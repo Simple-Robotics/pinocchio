@@ -9,7 +9,6 @@
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
-#include <boost/optional/optional.hpp>
 #include <pinocchio/algorithm/contact-cholesky.hpp>
 #include <pinocchio/algorithm/contact-jacobian.hpp>
 #include "pinocchio/algorithm/proximal.hpp"
