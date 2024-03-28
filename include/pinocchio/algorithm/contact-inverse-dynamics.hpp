@@ -63,8 +63,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
     PINOCCHIO_CHECK_INPUT_ARGUMENT(check_expression_if_real<Scalar>(settings.mu > Scalar(0)),
                                    "mu has to be strictly positive");
-    MatrixXs J = MatrixXs::Zero(problem_size,model.nv); // TODO: malloc
-    getConstraintsJacobian(model, data, contact_models, contact_datas, J);
+
     VectorXs c_ref_cor, desaxce_correction, R_prox, impulse_c_prev, dimpulse_c; // TODO: malloc
     R_prox = R + VectorXs::Constant(problem_size,settings.mu);
     c_ref_cor = c_ref + constraint_correction;
@@ -92,8 +91,6 @@ namespace pinocchio
         auto impulse_segment = data.impulse_c.template segment<3>(row_id);
         auto impulse_prev_segment = impulse_c_prev.template segment<3>(row_id);
         auto R_prox_segment = R_prox.template segment<3>(row_id);
-        // Vector3 desaxce_segment;
-        // auto desaxce_segment = desaxce_correction.template segment<3>(row_id);
         auto c_ref_segment = c_ref.template segment<3>(row_id);
         Vector3 desaxce_segment = cone.computeNormalCorrection(c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix());
         impulse_segment = -((c_ref_segment + desaxce_segment -settings.mu * impulse_prev_segment).array()/R_prox_segment.array()).matrix();
@@ -101,13 +98,6 @@ namespace pinocchio
       }
       dimpulse_c = data.impulse_c - impulse_c_prev;
       settings.relative_residual = dimpulse_c.template lpNorm<Eigen::Infinity>();
-
-      // if(   check_expression_if_real<Scalar,false>(complementarity <= this->absolute_precision)
-      //    && check_expression_if_real<Scalar,false>(dual_feasibility <= this->absolute_precision)
-      //    && check_expression_if_real<Scalar,false>(primal_feasibility <= this->absolute_precision))
-      //   abs_prec_reached = true;
-      // else
-      //   abs_prec_reached = false;
 
       const Scalar impulse_c_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
       if(check_expression_if_real<Scalar,false>(settings.relative_residual <= settings.relative_accuracy * math::max(impulse_c_norm_inf,impulse_c_prev_norm_inf)))
