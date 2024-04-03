@@ -56,12 +56,9 @@ namespace pinocchio
        ProximalSettingsTpl<Scalar> & settings,
        const boost::optional<VectorLikeImp > &impulse_guess= boost::none){
 
-    typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> MatrixXs;
-    typedef Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options> VectorXs;
-    typedef Eigen::Matrix<Scalar,3,1,Options> Vector3;
+    const std::size_t problem_size  = R.size();
+    const std::size_t n_contacts = cones.size();
 
-    int problem_size  = R.size();
-    int n_contacts = (int) problem_size/3;
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_contacts);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
@@ -81,13 +78,12 @@ namespace pinocchio
     Scalar impulse_c_prev_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
     Scalar complementarity, dual_feasibility;
     bool abs_prec_reached = false, rel_prec_reached = false;
-    const size_t nc = cones.size(); // num constraints
     settings.iter = 1;
     for(; settings.iter <= settings.max_iter; ++settings.iter)
     {
       settings.absolute_residual = Scalar(0);
       settings.relative_residual = Scalar(0);
-      for(size_t cone_id = 0; cone_id < nc; ++cone_id)
+      for(std::size_t cone_id = 0; cone_id < n_contacts; ++cone_id)
       {
         const Eigen::DenseIndex row_id = 3*cone_id;
         const CoulombFrictionCone & cone = cones[cone_id];
@@ -167,20 +163,14 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
        const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
        const boost::optional<VectorLikeLam> &lambda_guess= boost::none){
-
-    typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> MatrixXs;
-    typedef Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options> VectorXs;
-    typedef ForceTpl<Scalar,Options> Force;
-    typedef RigidConstraintDataTpl<Scalar,Options> RigidConstraintData;
-
-    int problem_size  = R.size();
-    int n_contacts = (int) problem_size/3;
-    MatrixXs J = MatrixXs::Zero(problem_size,model.nv); // TODO: malloc
+    const std::size_t problem_size  = R.size();
+    const std::size_t n_contacts = cones.size();
+    context::MatrixXs J = context::MatrixXs::Zero(problem_size,model.nv); // TODO: malloc
     getConstraintsJacobian(model, data, contact_models, contact_datas, J);
-    VectorXs v_ref, c_ref, tau_c;
+    context::VectorXs v_ref, c_ref, tau_c;
     v_ref = v + dt*a;
     c_ref.noalias() = J* v_ref; //TODO should rather use the displacement
-    boost::optional<VectorXs> impulse_guess = boost::none;
+    boost::optional<context::VectorXs> impulse_guess = boost::none;
     if (lambda_guess){
       data.impulse_c = lambda_guess.get();
       data.impulse_c *= dt;
@@ -188,12 +178,12 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
     }
     computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
     data.lambda_c = data.impulse_c/dt;
-    container::aligned_vector<Force> fext(model.njoints);
-    for(int i; i<model.njoints; i++){
-      fext[i] = Force::Zero();
+    container::aligned_vector<context::Force> fext(model.njoints);
+    for(std::size_t i; i<model.njoints; i++){
+      fext[i] = context::Force::Zero();
     }
-    for(int i; i<n_contacts; i++){
-      const auto & cmodel = contact_models[i];
+    for(std::size_t i; i<n_contacts; i++){
+      const RigidConstraintModel & cmodel = contact_models[i];
       const Eigen::DenseIndex row_id = 3*i;
       auto lambda_segment = data.lambda_c.template segment<3>(row_id);
       typename RigidConstraintData::Matrix6 actInv_transpose1 = cmodel.joint1_placement.toActionMatrixInverse();
