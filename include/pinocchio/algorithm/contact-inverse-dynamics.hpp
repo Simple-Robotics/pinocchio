@@ -5,6 +5,8 @@
 #ifndef __pinocchio_algorithm_contact_inverse_dynamics__hpp__
 #define __pinocchio_algorithm_contact_inverse_dynamics__hpp__
 
+#include "pinocchio/context.hpp"
+#include "pinocchio/context/generic.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
@@ -65,9 +67,8 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
     PINOCCHIO_CHECK_INPUT_ARGUMENT(check_expression_if_real<Scalar>(settings.mu > Scalar(0)),
                                    "mu has to be strictly positive");
-
-    VectorXs R_prox, impulse_c_prev, dimpulse_c; // TODO: malloc
-    R_prox = R + VectorXs::Constant(problem_size,settings.mu);
+    context::VectorXs R_prox; // TODO: malloc
+    R_prox = R + context::VectorXs::Constant(problem_size,settings.mu);
     if(impulse_guess)
     {
       data.impulse_c = impulse_guess.get();
@@ -84,23 +85,35 @@ namespace pinocchio
     settings.iter = 1;
     for(; settings.iter <= settings.max_iter; ++settings.iter)
     {
-      impulse_c_prev = data.impulse_c;
+      settings.absolute_residual = Scalar(0);
+      settings.relative_residual = Scalar(0);
       for(size_t cone_id = 0; cone_id < nc; ++cone_id)
       {
         const Eigen::DenseIndex row_id = 3*cone_id;
-        const auto & cone = cones[cone_id];
+        const CoulombFrictionCone & cone = cones[cone_id];
+        context::Vector3 impulse_c_prev = data.impulse_c.template segment<3>(row_id);
         auto impulse_segment = data.impulse_c.template segment<3>(row_id);
-        auto impulse_prev_segment = impulse_c_prev.template segment<3>(row_id);
         auto R_prox_segment = R_prox.template segment<3>(row_id);
         auto c_ref_segment = c_ref.template segment<3>(row_id);
-        Vector3 desaxce_segment = cone.computeNormalCorrection(c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix());
-        impulse_segment = -((c_ref_segment + desaxce_segment -settings.mu * impulse_prev_segment).array()/R_prox_segment.array()).matrix();
+        context::Vector3 desaxce_segment = cone.computeNormalCorrection(c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix());
+        context::Vector3 c_cor_segment = c_ref_segment + desaxce_segment;
+        impulse_segment = -((c_cor_segment -settings.mu * impulse_c_prev).array()/R_prox_segment.array()).matrix();
         impulse_segment = cone.weightedProject(impulse_segment, R_prox_segment);
+        // evaluate convergence criteria
+        Scalar contact_complementarity = cone.computeContactComplementarity(c_cor_segment, impulse_segment);
+        settings.absolute_residual = math::max(settings.absolute_residual,contact_complementarity);
+        context::Vector3 dimpulse_c = impulse_segment - impulse_c_prev;
+        Scalar proximal_metric = dimpulse_c.template lpNorm<Eigen::Infinity>();
+        settings.relative_residual = math::max(settings.relative_residual,proximal_metric);
       }
-      dimpulse_c = data.impulse_c - impulse_c_prev;
-      settings.relative_residual = dimpulse_c.template lpNorm<Eigen::Infinity>();
-
+      
       const Scalar impulse_c_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
+
+      if(check_expression_if_real<Scalar,false>(settings.absolute_residual <= settings.absolute_accuracy))
+        abs_prec_reached = true;
+      else
+        abs_prec_reached = false;
+
       if(check_expression_if_real<Scalar,false>(settings.relative_residual <= settings.relative_accuracy * math::max(impulse_c_norm_inf,impulse_c_prev_norm_inf)))
         rel_prec_reached = true;
       else
