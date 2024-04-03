@@ -9,6 +9,8 @@
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
+#include <Eigen/src/Core/util/Meta.h>
+#include <boost/optional/optional.hpp>
 #include <pinocchio/algorithm/contact-cholesky.hpp>
 #include <pinocchio/algorithm/contact-jacobian.hpp>
 #include "pinocchio/algorithm/proximal.hpp"
@@ -64,9 +66,8 @@ namespace pinocchio
     PINOCCHIO_CHECK_INPUT_ARGUMENT(check_expression_if_real<Scalar>(settings.mu > Scalar(0)),
                                    "mu has to be strictly positive");
 
-    VectorXs c_ref_cor, desaxce_correction, R_prox, impulse_c_prev, dimpulse_c; // TODO: malloc
+    VectorXs R_prox, impulse_c_prev, dimpulse_c; // TODO: malloc
     R_prox = R + VectorXs::Constant(problem_size,settings.mu);
-    c_ref_cor = c_ref + constraint_correction;
     if(impulse_guess)
     {
       data.impulse_c = impulse_guess.get();
