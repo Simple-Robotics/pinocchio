@@ -43,7 +43,7 @@ namespace pinocchio
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC, class ConstraintModelAllocator, class ConstraintDataAllocator, class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeImp>
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC, typename VectorLikeR,typename VectorLikeImp>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
   computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data,
@@ -52,14 +52,13 @@ namespace pinocchio
        std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
        const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
        const Eigen::MatrixBase<VectorLikeR> & R,
-       const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
+      //  const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
        const boost::optional<VectorLikeImp > &impulse_guess= boost::none){
 
     const std::size_t problem_size  = R.size();
     const std::size_t n_contacts = cones.size();
-
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
+    // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_contacts);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
     PINOCCHIO_CHECK_INPUT_ARGUMENT(check_expression_if_real<Scalar>(settings.mu > Scalar(0)),
@@ -170,13 +169,15 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
     context::VectorXs v_ref, c_ref, tau_c;
     v_ref = v + dt*a;
     c_ref.noalias() = J* v_ref; //TODO should rather use the displacement
+    c_ref += constraint_correction;
     boost::optional<context::VectorXs> impulse_guess = boost::none;
     if (lambda_guess){
       data.impulse_c = lambda_guess.get();
       data.impulse_c *= dt;
       impulse_guess = boost::make_optional(data.impulse_c);
     }
-    computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
+    computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, settings, impulse_guess);
+    // computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
     data.lambda_c = data.impulse_c/dt;
     container::aligned_vector<context::Force> fext(model.njoints);
     for(std::size_t i; i<model.njoints; i++){

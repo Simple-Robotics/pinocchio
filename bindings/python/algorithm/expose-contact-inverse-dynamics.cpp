@@ -26,11 +26,12 @@ namespace pinocchio
                                 context::RigidConstraintDataVector & contact_datas,
                                 const context::CoulombFrictionConeVector & cones,
                                 const ConstRefVectorXs & R,
-                                const ConstRefVectorXs & constraint_correction,
+                                // const ConstRefVectorXs & constraint_correction,
                                 ProximalSettingsTpl<Scalar> & settings,
                                 const boost::optional<ConstRefVectorXs> &lambda_guess = boost::none)
     {
-    return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, lambda_guess);
+    return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
+    // return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, lambda_guess);
     }
 
     static ConstRefVectorXs contactInverseDynamics_wrapper(const ModelTpl<Scalar,Options,JointCollectionDefaultTpl> & model,
@@ -56,7 +57,7 @@ namespace pinocchio
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       bp::def("computeContactForces",
               computeContactImpulses_wrapper,
-              (bp::arg("model"),"data","c_ref", "contact_models", "contact_datas", "cones","R", "constraint_correction",
+              (bp::arg("model"),"data","c_ref", "contact_models", "contact_datas", "cones","R",
               bp::arg("settings"),
               bp::arg("lambda_guess") = boost::none),
               "Compute the inverse dynamics with frictional contacts, store the result in Data and return it.\n\n"
@@ -68,7 +69,7 @@ namespace pinocchio
               "\tcontact_datas: list of contact datas\n"
               "\tcones: list of friction cones\n"
               "\tR: vector representing the diagonal of the compliance matrix\n"
-              "\tconstraint_correction: vector representing the constraint correction\n"
+              // "\tconstraint_correction: vector representing the constraint correction\n"
               "\tsettings: the settings of the proximal algorithm\n"
               "\tlambda_guess: initial guess for contact forces\n");
       
