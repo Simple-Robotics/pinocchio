@@ -180,10 +180,10 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
     // computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
     data.lambda_c = data.impulse_c/dt;
     container::aligned_vector<context::Force> fext(model.njoints);
-    for(std::size_t i; i<model.njoints; i++){
+    for(std::size_t i = 0; i<model.njoints; i++){
       fext[i] = context::Force::Zero();
     }
-    for(std::size_t i; i<n_contacts; i++){
+    for(std::size_t i = 0; i<n_contacts; i++){
       const RigidConstraintModel & cmodel = contact_models[i];
       const Eigen::DenseIndex row_id = 3*i;
       auto lambda_segment = data.lambda_c.template segment<3>(row_id);
