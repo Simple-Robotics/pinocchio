@@ -23,6 +23,7 @@ namespace pinocchio
   ///
   /// \details This functions implements the seminal work of W. BARTH, R. S. MARTIN and J. H. WILKINSON which can be downloaded at https://link.springer.com/content/pdf/10.1007/BF02162154.pdf
   /// \remarks This function proceeds to some minimal memory allocation for efficiency
+  /// \remarks One potential improvement of this implementation of bissec could be fine at https://link.springer.com/content/pdf/10.1007/BF01389644.pdf
   ///
   template<typename Scalar, int Options>
   Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options>
@@ -79,7 +80,6 @@ namespace pinocchio
     
 //    Eigen::DenseIndex z = 0;
     // Loop for the kth eigenvalue
-    
     for(Eigen::DenseIndex k = m2; k >= m1; --k)
     {
       Scalar xu = xmin;
@@ -100,16 +100,17 @@ namespace pinocchio
               const Scalar dq = q != Scalar(0) ? betas_square[j] / q : betas_abs[j] / relfeh;
               q = alphas[j] - x1 - dq;
               if (q < Scalar(0)) a++;
-            } // for
+            } // end for j
             if (a < k)
             {
-              if (a < m1) 
+              xu = x1;
+              if (a < m1)
               {
-                xu = wu[m1] = x1;
+                wu[m1] = x1;
               }
               else
               {
-                xu = wu[a+1] = x1;
+                wu[a+1] = x1;
                 x[a] = math::min(x[a],x1);
               }
             }
@@ -120,8 +121,8 @@ namespace pinocchio
           } // end while
           x[k] = 0.5 * (xu + x0);
         }
-      }
-    }
+      } // end for i
+    } // end for k
 
     return spectrum;
   }
