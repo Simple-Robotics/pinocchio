@@ -19,6 +19,8 @@ namespace pinocchio
   /// \param[in] m2 the index of the last eigenvalue to compute (largest)
   /// \param[in] eps tolerance in the estimate of the eigenvalues
   ///
+  /// \returns The spectrum[m1:m2] of the input tridiagonal matrix
+  ///
   /// \details This functions implements the seminal work of W. BARTH, R. S. MARTIN and J. H. WILKINSON which can be downloaded at https://link.springer.com/content/pdf/10.1007/BF02162154.pdf
   /// \remarks This function proceeds to some minimal memory allocation for efficiency
   ///

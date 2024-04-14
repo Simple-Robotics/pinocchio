@@ -70,6 +70,14 @@ namespace pinocchio
         .def("cols",&TridiagonalSymmetricMatrix::cols,bp::arg("self"))
         .def("matrix",&TridiagonalSymmetricMatrix::matrix,bp::arg("self"))
         
+        .def("computeEigenvalue",&TridiagonalSymmetricMatrix::computeEigenvalue,
+             (bp::arg("self"),bp::arg("eigenvalue_index"),bp::arg("eps") = 1e-8),
+             "Computes the kth eigenvalue associated with the input tridiagonal matrix up to precision eps.")
+        
+        .def("computeSpectrum",&TridiagonalSymmetricMatrix::computeSpectrum,
+             (bp::arg("self"),bp::arg("eps") = 1e-8),
+             "Computes the full spectrum associated with the input tridiagonal matrix up to precision eps.")
+        
         .def(bp::self * PlainMatrixType())
         .def(PlainMatrixType() * bp::self)
         ;

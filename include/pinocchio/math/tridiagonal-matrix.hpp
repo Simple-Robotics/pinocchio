@@ -5,7 +5,8 @@
 #ifndef __pinocchio_math_tridiagonal_matrix_hpp__
 #define __pinocchio_math_tridiagonal_matrix_hpp__
 
-#include "pinocchio/fwd.hpp"
+#include "pinocchio/math/fwd.hpp"
+#include "pinocchio/math/eigenvalues-tridiagonal-matrix.hpp"
 #include <Eigen/Dense>
 
 namespace pinocchio
@@ -230,10 +231,39 @@ namespace pinocchio
       return this->applyOnTheRight(mat.derived());
     }
     
+    ///
+    /// \brief Computes the full spectrum of the input tridiagonal matrix up to precision eps
+    ///
+    /// \param[in] eps tolerance in the estimate of the eigenvalues
+    ///
+    /// \returns The spectrum of the input tridiagonal matrix
+    ///
+    CoeffVectorType computeSpectrum(const Scalar eps = 1e-8) const
+    {
+      return ::pinocchio::computeSpectrum(*this,eps);
+    }
+    
+    ///
+    /// \brief Computes the kth eigenvalue associated with the input tridiagonal matrix up to precision eps
+    ///
+    /// \param[in] eigenvalue_index index of the eigenvalue to compute
+    /// \param[in] eps tolerance in the estimate of the eigenvalues///
+    ///
+    /// \returns The kth eigenvalue
+    ///
+    Scalar computeEigenvalue(const Eigen::DenseIndex eigenvalue_index,
+                             const Scalar eps = 1e-8) const
+    {
+      return ::pinocchio::computeEigenvalue(*this,eigenvalue_index,eps);
+    }
+    
   protected:
     
+    /// \brief Size of the tridiagonal matrix
     Eigen::DenseIndex m_size;
+    /// \brief Main diagonal of the tridiagonal matrix
     CoeffVectorType m_diagonal;
+      /// \brief Subdiagonal of the tridiagonal matrix
     CoeffVectorType m_sub_diagonal;
   };
   
