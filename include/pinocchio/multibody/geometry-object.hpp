@@ -77,6 +77,7 @@ enum PhysicsMaterialType
 {
   ICE,
   METAL,
+  CONCRETE,
   PLASTIC,
   WOOD,
   PHYSICS_MATERIAL_COUNT

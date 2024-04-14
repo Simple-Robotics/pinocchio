@@ -284,6 +284,7 @@ namespace pinocchio
           .value("METAL", METAL)
           .value("PLASTIC", PLASTIC)
           .value("WOOD", WOOD)
+          .value("CONCRETE", CONCRETE)
           .export_values()
           ;
         }
