@@ -138,6 +138,7 @@ SET(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
   include/pinocchio/math/cppadcg.hpp
   include/pinocchio/math/cppad.hpp
   include/pinocchio/math/eigenvalues.hpp
+  include/pinocchio/math/eigenvalues-tridiagonal-matrix.hpp
   include/pinocchio/math/fwd.hpp
   include/pinocchio/math/gram-schmidt-orthonormalisation.hpp
   include/pinocchio/math/lanczos-decomposition.hpp
