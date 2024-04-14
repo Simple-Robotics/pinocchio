@@ -255,6 +255,56 @@ namespace pinocchio
     MatrixOut & dest_ = PINOCCHIO_EIGEN_CONST_CAST(MatrixOut,dest);
     internal::CallCorrectMatrixInverseAccordingToScalar<typename MatrixIn::Scalar>::run(m_in,dest_);
   }
+  
+  namespace internal
+  {
+    template<typename MatrixLike, bool value = is_floating_point<typename MatrixLike::Scalar>::value>
+    struct isSymmetricAlgo
+    {
+      typedef typename MatrixLike::Scalar Scalar;
+      typedef typename MatrixLike::RealScalar RealScalar;
+      
+      static bool run(const Eigen::MatrixBase<MatrixLike> & mat,
+                      const RealScalar & prec =
+                      Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        if (mat.rows() != mat.cols())
+          return false;
+        return (mat - mat.transpose()).isZero(prec);
+      }
+    };
+    
+    template<typename MatrixLike>
+    struct isSymmetricAlgo<MatrixLike,false>
+    {
+      typedef typename MatrixLike::Scalar Scalar;
+      typedef typename MatrixLike::RealScalar RealScalar;
+      
+      static bool run(const Eigen::MatrixBase<MatrixLike> & /*mat*/,
+                      const RealScalar & prec =
+                      Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        PINOCCHIO_UNUSED_VARIABLE(prec);
+        return true;
+      }
+    };
+  }
+  
+  ///
+  /// \brief Check whether the input matrix is symmetric within the given precision.
+  ///
+  /// \param[in] mat Input matrix
+  /// \param[in] prec Required precision
+  ///
+  /// \returns true if mat is symmetric within the precision prec.
+  ///
+  template<typename MatrixLike>
+  inline bool isSymmetric(const Eigen::MatrixBase<MatrixLike> & mat,
+                          const typename MatrixLike::RealScalar & prec =
+                          Eigen::NumTraits< typename MatrixLike::Scalar >::dummy_precision())
+  {
+    return internal::isSymmetricAlgo<MatrixLike>::run(mat,prec);
+  }
 
 }
 
