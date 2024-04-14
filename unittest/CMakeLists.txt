@@ -105,12 +105,13 @@ ADD_PINOCCHIO_UNIT_TEST(quaternion)
 ADD_PINOCCHIO_UNIT_TEST(rpy)
 ADD_PINOCCHIO_UNIT_TEST(rotation)
 ADD_PINOCCHIO_UNIT_TEST(vector)
+ADD_PINOCCHIO_UNIT_TEST(matrix)
 ADD_PINOCCHIO_UNIT_TEST(eigenvalues)
 ADD_PINOCCHIO_UNIT_TEST(tridiagonal-matrix)
 ADD_PINOCCHIO_UNIT_TEST(lanczos-decomposition)
 ADD_PINOCCHIO_UNIT_TEST(gram-schmidt-orthonormalisation)
 
-#Derivatives algo
+# Derivatives algo
 ADD_PINOCCHIO_UNIT_TEST(kinematics-derivatives)
 ADD_PINOCCHIO_UNIT_TEST(frames-derivatives)
 ADD_PINOCCHIO_UNIT_TEST(rnea-derivatives)
