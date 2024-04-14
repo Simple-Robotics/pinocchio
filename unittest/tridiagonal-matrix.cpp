@@ -5,7 +5,9 @@
 #include <iostream>
 
 #include <pinocchio/math/tridiagonal-matrix.hpp>
+#include <pinocchio/math/eigenvalues-tridiagonal-matrix.hpp>
 
+#include <Eigen/Eigenvalues>
 #include <boost/variant.hpp> // to avoid C99 warnings
 
 #include <boost/test/unit_test.hpp>
@@ -169,6 +171,60 @@ BOOST_AUTO_TEST_CASE(test_inverse)
     BOOST_CHECK(res.isApprox(res_ref));
   }
   
+}
+
+BOOST_AUTO_TEST_CASE(test_eigenvalues)
+{
+  const Eigen::DenseIndex mat_size = 20;
+  TridiagonalSymmetricMatrixTpl<double> tridiagonal_matrix(mat_size);
+  
+  const double eps = 1e-8;
+
+  // Case: Identity matrix
+  {
+    tridiagonal_matrix.setIdentity();
+    const auto spectrum = computeSpectrum(tridiagonal_matrix,eps);
+    
+    BOOST_CHECK(spectrum.isOnes(eps));
+  }
+  
+  // Case: Zero matrix
+  {
+    tridiagonal_matrix.setZero();
+    const auto spectrum = computeSpectrum(tridiagonal_matrix,eps);
+    
+    BOOST_CHECK(spectrum.isZero(eps));
+  }
+  
+  // Case: Random matrix
+#ifndef NDEBUG
+  for(int k = 0; k < 100; ++k)
+#else
+  for(int k = 0; k < 10000; ++k)
+#endif
+  {
+    tridiagonal_matrix.setRandom();
+    const auto spectrum = computeSpectrum(tridiagonal_matrix,eps);
+    
+    const Eigen::MatrixXd dense_matrix = tridiagonal_matrix.matrix();
+
+    const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigen_solver(dense_matrix,Eigen::EigenvaluesOnly);
+    const auto spectrum_ref = eigen_solver.eigenvalues();
+    BOOST_CHECK(spectrum.isApprox(spectrum_ref,eps));
+    
+    // Compute largest and lowest eigenvalues
+    const Eigen::DenseIndex last_index = tridiagonal_matrix.rows()-1;
+    const Eigen::DenseIndex first_index = 0;
+    const double largest_eigenvalue = computeEigenvalue(tridiagonal_matrix,
+                                                        last_index,
+                                                        eps);
+    BOOST_CHECK(math::fabs(largest_eigenvalue - spectrum_ref[last_index]) <= eps);
+    
+    const double lowest_eigenvalue = computeEigenvalue(tridiagonal_matrix,
+                                                       first_index,
+                                                       eps);
+    BOOST_CHECK(math::fabs(lowest_eigenvalue - spectrum_ref[first_index]) <= eps);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
