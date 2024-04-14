@@ -38,7 +38,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_INPUT_ARGUMENT(m1 <= m2, "m1 should be lower than m2.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(m1 >= 0, "m1 should be greater than 0.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(m2 >= 0, "m2 should be greater than 0.");
-    PINOCCHIO_CHECK_INPUT_ARGUMENT(m2 <= tridiagonal_mat.rows(), "m2 should be lower than the size of the tridiagonal matrix.");
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(m2 <= tridiagonal_mat.rows()-1, "m2 should be lower than the size of the tridiagonal matrix.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(eps >= Scalar(0), "eps should be greater than 0.")
     
     const Eigen::DenseIndex n = tridiagonal_mat.rows();
