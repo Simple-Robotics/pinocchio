@@ -107,7 +107,7 @@ struct traits<DelassusOperatorSparseTpl<_Scalar,_Options,_SparseCholeskyDecompos
   enum { Options = _Options, RowsAtCompileTime = Eigen::Dynamic };
   
   typedef Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options> Vector;
-  typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> DenseMatrix;
+  typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> Matrix;
 };
 
 template<typename _Scalar, int _Options, class SparseCholeskyDecomposition>
@@ -123,7 +123,7 @@ struct DelassusOperatorSparseTpl
 
   typedef typename traits<Self>::SparseMatrix SparseMatrix;
   typedef typename traits<Self>::Vector Vector;
-  typedef typename traits<Self>::DenseMatrix DenseMatrix;
+  typedef typename traits<Self>::Matrix Matrix;
   typedef SparseCholeskyDecomposition CholeskyDecomposition;
   typedef DelassusOperatorBase<Self> Base;
 
