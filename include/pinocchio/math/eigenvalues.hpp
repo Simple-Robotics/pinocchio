@@ -41,11 +41,11 @@ namespace pinocchio
       for(it = 0; it < max_it; ++it)
       {
         const Scalar eigenvalue_est_prev = eigenvalue_est;
-        principal_eigen_vector /= eigenvalue_est;
+        principal_eigen_vector /= principal_eigen_vector.norm();
         eigen_vector_prev = principal_eigen_vector;
         principal_eigen_vector.noalias() = mat * eigen_vector_prev;
 
-        eigenvalue_est = principal_eigen_vector.norm();
+        eigenvalue_est = eigen_vector_prev.dot(principal_eigen_vector);
 
         convergence_criteria = math::fabs(eigenvalue_est_prev - eigenvalue_est);
         if (check_expression_if_real<Scalar, false>(convergence_criteria <= rel_tol * math::max(math::fabs(eigenvalue_est_prev),math::fabs(eigenvalue_est))))
@@ -78,12 +78,12 @@ namespace pinocchio
       for(it = 0; it < max_it; ++it)
       {
         const Scalar eigenvalue_est_prev = eigenvalue_est;
-        lowest_eigen_vector /= eigenvalue_est;
+        lowest_eigen_vector /= lowest_eigen_vector.norm();
         eigen_vector_prev = lowest_eigen_vector;
         lowest_eigen_vector.noalias() = mat * eigen_vector_prev;
         lowest_eigen_vector -= largest_eigen_value * eigen_vector_prev;
 
-        eigenvalue_est = lowest_eigen_vector.norm();
+        eigenvalue_est = eigen_vector_prev.dot(lowest_eigen_vector);
 
         convergence_criteria = math::fabs(eigenvalue_est_prev - eigenvalue_est);
         if (check_expression_if_real<Scalar, false>(convergence_criteria <= rel_tol * math::max(math::fabs(eigenvalue_est_prev),math::fabs(eigenvalue_est))))
