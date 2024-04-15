@@ -123,6 +123,24 @@ namespace pinocchio
       // Keep z from the previous iteration
     }
 
+    // Checking if the initial guess is better than 0
+    complementarity = computeConicComplementarity(cones,z_,y_);
+    Scalar min_vn = 0;
+    for (int i = 0; i < static_cast<int>(cones.size()); ++i) {
+      if (g(3 * i + 2) < min_vn) {
+        min_vn = g(3 * i + 2);
+      }
+    }
+    if (-min_vn < complementarity) {
+      x_.setZero();
+      y_.setZero();
+      z_ = g;
+      computeComplementarityShift(cones, z_, s_);
+      z_ += s_; // Add De Saxé shift
+      computeDualConeProjection(cones, z_, z_);
+    }
+
+
 //    std::cout << "x_: " << x_.transpose() << std::endl;
 //    std::cout << "y_: " << y_.transpose() << std::endl;
 //    std::cout << "z_: " << z_.transpose() << std::endl;
