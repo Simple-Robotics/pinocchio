@@ -129,7 +129,7 @@ struct DelassusOperatorSparseTpl
 
   template<typename MatrixDerived>
   explicit DelassusOperatorSparseTpl(const Eigen::SparseMatrixBase<MatrixDerived> & mat)
-  : Base(mat.rows())
+  : Base()
   , delassus_matrix(mat)
   , delassus_matrix_plus_damping(mat)
   , llt(mat)

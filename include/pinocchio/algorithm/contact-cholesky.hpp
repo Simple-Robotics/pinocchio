@@ -468,7 +468,7 @@ namespace pinocchio
       enum { RowsAtCompileTime = traits<DelassusCholeskyExpressionTpl>::RowsAtCompileTime };
 
       explicit DelassusCholeskyExpressionTpl(const ContactCholeskyDecomposition & self)
-      : Base(self.constraintDim())
+      : Base()
       , self(self)
       {}
 
