@@ -48,14 +48,13 @@ namespace pinocchio
   computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data,
        const Eigen::MatrixBase<VectorLikeC> & c_ref,
-       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
-       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
-       const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
+       const context::RigidConstraintModelVector & contact_models,
+       context::RigidConstraintDataVector & contact_datas,
+       const context::CoulombFrictionConeVector & cones,
        const Eigen::MatrixBase<VectorLikeR> & R,
       //  const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
        const boost::optional<VectorLikeImp > &impulse_guess= boost::none){
-
     const std::size_t problem_size  = R.size();
     const std::size_t n_contacts = cones.size();
     // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
@@ -147,7 +146,7 @@ namespace pinocchio
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
-template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2, class ConstraintModelAllocator, class ConstraintDataAllocator, class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeLam>
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeLam>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data, 
@@ -155,9 +154,9 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
        const Eigen::MatrixBase<TangentVectorType1> & v,
        const Eigen::MatrixBase<TangentVectorType2> & a,
        Scalar dt,
-       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
-       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
-       const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
+       const context::RigidConstraintModelVector & contact_models,
+       context::RigidConstraintDataVector & contact_datas,
+       const context::CoulombFrictionConeVector & cones,
        const Eigen::MatrixBase<VectorLikeR> & R,
        const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
@@ -187,12 +186,12 @@ template<typename Scalar, int Options, template<typename,int> class JointCollect
       const RigidConstraintModel & cmodel = contact_models[i];
       const Eigen::DenseIndex row_id = 3*i;
       auto lambda_segment = data.lambda_c.template segment<3>(row_id);
-      typename RigidConstraintData::Matrix6 actInv_transpose1 = cmodel.joint1_placement.toActionMatrixInverse();
+      RigidConstraintData::Matrix6 actInv_transpose1 = cmodel.joint1_placement.toActionMatrixInverse();
       actInv_transpose1.transposeInPlace();
-      fext[cmodel.joint1_id] += Force(actInv_transpose1.template leftCols<3>() * lambda_segment);
-      typename RigidConstraintData::Matrix6 actInv_transpose2 = cmodel.joint2_placement.toActionMatrixInverse();
+      fext[cmodel.joint1_id] += context::Force(actInv_transpose1.leftCols<3>() * lambda_segment);
+      RigidConstraintData::Matrix6 actInv_transpose2 = cmodel.joint2_placement.toActionMatrixInverse();
       actInv_transpose2.transposeInPlace();
-      fext[cmodel.joint2_id] += Force(actInv_transpose2.template leftCols<3>() * lambda_segment);
+      fext[cmodel.joint2_id] += context::Force(actInv_transpose2.leftCols<3>() * lambda_segment);
     }
     rnea(model, data, q, v, a, fext);
     return data.tau;
