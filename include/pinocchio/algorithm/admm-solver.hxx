@@ -124,14 +124,16 @@ namespace pinocchio
     }
 
     // Checking if the initial guess is better than 0
-    complementarity = computeConicComplementarity(cones,z_,y_);
-    Scalar min_vn = 0;
-    for (int i = 0; i < static_cast<int>(cones.size()); ++i) {
-      if (g(3 * i + 2) < min_vn) {
-        min_vn = g(3 * i + 2);
+    complementarity = computeConicComplementarity(cones,z_,y_); // Complementarity of the initial guess
+    Scalar complementarity_zero_initial_guess_max_violation = 0;
+    // Search for the max violation of the constraint g_N >= 0, i.e. the smallest value of g_N over all contact points.
+    for (Eigen::DenseIndex i = 0; i < static_cast<Eigen::DenseIndex>(cones.size()); ++i) { // TODO(jcarpent): adjust for other type of constraints
+      if (g(3 * i + 2) < complementarity_zero_initial_guess_max_violation) {
+        complementarity_zero_initial_guess_max_violation = g(3 * i + 2);
       }
     }
-    if (-min_vn < complementarity) {
+
+    if (-complementarity_zero_initial_guess_max_violation < complementarity) { // If true, this means that the zero value initial guess leads a better feasibility in the sense of the contact complementarity
       x_.setZero();
       y_.setZero();
       z_ = g;
