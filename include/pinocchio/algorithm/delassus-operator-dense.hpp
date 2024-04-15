@@ -38,7 +38,7 @@ struct DelassusOperatorDenseTpl
 
   template<typename MatrixDerived>
   explicit DelassusOperatorDenseTpl(const Eigen::MatrixBase<MatrixDerived> & mat)
-  : Base(mat.rows())
+  : Base()
   , delassus_matrix(mat)
   , mat_tmp(mat.rows(),mat.cols())
   , llt(mat)
