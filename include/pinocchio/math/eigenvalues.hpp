@@ -43,7 +43,7 @@ namespace pinocchio
         const Scalar eigenvalue_est_prev = eigenvalue_est;
         principal_eigen_vector /= principal_eigen_vector.norm();
         eigen_vector_prev = principal_eigen_vector;
-        principal_eigen_vector.noalias() = mat * eigen_vector_prev;
+        (mat * eigen_vector_prev).evalTo(principal_eigen_vector);
 
         eigenvalue_est = eigen_vector_prev.dot(principal_eigen_vector);
 
@@ -80,7 +80,7 @@ namespace pinocchio
         const Scalar eigenvalue_est_prev = eigenvalue_est;
         lowest_eigen_vector /= lowest_eigen_vector.norm();
         eigen_vector_prev = lowest_eigen_vector;
-        lowest_eigen_vector.noalias() = mat * eigen_vector_prev;
+        (mat * eigen_vector_prev).evalTo(lowest_eigen_vector);
         lowest_eigen_vector -= largest_eigen_value * eigen_vector_prev;
 
         eigenvalue_est = eigen_vector_prev.dot(lowest_eigen_vector);
