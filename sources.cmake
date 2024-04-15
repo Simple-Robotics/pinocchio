@@ -133,6 +133,7 @@ SET(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
   include/pinocchio/eigen-macros.hpp
   include/pinocchio/fwd.hpp
   include/pinocchio/macros.hpp
+  include/pinocchio/math/arithmetic-operators.hpp
   include/pinocchio/math/casadi.hpp
   include/pinocchio/math/comparison-operators.hpp
   include/pinocchio/math/cppadcg.hpp
