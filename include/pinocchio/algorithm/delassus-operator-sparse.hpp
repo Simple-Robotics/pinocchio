@@ -187,21 +187,10 @@ struct DelassusOperatorSparseTpl
   void applyOnTheRight(const Eigen::MatrixBase<MatrixIn> & x,
                        const Eigen::MatrixBase<MatrixOut> & res_) const
   {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(x.rows(),size());
     MatrixOut & res = res_.const_cast_derived();
     res.noalias() = delassus_matrix * x;
     res.array() += damping.array() * x.array();
-  }
-
-  template<typename MatrixDerived>
-  typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixDerived)
-  operator*(const Eigen::MatrixBase<MatrixDerived> & x) const
-  {
-    typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixDerived) ReturnType;
-
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(x.rows(),size());
-    ReturnType res(x.rows(),x.cols());
-    applyOnTheRight(x,res);
-    return res;
   }
 
   Eigen::DenseIndex size() const { return delassus_matrix.rows(); }

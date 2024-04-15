@@ -7,8 +7,71 @@
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/math/eigenvalues.hpp"
+#include "pinocchio/math/arithmetic-operators.hpp"
 
 namespace pinocchio {
+  
+  template<typename DelassusOperatorDerived> struct DelassusOperatorBase;
+  
+  template<typename DelassusOperatorDerived, typename MatrixDerived>
+  struct DelassusOperatorApplyOnTheRightReturnType;
+  
+  template<typename DelassusOperatorDerived, typename MatrixDerived>
+  struct traits<DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived> >
+  {
+    typedef typename traits<DelassusOperatorDerived>::Scalar Scalar;
+    typedef typename traits<DelassusOperatorDerived>::Matrix Matrix;
+  };
+  
+  template<typename DelassusOperatorDerived, typename MatrixDerived>
+  struct MultiplicationOperatorReturnType<DelassusOperatorBase<DelassusOperatorDerived>,Eigen::MatrixBase<MatrixDerived>>
+  {
+    typedef DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived> type;
+  };
+  
+}
+
+namespace Eigen {
+  namespace internal {
+    
+    template<typename DelassusOperatorDerived, typename MatrixDerived>
+    struct traits<pinocchio::DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived> >
+    {
+      typedef typename ::pinocchio::traits<DelassusOperatorDerived>::Matrix ReturnType;
+      enum { Flags = 0 };
+    };
+    
+  }
+}
+
+namespace pinocchio {
+  
+  template<typename DelassusOperatorDerived, typename MatrixDerived>
+  struct DelassusOperatorApplyOnTheRightReturnType
+  : public Eigen::ReturnByValue<DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived> >
+  {
+    typedef DelassusOperatorApplyOnTheRightReturnType Self;
+    
+    DelassusOperatorApplyOnTheRightReturnType(const DelassusOperatorDerived & lhs,
+                                              const MatrixDerived & rhs)
+    : m_lhs(lhs)
+    , m_rhs(rhs)
+    {}
+    
+    template <typename ResultType>
+    inline void evalTo(ResultType& result) const
+    {
+      m_lhs.applyOnTheRight(m_rhs.derived(),result);
+    }
+    
+    EIGEN_CONSTEXPR Eigen::Index rows() const EIGEN_NOEXCEPT { return m_lhs.rows(); }
+    EIGEN_CONSTEXPR Eigen::Index cols() const EIGEN_NOEXCEPT { return m_rhs.cols(); }
+    
+  protected:
+    
+    const DelassusOperatorDerived & m_lhs;
+    const MatrixDerived & m_rhs;
+  };
 
 template<typename DelassusOperatorDerived>
 struct DelassusOperatorBase
@@ -62,10 +125,11 @@ struct DelassusOperatorBase
   }
 
   template<typename MatrixDerived>
-  typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixDerived)
+  typename MultiplicationOperatorReturnType<DelassusOperatorBase,Eigen::MatrixBase<MatrixDerived>>::type
   operator*(const Eigen::MatrixBase<MatrixDerived> & x) const
   {
-    return derived() * x.derived();
+    typedef typename MultiplicationOperatorReturnType<DelassusOperatorBase,Eigen::MatrixBase<MatrixDerived>>::type ReturnType;
+    return ReturnType(derived(),x.derived());
   }
 
   Eigen::DenseIndex size() const { return derived().size(); }

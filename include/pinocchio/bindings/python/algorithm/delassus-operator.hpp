@@ -28,7 +28,7 @@ namespace pinocchio
       {
         cl
         .def(bp::self * bp::other<Matrix>())
-        .def("__matmul__",+[](const DelassusOperator & self, const Matrix & other) -> Matrix { return self * other; },
+        .def("__matmul__",+[](const DelassusOperator & self, const Matrix & other) -> Matrix { return Matrix(self * other); },
              bp::args("self","other"),
              "Matrix multiplication between self and another matrix. Returns the result of Delassus * matrix.")
 
