@@ -40,9 +40,28 @@ namespace Eigen {
       typedef typename ::pinocchio::traits<DelassusOperatorDerived>::Matrix ReturnType;
       enum { Flags = 0 };
     };
-    
-  }
-}
+  
+    template< typename DstXprType, typename DelassusOperatorDerived, typename MatrixDerived, typename Functor>
+    struct Assignment<DstXprType, Eigen::ReturnByValue<pinocchio::DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived>>, Functor, Dense2Dense, void>
+    {
+      typedef Eigen::ReturnByValue<pinocchio::DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived>> SrcXprType;
+      
+      EIGEN_DEVICE_FUNC
+      static EIGEN_STRONG_INLINE void run(DstXprType &dst, const SrcXprType &src, const Functor &func)
+      {
+        Index dstRows = src.rows();
+        Index dstCols = src.cols();
+        if((dst.rows()!=dstRows) || (dst.cols()!=dstCols))
+          dst.resize(dstRows, dstCols);
+        
+        eigen_assert(dst.rows() == src.rows() && dst.cols() == src.cols());
+        src.evalTo(dst);
+      }
+    };
+   
+  } // namespace internal
+} // namespace Eigen
+
 
 namespace pinocchio {
   
