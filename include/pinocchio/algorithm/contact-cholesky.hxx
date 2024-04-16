@@ -57,7 +57,7 @@ namespace pinocchio
       last_child.fill(-1);
       for(long joint_id = model.njoints-1; joint_id >= 0; --joint_id)
       {
-        const JointIndex & parent = model.parents[(size_t)joint_id];
+        const JointIndex parent = model.parents[(size_t)joint_id];
         if(last_child[joint_id] == -1)
           last_child[joint_id] = joint_id;
         last_child[(Eigen::DenseIndex)parent] = std::max(last_child[joint_id],
@@ -69,8 +69,8 @@ namespace pinocchio
       {
         const JointIndex parent_id = model.parents[joint_id];
 
-        const JointModel & joint = model.joints[joint_id];
-        const JointModel & parent_joint = model.joints[parent_id];
+        const JointModel joint = model.joints[joint_id];
+        const JointModel parent_joint = model.joints[parent_id];
         const int nvj    = joint.nv();
         const int idx_vj = joint.idx_v();
         
@@ -100,9 +100,9 @@ namespace pinocchio
       {
         const RigidConstraintModel & cmodel = it->get();
         const JointIndex joint1_id = cmodel.joint1_id;
-        const JointModel & joint1 = model.joints[joint1_id];
+        const JointModel joint1 = model.joints[joint1_id];
         const JointIndex joint2_id = cmodel.joint2_id;
-        const JointModel & joint2 = model.joints[joint2_id];
+        const JointModel joint2 = model.joints[joint2_id];
 
         // Fill nv_subtree_fromRow for constraints
         const Eigen::DenseIndex nv1 = joint1.idx_v() + joint1.nv();
