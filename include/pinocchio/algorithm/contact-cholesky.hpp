@@ -507,16 +507,6 @@ namespace pinocchio
       }
 
       template<typename MatrixDerived>
-      typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixDerived)
-      operator*(const Eigen::MatrixBase<MatrixDerived> & x) const
-      {
-        typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixDerived) ReturnType;
-        ReturnType res(self.constraintDim(), x.cols());
-        applyOnTheRight(x.derived(),res);
-        return res;
-      }
-
-      template<typename MatrixDerived>
       void solveInPlace(const Eigen::MatrixBase<MatrixDerived> & x) const
       {
         PINOCCHIO_CHECK_ARGUMENT_SIZE(x.rows(),self.constraintDim());
