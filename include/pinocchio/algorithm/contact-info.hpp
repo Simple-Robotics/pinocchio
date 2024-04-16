@@ -519,7 +519,6 @@ namespace pinocchio
       
       const RigidConstraintModelTpl & cmodel = *this;
 
-      const Eigen::DenseIndex constraint_dim = cmodel.size();
       const SE3 & oMc1 = cdata.oMc1;
       const SE3 & oMc2 = cdata.oMc2;
       const SE3 & c1Mc2 = cdata.c1Mc2;
@@ -764,7 +763,7 @@ namespace pinocchio
     typedef std::vector< RigidConstraintModelTpl<Scalar,Options>, Allocator> VectorType;
     size_t total_size = 0;
     for(typename VectorType::const_iterator it = contact_models.begin(); it != contact_models.end(); ++it)
-      total_size += it->size();
+      total_size += size_t(it->size());
     
     return total_size;
   }
