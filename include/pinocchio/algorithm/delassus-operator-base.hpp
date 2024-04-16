@@ -47,7 +47,7 @@ namespace Eigen {
       typedef Eigen::ReturnByValue<pinocchio::DelassusOperatorApplyOnTheRightReturnType<DelassusOperatorDerived,MatrixDerived>> SrcXprType;
       
       EIGEN_DEVICE_FUNC
-      static EIGEN_STRONG_INLINE void run(DstXprType &dst, const SrcXprType &src, const Functor &func)
+      static EIGEN_STRONG_INLINE void run(DstXprType &dst, const SrcXprType &src, const Functor &/*func*/)
       {
         Index dstRows = src.rows();
         Index dstCols = src.cols();
