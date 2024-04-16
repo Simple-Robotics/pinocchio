@@ -59,7 +59,7 @@ namespace pinocchio
                     double boundInertia = 0;
 
                     // True, false or auto - auto = indeterminate
-                    boost::logic::tribool inertiafromgeom = boost::indeterminate;
+                    boost::logic::tribool inertiafromgeom = boost::logic::indeterminate;
                     
                     /// @brief Convert the angle in radian if model was declared to use degree
                     /// @param angle_ angle to convert
@@ -431,10 +431,10 @@ namespace pinocchio
                 }
             
                 template<int N>
-                inline Eigen::Vector<double, N> getVectorFromStream(const std::string &str)
+                inline Eigen::Matrix<double, N, 1> getVectorFromStream(const std::string &str)
                 {   
                     std::istringstream stream = getConfiguredStringStream(str);
-                    Eigen::Vector<double, N> vector;
+                    Eigen::Matrix<double, N, 1> vector;
                     for(int i = 0; i < N; i++)
                         stream >> vector(i);
                     
