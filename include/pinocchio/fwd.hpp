@@ -16,6 +16,13 @@ namespace pinocchio {}
 
 #include <cassert>
 
+#ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
+  #ifndef EIGEN_RUNTIME_NO_MALLOC
+    #define EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED
+    #define EIGEN_RUNTIME_NO_MALLOC
+  #endif
+#endif
+
 #include "pinocchio/macros.hpp"
 #include "pinocchio/deprecation.hpp"
 #include "pinocchio/warning.hpp"
@@ -26,14 +33,6 @@ namespace pinocchio {}
 #include "pinocchio/utils/check.hpp"
 
 #include "pinocchio/container/boost-container-limits.hpp"
-
-
-#ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
-  #ifndef EIGEN_RUNTIME_NO_MALLOC
-    #define EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED
-    #define EIGEN_RUNTIME_NO_MALLOC
-  #endif
-#endif
   
 #include <Eigen/Core>
 #include <Eigen/Sparse>
@@ -43,16 +42,16 @@ namespace pinocchio {}
 #include <Eigen/AccelerateSupport>
 #endif
 
+#include "pinocchio/eigen-macros.hpp"
+#ifdef PINOCCHIO_WITH_EIGEN_TENSOR_MODULE
+  #include <unsupported/Eigen/CXX11/Tensor>
+#endif
+
 #ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
   #ifdef EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED
     #undef EIGEN_RUNTIME_NO_MALLOC
     #undef EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED
   #endif
-#endif
-
-#include "pinocchio/eigen-macros.hpp"
-#ifdef PINOCCHIO_WITH_EIGEN_TENSOR_MODULE
-  #include <unsupported/Eigen/CXX11/Tensor>
 #endif
 
 #include "pinocchio/core/binary-op.hpp"
