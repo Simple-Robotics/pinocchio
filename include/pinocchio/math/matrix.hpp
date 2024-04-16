@@ -305,6 +305,36 @@ namespace pinocchio
   {
     return internal::isSymmetricAlgo<MatrixLike>::run(mat,prec);
   }
+  
+  namespace internal
+  {
+    template<typename XprType, typename DestType, typename Weak = void>
+    struct evalToImpl
+    {
+      static void run(const XprType & xpr, DestType & dest)
+      {
+        xpr.evalTo(dest);
+      }
+    };
+    
+    template<typename X1, typename X2, typename DenseDerived>
+    struct evalToImpl<Eigen::Product<X1,X2>,DenseDerived,void>
+    {
+      typedef Eigen::MatrixBase<DenseDerived> DestType;
+      typedef Eigen::Product<X1,X2> XprType;
+      static void run(const XprType & xpr, DestType & dest)
+      {
+        dest.noalias() = xpr;
+      }
+    };
+    
+  }
+  
+  template<typename XprType, typename DestType>
+  inline void evalTo(const XprType & xpr, DestType & dest)
+  {
+    internal::evalToImpl<XprType,DestType>::run(xpr,dest);
+  }
 
 }
 
