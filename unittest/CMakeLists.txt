@@ -152,6 +152,7 @@ ADD_PINOCCHIO_UNIT_TEST(sample-models)
 ADD_PINOCCHIO_UNIT_TEST(kinematics)
 ADD_PINOCCHIO_UNIT_TEST(delassus)
 ADD_PINOCCHIO_UNIT_TEST(delassus-operator-dense)
+ADD_PINOCCHIO_UNIT_TEST(delassus-operator-rigid-body)
 ADD_PINOCCHIO_UNIT_TEST(pv-solver)
 
 ADD_PINOCCHIO_UNIT_TEST(mjcf PARSERS)
