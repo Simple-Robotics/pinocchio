@@ -11,6 +11,7 @@
 
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
+#include <functional>
 
 namespace pinocchio
 {
@@ -133,7 +134,24 @@ namespace pinocchio
       ///
       template<typename S1, int O1, template<typename,int> class JointCollectionTpl, class Allocator>
       void allocate(const ModelTpl<S1,O1,JointCollectionTpl> & model,
-                    const std::vector<RigidConstraintModelTpl<S1,O1>,Allocator> & contact_models);
+                    const std::vector<RigidConstraintModelTpl<S1,O1>,Allocator> & contact_models)
+      {
+        typedef std::reference_wrapper<const RigidConstraintModelTpl<S1,O1>> WrappedType;
+        typedef std::vector<WrappedType> WrappedTypeVector;
+        
+        WrappedTypeVector wrapped_contact_models(contact_models.cbegin(),contact_models.cend());
+        allocate(model,wrapped_contact_models);
+      }
+      
+      ///
+      /// \brief Memory allocation of the vectors D, Dinv, and the upper triangular matrix U.
+      ///
+      /// \param[in] model Model of the kinematic tree
+      /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact information
+      ///
+      template<typename S1, int O1, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, class Allocator>
+      void allocate(const ModelTpl<S1,O1,JointCollectionTpl> & model,
+                    const std::vector<Holder<const RigidConstraintModelTpl<S1,O1>>,Allocator> & contact_models);
       
       ///
       /// \brief Returns the Inverse of the Operational Space Inertia Matrix resulting from the decomposition.

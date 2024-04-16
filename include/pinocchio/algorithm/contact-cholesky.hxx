@@ -13,28 +13,28 @@ namespace pinocchio
 {
     
     template<typename Scalar, int Options>
-    template<typename S1, int O1, template<typename,int> class JointCollectionTpl, class Allocator>
+    template<typename S1, int O1, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, class Allocator>
     void
     ContactCholeskyDecompositionTpl<Scalar,Options>::
     allocate(const ModelTpl<S1,O1,JointCollectionTpl> & model,
-             const std::vector<RigidConstraintModelTpl<S1,O1>,Allocator> & contact_models)
+             const std::vector<Holder<const RigidConstraintModelTpl<S1,O1>>,Allocator> & contact_models)
     {
       typedef ModelTpl<S1,O1,JointCollectionTpl> Model;
       typedef typename Model::JointModel JointModel;
       typedef RigidConstraintModelTpl<S1,O1> RigidConstraintModel;
-      typedef std::vector<RigidConstraintModel,Allocator> RigidConstraintModelVector;
       
       nv = model.nv;
       num_contacts = (Eigen::DenseIndex)contact_models.size();
       
       Eigen::DenseIndex num_total_constraints = 0;
-      for(typename RigidConstraintModelVector::const_iterator it = contact_models.begin();
-          it != contact_models.end();
+      for(auto it = contact_models.cbegin();
+          it != contact_models.cend();
           ++it)
       {
-        PINOCCHIO_CHECK_INPUT_ARGUMENT(it->size() > 0,
+        const RigidConstraintModel & cmodel = it->get();
+        PINOCCHIO_CHECK_INPUT_ARGUMENT(cmodel.size() > 0,
                                        "The dimension of the constraint must be positive");
-        num_total_constraints += it->size();
+        num_total_constraints += cmodel.size();
       }
       
       U1inv.resize(num_total_constraints,num_total_constraints);
@@ -94,11 +94,11 @@ namespace pinocchio
       
 
       Eigen::DenseIndex row_id = 0;
-      for(typename RigidConstraintModelVector::const_iterator it = contact_models.begin();
-          it != contact_models.end();
+      for(auto it = contact_models.cbegin();
+          it != contact_models.cend();
           ++it)
       {
-        const RigidConstraintModel & cmodel = *it;
+        const RigidConstraintModel & cmodel = it->get();
         const JointIndex joint1_id = cmodel.joint1_id;
         const JointModel & joint1 = model.joints[joint1_id];
         const JointIndex joint2_id = cmodel.joint2_id;
