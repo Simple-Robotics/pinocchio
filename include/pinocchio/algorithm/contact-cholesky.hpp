@@ -480,30 +480,43 @@ namespace pinocchio
         PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(),self.constraintDim());
         PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(),x.cols());
 
-        PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
-
         const RowMatrixConstBlockXpr U1 = self.U.topLeftCorner(self.constraintDim(), self.constraintDim());
 
         if(x.cols() <= self.constraintDim())
         {
+          PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
           RowMatrixBlockXpr tmp_mat = const_cast<ContactCholeskyDecomposition&>(self).OSIMinv_tmp.topLeftCorner(self.constraintDim(),x.cols());
   //            tmp_mat.noalias() = U1.adjoint() * x;
           triangularMatrixMatrixProduct<Eigen::UnitLower>(U1.adjoint(), x.derived(), tmp_mat);
-          tmp_mat.array().colwise() *= -self.D.head(self.constraintDim()).array();
+          
+          // The following commented lines produced some memory allocation.
+          // Should be replaced by a manual loop
+//          tmp_mat.array().colwise() *= -self.D.head(self.constraintDim()).array();
+          for(Eigen::DenseIndex i = 0; i < x.cols(); ++i)
+            tmp_mat.col(i).array() *= -self.D.head(self.constraintDim()).array();
+          
   //            res.const_cast_derived().noalias() = U1 * tmp_mat;
           triangularMatrixMatrixProduct<Eigen::UnitUpper>(U1, tmp_mat, res.const_cast_derived());
+          PINOCCHIO_EIGEN_MALLOC_ALLOWED();
         }
         else // do memory allocation
         {
           RowMatrix tmp_mat(x.rows(),x.cols());
+          PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
   //            tmp_mat.noalias() = U1.adjoint() * x;
           triangularMatrixMatrixProduct<Eigen::UnitLower>(U1.adjoint(), x.derived(), tmp_mat);
-          tmp_mat.array().colwise() *= -self.D.head(self.constraintDim()).array();
+          
+          // The following commented lines produced some memory allocation.
+          // Should be replaced by a manual loop
+//          tmp_mat.array().colwise() *= -self.D.head(self.constraintDim()).array();
+          for(Eigen::DenseIndex i = 0; i < x.cols(); ++i)
+            tmp_mat.col(i).array() *= -self.D.head(self.constraintDim()).array();
+          
   //            res.const_cast_derived().noalias() = U1 * tmp_mat;
           triangularMatrixMatrixProduct<Eigen::UnitUpper>(U1, tmp_mat, res.const_cast_derived());
+          PINOCCHIO_EIGEN_MALLOC_ALLOWED();
         }
 
-        PINOCCHIO_EIGEN_MALLOC_ALLOWED();
       }
 
       template<typename MatrixDerived>
@@ -516,7 +529,13 @@ namespace pinocchio
 
         PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
         U1.solveInPlace(x.const_cast_derived());
-        x.const_cast_derived().array().colwise() *= -self.Dinv.head(self.constraintDim()).array();
+        
+        // The following commented lines produced some memory allocation.
+        // Should be replaced by a manual loop
+//        x.const_cast_derived().array().colwise() *= -self.Dinv.head(self.constraintDim()).array();
+        for(Eigen::DenseIndex i = 0; i < x.cols(); ++i)
+          x.const_cast_derived().col(i).array() *= - self.Dinv.head(self.constraintDim()).array();
+        
         U1.adjoint().solveInPlace(x);
         PINOCCHIO_EIGEN_MALLOC_ALLOWED();
       }
