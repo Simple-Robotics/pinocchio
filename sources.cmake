@@ -59,6 +59,7 @@ SET(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
   include/pinocchio/algorithm/delassus-operator-base.hpp
   include/pinocchio/algorithm/delassus-operator-dense.hpp
   include/pinocchio/algorithm/delassus-operator-rigid-body.hpp
+  include/pinocchio/algorithm/delassus-operator-rigid-body.hxx
   include/pinocchio/algorithm/delassus-operator-sparse.hpp
   include/pinocchio/algorithm/dynamics.hpp
   include/pinocchio/algorithm/energy.hpp
@@ -289,6 +290,7 @@ SET(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
   include/pinocchio/utils/file-io.hpp
   include/pinocchio/utils/helpers.hpp
   include/pinocchio/utils/openmp.hpp
+  include/pinocchio/utils/reference.hpp
   include/pinocchio/utils/shared-ptr.hpp
   include/pinocchio/utils/static-if.hpp
   include/pinocchio/utils/string-generator.hpp
