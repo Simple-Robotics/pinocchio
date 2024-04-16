@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2019 INRIA
+// Copyright (c) 2019-2024 INRIA
 //
 
 #ifndef __pinocchio_math_matrix_block_hpp__
 #define __pinocchio_math_matrix_block_hpp__
 
-#include <Eigen/Core>
+#include "pinocchio/fwd.hpp"
 
 namespace pinocchio
 {

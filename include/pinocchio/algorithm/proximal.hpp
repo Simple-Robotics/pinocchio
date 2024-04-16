@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2019-2022 INRIA
+// Copyright (c) 2019-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_proximal_hpp__
 #define __pinocchio_algorithm_proximal_hpp__
 
-#include <Eigen/Core>
+#include "pinocchio/fwd.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
 

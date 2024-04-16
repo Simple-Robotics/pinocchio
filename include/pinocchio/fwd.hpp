@@ -28,24 +28,25 @@ namespace pinocchio {}
 #include "pinocchio/warning.hpp"
 #include "pinocchio/config.hpp"
 
-#include "pinocchio/utils/helpers.hpp"
-#include "pinocchio/utils/cast.hpp"
-#include "pinocchio/utils/check.hpp"
-
-#include "pinocchio/container/boost-container-limits.hpp"
-  
+// Include Eigen components
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
 
 #ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
-#include <Eigen/AccelerateSupport>
+  #include <Eigen/AccelerateSupport>
 #endif
 
 #include "pinocchio/eigen-macros.hpp"
 #ifdef PINOCCHIO_WITH_EIGEN_TENSOR_MODULE
   #include <unsupported/Eigen/CXX11/Tensor>
 #endif
+
+#include "pinocchio/utils/helpers.hpp"
+#include "pinocchio/utils/cast.hpp"
+#include "pinocchio/utils/check.hpp"
+
+#include "pinocchio/container/boost-container-limits.hpp"
 
 #ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
   #ifdef EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED

@@ -5,7 +5,7 @@
 #ifndef __pinocchio_context_generic_hpp__
 #define __pinocchio_context_generic_hpp__
 
-#include <Eigen/Core>
+#include "pinocchio/fwd.hpp"
 #include "pinocchio/container/aligned-vector.hpp"
 
 namespace pinocchio {

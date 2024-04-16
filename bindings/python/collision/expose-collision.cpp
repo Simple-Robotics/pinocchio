@@ -9,8 +9,6 @@
 #include "pinocchio/collision/collision.hpp"
 #include "pinocchio/collision/distance.hpp"
 
-#include <Eigen/Core>
-
 namespace pinocchio
 {
   namespace python

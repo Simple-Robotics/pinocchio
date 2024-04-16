@@ -10,8 +10,6 @@
 #include "pinocchio/math/fwd.hpp"
 
 #include <casadi/casadi.hpp>
-#include <Eigen/Core>
-#include <Eigen/Sparse>
 
 namespace boost { namespace math { namespace constants { namespace detail {
   template<>

@@ -9,7 +9,6 @@
 #include "pinocchio/math/matrix.hpp"
 #include "pinocchio/math/sincos.hpp"
 
-#include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <Eigen/SVD>
 

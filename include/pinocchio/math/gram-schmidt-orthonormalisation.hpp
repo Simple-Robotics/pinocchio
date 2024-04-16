@@ -6,7 +6,6 @@
 #define __pinocchio_math_gram_schmidt_orthonormalisation_hpp__
 
 #include "pinocchio/math/fwd.hpp"
-#include <Eigen/Core>
 
 namespace pinocchio
 {

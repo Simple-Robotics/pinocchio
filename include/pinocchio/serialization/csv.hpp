@@ -7,7 +7,6 @@
 
 #include "pinocchio/serialization/fwd.hpp"
 
-#include <Eigen/Core>
 #include <fstream>
 
 namespace pinocchio
