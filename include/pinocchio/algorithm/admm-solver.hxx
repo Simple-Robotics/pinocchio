@@ -194,7 +194,7 @@ namespace pinocchio
 
       // x-update
       rhs = -(g + s_ - (rho*tau) * y_ - mu_prox * x_ - z_);
-      const VectorXs rhs_copy = rhs;
+      // const VectorXs rhs_copy = rhs;
 //      x_ = rhs;
       delassus.solveInPlace(rhs);
 //      VectorXs tmp = delassus * rhs - rhs_copy;
