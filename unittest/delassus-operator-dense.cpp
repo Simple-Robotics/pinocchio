@@ -2,7 +2,7 @@
 // Copyright (c) 2024 INRIA
 //
 
-#define EIGEN_RUNTIME_NO_MALLOC
+#define PINOCCHIO_EIGEN_CHECK_MALLOC
 #include <iostream>
 
 #include <pinocchio/fwd.hpp>
@@ -34,6 +34,8 @@ BOOST_AUTO_TEST_CASE(test_memory_allocation)
   res = delassus * rhs;
   BOOST_CHECK(res.isApprox((symmetric_mat * rhs).eval()));
   
+  PowerIterationAlgoTpl<Eigen::VectorXd> power_iteration(mat_size);
+  
   // Check memory allocations
   Eigen::internal::set_is_malloc_allowed(false);
   res = delassus * rhs;
@@ -41,6 +43,8 @@ BOOST_AUTO_TEST_CASE(test_memory_allocation)
   res.noalias() = symmetric_mat * rhs;
   res.noalias() = delassus * rhs;
   evalTo(symmetric_mat * rhs, res);
+  power_iteration.run(delassus);
+  power_iteration.run(symmetric_mat);
   Eigen::internal::set_is_malloc_allowed(true);
 }
 
