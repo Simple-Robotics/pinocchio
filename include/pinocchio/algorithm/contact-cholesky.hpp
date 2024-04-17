@@ -123,10 +123,6 @@ namespace pinocchio
       }
 
       ///
-      /// \brief Copy constructor
-      ContactCholeskyDecompositionTpl(const ContactCholeskyDecompositionTpl & copy) = default;
-
-      ///
       /// \brief Memory allocation of the vectors D, Dinv, and the upper triangular matrix U.
       ///
       /// \param[in] model Model of the kinematic tree
