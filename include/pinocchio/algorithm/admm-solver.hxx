@@ -289,8 +289,8 @@ namespace pinocchio
       else
         rel_prec_reached = false;
 
-//      if(abs_prec_reached || rel_prec_reached)
-      if(abs_prec_reached)
+      if(abs_prec_reached || rel_prec_reached)
+//      if(abs_prec_reached)
         break;
 
       // Apply rho according to the primal_dual_ratio
