@@ -1,9 +1,13 @@
 //
-// Copyright (c) 2019-2022 INRIA
+// Copyright (c) 2019-2024 INRIA
 //
+
+#define PINOCCHIO_EIGEN_CHECK_MALLOC
 
 #include <iostream>
 
+#include "pinocchio/fwd.hpp"
+#include "pinocchio/math/eigenvalues.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
@@ -513,6 +517,18 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_contact6D_LOCAL)
   
   MatrixXd mat3 = contact_chol_decomposition.matrix();
   BOOST_CHECK(mat3.isApprox(H));
+  
+  // Check memory allocation
+  {
+    const auto delassus_chol = contact_chol_decomposition.getDelassusCholeskyExpression();
+    PowerIterationAlgoTpl<Eigen::VectorXd> power_iteration(delassus_chol.rows());
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_chol.rows());
+    Eigen::VectorXd res = Eigen::VectorXd::Random(delassus_chol.rows());
+    PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
+    res.noalias() = delassus_chol * rhs;
+    power_iteration.run(delassus_chol);
+    PINOCCHIO_EIGEN_MALLOC_ALLOWED();
+  }
 }
 
 BOOST_AUTO_TEST_CASE(contact_cholesky_contact3D_6D_LOCAL)
