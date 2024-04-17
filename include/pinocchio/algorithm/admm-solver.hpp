@@ -103,6 +103,15 @@ namespace pinocchio
       PINOCCHIO_CHECK_INPUT_ARGUMENT(decrease_factor > Scalar(1),"decrease_factor should be greater than one.");
     }
     
+    ADMMLinearUpdateRuleTpl(const Scalar ratio_primal_dual,
+                            const Scalar factor)
+    : ratio_primal_dual(ratio_primal_dual)
+    , increase_factor(factor)
+    , decrease_factor(factor)
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(factor > Scalar(1),"factor should be greater than one.");
+    }
+    
     bool eval(const Scalar primal_feasibility,
               const Scalar dual_feasibility,
               Scalar & rho) const
