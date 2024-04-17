@@ -43,9 +43,10 @@ namespace python
                             const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
                             const boost::optional<ConstRefVectorXs> dual_solution = boost::none,
                             bool compute_largest_eigen_values = true,
+                            ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
                             bool stat_record = false)
   {
-    return solver.solve(delassus,g,cones,R,primal_solution,dual_solution,compute_largest_eigen_values, stat_record);
+    return solver.solve(delassus,g,cones,R,primal_solution,dual_solution,compute_largest_eigen_values, admm_update_rule, stat_record);
   }
 
   template<typename DelassusDerived>
@@ -102,6 +103,13 @@ namespace python
   void exposeADMMContactSolver()
   {
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
+    
+    bp::enum_< ::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
+      .value("SPECTRAL",::pinocchio::ADMMUpdateRule::SPECTRAL)
+      .value("LINEAR",::pinocchio::ADMMUpdateRule::SPECTRAL)
+//      .export_values()
+    ;
+    
     bp::class_<Solver> cl("ADMMContactSolver",
                           "Alternating Direction Method of Multi-pliers solver for contact dynamics.",
                           bp::init<int, Scalar, Scalar, Scalar, Scalar, Scalar, int>((bp::arg("self"),
@@ -121,6 +129,7 @@ namespace python
           bp::arg("primal_solution") = boost::none,
           bp::arg("dual_solution") = boost::none,
           bp::arg("compute_largest_eigen_values") = true,
+          bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
           bp::arg("stat_record") = false),
          "Solve the constrained conic problem, starting from the optional initial guess.")
     .def("solve",solve_wrapper<context::DelassusOperatorDense>,
@@ -128,6 +137,7 @@ namespace python
           bp::arg("primal_solution") = boost::none,
           bp::arg("dual_solution") = boost::none,
           bp::arg("compute_largest_eigen_values") = true,
+          bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
           bp::arg("stat_record") = false),
          "Solve the constrained conic problem, starting from the optional initial guess.")
     .def("solve",solve_wrapper<context::DelassusOperatorSparse>,
@@ -135,6 +145,7 @@ namespace python
           bp::arg("primal_solution") = boost::none,
           bp::arg("dual_solution") = boost::none,
           bp::arg("compute_largest_eigen_values") = true,
+          bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
           bp::arg("stat_record") = false),
          "Solve the constrained conic problem, starting from the optional initial guess.")
 
