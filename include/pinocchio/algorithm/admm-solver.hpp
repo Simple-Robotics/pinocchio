@@ -263,6 +263,7 @@ namespace pinocchio
                                   Scalar tau = Scalar(0.5),
                                   Scalar rho_power = Scalar(0.2),
                                   Scalar rho_power_factor = Scalar(0.05),
+                                  Scalar linear_update_rule_factor = Scalar(10),
                                   Scalar ratio_primal_dual = Scalar(10),
                                   int max_it_largest_eigen_value_solver = 20)
     : Base(problem_dim)
@@ -272,6 +273,7 @@ namespace pinocchio
     , rho(Scalar(-1))
     , rho_power(rho_power)
     , rho_power_factor(rho_power_factor)
+    , linear_update_rule_factor(linear_update_rule_factor)
     , ratio_primal_dual(ratio_primal_dual)
     , max_it_largest_eigen_value_solver(max_it_largest_eigen_value_solver)
     , power_iteration_algo(problem_dim)
@@ -311,8 +313,16 @@ namespace pinocchio
     {
       this->rho_power_factor = rho_power_factor;
     }
-    /// \brief Get the power factor  associated to the problem conditionning.
+    /// \brief Get the value of the increase/decrease factor associated to the problem conditionning.
     Scalar getRhoPowerFactor() const { return rho_power_factor; }
+    
+    /// \brief Set the update factor of the Linear update rule
+    void setLinearUpdateRuleFactor(const Scalar linear_update_rule_factor)
+    {
+      this->linear_update_rule_factor = linear_update_rule_factor;
+    }
+    /// \brief Get the value of the increase/decrease factor of the Linear update rule
+    Scalar getLinearUpdateRuleFactor() const { return linear_update_rule_factor; }
 
     /// \brief Set the tau linear scaling factor.
     void setTau(const Scalar tau)
@@ -411,14 +421,18 @@ namespace pinocchio
 
     /// \brief Linear scaling of the ADMM penalty term
     Scalar tau;
-
-    // Set of parameters associated with the Spectral update
     /// \brief Penalty term associated to the ADMM.
     Scalar rho;
+
+    // Set of parameters associated with the Spectral update rule
     /// \brief Power value associated to rho. This quantity will be automatically updated.
     Scalar rho_power;
     /// \brief Update factor for the primal/dual update of rho.
     Scalar rho_power_factor;
+    
+    // Set of parameters associated with the Linear update rule
+    /// \brief value of the increase/decrease factor
+    Scalar linear_update_rule_factor;
     
     /// \brief Ratio primal/dual
     Scalar ratio_primal_dual;

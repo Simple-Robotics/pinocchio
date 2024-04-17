@@ -58,7 +58,7 @@ namespace pinocchio
         admm_update_rule_container.spectral_rule = ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
         break;
       case(ADMMUpdateRule::LINEAR):
-        admm_update_rule_container.linear_rule = ADMMLinearUpdateRule(ratio_primal_dual, 10, 10);
+        admm_update_rule_container.linear_rule = ADMMLinearUpdateRule(ratio_primal_dual, linear_update_rule_factor);
         break;
     }
 //    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
