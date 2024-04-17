@@ -18,6 +18,76 @@
 namespace pinocchio
 {
   template<typename _Scalar>
+  struct ADMMSpectralUpdateRuleTpl
+  {
+    typedef _Scalar Scalar;
+    
+    ADMMSpectralUpdateRuleTpl(const Scalar ratio_primal_dual,
+                              const Scalar L, const Scalar m,
+                              const Scalar rho_power_factor)
+    : ratio_primal_dual(ratio_primal_dual)
+    , rho_increment(std::pow(L/m,rho_power_factor))
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(m > Scalar(0),"m should be positive.");
+    }
+    
+    Scalar getRatioPrimalDual() const { return ratio_primal_dual; }
+    void setRatioPrimalDual(const Scalar ratio_primal_dual)
+    { this->ratio_primal_dual = ratio_primal_dual; }
+
+    Scalar getRhoIncrement() const { return rho_increment; }
+    void setRhoIncrement(const Scalar cond, const Scalar rho_power_factor)
+    {
+      rho_increment = std::pow(cond,rho_power_factor);
+    }
+
+    bool eval(const Scalar primal_feasibility,
+              const Scalar dual_feasibility,
+              Scalar & rho) const
+    {
+      bool rho_has_changed = false;
+      if(primal_feasibility > ratio_primal_dual * dual_feasibility)
+      {
+        rho *= rho_increment;
+          //        rho *= math::pow(cond,rho_power_factor);
+          //        rho_power += rho_power_factor;
+        rho_has_changed = true;
+      }
+      else if(dual_feasibility > ratio_primal_dual * primal_feasibility)
+      {
+        rho /= rho_increment;
+          //        rho *= math::pow(cond,-rho_power_factor);
+          //        rho_power -= rho_power_factor;
+        rho_has_changed = true;
+      }
+      
+      return rho_has_changed;
+    }
+    
+    /// \brief Compute the penalty ADMM value from the current largest and lowest eigenvalues and the scaling spectral factor.
+    static inline Scalar computeRho(const Scalar L, const Scalar m, const Scalar rho_power)
+    {
+      const Scalar cond = L / m;
+      const Scalar rho = math::sqrt(L * m) * math::pow(cond,rho_power);
+      return rho;
+    }
+    
+    /// \brief Compute the  scaling spectral factor of the ADMM penalty term from the current largest and lowest eigenvalues and the ADMM penalty term.
+    static inline Scalar computeRhoPower(const Scalar L, const Scalar m, const Scalar rho)
+    {
+      const Scalar cond = L / m;
+      const Scalar sqtr_L_m = math::sqrt(L * m);
+      const Scalar rho_power = math::log(rho/sqtr_L_m) / math::log(cond);
+      return rho_power;
+    }
+    
+  protected:
+    
+    Scalar ratio_primal_dual;
+    Scalar rho_increment;
+  };
+  
+  template<typename _Scalar>
   struct ADMMContactSolverTpl
   : ContactSolverBaseTpl<_Scalar>
   {
@@ -250,23 +320,6 @@ namespace pinocchio
     /// \returns the complementarity shift
     const VectorXs & getComplementarityShift() const { return s_; }
 
-    /// \brief Compute the penalty ADMM value from the current largest and lowest eigenvalues and the scaling spectral factor.
-    static inline Scalar computeRho(const Scalar L, const Scalar m, const Scalar rho_power)
-    {
-      const Scalar cond = L / m;
-      const Scalar rho = math::sqrt(L * m) * math::pow(cond,rho_power);
-      return rho;
-    }
-
-    /// \brief Compute the  scaling spectral factor of the ADMM penalty term from the current largest and lowest eigenvalues and the ADMM penalty term.
-    static inline Scalar computeRhoPower(const Scalar L, const Scalar m, const Scalar rho)
-    {
-      const Scalar cond = L / m;
-      const Scalar sqtr_L_m = math::sqrt(L * m);
-      const Scalar rho_power = math::log(rho/sqtr_L_m) / math::log(cond);
-      return rho_power;
-    }
-
     PowerIterationAlgo & getPowerIterationAlgo()
     {
       return power_iteration_algo;
@@ -287,12 +340,14 @@ namespace pinocchio
     /// \brief Linear scaling of the ADMM penalty term
     Scalar tau;
 
+    // Set of parameters associated with the Spectral update
     /// \brief Penalty term associated to the ADMM.
     Scalar rho;
     /// \brief Power value associated to rho. This quantity will be automatically updated.
     Scalar rho_power;
     /// \brief Update factor for the primal/dual update of rho.
     Scalar rho_power_factor;
+    
     /// \brief Ratio primal/dual
     Scalar ratio_primal_dual;
 

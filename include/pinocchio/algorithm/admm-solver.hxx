@@ -28,6 +28,7 @@ namespace pinocchio
 
   {
     using namespace internal;
+    typedef ADMMSpectralUpdateRuleTpl<Scalar> ADMMSpectralUpdateRule;
 
     DelassusDerived & delassus = _delassus.derived();
 
@@ -46,8 +47,7 @@ namespace pinocchio
     const Scalar L = power_iteration_algo.largest_eigen_value;
 //    const Scalar L = delassus.computeLargestEigenValue(20);
     const Scalar m = mu_prox + mu_R;
-    const Scalar cond = L / m;
-    const Scalar rho_increment = std::pow(cond,rho_power_factor);
+    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
 
     Scalar
     complementarity,
@@ -58,8 +58,7 @@ namespace pinocchio
 
 //    std::cout << std::setprecision(12);
 
-    Scalar rho;
-    rho = computeRho(L,m,rho_power);
+    Scalar rho = ADMMSpectralUpdateRule::computeRho(L,m,rho_power);
 //    if(!is_initialized)
 //    {
 //      rho = computeRho(L,m,rho_power);
@@ -294,23 +293,11 @@ namespace pinocchio
       if(abs_prec_reached)
         break;
 
-      // Account for potential update of rho
-      bool update_delassus_factorization = false;
-      if(primal_feasibility > ratio_primal_dual * dual_feasibility)
-      {
-        rho *= rho_increment;
-//        rho *= math::pow(cond,rho_power_factor);
-//        rho_power += rho_power_factor;
-        update_delassus_factorization = true;
-      }
-      else if(dual_feasibility > ratio_primal_dual * primal_feasibility)
-      {
-        rho /= rho_increment;
-//        rho *= math::pow(cond,-rho_power_factor);
-//        rho_power -= rho_power_factor;
-        update_delassus_factorization = true;
-      }
+      // Apply rho according to the primal_dual_ratio
+      const bool update_delassus_factorization
+      = spectral_rule.eval(primal_feasibility,dual_feasibility,rho);
 
+      // Account for potential update of rho
       if(update_delassus_factorization)
       {
         prox_value = mu_prox + tau * rho;
@@ -334,7 +321,7 @@ namespace pinocchio
 //    y_sol.const_cast_derived() = y_;
 
     // Save values
-    this->rho_power = computeRhoPower(L,m,rho);
+    this->rho_power = ADMMSpectralUpdateRule::computeRhoPower(L,m,rho);
     this->rho = rho;
 
     if(stat_record)
@@ -353,6 +340,7 @@ namespace pinocchio
 
     return false;
   }
+ 
 }
 
 #endif // ifndef __pinocchio_algorithm_admm_solver_hxx__
