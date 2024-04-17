@@ -353,6 +353,7 @@ namespace pinocchio
                const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
                const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
                bool compute_largest_eigen_values = true,
+               ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
                bool stat_record = false);
 
     ///

@@ -24,12 +24,15 @@ namespace pinocchio
                                             const boost::optional<ConstRefVectorXs> primal_guess,
                                             const boost::optional<ConstRefVectorXs> dual_guess,
                                             bool compute_largest_eigen_values,
+                                            ADMMUpdateRule admm_update_rule,
                                             bool stat_record)
 
   {
     using namespace internal;
     typedef ADMMSpectralUpdateRuleTpl<Scalar> ADMMSpectralUpdateRule;
+    typedef ADMMLinearUpdateRuleTpl<Scalar> ADMMLinearUpdateRule;
 
+    typedef ADMMUpdateRuleContainerTpl<Scalar> ADMMUpdateRuleContainer;
     DelassusDerived & delassus = _delassus.derived();
 
     const Scalar mu_R = R.minCoeff();
@@ -47,7 +50,18 @@ namespace pinocchio
     const Scalar L = power_iteration_algo.largest_eigen_value;
 //    const Scalar L = delassus.computeLargestEigenValue(20);
     const Scalar m = mu_prox + mu_R;
-    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
+    
+    ADMMUpdateRuleContainer admm_update_rule_container;
+    switch(admm_update_rule)
+    {
+      case(ADMMUpdateRule::SPECTRAL):
+        admm_update_rule_container.spectral_rule = ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
+        break;
+      case(ADMMUpdateRule::LINEAR):
+        admm_update_rule_container.linear_rule = ADMMLinearUpdateRule(ratio_primal_dual, 10, 10);
+        break;
+    }
+//    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
 
     Scalar
     complementarity,
@@ -294,8 +308,16 @@ namespace pinocchio
         break;
 
       // Apply rho according to the primal_dual_ratio
-      const bool update_delassus_factorization
-      = spectral_rule.eval(primal_feasibility,dual_feasibility,rho);
+      bool update_delassus_factorization = false;
+      switch(admm_update_rule)
+      {
+        case(ADMMUpdateRule::SPECTRAL):
+          update_delassus_factorization = admm_update_rule_container.spectral_rule.eval(primal_feasibility,dual_feasibility,rho);
+          break;
+        case(ADMMUpdateRule::LINEAR):
+          update_delassus_factorization = admm_update_rule_container.linear_rule.eval(primal_feasibility,dual_feasibility,rho);;
+          break;
+      }
 
       // Account for potential update of rho
       if(update_delassus_factorization)
