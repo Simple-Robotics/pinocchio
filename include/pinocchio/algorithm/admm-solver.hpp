@@ -88,6 +88,47 @@ namespace pinocchio
   };
   
   template<typename _Scalar>
+  struct ADMMLinearUpdateRuleTpl
+  {
+    typedef _Scalar Scalar;
+    
+    ADMMLinearUpdateRuleTpl(const Scalar ratio_primal_dual,
+                            const Scalar increase_factor,
+                            const Scalar decrease_factor)
+    : ratio_primal_dual(ratio_primal_dual)
+    , increase_factor(increase_factor)
+    , decrease_factor(decrease_factor)
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(increase_factor > Scalar(1),"increase_factor should be greater than one.");
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(decrease_factor > Scalar(1),"decrease_factor should be greater than one.");
+    }
+    
+    bool eval(const Scalar primal_feasibility,
+              const Scalar dual_feasibility,
+              Scalar & rho) const
+    {
+      bool rho_has_changed = false;
+      if(primal_feasibility > ratio_primal_dual * dual_feasibility)
+      {
+        rho *= increase_factor;
+        rho_has_changed = true;
+      }
+      else if(dual_feasibility > ratio_primal_dual * primal_feasibility)
+      {
+        rho /= decrease_factor;
+        rho_has_changed = true;
+      }
+      
+      return rho_has_changed;
+    }
+    
+  protected:
+    
+    Scalar ratio_primal_dual;
+    Scalar increase_factor, decrease_factor;
+  };
+  
+  template<typename _Scalar>
   struct ADMMContactSolverTpl
   : ContactSolverBaseTpl<_Scalar>
   {
