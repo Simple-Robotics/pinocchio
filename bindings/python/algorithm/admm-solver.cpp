@@ -112,12 +112,13 @@ namespace python
     
     bp::class_<Solver> cl("ADMMContactSolver",
                           "Alternating Direction Method of Multi-pliers solver for contact dynamics.",
-                          bp::init<int, Scalar, Scalar, Scalar, Scalar, Scalar, int>((bp::arg("self"),
+                          bp::init<int, Scalar, Scalar, Scalar, Scalar, Scalar, Scalar, int>((bp::arg("self"),
                                                                                       bp::arg("problem_dim"),
                                                                                       bp::arg("mu_prox") = Scalar(1e-6),
                                                                                       bp::arg("tau") = Scalar(0.5),
                                                                                       bp::arg("rho_power") = Scalar(0.2),
                                                                                       bp::arg("rho_power_factor") = Scalar(0.05),
+                                                                                      bp::arg("linear_update_rule_factor") = Scalar(10),
                                                                                       bp::arg("ratio_primal_dual") = Scalar(10),
                                                                                       bp::arg("max_it_largest_eigen_value_solver") = 20),
                                                                                      "Default constructor."));
@@ -155,14 +156,19 @@ namespace python
          "Get the ADMM penalty value.")
 
     .def("setRhoPower",&Solver::setRhoPower,bp::args("self","rho_power"),
-         "Set the power associated to the problem conditionning.")
+         "Set the power associated to the ADMM spectral update rule.")
     .def("getRhoPower",&Solver::getRhoPower,bp::arg("self"),
-         "Get the power associated to the problem conditionning.")
+         "Get the power associated to the ADMM spectral update rule.")
 
     .def("setRhoPowerFactor",&Solver::setRhoPowerFactor,bp::args("self","rho_power_factor"),
-         "Set the power factor associated to the problem conditionning.")
+         "Set the power factor associated to the ADMM spectral update rule.")
     .def("getRhoPowerFactor",&Solver::getRhoPowerFactor,bp::arg("self"),
-         "Get the power factor associated to the problem conditionning.")
+         "Get the power factor associated to the ADMM spectral update rule.")
+    
+    .def("setLinearUpdateRuleFactor",&Solver::setLinearUpdateRuleFactor,bp::args("self","linear_update_rule_factor"),
+         "Set the factor associated with the ADMM linear update rule.")
+    .def("getLinearUpdateRuleFactor",&Solver::getLinearUpdateRuleFactor,bp::arg("self"),
+         "Get the factor associated with the ADMM linear update rule.")
 
     .def("setTau",&Solver::setTau,bp::args("self","tau"),
          "Set the tau linear scaling factor.")
