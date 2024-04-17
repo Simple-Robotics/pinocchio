@@ -128,6 +128,27 @@ namespace pinocchio
     Scalar increase_factor, decrease_factor;
   };
   
+  enum class ADMMUpdateRule : char
+  {
+    SPECTRAL = 'S',
+    LINEAR = 'L',
+  };
+  
+  template<typename Scalar>
+  union ADMMUpdateRuleContainerTpl
+  {
+    ADMMUpdateRuleContainerTpl() : dummy() {};
+    ADMMSpectralUpdateRuleTpl<Scalar> spectral_rule;
+    ADMMLinearUpdateRuleTpl<Scalar> linear_rule;
+    
+  protected:
+    struct Dummy {
+      Dummy() {};
+    };
+    
+    Dummy dummy {};
+  };
+  
   template<typename _Scalar>
   struct ADMMContactSolverTpl
   : ContactSolverBaseTpl<_Scalar>
