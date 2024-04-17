@@ -170,12 +170,12 @@ namespace pinocchio
     }
     
     template<typename Scalar, int Options>
-    template<typename S1, int O1, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, typename VectorLike>
+    template<typename S1, int O1, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator, typename VectorLike>
     void ContactCholeskyDecompositionTpl<Scalar,Options>::
     compute(const ModelTpl<S1,O1,JointCollectionTpl> & model,
             DataTpl<S1,O1,JointCollectionTpl> & data,
-            const std::vector<RigidConstraintModelTpl<S1,O1>,ConstraintModelAllocator> & contact_models,
-            std::vector<RigidConstraintDataTpl<S1,O1>,ConstraintDataAllocator> & contact_datas,
+            const std::vector<Holder<const RigidConstraintModelTpl<S1,O1>>,ConstraintModelAllocator> & contact_models,
+            std::vector<Holder<RigidConstraintDataTpl<S1,O1>>,ConstraintDataAllocator> & contact_datas,
             const Eigen::MatrixBase<VectorLike> & mus)
     {
       typedef RigidConstraintModelTpl<S1,O1> RigidConstraintModel;
@@ -201,8 +201,8 @@ namespace pinocchio
       // Update frame placements if needed
       for(size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
-        const RigidConstraintModel & cmodel = contact_models[ee_id];
-        RigidConstraintData & cdata = contact_datas[ee_id];
+        const RigidConstraintModel & cmodel = contact_models[ee_id].get();
+        RigidConstraintData & cdata = contact_datas[ee_id].get();
 
         cmodel.calc(model,data,cdata);
       }
@@ -215,8 +215,8 @@ namespace pinocchio
       U.topRightCorner(total_constraints_dim,model.nv).setZero();
       for(size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
-        const RigidConstraintModel & cmodel = contact_models[ee_id];
-        RigidConstraintData & cdata = contact_datas[ee_id];
+        const RigidConstraintModel & cmodel = contact_models[ee_id].get();
+        RigidConstraintData & cdata = contact_datas[ee_id].get();
 
         const Eigen::DenseIndex constraint_dim = cmodel.size();
         cmodel.jacobian(model,data,cdata,U.block(current_row,total_constraints_dim,cmodel.size(),model.nv));

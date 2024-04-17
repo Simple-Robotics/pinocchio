@@ -291,7 +291,30 @@ namespace pinocchio
       /// \param[in] model Model of the dynamical system
       /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian of the kinematic tree
       /// \param[in] contact_models Vector containing the contact models (which frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
-      /// \param[out] contact_datas Vector containing the contact data related to the contact_models.
+      /// \param[in,out] contact_datas Vector containing the contact data related to the contact_models.
+      /// \param[in] mu Positive regularization factor allowing to enforce the definite property of the KKT matrix.
+      ///
+      /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed first. This can be achieved by simply calling pinocchio::crba.
+      ///
+      template<typename S1, int O1, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator>
+      void compute(const ModelTpl<S1,O1,JointCollectionTpl> & model,
+                   DataTpl<S1,O1,JointCollectionTpl> & data,
+                   const std::vector<Holder<const RigidConstraintModelTpl<S1,O1>>,ConstraintModelAllocator> & contact_models,
+                   std::vector<Holder<RigidConstraintDataTpl<S1,O1>>,ConstraintDataAllocator> & contact_datas,
+                   const S1 mu = S1(0.))
+      {
+        compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(),mu));
+      }
+      
+      ///
+      /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
+      ///        related to the system mass matrix and the Jacobians of the contact patches contained in
+      ///        the vector of RigidConstraintModel named contact_models.
+      ///
+      /// \param[in] model Model of the dynamical system
+      /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian of the kinematic tree
+      /// \param[in] contact_models Vector containing the contact models (which frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+      /// \param[in,out] contact_datas Vector containing the contact data related to the contact_models.
       /// \param[in] mus Vector of positive regularization factor allowing to enforce the definite property of the KKT matrix.
       ///
       /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed first. This can be achieved by simply calling pinocchio::crba.
@@ -301,6 +324,39 @@ namespace pinocchio
                    DataTpl<S1,O1,JointCollectionTpl> & data,
                    const std::vector<RigidConstraintModelTpl<S1,O1>,ConstraintModelAllocator> & contact_models,
                    std::vector<RigidConstraintDataTpl<S1,O1>,ConstraintDataAllocator> & contact_datas,
+                   const Eigen::MatrixBase<VectorLike> & mus)
+      {
+        typedef std::reference_wrapper<const RigidConstraintModelTpl<S1,O1>> WrappedConstraintModelType;
+        typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+        
+        WrappedConstraintModelVector wrapped_constraint_models(contact_models.cbegin(),contact_models.cend());
+        
+        typedef std::reference_wrapper<RigidConstraintDataTpl<S1,O1>> WrappedConstraintDataType;
+        typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
+        
+        WrappedConstraintDataVector wrapped_constraint_datas(contact_datas.begin(),contact_datas.end());
+        
+        compute(model,data,wrapped_constraint_models,wrapped_constraint_datas,mus);
+      }
+      
+      ///
+      /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
+      ///        related to the system mass matrix and the Jacobians of the contact patches contained in
+      ///        the vector of RigidConstraintModel named contact_models.
+      ///
+      /// \param[in] model Model of the dynamical system
+      /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian of the kinematic tree
+      /// \param[in] contact_models Vector containing the contact models (which frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+      /// \param[in,out] contact_datas Vector containing the contact data related to the contact_models.
+      /// \param[in] mus Vector of positive regularization factor allowing to enforce the definite property of the KKT matrix.
+      ///
+      /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed first. This can be achieved by simply calling pinocchio::crba.
+      ///
+      template<typename S1, int O1, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator, typename VectorLike>
+      void compute(const ModelTpl<S1,O1,JointCollectionTpl> & model,
+                   DataTpl<S1,O1,JointCollectionTpl> & data,
+                   const std::vector<Holder<const RigidConstraintModelTpl<S1,O1>>,ConstraintModelAllocator> & contact_models,
+                   std::vector<Holder<RigidConstraintDataTpl<S1,O1>>,ConstraintDataAllocator> & contact_datas,
                    const Eigen::MatrixBase<VectorLike> & mus);
       
       ///
