@@ -43,18 +43,21 @@ namespace pinocchio
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC, class ConstraintModelAllocator, class ConstraintDataAllocator, class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeImp>
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC,
+           template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator,
+           class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeImp>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
   computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data,
        const Eigen::MatrixBase<VectorLikeC> & c_ref,
-       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
-       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
+       const std::vector<Holder<const RigidConstraintModelTpl<Scalar,Options>>,ConstraintModelAllocator> & contact_models,
+       std::vector<Holder<RigidConstraintDataTpl<Scalar,Options>>,ConstraintDataAllocator> & contact_datas,
        const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
        const Eigen::MatrixBase<VectorLikeR> & R,
        // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
-       const boost::optional<VectorLikeImp > &impulse_guess= boost::none){
+       const boost::optional<VectorLikeImp > &impulse_guess= boost::none)
+  {
     using MatrixXs =  Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options>;
     using VectorXs = Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options>;
     using Vector3 =  Eigen::Matrix<Scalar,3,1,Options>;
@@ -125,6 +128,54 @@ namespace pinocchio
     return data.impulse_c;
   }
 
+  ///
+  /// \brief Compute the contact impulses given a target velocity of contact points.
+  ///
+  /// \tparam JointCollection Collection of Joint types.
+  /// \tparam ConfigVectorType Type of the joint configuration vector.
+  /// \tparam TangentVectorType1 Type of the joint velocity vector.
+  /// \tparam TangentVectorType2 Type of the joint acceleration vector.
+  ///
+  /// \param[in] model The model structure of the rigid body system.
+  /// \param[in] data The data structure of the rigid body system.
+  /// \param[in] c_ref The contact point velocity
+  /// \param[in] contact_models The list of contact models.
+  /// \param[in] contact_datas The list of contact_datas.
+  /// \param[in] cones list of friction cones.
+  /// \param[in] R vector representing the diagonal of the compliance matrix.
+  /// \param[in] constraint_correction vector representing the constraint correction.
+  /// \param[in] settings The settings for the proximal algorithm.
+  /// \param[in] impulse_guess initial guess for the contact impulses.
+  ///
+  /// \return The desired joint torques stored in data.tau.
+  ///
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC, class ConstraintModelAllocator, class ConstraintDataAllocator,
+           class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeImp>
+  const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
+  computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+       DataTpl<Scalar,Options,JointCollectionTpl> & data,
+       const Eigen::MatrixBase<VectorLikeC> & c_ref,
+       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
+       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
+       const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
+       const Eigen::MatrixBase<VectorLikeR> & R,
+       // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
+       ProximalSettingsTpl<Scalar> & settings,
+       const boost::optional<VectorLikeImp > &impulse_guess= boost::none)
+  {
+      typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar,Options>> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(contact_models.cbegin(),contact_models.cend());
+
+      typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar,Options>> WrappedConstraintDataType;
+      typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
+
+      WrappedConstraintDataVector wrapped_constraint_datas(contact_datas.begin(),contact_datas.end());
+
+      return computeContactImpulses(model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, cones, R, settings, impulse_guess);
+  }
+
   
   ///
   /// \brief The Contact Inverse Dynamics algorithm. It computes the inverse dynamics in the presence of contacts, aka the joint torques according to the current state of the system and the desired joint accelerations.
@@ -150,7 +201,9 @@ namespace pinocchio
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
-    template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2, class ConstraintModelAllocator, class ConstraintDataAllocator, class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeLam>
+    template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2,
+             template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator,
+             class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeLam>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data, 
@@ -158,14 +211,14 @@ namespace pinocchio
        const Eigen::MatrixBase<TangentVectorType1> & v,
        const Eigen::MatrixBase<TangentVectorType2> & a,
        Scalar dt,
-       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
-       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
+       const std::vector<Holder<const RigidConstraintModelTpl<Scalar,Options>>,ConstraintModelAllocator> & contact_models,
+       std::vector<Holder<RigidConstraintDataTpl<Scalar,Options>>,ConstraintDataAllocator> & contact_datas,
        const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
        const Eigen::MatrixBase<VectorLikeR> & R,
        const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
-       const boost::optional<VectorLikeLam> &lambda_guess= boost::none){
-
+       const boost::optional<VectorLikeLam> &lambda_guess= boost::none)
+  {
     typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> MatrixXs;
     typedef Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options> VectorXs;
     typedef ForceTpl<Scalar,Options> Force;
@@ -206,6 +259,61 @@ namespace pinocchio
     }
     rnea(model, data, q, v, a, fext);
     return data.tau;
+  }
+
+  ///
+  /// \brief The Contact Inverse Dynamics algorithm. It computes the inverse dynamics in the presence of contacts, aka the joint torques according to the current state of the system and the desired joint accelerations.
+  ///
+  /// \tparam JointCollection Collection of Joint types.
+  /// \tparam ConfigVectorType Type of the joint configuration vector.
+  /// \tparam TangentVectorType1 Type of the joint velocity vector.
+  /// \tparam TangentVectorType2 Type of the joint acceleration vector.
+  ///
+  /// \param[in] model The model structure of the rigid body system.
+  /// \param[in] data The data structure of the rigid body system.
+  /// \param[in] q The joint configuration vector (dim model.nq).
+  /// \param[in] v The joint velocity vector (dim model.nv).
+  /// \param[in] a The joint acceleration vector (dim model.nv).
+  /// \param[in] dt The time step.
+  /// \param[in] contact_models The list of contact models.
+  /// \param[in] contact_datas The list of contact_datas.
+  /// \param[in] cones list of friction cones.
+  /// \param[in] R vector representing the diagonal of the compliance matrix.
+  /// \param[in] constraint_correction vector representing the constraint correction.
+  /// \param[in] settings The settings for the proximal algorithm.
+  /// \param[in] lambda_guess initial guess for the contact forces.
+  ///
+  /// \return The desired joint torques stored in data.tau.
+  ///
+    template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2,
+             class ConstraintModelAllocator, class ConstraintDataAllocator, class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeGamma,typename VectorLikeLam>
+  const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
+  contactInverseDynamics(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+       DataTpl<Scalar,Options,JointCollectionTpl> & data,
+       const Eigen::MatrixBase<ConfigVectorType> & q,
+       const Eigen::MatrixBase<TangentVectorType1> & v,
+       const Eigen::MatrixBase<TangentVectorType2> & a,
+       Scalar dt,
+       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
+       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & contact_datas,
+       const std::vector<CoulombFrictionConeTpl<Scalar>,CoulombFrictionConelAllocator> & cones,
+       const Eigen::MatrixBase<VectorLikeR> & R,
+       const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
+       ProximalSettingsTpl<Scalar> & settings,
+       const boost::optional<VectorLikeLam> &lambda_guess= boost::none)
+  {
+
+      typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar,Options>> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(contact_models.cbegin(),contact_models.cend());
+
+      typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar,Options>> WrappedConstraintDataType;
+      typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
+
+      WrappedConstraintDataVector wrapped_constraint_datas(contact_datas.begin(),contact_datas.end());
+
+      return contactInverseDynamics(model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas, cones, R, constraint_correction, settings, lambda_guess);
   }
   
 
