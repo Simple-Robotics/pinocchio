@@ -270,7 +270,7 @@ namespace pinocchio
     , is_initialized(false)
     , mu_prox(mu_prox)
     , tau(tau)
-    , rho(Scalar(-1))
+    , rho(10.)
     , rho_power(rho_power)
     , rho_power_factor(rho_power_factor)
     , linear_update_rule_factor(linear_update_rule_factor)
