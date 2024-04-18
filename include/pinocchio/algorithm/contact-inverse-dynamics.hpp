@@ -58,11 +58,11 @@ namespace pinocchio
        ProximalSettingsTpl<Scalar> & settings,
        const boost::optional<VectorLikeImp > &impulse_guess= boost::none)
   {
-    using MatrixXs =  Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options>;
+    PINOCCHIO_UNUSED_VARIABLE(model);
     using VectorXs = Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options>;
     using Vector3 =  Eigen::Matrix<Scalar,3,1,Options>;
 
-    const std::size_t problem_size  = R.size();
+    const Eigen::Index problem_size  = R.size();
     const std::size_t n_contacts = cones.size();
     // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_contacts);
@@ -81,7 +81,6 @@ namespace pinocchio
       data.impulse_c.setZero();
     }
     Scalar impulse_c_prev_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
-    Scalar complementarity, dual_feasibility;
     bool abs_prec_reached = false, rel_prec_reached = false;
     settings.iter = 1;
     for(; settings.iter <= settings.max_iter; ++settings.iter)
@@ -90,7 +89,7 @@ namespace pinocchio
       settings.relative_residual = Scalar(0);
       for(std::size_t cone_id = 0; cone_id < n_contacts; ++cone_id)
       {
-        const Eigen::DenseIndex row_id = 3*cone_id;
+        const auto row_id = (Eigen::Index)(3*cone_id);
         const CoulombFrictionCone & cone = cones[cone_id];
         Vector3 impulse_c_prev = data.impulse_c.template segment<3>(row_id);
         auto impulse_segment = data.impulse_c.template segment<3>(row_id);
@@ -225,9 +224,9 @@ namespace pinocchio
     typedef RigidConstraintDataTpl<Scalar,Options> RigidConstraintData;
 
 
-    const std::size_t problem_size  = R.size();
+    const Eigen::Index problem_size  = R.size();
     const std::size_t n_contacts = cones.size();
-    MatrixXs J = MatrixXs::Zero(problem_size,model.nv); // TODO: malloc
+    MatrixXs J = MatrixXs::Zero(problem_size, model.nv); // TODO: malloc
     getConstraintsJacobian(model, data, contact_models, contact_datas, J);
     VectorXs v_ref, c_ref, tau_c;
     v_ref = v + dt*a;
@@ -242,13 +241,13 @@ namespace pinocchio
     computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, settings, impulse_guess);
     // computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
     data.lambda_c = data.impulse_c/dt;
-    container::aligned_vector<Force> fext(model.njoints);
-    for(std::size_t i = 0; i<model.njoints; i++){
+    container::aligned_vector<Force> fext((std::size_t)(model.njoints));
+    for(std::size_t i = 0; i < (std::size_t)(model.njoints); i++){
       fext[i] = Force::Zero();
     }
-    for(std::size_t i = 0; i<n_contacts; i++){
+    for(std::size_t i = 0; i < n_contacts; i++){
       const RigidConstraintModel & cmodel = contact_models[i];
-      const Eigen::DenseIndex row_id = 3*i;
+      const auto row_id = (Eigen::Index)(3*i);
       auto lambda_segment = data.lambda_c.template segment<3>(row_id);
       typename RigidConstraintData::Matrix6 actInv_transpose1 = cmodel.joint1_placement.toActionMatrixInverse();
       actInv_transpose1.transposeInPlace();
