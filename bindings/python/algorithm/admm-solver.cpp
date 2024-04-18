@@ -106,8 +106,8 @@ namespace python
     
     bp::enum_< ::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
       .value("SPECTRAL",::pinocchio::ADMMUpdateRule::SPECTRAL)
-      .value("LINEAR",::pinocchio::ADMMUpdateRule::SPECTRAL)
-//      .export_values()
+      .value("LINEAR",::pinocchio::ADMMUpdateRule::LINEAR)
+     // .export_values()
     ;
     
     bp::class_<Solver> cl("ADMMContactSolver",
