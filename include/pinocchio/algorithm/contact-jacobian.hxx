@@ -141,11 +141,11 @@ namespace pinocchio
     
   }
 
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename DynamicMatrixLike, class ConstraintModelAllocator, class ConstraintDataAllocator>
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, template<typename T> class Holder, typename DynamicMatrixLike, class ConstraintModelAllocator, class ConstraintDataAllocator>
   void getConstraintsJacobian(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
                               const DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                              const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
-                              std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                              const std::vector<Holder<const RigidConstraintModelTpl<Scalar,Options>>,ConstraintModelAllocator> & constraint_models,
+                              std::vector<Holder<RigidConstraintDataTpl<Scalar,Options>>,ConstraintDataAllocator> & constraint_datas,
                               const Eigen::MatrixBase<DynamicMatrixLike> & J_)
   {
     typedef RigidConstraintModelTpl<Scalar,Options> ContraintModel;
@@ -166,6 +166,26 @@ namespace pinocchio
       
       row_id += cmodel.size();
     }
+  }
+
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename DynamicMatrixLike, class ConstraintModelAllocator, class ConstraintDataAllocator>
+  void getConstraintsJacobian(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                              const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                              const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                              std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                              const Eigen::MatrixBase<DynamicMatrixLike> & J_)
+  {
+    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar,Options>> WrappedConstraintModelType;
+    typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+    WrappedConstraintModelVector wrapped_constraint_models(constraint_models.cbegin(), constraint_models.cend());
+
+    typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar,Options>> WrappedConstraintDataType;
+    typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
+
+    WrappedConstraintDataVector wrapped_constraint_datas(constraint_datas.begin(), constraint_datas.end());
+
+    getConstraintsJacobian(model, data, wrapped_constraint_models, wrapped_constraint_datas, J_);
   }
 
 } // namespace pinocchio
