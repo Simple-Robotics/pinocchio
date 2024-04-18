@@ -42,23 +42,25 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(R.size(),problem_size);
 //    PINOCCHIO_CHECK_INPUT_ARGUMENT(math::max(R.maxCoeff(),mu_prox) >= 0,"mu_prox and mu_R cannot be both equal to zero.");
 
-    if(compute_largest_eigen_values)
-    {
-//      const Scalar L = delassus.computeLargestEigenValue(20); // Largest eigen_value estimate.
-      power_iteration_algo.run(delassus);
-    }
-    const Scalar L = power_iteration_algo.largest_eigen_value;
-//    const Scalar L = delassus.computeLargestEigenValue(20);
-    const Scalar m = mu_prox + mu_R;
-    
+    Scalar L, m, rho;
     ADMMUpdateRuleContainer admm_update_rule_container;
     switch(admm_update_rule)
     {
       case(ADMMUpdateRule::SPECTRAL):
+        if(compute_largest_eigen_values)
+        {
+            //      const Scalar L = delassus.computeLargestEigenValue(20); // Largest eigen_value estimate.
+          power_iteration_algo.run(delassus);
+        }
+          //    const Scalar L = delassus.computeLargestEigenValue(20);
+        m = mu_prox + mu_R;
+        L = power_iteration_algo.largest_eigen_value;
         admm_update_rule_container.spectral_rule = ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
+        rho = ADMMSpectralUpdateRule::computeRho(L,m,rho_power);
         break;
       case(ADMMUpdateRule::LINEAR):
         admm_update_rule_container.linear_rule = ADMMLinearUpdateRule(ratio_primal_dual, linear_update_rule_factor);
+        rho = this->rho;
         break;
     }
 //    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
@@ -72,7 +74,6 @@ namespace pinocchio
 
 //    std::cout << std::setprecision(12);
 
-    Scalar rho = ADMMSpectralUpdateRule::computeRho(L,m,rho_power);
 //    if(!is_initialized)
 //    {
 //      rho = computeRho(L,m,rho_power);
