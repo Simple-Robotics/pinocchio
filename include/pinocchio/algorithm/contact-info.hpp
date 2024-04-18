@@ -757,15 +757,31 @@ namespace pinocchio
     
   };
 
-  template<typename Scalar, int Options, class Allocator>
-  size_t getTotalConstraintSize(const std::vector< RigidConstraintModelTpl<Scalar,Options>, Allocator> & contact_models)
+  ///
+  /// \brief Computes the sum of the sizes of the constraints contained in the input `contact_models` vector.
+  template<typename Scalar, int Options, template<typename T> class Holder, class Allocator>
+  size_t getTotalConstraintSize(const std::vector<Holder<const RigidConstraintModelTpl<Scalar,Options>>, Allocator> & contact_models)
   {
-    typedef std::vector< RigidConstraintModelTpl<Scalar,Options>, Allocator> VectorType;
     size_t total_size = 0;
-    for(typename VectorType::const_iterator it = contact_models.begin(); it != contact_models.end(); ++it)
-      total_size += size_t(it->size());
+    for(size_t i = 0; i < contact_models.size(); ++i) {
+      const RigidConstraintModel & contact_model = contact_models[i];
+      total_size += size_t(contact_model.size());
+    }
     
     return total_size;
+  }
+
+  ///
+  /// \brief Computes the sum of the sizes of the constraints contained in the input `contact_models` vector.
+  template<typename Scalar, int Options, class Allocator>
+  size_t getTotalConstraintSize(const std::vector<RigidConstraintModelTpl<Scalar,Options>, Allocator> & contact_models)
+  {
+    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar,Options>> WrappedConstraintModelType;
+    typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+    WrappedConstraintModelVector wrapped_constraint_models(contact_models.cbegin(), contact_models.cend());
+
+    return getTotalConstraintSize(wrapped_constraint_models);
   }
 
   ///
