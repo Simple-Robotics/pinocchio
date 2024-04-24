@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_multibody_fwd_hpp__
@@ -44,6 +44,13 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     LOCAL = 1, ///<  The LOCAL frame convention corresponds to the frame directly attached to the moving part (Joint, Frame, etc.) where the coordinates basis matches the local coordinates system associated with the moving part. It also called the BODY representation in the litterature.
     LOCAL_WORLD_ALIGNED = 2 ///<  The LOCAL_WORLD_ALIGNED frame convention corresponds to the frame centered on the moving part (Joint, Frame, etc.) but with axes aligned with the frame of the Universe. This a MIXED representation between the LOCAL and the WORLD conventions.
   };
+  
+  template<ReferenceFrame val>
+  struct ReferenceFrameTag {};
+  
+  using WorldFrame = ReferenceFrameTag<WORLD>;
+  using LocalFrame = ReferenceFrameTag<LOCAL>;
+  using LocalWorldAlignedFrame = ReferenceFrameTag<LOCAL_WORLD_ALIGNED>;
 
   ///
   /// \brief List of Kinematics Level supported by Pinocchio.
