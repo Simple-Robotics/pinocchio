@@ -14,6 +14,7 @@
 #include "pinocchio/algorithm/rnea.hpp"
 #include <Eigen/src/Core/util/Meta.h>
 #include <boost/optional/optional.hpp>
+#include <cstdlib>
 #include <pinocchio/algorithm/contact-cholesky.hpp>
 #include <pinocchio/algorithm/contact-jacobian.hpp>
 #include "pinocchio/algorithm/proximal.hpp"
@@ -103,7 +104,7 @@ namespace pinocchio
         impulse_segment = cone.weightedProject(impulse_segment, R_prox_segment);
         // evaluate convergence criteria
         Scalar contact_complementarity = cone.computeConicComplementarity(sigma_segment + desaxce_segment, impulse_segment);
-        Scalar dual_feasibility = math::min(0., sigma_segment(2)) ; //proxy of dual feasibility
+        Scalar dual_feasibility = std::abs(math::min(0., sigma_segment(2))) ; //proxy of dual feasibility
         settings.absolute_residual = math::max(settings.absolute_residual,math::max(contact_complementarity, dual_feasibility));
         Vector3 dimpulse_c = impulse_segment - impulse_c_prev;
         Scalar proximal_metric = dimpulse_c.template lpNorm<Eigen::Infinity>();
