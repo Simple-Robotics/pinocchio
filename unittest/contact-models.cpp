@@ -83,24 +83,43 @@ BOOST_AUTO_TEST_CASE(contact_models)
 
 void check_A1_and_A2(const Model & model, const Data & data, const RigidConstraintModel & cmodel, RigidConstraintData & cdata)
 {
-  const RigidConstraintModel::Matrix36 A1 = cmodel.getA1(cdata);
-  const RigidConstraintModel::Matrix36 A1_ref = cdata.oMc1.toActionMatrixInverse().topRows<3>();
+  const RigidConstraintModel::Matrix36 A1_world = cmodel.getA1(cdata,WorldFrame());
+  const RigidConstraintModel::Matrix36 A1_world_ref = cdata.oMc1.toActionMatrixInverse().topRows<3>();
 
-  BOOST_CHECK(A1.isApprox(A1_ref));
+  BOOST_CHECK(A1_world.isApprox(A1_world_ref));
 
-  const RigidConstraintModel::Matrix36 A2 = cmodel.getA2(cdata);
-  const RigidConstraintModel::Matrix36 A2_ref = -cdata.c1Mc2.rotation() * cdata.oMc2.toActionMatrixInverse().topRows<3>();
+  const RigidConstraintModel::Matrix36 A2_world = cmodel.getA2(cdata,WorldFrame());
+  const RigidConstraintModel::Matrix36 A2_world_ref = -cdata.c1Mc2.rotation() * cdata.oMc2.toActionMatrixInverse().topRows<3>();
 
-  BOOST_CHECK(A2.isApprox(A2_ref));
+  BOOST_CHECK(A2_world.isApprox(A2_world_ref));
+  
+  const RigidConstraintModel::Matrix36 A1_local = cmodel.getA1(cdata,LocalFrame());
+  const RigidConstraintModel::Matrix36 A1_local_ref = cmodel.joint1_placement.toActionMatrixInverse().topRows<3>();
+  
+  BOOST_CHECK(A1_local.isApprox(A1_local_ref));
 
-  // Check Jacobian
+  const RigidConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata,LocalFrame());
+  const RigidConstraintModel::Matrix36 A2_local_ref = -cdata.c1Mc2.rotation() * cmodel.joint2_placement.toActionMatrixInverse().topRows<3>();
+  
+  BOOST_CHECK(A2_local.isApprox(A2_local_ref));
+  
+  // Check Jacobians
   Data::MatrixXs J_ref(3,model.nv); J_ref.setZero();
   getConstraintJacobian(model,data,cmodel,cdata, J_ref);
-  const Data::Matrix6x J1 = getJointJacobian(model, data, cmodel.joint1_id, WORLD);
-  const Data::Matrix6x J2 = getJointJacobian(model, data, cmodel.joint2_id, WORLD);
-  const Data::Matrix3x J = A1 * J1 + A2 * J2;
+  
+  // World
+  const Data::Matrix6x J1_world = getJointJacobian(model, data, cmodel.joint1_id, WORLD);
+  const Data::Matrix6x J2_world = getJointJacobian(model, data, cmodel.joint2_id, WORLD);
+  const Data::Matrix3x J_world = A1_world * J1_world + A2_world * J2_world;
 
-  BOOST_CHECK(J.isApprox(J_ref));
+  BOOST_CHECK(J_world.isApprox(J_ref));
+  
+  // Local
+  const Data::Matrix6x J1_local = getJointJacobian(model, data, cmodel.joint1_id, LOCAL);
+  const Data::Matrix6x J2_local = getJointJacobian(model, data, cmodel.joint2_id, LOCAL);
+  const Data::Matrix3x J_local = A1_local * J1_local + A2_local * J2_local;
+  
+  BOOST_CHECK(J_local.isApprox(J_ref));
 
   // Check Jacobian matrix product
   const Eigen::DenseIndex m = 40;

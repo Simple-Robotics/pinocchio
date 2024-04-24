@@ -413,47 +413,90 @@ namespace pinocchio
 
     /// \brief Returns the constraint projector associated with joint 1.
     /// This matrix transforms a spatial velocity expressed at the origin to the first component of the constraint associated with joint 1.
-    Matrix36 getA1(const RigidConstraintDataTpl<Scalar,Options> & cdata) const
+    template<ReferenceFrame rf>
+    Matrix36 getA1(const RigidConstraintDataTpl<Scalar,Options> & cdata,
+                   ReferenceFrameTag<rf>) const
     {
       Matrix36 res;
-      const SE3 & oMl = cdata.oMc1;
       typedef typename SE3::Vector3 Vector3;
 
-#define PINOCCHIO_INTERNAL_COMPUTATION(axis_id,v3_in,res) \
+      if(std::is_same<ReferenceFrameTag<rf>,WorldFrame>::value)
+      {
+#define INTERNAL_LOOP(axis_id,v3_in,res) \
   CartesianAxis<axis_id>::cross(v3_in,v_tmp); \
-  res.col(axis_id).noalias() = oMl.rotation().transpose() * v_tmp;
+  res.col(axis_id).noalias() = oM1.rotation().transpose() * v_tmp;
+        
+        const SE3 & oM1 = cdata.oMc1;
+        Vector3 v_tmp;
+        res.template leftCols<3>() = oM1.rotation().transpose();
+        INTERNAL_LOOP(0,oM1.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(1,oM1.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(2,oM1.translation(),res.template rightCols<3>());
+        
+#undef INTERNAL_LOOP
+      }
+      else if(std::is_same<ReferenceFrameTag<rf>,LocalFrame>::value)
+      {
+#define INTERNAL_LOOP(axis_id,v3_in,res) \
+  CartesianAxis<axis_id>::cross(v3_in,v_tmp); \
+  res.col(axis_id).noalias() = M1.rotation().transpose() * v_tmp;
+        
+        const SE3 & M1 = this->joint1_placement;
+        Vector3 v_tmp;
+        res.template leftCols<3>() = M1.rotation().transpose();
+        INTERNAL_LOOP(0,M1.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(1,M1.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(2,M1.translation(),res.template rightCols<3>());
 
-      res.template leftCols<3>() = oMl.rotation().transpose();
-      Vector3 v_tmp;
-      PINOCCHIO_INTERNAL_COMPUTATION(0,oMl.translation(),res.template rightCols<3>());
-      PINOCCHIO_INTERNAL_COMPUTATION(1,oMl.translation(),res.template rightCols<3>());
-      PINOCCHIO_INTERNAL_COMPUTATION(2,oMl.translation(),res.template rightCols<3>());
+#undef INTERNAL_LOOP
 
-#undef PINOCCHIO_INTERNAL_COMPUTATION
+      }
 
       return res;
     }
 
     /// \brief Returns the constraint projector associated with joint 2.
     /// This matrix transforms a spatial velocity expressed at the origin to the first component of the constraint associated with joint 2.
-    Matrix36 getA2(const RigidConstraintDataTpl<Scalar,Options> & cdata) const
+    template<ReferenceFrame rf>
+    Matrix36 getA2(const RigidConstraintDataTpl<Scalar,Options> & cdata,
+                   ReferenceFrameTag<rf>) const
     {
       Matrix36 res;
-      const SE3 & oM1 = cdata.oMc1;
-      const SE3 & oM2 = cdata.oMc2;
       typedef typename SE3::Vector3 Vector3;
 
-#define PINOCCHIO_INTERNAL_COMPUTATION(axis_id,v3_in,res) \
+      if(std::is_same<ReferenceFrameTag<rf>,WorldFrame>::value)
+      {
+#define INTERNAL_LOOP(axis_id,v3_in,res) \
   CartesianAxis<axis_id>::cross(v3_in,v_tmp); \
   res.col(axis_id).noalias() = oM1.rotation().transpose() * v_tmp;
-
-      res.template leftCols<3>() = -oM1.rotation().transpose();
-      Vector3 v_tmp;
-      PINOCCHIO_INTERNAL_COMPUTATION(0,-oM2.translation(),res.template rightCols<3>());
-      PINOCCHIO_INTERNAL_COMPUTATION(1,-oM2.translation(),res.template rightCols<3>());
-      PINOCCHIO_INTERNAL_COMPUTATION(2,-oM2.translation(),res.template rightCols<3>());
-
-#undef PINOCCHIO_INTERNAL_COMPUTATION
+        
+        const SE3 & oM1 = cdata.oMc1;
+        const SE3 & oM2 = cdata.oMc2;
+        res.template leftCols<3>() = -oM1.rotation().transpose();
+        Vector3 v_tmp;
+        INTERNAL_LOOP(0,-oM2.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(1,-oM2.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(2,-oM2.translation(),res.template rightCols<3>());
+        
+#undef INTERNAL_LOOP
+      }
+      else if(std::is_same<ReferenceFrameTag<rf>,LocalFrame>::value)
+      {
+        const SE3 & j2Mc2 = this->joint2_placement;
+        const SE3 & c1Mc2 = cdata.c1Mc2;
+        const typename SE3::Matrix3 c1Rj2 = c1Mc2.rotation() * j2Mc2.rotation().transpose();
+        res.template leftCols<3>() = -c1Rj2;
+        Vector3 v_tmp;
+#define INTERNAL_LOOP(axis_id,v3_in,res) \
+  CartesianAxis<axis_id>::cross(v3_in,v_tmp); \
+  res.col(axis_id).noalias() = -c1Rj2 * v_tmp;
+        
+        INTERNAL_LOOP(0,j2Mc2.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(1,j2Mc2.translation(),res.template rightCols<3>());
+        INTERNAL_LOOP(2,j2Mc2.translation(),res.template rightCols<3>());
+        
+#undef INTERNAL_LOOP
+      }
 
       return res;
     }
@@ -480,8 +523,8 @@ namespace pinocchio
 //      complexity_strategy_1 = 6 * res.cols() * 36 + constraint_dim * 36 * res.cols(),
 //      complexity_strategy_2 = 36 * constraint_dim * 6 + constraint_dim * 36 * res.cols();
 
-      const Matrix36 A1 = getA1(cdata);
-      const Matrix36 A2 = getA2(cdata);
+      const Matrix36 A1 = getA1(cdata,WorldFrame());
+      const Matrix36 A2 = getA2(cdata,WorldFrame());
       for(Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if(!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
