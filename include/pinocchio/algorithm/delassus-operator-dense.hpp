@@ -24,6 +24,8 @@ template<typename _Scalar, int _Options>
 struct DelassusOperatorDenseTpl
 : DelassusOperatorBase< DelassusOperatorDenseTpl<_Scalar,_Options> >
 {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
   typedef _Scalar Scalar;
   typedef DelassusOperatorDenseTpl Self;
   enum {
