@@ -19,7 +19,7 @@ namespace pinocchio
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     enum { Options = context::Options };
 
-    static ConstRefVectorXs computeContactImpulses_wrapper(const ModelTpl<Scalar,Options,JointCollectionDefaultTpl> & model,
+    static ConstRefVectorXs computeContactForces_wrapper(const ModelTpl<Scalar,Options,JointCollectionDefaultTpl> & model,
                                 DataTpl<Scalar,Options,JointCollectionDefaultTpl> & data,
                                 const ConstRefVectorXs & c_ref,
                                 const context::RigidConstraintModelVector & contact_models,
@@ -30,7 +30,7 @@ namespace pinocchio
                                 ProximalSettingsTpl<Scalar> & settings,
                                 const boost::optional<ConstRefVectorXs> &lambda_guess = boost::none)
     {
-    return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
+    return computeContactForces(model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
     // return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, lambda_guess);
     }
 
@@ -56,7 +56,7 @@ namespace pinocchio
     {
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       bp::def("computeContactForces",
-              computeContactImpulses_wrapper,
+              computeContactForces_wrapper,
               (bp::arg("model"),"data","c_ref", "contact_models", "contact_datas", "cones","R",
               bp::arg("settings"),
               bp::arg("lambda_guess") = boost::none),

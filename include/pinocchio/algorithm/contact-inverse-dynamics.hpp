@@ -25,7 +25,7 @@ namespace pinocchio
 {   
 
   ///
-  /// \brief Compute the contact impulses given a target velocity of contact points.
+  /// \brief Compute the contact forces given a target velocity of contact points.
   ///
   /// \tparam JointCollection Collection of Joint types.
   /// \tparam ConfigVectorType Type of the joint configuration vector.
@@ -41,7 +41,7 @@ namespace pinocchio
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] impulse_guess initial guess for the contact impulses.
+  /// \param[in] lambda_guess initial guess for the contact forces.
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
@@ -49,7 +49,7 @@ namespace pinocchio
            template<typename T> class Holder, class ConstraintModelAllocator, class ConstraintDataAllocator,
            class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeImp>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
-  computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+  computeContactForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data,
        const Eigen::MatrixBase<VectorLikeC> & c_ref,
        const std::vector<Holder<const RigidConstraintModelTpl<Scalar,Options>>,ConstraintModelAllocator> & contact_models,
@@ -58,7 +58,7 @@ namespace pinocchio
        const Eigen::MatrixBase<VectorLikeR> & R,
        // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
-       const boost::optional<VectorLikeImp > &impulse_guess= boost::none)
+       const boost::optional<VectorLikeImp > &lambda_guess= boost::none)
   {
     PINOCCHIO_UNUSED_VARIABLE(model);
     using VectorXs = Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options>;
@@ -73,16 +73,16 @@ namespace pinocchio
                                    "mu has to be strictly positive");
     VectorXs R_prox; // TODO: malloc
     R_prox = R + VectorXs::Constant(problem_size,settings.mu);
-    if(impulse_guess)
+    if(lambda_guess)
     {
-      data.impulse_c = impulse_guess.get();
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(data.impulse_c.size(), problem_size);
+      data.lambda_c = lambda_guess.get();
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(data.lambda_c.size(), problem_size);
     }
     else
     {
-      data.impulse_c.setZero();
+      data.lambda_c.setZero();
     }
-    Scalar impulse_c_prev_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
+    Scalar lambda_c_prev_norm_inf = data.lambda_c.template lpNorm<Eigen::Infinity>();
     bool abs_prec_reached = false, rel_prec_reached = false;
     settings.iter = 1;
     for(; settings.iter <= settings.max_iter; ++settings.iter)
@@ -93,32 +93,32 @@ namespace pinocchio
       {
         const auto row_id = (Eigen::Index)(3*cone_id);
         const CoulombFrictionCone & cone = cones[cone_id];
-        Vector3 impulse_c_prev = data.impulse_c.template segment<3>(row_id);
-        auto impulse_segment = data.impulse_c.template segment<3>(row_id);
+        Vector3 lambda_c_prev = data.lambda_c.template segment<3>(row_id);
+        auto lambda_segment = data.lambda_c.template segment<3>(row_id);
         auto R_prox_segment = R_prox.template segment<3>(row_id);
         auto c_ref_segment = c_ref.template segment<3>(row_id);
-        Vector3 sigma_segment = c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix();
+        Vector3 sigma_segment = c_ref_segment + (R.template segment<3>(row_id).array()*lambda_segment.array()).matrix();
         Vector3 desaxce_segment = cone.computeNormalCorrection(sigma_segment);
         Vector3 c_cor_segment = c_ref_segment + desaxce_segment;
-        impulse_segment = -((c_cor_segment -settings.mu * impulse_c_prev).array()/R_prox_segment.array()).matrix();
-        impulse_segment = cone.weightedProject(impulse_segment, R_prox_segment);
+        lambda_segment = -((c_cor_segment -settings.mu * lambda_c_prev).array()/R_prox_segment.array()).matrix();
+        lambda_segment = cone.weightedProject(lambda_segment, R_prox_segment);
         // evaluate convergence criteria
-        Scalar contact_complementarity = cone.computeConicComplementarity(sigma_segment + desaxce_segment, impulse_segment);
+        Scalar contact_complementarity = cone.computeConicComplementarity(sigma_segment + desaxce_segment, lambda_segment);
         Scalar dual_feasibility = std::abs(math::min(0., sigma_segment(2))) ; //proxy of dual feasibility
         settings.absolute_residual = math::max(settings.absolute_residual,math::max(contact_complementarity, dual_feasibility));
-        Vector3 dimpulse_c = impulse_segment - impulse_c_prev;
-        Scalar proximal_metric = dimpulse_c.template lpNorm<Eigen::Infinity>();
+        Vector3 dlambda_c = lambda_segment - lambda_c_prev;
+        Scalar proximal_metric = dlambda_c.template lpNorm<Eigen::Infinity>();
         settings.relative_residual = math::max(settings.relative_residual,proximal_metric);
       }
       
-      const Scalar impulse_c_norm_inf = data.impulse_c.template lpNorm<Eigen::Infinity>();
+      const Scalar lambda_c_norm_inf = data.lambda_c.template lpNorm<Eigen::Infinity>();
 
       if(check_expression_if_real<Scalar,false>(settings.absolute_residual <= settings.absolute_accuracy))
         abs_prec_reached = true;
       else
         abs_prec_reached = false;
 
-      if(check_expression_if_real<Scalar,false>(settings.relative_residual <= settings.relative_accuracy * math::max(impulse_c_norm_inf,impulse_c_prev_norm_inf)))
+      if(check_expression_if_real<Scalar,false>(settings.relative_residual <= settings.relative_accuracy * math::max(lambda_c_norm_inf,lambda_c_prev_norm_inf)))
         rel_prec_reached = true;
       else
         rel_prec_reached = false;
@@ -126,13 +126,13 @@ namespace pinocchio
       if(abs_prec_reached || rel_prec_reached)
         break;
       
-      impulse_c_prev_norm_inf = impulse_c_norm_inf;
+      lambda_c_prev_norm_inf = lambda_c_norm_inf;
     }
-    return data.impulse_c;
+    return data.lambda_c;
   }
 
   ///
-  /// \brief Compute the contact impulses given a target velocity of contact points.
+  /// \brief Compute the contact forces given a target velocity of contact points.
   ///
   /// \tparam JointCollection Collection of Joint types.
   /// \tparam ConfigVectorType Type of the joint configuration vector.
@@ -148,14 +148,14 @@ namespace pinocchio
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] impulse_guess initial guess for the contact impulses.
+  /// \param[in] lambda_guess initial guess for the contact forces.
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename VectorLikeC, class ConstraintModelAllocator, class ConstraintDataAllocator,
            class CoulombFrictionConelAllocator, typename VectorLikeR, typename VectorLikeImp>
   const typename DataTpl<Scalar,Options,JointCollectionTpl>::TangentVectorType &
-  computeContactImpulses(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+  computeContactForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
        DataTpl<Scalar,Options,JointCollectionTpl> & data,
        const Eigen::MatrixBase<VectorLikeC> & c_ref,
        const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & contact_models,
@@ -164,7 +164,7 @@ namespace pinocchio
        const Eigen::MatrixBase<VectorLikeR> & R,
        // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
        ProximalSettingsTpl<Scalar> & settings,
-       const boost::optional<VectorLikeImp > &impulse_guess= boost::none)
+       const boost::optional<VectorLikeImp > &lambda_guess= boost::none)
   {
       typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar,Options>> WrappedConstraintModelType;
       typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
@@ -176,7 +176,7 @@ namespace pinocchio
 
       WrappedConstraintDataVector wrapped_constraint_datas(contact_datas.begin(),contact_datas.end());
 
-      return computeContactImpulses(model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, cones, R, settings, impulse_guess);
+      return computeContactForces(model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, cones, R, settings, lambda_guess);
   }
 
   
@@ -236,15 +236,8 @@ namespace pinocchio
     v_ref = v + dt*a;
     c_ref.noalias() = J* v_ref; //TODO should rather use the displacement
     c_ref += constraint_correction;
-    boost::optional<VectorXs> impulse_guess = boost::none;
-    if (lambda_guess){
-      data.impulse_c = lambda_guess.get();
-      data.impulse_c *= dt;
-      impulse_guess = boost::make_optional(data.impulse_c);
-    }
-    computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, settings, impulse_guess);
-    // computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R, constraint_correction, settings, impulse_guess);
-    data.lambda_c = data.impulse_c/dt;
+    c_ref /= dt; //we work with a formulation on forces
+    computeContactForces(model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
     container::aligned_vector<Force> fext((std::size_t)(model.njoints));
     for(std::size_t i = 0; i < (std::size_t)(model.njoints); i++){
       fext[i] = Force::Zero();
