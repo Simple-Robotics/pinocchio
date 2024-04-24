@@ -7,6 +7,7 @@
 
 #include "pinocchio/context.hpp"
 #include "pinocchio/context/generic.hpp"
+#include "pinocchio/math/fwd.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
@@ -95,13 +96,15 @@ namespace pinocchio
         auto impulse_segment = data.impulse_c.template segment<3>(row_id);
         auto R_prox_segment = R_prox.template segment<3>(row_id);
         auto c_ref_segment = c_ref.template segment<3>(row_id);
-        Vector3 desaxce_segment = cone.computeNormalCorrection(c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix());
+        Vector3 sigma_segment = c_ref_segment + (R.template segment<3>(row_id).array()*impulse_segment.array()).matrix();
+        Vector3 desaxce_segment = cone.computeNormalCorrection(sigma_segment);
         Vector3 c_cor_segment = c_ref_segment + desaxce_segment;
         impulse_segment = -((c_cor_segment -settings.mu * impulse_c_prev).array()/R_prox_segment.array()).matrix();
         impulse_segment = cone.weightedProject(impulse_segment, R_prox_segment);
         // evaluate convergence criteria
-        Scalar contact_complementarity = cone.computeContactComplementarity(c_cor_segment, impulse_segment);
-        settings.absolute_residual = math::max(settings.absolute_residual,contact_complementarity);
+        Scalar contact_complementarity = cone.computeConicComplementarity(sigma_segment + desaxce_segment, impulse_segment);
+        Scalar dual_feasibility = math::min(0., sigma_segment(2)) ; //proxy of dual feasibility
+        settings.absolute_residual = math::max(settings.absolute_residual,math::max(contact_complementarity, dual_feasibility));
         Vector3 dimpulse_c = impulse_segment - impulse_c_prev;
         Scalar proximal_metric = dimpulse_c.template lpNorm<Eigen::Infinity>();
         settings.relative_residual = math::max(settings.relative_residual,proximal_metric);
