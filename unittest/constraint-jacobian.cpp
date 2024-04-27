@@ -3,6 +3,7 @@
 //
 
 #include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
@@ -47,22 +48,33 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian_operations)
     
     const Eigen::DenseIndex m = Eigen::DenseIndex(getTotalConstraintSize(constraints_models));
     
-    Eigen::VectorXd res(model.nv), res_ref(model.nv);
+    Eigen::VectorXd res(model.nv);
     const Eigen::VectorXd rhs = Eigen::VectorXd::Random(m);
     
     evalConstraints(model,data,constraints_models,constraints_datas);
     evalConstraintJacobianTransposeProduct(model,data,constraints_models,constraints_datas,rhs,res);
     
     // Check Jacobian
-    Data::MatrixXs J_RF_LOCAL_sparse(3,model.nv); J_RF_LOCAL_sparse.setZero(); // TODO: change input type when all the API would be refactorized with CRTP on contact constraints
-    getConstraintJacobian(model,data,cm_RF_LOCAL,cd_RF_LOCAL,J_RF_LOCAL_sparse);
-    res_ref += J_RF_LOCAL_sparse.transpose() * rhs.segment<3>(0);
-
-    Data::MatrixXs J_LF_LOCAL_sparse(3,model.nv); J_LF_LOCAL_sparse.setZero(); // TODO: change input type when all the API would be refactorized with CRTP on contact constraints
-    getConstraintJacobian(model,data,cm_LF_LOCAL,cd_LF_LOCAL,J_LF_LOCAL_sparse);
-    res_ref += J_LF_LOCAL_sparse.transpose() * rhs.segment<3>(3);
-
-    BOOST_CHECK(res.isApprox(res_ref));
+    {
+      Eigen::VectorXd res_ref = Eigen::VectorXd::Zero(model.nv);
+      Data::MatrixXs J_RF_LOCAL_sparse(3,model.nv); J_RF_LOCAL_sparse.setZero(); // TODO: change input type when all the API would be refactorized with CRTP on contact constraints
+      getConstraintJacobian(model,data,cm_RF_LOCAL,cd_RF_LOCAL,J_RF_LOCAL_sparse);
+      res_ref += J_RF_LOCAL_sparse.transpose() * rhs.segment<3>(0);
+      
+      Data::MatrixXs J_LF_LOCAL_sparse(3,model.nv); J_LF_LOCAL_sparse.setZero(); // TODO: change input type when all the API would be refactorized with CRTP on contact constraints
+      getConstraintJacobian(model,data,cm_LF_LOCAL,cd_LF_LOCAL,J_LF_LOCAL_sparse);
+      res_ref += J_LF_LOCAL_sparse.transpose() * rhs.segment<3>(3);
+      
+      BOOST_CHECK(res.isApprox(res_ref));
+    }
+    
+    // Alternative way to compute the Jacobians
+    {
+      Eigen::MatrixXd J_ref(6,model.nv); J_ref.setZero();
+      getConstraintsJacobian(model, data_ref, constraints_models, constraints_datas_ref, J_ref);
+      const Eigen::VectorXd res_ref = J_ref.transpose() * rhs;
+      BOOST_CHECK(res.isApprox(res_ref));
+    }
   }
   
 }
