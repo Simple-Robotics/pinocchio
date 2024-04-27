@@ -80,6 +80,27 @@ namespace pinocchio
                               const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_model,
                               std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_data,
                               const Eigen::MatrixBase<DynamicMatrixLike> & J);
+  
+  
+    ///
+    /// \brief Evaluate the operation res = J.T * rhs
+    ///
+    /// \remarks This function assumes that the a computeJointJacobians has been called first or any algorithms that computes data.J and data.oMi.
+    ///
+    /// \param[in] model The model structure of the rigid body system.
+    /// \param[in] data The data structure of the rigid body system.
+    /// \param[in] constraint_models Vector of constraint models.
+    /// \param[in] constraint_datas Vector of constraint data.
+    /// \param[in] rhs Right-hand side term.
+    /// \param[out] res Results.
+    ///
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, typename RhsMatrixType, typename ResultMatrixType>
+  void evalConstraintJacobianTransposeProduct(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                              const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                              const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                              const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                              const Eigen::MatrixBase<RhsMatrixType> & rhs,
+                                              const Eigen::MatrixBase<ResultMatrixType> & res);
 
 } // namespace pinocchio
 

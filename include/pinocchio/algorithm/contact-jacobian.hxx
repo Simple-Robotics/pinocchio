@@ -206,6 +206,85 @@ namespace pinocchio
 
     getConstraintsJacobian(model, data, wrapped_constraint_models, wrapped_constraint_datas, J_);
   }
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ResultMatrixType>
+  struct EvalConstraintJacobianTransposeProductBackwardPass
+  : public fusion::JointUnaryVisitorBase< EvalConstraintJacobianTransposeProductBackwardPass<Scalar,Options,JointCollectionTpl,ResultMatrixType> >
+  {
+    typedef ModelTpl<Scalar,Options,JointCollectionTpl> Model;
+    typedef DataTpl<Scalar,Options,JointCollectionTpl> Data;
+    
+    typedef typename Data::Force Force;
+    typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
+    
+    typedef boost::fusion::vector<const Model &,
+    const Data &,
+    ForceVector &,
+    ResultMatrixType &
+    > ArgsType;
+    
+    template<typename JointModel>
+    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
+                     const pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+                     const Model & model,
+                     const Data & data,
+                     ForceVector & f,
+                     const Eigen::MatrixBase<ResultMatrixType> & res_)
+    {
+      typedef typename Model::JointIndex JointIndex;
+      
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+      
+      jmodel.jointVelocitySelector(res_.const_cast_derived()) = jdata.S().transpose()*f[i];
+      
+      if(parent>0) 
+        f[parent] += data.liMi[i].act(f[i]);
+    }
+    
+  }; // struct EvalConstraintJacobianTransposeProductBackwardPass
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, typename RhsMatrixType, typename ResultMatrixType>
+  void evalConstraintJacobianTransposeProduct(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                              const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                              const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                              const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                              const Eigen::MatrixBase<RhsMatrixType> & rhs,
+                                              const Eigen::MatrixBase<ResultMatrixType> & res_)
+  {
+    
+    const Eigen::DenseIndex constraint_size = Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    ResultMatrixType & res = res_.const_cast_derived();
+    
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(rhs.rows(), constraint_size);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res_.rows(), model.nv);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res_.cols(), rhs.cols());
+    
+    typedef DataTpl<Scalar,Options,JointCollectionTpl> Data;
+    typedef typename Data::Force Force;
+    typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
+    
+    // Temporary memory variable
+    // TODO(jcarpent): remove memory allocation here
+    ForceVector joint_forces(size_t(model.njoints),Force::Zero());
+    
+    for(size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
+    {
+      const RigidConstraintModel & cmodel = constraint_models[ee_id];
+      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      
+      const auto constraint_force = rhs.template middleRows<3>(Eigen::DenseIndex(ee_id*3));
+      cmodel.mapConstraintForceToJoints(model, data, cdata, constraint_force, joint_forces);
+    }
+    
+    res.setZero();
+    typedef EvalConstraintJacobianTransposeProductBackwardPass<Scalar,Options,JointCollectionTpl,ResultMatrixType> Pass;
+    for(JointIndex i=(JointIndex)model.njoints-1; i>0; --i)
+    {
+      typename Pass::ArgsType arg(model,data,joint_forces,res);
+      Pass::run(model.joints[i],data.joints[i],arg);
+    }
+  }
 
 } // namespace pinocchio
 
