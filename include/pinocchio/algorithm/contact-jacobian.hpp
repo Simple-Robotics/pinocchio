@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 INRIA
+// Copyright (c) 2021-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_jacobian_hpp__
@@ -9,6 +9,22 @@
 
 namespace pinocchio
 {
+  
+  ///
+  /// \brief Evaluates all the constraints by calling cmodel.calc().
+  ///
+  /// \remarks This function assumes that data is up-to-date.
+  ///
+  /// \param[in] model The model structure of the rigid body system.
+  /// \param[in] data The data structure of the rigid body system.
+  /// \param[in] constraint_models Vector of constraint models.
+  /// \param[in] constraint_datas Vector of constraint datas.
+  ///
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator>
+  void evalConstraints(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                       const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas);
 
   ///
   /// \brief Computes the kinematic Jacobian associatied to a given constraint model.

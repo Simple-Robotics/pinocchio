@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 INRIA
+// Copyright (c) 2021-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_jacobian_hxx__
@@ -10,6 +10,25 @@
 
 namespace pinocchio
 {
+  
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator>
+  void evalConstraints(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                       const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                       std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(),constraint_datas.size());
+    const size_t num_ee = constraint_models.size();
+    
+    for(size_t ee_id = 0; ee_id < num_ee; ++ee_id)
+    {
+      const RigidConstraintModel & cmodel = constraint_models[ee_id];
+      RigidConstraintData & cdata = constraint_datas[ee_id];
+      
+      cmodel.calc(model,data,cdata);
+    }
+  }
 
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename Matrix6or3Like>
   void getConstraintJacobian(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
