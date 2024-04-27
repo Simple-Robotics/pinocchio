@@ -29,6 +29,8 @@ namespace pinocchio
   ///
   /// \brief Computes the kinematic Jacobian associatied to a given constraint model.
   ///
+  /// \remarks This function assumes that the a computeJointJacobians has been called first or any algorithms that computes data.J and data.oMi.
+  ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
   /// \param[in] constraint_model Constraint model.
@@ -46,6 +48,8 @@ namespace pinocchio
   ///
   /// \brief Computes the kinematic Jacobian associatied to a given set of constraint models.
   ///
+  /// \remarks This function assumes that the a computeJointJacobians has been called first or any algorithms that computes data.J and data.oMi.
+  ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
   /// \param[in] constraint_models Vector of constraint models.
@@ -61,6 +65,8 @@ namespace pinocchio
 
   ///
   /// \brief Computes the kinematic Jacobian associatied to a given set of constraint models.
+  ///
+  /// \remarks This function assumes that the a computeJointJacobians has been called first or any algorithms that computes data.J and data.oMi.
   ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
