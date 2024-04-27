@@ -170,7 +170,7 @@ namespace pinocchio
     typedef RigidConstraintModelTpl<Scalar,Options> ContraintModel;
     typedef RigidConstraintDataTpl<Scalar,Options> ContraintData;
     
-    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
+    const Eigen::DenseIndex constraint_size = Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
     
