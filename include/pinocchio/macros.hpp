@@ -176,6 +176,14 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
   _PINOCCHIO_EXPAND(_PINOCCHIO_EXPAND(_PINOCCHIO_GET_OVERRIDE_FOR_CHECK_ARGUMENT_SIZE(__VA_ARGS__,_PINOCCHIO_CHECK_ARGUMENT_SIZE_3, \
   _PINOCCHIO_CHECK_ARGUMENT_SIZE_2, _PINOCCHIO_CHECK_ARGUMENT_SIZE_1))(__VA_ARGS__))
 
+/// \brief Macro to check whether two matrices have the same size.
+#define PINOCCHIO_CHECK_SAME_MATRIX_SIZE(mat1,mat2) \
+  if (mat1.rows() != mat2.rows() || mat1.cols() != mat2.cols() ) { \
+    std::ostringstream oss; \
+    oss << "wrong matrix size: expected (" << mat1.rows() << ", " << mat1.cols() << "), got (" << mat2.rows() << ", " << mat2.cols() << ")" << std::endl; \
+    PINOCCHIO_THROW(false, std::invalid_argument, oss.str()); \
+  }
+
 PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
 #endif // ifndef __pinocchio_macros_hpp__
