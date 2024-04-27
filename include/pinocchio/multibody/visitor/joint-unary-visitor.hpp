@@ -1,10 +1,11 @@
 //
-// Copyright (c) 2015-2023 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_multibody_visitor_joint_unary_visitor_hpp__
 #define __pinocchio_multibody_visitor_joint_unary_visitor_hpp__
 
+#include <type_traits>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
 
@@ -15,6 +16,22 @@ namespace pinocchio
 {
   namespace fusion
   {
+    
+    namespace helper
+    {
+      /// \brief Add constness to T2 if T1 is const
+      template<typename T1, typename T2>
+      struct add_const_if_const
+      {
+        typedef T2 type;
+      };
+      
+      template<typename T1, typename T2>
+      struct add_const_if_const<const T1, T2>
+      {
+        typedef const T2 type;
+      };
+    }
     
     ///
     /// \brief Base structure for \b Unary visitation of a JointModel.
@@ -30,7 +47,22 @@ namespace pinocchio
                             JointDataTpl<Scalar,Options,JointCollectionTpl> & jdata,
                             ArgsTmp args)
       {
-        InternalVisitorModelAndData<JointModelTpl<Scalar,Options,JointCollectionTpl>,ArgsTmp> visitor(jdata,args);
+        typedef JointModelTpl<Scalar,Options,JointCollectionTpl> JointModel;
+        typedef JointDataTpl<Scalar,Options,JointCollectionTpl> JointData;
+        
+        InternalVisitorModelAndData<JointModel,JointData,ArgsTmp> visitor(jdata,args);
+        return boost::apply_visitor(visitor,jmodel);
+      }
+      
+      template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ArgsTmp>
+      static ReturnType run(const JointModelTpl<Scalar,Options,JointCollectionTpl> & jmodel,
+                            const JointDataTpl<Scalar,Options,JointCollectionTpl> & jdata,
+                            ArgsTmp args)
+      {
+        typedef JointModelTpl<Scalar,Options,JointCollectionTpl> JointModel;
+        typedef JointDataTpl<Scalar,Options,JointCollectionTpl> JointData;
+        
+        InternalVisitorModelAndData<JointModel,const JointData,ArgsTmp> visitor(jdata,args);
         return boost::apply_visitor(visitor,jmodel);
       }
       
@@ -38,7 +70,21 @@ namespace pinocchio
       static ReturnType run(const JointModelTpl<Scalar,Options,JointCollectionTpl> & jmodel,
                             JointDataTpl<Scalar,Options,JointCollectionTpl> & jdata)
       {
-        InternalVisitorModelAndData<JointModelTpl<Scalar,Options,JointCollectionTpl>,NoArg> visitor(jdata);
+        typedef JointModelTpl<Scalar,Options,JointCollectionTpl> JointModel;
+        typedef JointDataTpl<Scalar,Options,JointCollectionTpl> JointData;
+        
+        InternalVisitorModelAndData<JointModel,JointData,NoArg> visitor(jdata);
+        return boost::apply_visitor(visitor,jmodel);
+      }
+      
+      template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl>
+      static ReturnType run(const JointModelTpl<Scalar,Options,JointCollectionTpl> & jmodel,
+                            const JointDataTpl<Scalar,Options,JointCollectionTpl> & jdata)
+      {
+        typedef JointModelTpl<Scalar,Options,JointCollectionTpl> JointModel;
+        typedef JointDataTpl<Scalar,Options,JointCollectionTpl> JointData;
+        
+        InternalVisitorModelAndData<JointModel,const JointData,NoArg> visitor(jdata);
         return boost::apply_visitor(visitor,jmodel);
       }
       
@@ -47,7 +93,22 @@ namespace pinocchio
                             typename JointModelBase<JointModelDerived>::JointDataDerived & jdata,
                             ArgsTmp args)
       {
-        InternalVisitorModelAndData<JointModelDerived,ArgsTmp> visitor(jdata,args);
+        typedef JointModelBase<JointModelDerived> JointModel;
+        typedef typename JointModel::JointDataDerived JointData;
+        
+        InternalVisitorModelAndData<JointModelDerived,JointData,ArgsTmp> visitor(jdata,args);
+        return visitor(jmodel.derived());
+      }
+      
+      template<typename JointModelDerived, typename ArgsTmp>
+      static ReturnType run(const JointModelBase<JointModelDerived> & jmodel,
+                            const typename JointModelBase<JointModelDerived>::JointDataDerived & jdata,
+                            ArgsTmp args)
+      {
+        typedef JointModelBase<JointModelDerived> JointModel;
+        typedef typename JointModel::JointDataDerived JointData;
+        
+        InternalVisitorModelAndData<JointModelDerived,const JointData,ArgsTmp> visitor(jdata,args);
         return visitor(jmodel.derived());
       }
       
@@ -55,7 +116,21 @@ namespace pinocchio
       static ReturnType run(const JointModelBase<JointModelDerived> & jmodel,
                             typename JointModelBase<JointModelDerived>::JointDataDerived & jdata)
       {
-        InternalVisitorModelAndData<JointModelDerived,NoArg> visitor(jdata);
+        typedef JointModelBase<JointModelDerived> JointModel;
+        typedef typename JointModel::JointDataDerived JointData;
+        
+        InternalVisitorModelAndData<JointModelDerived,JointData,NoArg> visitor(jdata);
+        return visitor(jmodel.derived());
+      }
+      
+      template<typename JointModelDerived>
+      static ReturnType run(const JointModelBase<JointModelDerived> & jmodel,
+                            const typename JointModelBase<JointModelDerived>::JointDataDerived & jdata)
+      {
+        typedef JointModelBase<JointModelDerived> JointModel;
+        typedef typename JointModel::JointDataDerived JointData;
+        
+        InternalVisitorModelAndData<JointModelDerived,const JointData,NoArg> visitor(jdata);
         return visitor(jmodel.derived());
       }
       
@@ -121,12 +196,10 @@ namespace pinocchio
       
     private:
       
-      template<typename JointModel, typename ArgType>
+      template<typename JointModel, typename JointData, typename ArgType>
       struct InternalVisitorModelAndData
       : public boost::static_visitor<ReturnType>
       {
-        typedef typename JointModel::JointDataDerived JointData;
-        
         InternalVisitorModelAndData(JointData & jdata, ArgType args)
         : jdata(jdata), args(args)
         {}
@@ -134,9 +207,10 @@ namespace pinocchio
         template<typename JointModelDerived>
         ReturnType operator()(const JointModelBase<JointModelDerived> & jmodel) const
         {
+          typedef typename helper::add_const_if_const<JointData,typename JointModelBase<JointModelDerived>::JointDataDerived>::type JointDataDerived;
           return bf::invoke(&JointVisitorDerived::template algo<JointModelDerived>,
                             bf::append(boost::ref(jmodel.derived()),
-                                       boost::ref(boost::get<typename JointModelBase<JointModelDerived>::JointDataDerived >(jdata)),
+                                       boost::ref(boost::get<JointDataDerived>(jdata)),
                                        args));
         }
         
@@ -146,12 +220,10 @@ namespace pinocchio
         ArgType args;
       };
       
-      template<typename JointModel>
-      struct InternalVisitorModelAndData<JointModel,NoArg>
+      template<typename JointModel, typename JointData>
+      struct InternalVisitorModelAndData<JointModel,JointData,NoArg>
       : public boost::static_visitor<ReturnType>
       {
-        typedef typename JointModel::JointDataDerived JointData;
-        
         InternalVisitorModelAndData(JointData & jdata)
         : jdata(jdata)
         {}
@@ -159,9 +231,10 @@ namespace pinocchio
         template<typename JointModelDerived>
         ReturnType operator()(const JointModelBase<JointModelDerived> & jmodel) const
         {
+          typedef typename helper::add_const_if_const<JointData,typename JointModelBase<JointModelDerived>::JointDataDerived>::type JointDataDerived;
           return bf::invoke(&JointVisitorDerived::template algo<JointModelDerived>,
                             bf::make_vector(boost::ref(jmodel.derived()),
-                                            boost::ref(boost::get<typename JointModelBase<JointModelDerived>::JointDataDerived >(jdata))));
+                                            boost::ref(boost::get<JointDataDerived>(jdata))));
         }
         
         JointData & jdata;
