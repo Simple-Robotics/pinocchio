@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2022 CNRS INRIA
+// Copyright (c) 2017-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_macros_hpp__
@@ -122,8 +122,10 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
 
 /// \brief Generic macro to throw an exception in Pinocchio if the condition is not met with a given input message.
 #if !defined(PINOCCHIO_NO_THROW)
-  #define PINOCCHIO_THROW(condition,exception_type,message) \
-    if (!(condition)) { throw exception_type(message); }
+  #define PINOCCHIO_THROW(exception_type,message) \
+    { throw exception_type(message); }
+  #define PINOCCHIO_THROW_IF(condition,exception_type,message) \
+    if (!(condition)) { PINOCCHIO_THROW(exception_type,message); }
 
   #define PINOCCHIO_THROW_PRETTY(exception, message)              \
   {                                                           \
@@ -134,16 +136,20 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
     ss << "message: " << message << "\n";                     \
     throw exception(ss.str());                                \
   }
+  #define PINOCCHIO_THROW_PRETTY_IF(condition,exception_type,message) \
+    if (!(condition)) { PINOCCHIO_THROW_PRETTY(exception_type,message); }
 #else
-  #define PINOCCHIO_THROW(condition,exception_type,message)
+  #define PINOCCHIO_THROW(exception_type,message)
+  #define PINOCCHIO_THROW_IF(condition,exception_type,message)
   #define PINOCCHIO_THROW_PRETTY(exception, message)
+  #define PINOCCHIO_THROW_PRETTY_IF(condition,exception, message)
 #endif
 
 #define _PINOCCHIO_EXPAND(x) x
 #define _PINOCCHIO_GET_OVERRIDE_FOR_CHECK_INPUT_ARGUMENT(_1, _2, MACRO_NAME, ...) MACRO_NAME
 
 #define _PINOCCHIO_CHECK_INPUT_ARGUMENT_2(condition, message) \
-  PINOCCHIO_THROW(condition,std::invalid_argument,message)
+  PINOCCHIO_THROW_PRETTY_IF(condition,std::invalid_argument,message)
 
 #define _PINOCCHIO_CHECK_INPUT_ARGUMENT_1(condition) \
   _PINOCCHIO_CHECK_INPUT_ARGUMENT_2(condition,\
@@ -163,7 +169,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
     std::ostringstream oss; \
     oss << "wrong argument size: expected " << expected_size << ", got " << size << std::endl; \
     oss << "hint: " << message << std::endl; \
-    PINOCCHIO_THROW(false, std::invalid_argument, oss.str()); \
+    PINOCCHIO_THROW_PRETTY(std::invalid_argument, oss.str()); \
   }
 
 #define _PINOCCHIO_CHECK_ARGUMENT_SIZE_2(size, expected_size) \
@@ -181,7 +187,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
   if (mat1.rows() != mat2.rows() || mat1.cols() != mat2.cols() ) { \
     std::ostringstream oss; \
     oss << "wrong matrix size: expected (" << mat1.rows() << ", " << mat1.cols() << "), got (" << mat2.rows() << ", " << mat2.cols() << ")" << std::endl; \
-    PINOCCHIO_THROW(false, std::invalid_argument, oss.str()); \
+    PINOCCHIO_THROW_PRETTY(std::invalid_argument, oss.str()); \
   }
 
 PINOCCHIO_COMPILER_DIAGNOSTIC_POP

@@ -57,9 +57,9 @@ namespace pinocchio
       typedef ModelTpl<Scalar,Options,JointCollectionTpl> Model;
       typedef typename Model::Frame Frame;
       
-      PINOCCHIO_THROW(parentFrame < model.frames.size(),
-                      std::invalid_argument,
-                      "parentFrame is greater than the size of the frames vector.");
+      PINOCCHIO_THROW_IF(parentFrame < model.frames.size(),
+                         std::invalid_argument,
+                         "parentFrame is greater than the size of the frames vector.");
 
       const Frame & pframe = model.frames[parentFrame];
       JointIndex jid = pframe.parentJoint;

@@ -200,7 +200,7 @@ namespace pinocchio
         break;
       }
     }
-    PINOCCHIO_THROW(it != geometryObjects.end(),std::invalid_argument, (std::string("Object ") + name + std::string(" does not belong to model")).c_str());
+    PINOCCHIO_THROW_IF(it != geometryObjects.end(),std::invalid_argument, (std::string("Object ") + name + std::string(" does not belong to model")).c_str());
     // Remove all collision pairs that contain i as first or second index,
     for (CollisionPairVector::iterator itCol = collisionPairs.begin(); itCol != collisionPairs.end(); ++itCol){
       if ((itCol->first == i) || (itCol->second == i)) {
