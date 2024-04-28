@@ -266,16 +266,7 @@ namespace pinocchio {
     }
     
     // Make a pass over the whole set of constraints to project back the accelerations onto the joint
-    {
-      for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
-        const RigidConstraintData & cdata = constraint_datas_ref[ee_id];
-        
-        auto constraint_value = res.template segment<3>(Eigen::DenseIndex(ee_id*3));
-        cmodel.mapJointMotionsToConstraintMotion(model_ref, data_ref, cdata, this->m_custom_data.a, constraint_value);
-      }
-    }
+    mapJointMotionsToConstraintMotions(model_ref,data_ref,constraint_models_ref,constraint_datas_ref,this->m_custom_data.a,res);
     
     // Add damping contribution
     res.array() += m_damping.array() * rhs.array();
