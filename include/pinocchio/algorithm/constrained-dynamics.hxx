@@ -657,7 +657,7 @@ namespace pinocchio
         data.oa_augmented[i] += data.oa_augmented[parent]; // does not take into account the gravity field
       jmodel.jointVelocitySelector(data.ddq).noalias() =
       jdata.Dinv() * jmodel.jointVelocitySelector(data.u) - jdata.UDinv().transpose() * data.oa_augmented[i].toVector();
-      data.oa_augmented[i].toVector() += Jcols * jmodel.jointVelocitySelector(data.ddq);
+      data.oa_augmented[i].toVector().noalias() += Jcols * jmodel.jointVelocitySelector(data.ddq);
     }
 
   };
