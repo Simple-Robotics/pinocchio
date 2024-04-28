@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2021 CNRS INRIA
+// Copyright (c) 2016-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_algorithm_aba_hxx__
@@ -32,11 +32,12 @@ namespace pinocchio
 
         typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Matrix6Type) ReturnType;
         typedef Eigen::Block<ReturnType,3,3> Block3;
+        typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Block3) Matrix3;
 
         Matrix6Type & I_ = PINOCCHIO_EIGEN_CONST_CAST(Matrix6Type,I);
-        const constBlock3 & Ai = I_.template block<3,3>(Inertia::LINEAR, Inertia::LINEAR);
-        const constBlock3 & Bi = I_.template block<3,3>(Inertia::LINEAR, Inertia::ANGULAR);
-        const constBlock3 & Di = I_.template block<3,3>(Inertia::ANGULAR, Inertia::ANGULAR);
+        const constBlock3 Ai = I_.template block<3,3>(Inertia::LINEAR, Inertia::LINEAR);
+        const constBlock3 Bi = I_.template block<3,3>(Inertia::LINEAR, Inertia::ANGULAR);
+        const constBlock3 Di = I_.template block<3,3>(Inertia::ANGULAR, Inertia::ANGULAR);
 
         const Matrix3 & R = M.rotation();
         const Vector3 & t = M.translation();
@@ -47,14 +48,14 @@ namespace pinocchio
         Block3 Co = res.template block<3,3>(Inertia::ANGULAR, Inertia::LINEAR);
         Block3 Do = res.template block<3,3>(Inertia::ANGULAR, Inertia::ANGULAR);
 
-        Do.noalias() = R*Ai; // tmp variable
-        Ao.noalias() = Do*R.transpose();
+        Matrix3 mat33_tmp = R*Ai; // tmp variable
+        Ao.noalias() = mat33_tmp*R.transpose();
 
-        Do.noalias() = R*Bi; // tmp variable
-        Bo.noalias() = Do*R.transpose();
+        mat33_tmp.noalias() = R*Bi;
+        Bo.noalias() = mat33_tmp*R.transpose();
 
-        Co.noalias() = R*Di; // tmp variable
-        Do.noalias() = Co*R.transpose();
+        mat33_tmp.noalias() = R*Di;
+        Do.noalias() = mat33_tmp*R.transpose();
 
         Do.row(0) += t.cross(Bo.col(0));
         Do.row(1) += t.cross(Bo.col(1));
