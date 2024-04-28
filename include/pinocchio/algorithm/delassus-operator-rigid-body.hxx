@@ -265,7 +265,7 @@ namespace pinocchio {
         const RigidConstraintData & cdata = constraint_datas_ref[ee_id];
         
         auto constraint_value = res.template segment<3>(Eigen::DenseIndex(ee_id*3));
-        cmodel.mapJointMotionsToConstraintMotions(model_ref, data_ref, cdata, this->m_custom_data.a, constraint_value);
+        cmodel.mapJointMotionsToConstraintMotion(model_ref, data_ref, cdata, this->m_custom_data.a, constraint_value);
       }
     }
     

@@ -691,7 +691,7 @@ namespace pinocchio
     
     /// \brief Map the joint accelerations to constraint value
     template<template<typename,int> class JointCollectionTpl, typename MotionAllocator, typename VectorLike>
-    void mapJointMotionsToConstraintMotions(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+    void mapJointMotionsToConstraintMotion(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
                                             const DataTpl<Scalar,Options,JointCollectionTpl> & data,
                                             const RigidConstraintDataTpl<Scalar,Options> & cdata,
                                             const std::vector<MotionTpl<Scalar,Options>,MotionAllocator> & joint_accelerations,
