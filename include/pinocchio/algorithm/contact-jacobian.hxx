@@ -301,7 +301,7 @@ namespace pinocchio
       const RigidConstraintData & cdata = constraint_datas[ee_id];
       
       const auto constraint_force = rhs.template middleRows<3>(Eigen::DenseIndex(ee_id*3));
-      cmodel.mapConstraintForceToJoints(model, data, cdata, constraint_force, joint_forces);
+      cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
     }
     
     res.setZero();
