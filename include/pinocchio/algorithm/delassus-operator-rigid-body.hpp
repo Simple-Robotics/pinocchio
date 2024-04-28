@@ -5,9 +5,6 @@
 #ifndef __pinocchio_algorithm_delassus_operator_linear_complexity_hpp__
 #define __pinocchio_algorithm_delassus_operator_linear_complexity_hpp__
 
-#include <functional>
-#include <memory>
-
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 #include "pinocchio/utils/reference.hpp"
