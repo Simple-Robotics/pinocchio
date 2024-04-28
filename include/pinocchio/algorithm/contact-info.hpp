@@ -568,18 +568,18 @@ namespace pinocchio
 
       for(Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
-
+        
         if(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj])
         {
           const int sign =
           colwise_joint1_sparsity[jj] != colwise_joint2_sparsity[jj]
           ? colwise_joint1_sparsity[jj] ? +1:-1
           : 0; // specific case for CONTACT_3D
-
+          
           typedef typename Data::Matrix6x::ConstColXpr ConstColXpr;
           const ConstColXpr Jcol = data.J.col(jj);
           const MotionRef<const ConstColXpr> Jcol_motion(Jcol);
-
+          
           switch(cmodel.type)
           {
             case CONTACT_3D:
@@ -634,7 +634,7 @@ namespace pinocchio
               }
               break;
             }
-
+              
             case CONTACT_6D:
             {
               assert(check_expression_if_real<Scalar>(sign != 0) && "sign should be equal to +1 or -1.");
@@ -657,13 +657,78 @@ namespace pinocchio
               }
               break;
             }
-
+              
             default:
               assert(false && "must never happened");
               break;
           }
-
-        }}
+          
+        }
+      }
+    }
+    
+    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces supported by the joints.
+    template<template<typename,int> class JointCollectionTpl, typename ForceLike, typename ForceAllocator>
+    void mapConstraintForceToJointForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                         const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                         const RigidConstraintDataTpl<Scalar,Options> & cdata,
+                                         const Eigen::MatrixBase<ForceLike> & constraint_forces,
+                                         std::vector<ForceTpl<Scalar,Options>,ForceAllocator> & joint_forces) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(),size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(),size());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      
+      assert(this->type == CONTACT_3D);
+      
+      // Todo: optimize code
+      const Matrix36
+      A1 = getA1(cdata,LocalFrame()),
+      A2 = getA2(cdata,LocalFrame());
+      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose()*constraint_forces;
+      joint_forces[this->joint2_id].toVector().noalias() += A2.transpose()*constraint_forces;
+    }
+    
+    /// \brief Map the joint accelerations to constraint value
+    template<template<typename,int> class JointCollectionTpl, typename MotionAllocator, typename VectorLike>
+    void mapJointMotionsToConstraintMotions(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                            const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                            const RigidConstraintDataTpl<Scalar,Options> & cdata,
+                                            const std::vector<MotionTpl<Scalar,Options>,MotionAllocator> & joint_accelerations,
+                                            const Eigen::MatrixBase<VectorLike> & constraint_value) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_accelerations.size(),size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_value.rows(),size());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      
+      assert(this->type == CONTACT_3D);
+      
+        // Todo: optimize code
+      
+      if(this->joint1_id != 0 && this->joint2_id != 0)
+      {
+        const Matrix36
+        A1 = getA1(cdata,LocalFrame()),
+        A2 = getA2(cdata,LocalFrame());
+        constraint_value.const_cast_derived().noalias()
+        = A1 * joint_accelerations[this->joint1_id].toVector() + A2 * joint_accelerations[this->joint2_id].toVector();
+      }
+      else if(this->joint1_id != 0)
+      {
+        const Matrix36
+        A1 = getA1(cdata,LocalFrame());
+        constraint_value.const_cast_derived().noalias()
+        = A1 * joint_accelerations[this->joint1_id].toVector();
+      }
+      else if(this->joint2_id != 0)
+      {
+        const Matrix36
+        A2 = getA2(cdata,LocalFrame());
+        constraint_value.const_cast_derived().noalias()
+        = A2 * joint_accelerations[this->joint2_id].toVector();
+      }
+      else
+        constraint_value.const_cast_derived().setZero();
     }
     
     int size() const
