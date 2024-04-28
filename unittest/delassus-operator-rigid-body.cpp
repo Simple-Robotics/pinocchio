@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(test_compute)
 //    BOOST_CHECK(delassus_operator.getCustomData().u.isApprox(Jt_rhs_gt));
 
     pinocchio::container::aligned_vector<Data::Force> joint_forces_gt(size_t(model.njoints),Data::Force::Zero());
-    mapConstraintForceToJointForces(model,data_gt,constraint_models,constraint_datas_gt,rhs,joint_forces_gt);
+    mapConstraintForcesToJointForces(model,data_gt,constraint_models,constraint_datas_gt,rhs,joint_forces_gt);
     minimal::aba(model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), Eigen::VectorXd::Zero(model.nv), joint_forces_gt);
     
     for(Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)

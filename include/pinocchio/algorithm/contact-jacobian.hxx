@@ -31,12 +31,12 @@ namespace pinocchio
   }
   
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, typename ForceMatrix, class ForceAllocator>
-  void mapConstraintForceToJointForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                                       const DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                                       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
-                                       const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
-                                       const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
-                                       std::vector<ForceTpl<Scalar,Options>,ForceAllocator> & joint_forces)
+  void mapConstraintForcesToJointForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                        const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                        const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                        const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                        const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
+                                        std::vector<ForceTpl<Scalar,Options>,ForceAllocator> & joint_forces)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(),constraint_datas.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(),size_t(model.njoints));
