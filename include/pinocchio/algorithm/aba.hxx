@@ -105,7 +105,7 @@ namespace pinocchio
         Motion & ov = data.ov[i];
         jmodel.calc(jdata.derived(),q.derived(),v.derived());
         
-        const JointIndex & parent = model.parents[i];
+        const JointIndex parent = model.parents[i];
         data.liMi[i] = model.jointPlacements[i] * jdata.M();
         if(parent > 0)
           data.oMi[i] = data.oMi[parent] * data.liMi[i];
@@ -346,7 +346,7 @@ namespace pinocchio
         const JointIndex i = jmodel.id();
         jmodel.calc(jdata.derived(),q.derived(),v.derived());
   
-        const JointIndex & parent = model.parents[i];
+        const JointIndex parent = model.parents[i];
         data.liMi[i] = model.jointPlacements[i] * jdata.M();
   
         data.v[i] = jdata.v();
@@ -429,7 +429,7 @@ namespace pinocchio
         data.a_gf[i] += jdata.S() * jmodel.jointVelocitySelector(data.ddq);
   
         data.a[i] = data.a_gf[i];
-        data.a[i].linear().noalias() += data.oMi[i].rotation().transpose() * model.gravity.linear();
+        data.a[i].linear().noalias() += data.oMi[i].rotation().transpose() * model.gravity.linear(); // remove gravity
         data.f[i] = model.inertias[i] * data.a_gf[i] + data.v[i].cross(data.h[i]);
       }
   
