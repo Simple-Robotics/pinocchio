@@ -86,12 +86,18 @@ namespace pinocchio {
                                     "The sizes of contact vector models and contact vector data are not the same.");
     }
     
+    ///
     /// \brief Update the intermediate computations according to a new configuration vector entry
     ///
     /// \param[in] q Configuration vector
     ///
     template<typename ConfigVectorType>
     void compute(const Eigen::MatrixBase<ConfigVectorType> & q);
+    
+    ///
+    /// \brief Update the intermediate computations before calling solveInPlace or operator*
+    ///
+    void compute();
     
     const Model & model() const { return get_ref(m_model_ref); }
     

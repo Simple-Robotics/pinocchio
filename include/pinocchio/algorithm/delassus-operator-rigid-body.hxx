@@ -42,8 +42,6 @@ namespace pinocchio {
         data.oMi[i] = data.oMi[parent] * data.liMi[i];
       else
         data.oMi[i] = data.liMi[i];
-      
-      data.Yaba[i] = data.Yaba_augmented[i] = model.inertias[i].matrix();
     }
     
   };
@@ -68,22 +66,27 @@ namespace pinocchio {
     {
       typedef typename Model::JointIndex JointIndex;
       typedef typename Data::Inertia Inertia;
+      typedef typename JointModel::JointDataDerived JointData;
       
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
       typename Inertia::Matrix6 & Ia = data.Yaba[i];
+      typename Inertia::Matrix6 & Ia_augmented = data.Yaba_augmented[i];
       
-//      jmodel.jointVelocitySelector(data.u) -= jdata.S().transpose()*data.f[i];
+      JointData & jdata_augmented = boost::get<JointData>(data.joints[i]);
+
       jmodel.calc_aba(jdata.derived(),
                       jmodel.jointVelocitySelector(model.armature),
                       Ia, parent > 0);
       
+      jmodel.calc_aba(jdata_augmented,
+                      jmodel.jointVelocitySelector(model.armature),
+                      Ia_augmented, parent > 0);
+      
       if (parent > 0)
       {
-//        Force & pa = data.f[i];
-//        pa.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
         data.Yaba[parent] += impl::internal::SE3actOn<Scalar>::run(data.liMi[i], Ia);
-//        data.f[parent] += data.liMi[i].act(pa);
+        data.Yaba_augmented[parent] += impl::internal::SE3actOn<Scalar>::run(data.liMi[i], Ia_augmented);
       }
     }
     
@@ -98,13 +101,28 @@ namespace pinocchio {
                                   "The joint configuration vector is not of right size");
     
     const Model & model_ref = model();
-    Data & data_ref = data();
     
     typedef DelassusOperatorRigidBodyTplComputeForwardPass<DelassusOperatorRigidBodyTpl,ConfigVectorType> Pass1;
     for(JointIndex i=1; i<(JointIndex)model_ref.njoints; ++i)
     {
       typename Pass1::ArgsType args(model_ref,this->m_custom_data,q.derived());
       Pass1::run(model_ref.joints[i],this->m_custom_data.joints[i],args);
+    }
+    
+    compute();
+  }
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, template<typename T> class Holder>
+  void DelassusOperatorRigidBodyTpl<Scalar,Options,JointCollectionTpl,Holder>
+  ::compute()
+  {
+    const Model & model_ref = model();
+    Data & data_ref = data();
+    CustomData & custom_data = this->m_custom_data;
+    
+    for(JointIndex i=1; i<(JointIndex)model_ref.njoints; ++i)
+    {
+      custom_data.Yaba[i] = custom_data.Yaba_augmented[i] = model_ref.inertias[i].matrix();
     }
     
     typedef DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperatorRigidBodyTpl> Pass2;
@@ -119,6 +137,7 @@ namespace pinocchio {
       const ConstraintModelVector & constraint_models_ref = constraint_models();
       ConstraintDataVector & constraint_datas_ref = constraint_datas();
       
+      // TODO(jcarpent): change data_ref for custom_data
       evalConstraints(model_ref,data_ref,constraint_models_ref,constraint_datas_ref);
     }
     
