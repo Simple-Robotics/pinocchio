@@ -56,6 +56,32 @@ namespace pinocchio
       cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
     }
   }
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, class MotionAllocator, typename MotionMatrix>
+  void mapJointMotionsToConstraintMotions(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                          const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                          const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                          const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                          const std::vector<MotionTpl<Scalar,Options>,MotionAllocator> & joint_motions,
+                                          const Eigen::MatrixBase<MotionMatrix> & constraint_motions_)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(),constraint_datas.size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.size(),size_t(model.njoints));
+    
+    MotionMatrix & constraint_motions = constraint_motions_.const_cast_derived();
+    const Eigen::DenseIndex constraint_size = Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions.rows(), constraint_size);
+    
+    for(size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
+    {
+      const RigidConstraintModel & cmodel = constraint_models[ee_id];
+      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      
+      auto constraint_motion = constraint_motions.template segment<3>(Eigen::DenseIndex(ee_id*3));
+      cmodel.mapJointMotionsToConstraintMotion(model, data, cdata, joint_motions, constraint_motion);
+    }
+    
+  }
 
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename Matrix6or3Like>
   void getConstraintJacobian(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,

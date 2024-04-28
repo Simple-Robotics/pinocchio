@@ -29,7 +29,7 @@ namespace pinocchio
   ///
   /// \brief Maps the constraint forces expressed in the constraint space to joint forces expressed in the local frame.
   ///
-  /// \remarks This function assumes that the constrained data are up-to-date. The ouput vector joint_forces should be initialized to Zero
+  /// \remarks This function assumes that the constrained data are up-to-date.
   ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
@@ -45,6 +45,26 @@ namespace pinocchio
                                         const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
                                         const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
                                         std::vector<ForceTpl<Scalar,Options>,ForceAllocator> & joint_forces);
+  
+  ///
+  /// \brief Maps the joint motions expressed in the joint space local frame to the constraint motions.
+  ///
+  /// \remarks This function assumes that the constrained data are up-to-date.
+  ///
+  /// \param[in] model The model structure of the rigid body system.
+  /// \param[in] data The data structure of the rigid body system.
+  /// \param[in] constraint_models Vector of constraint models.
+  /// \param[in] constraint_datas Vector of constraint datas.
+  /// \param[in] joint_motions Vector of  joint motions (dimension model.njoints).
+  /// \param[out] constraint_motions Resulting matrix or vector containing the constraint motions.
+  ///
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, class MotionAllocator, typename MotionMatrix>
+  void mapJointMotionsToConstraintMotions(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                          const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                          const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                          const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                          const std::vector<MotionTpl<Scalar,Options>,MotionAllocator> & joint_motions,
+                                          const Eigen::MatrixBase<MotionMatrix> & constraint_motions);
 
 
   ///
