@@ -44,7 +44,7 @@ namespace pinocchio
     const Eigen::DenseIndex constraint_size = Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), constraint_size);
     
-    for(auto force: joint_forces)
+    for(auto & force: joint_forces)
       force.setZero();
     
     for(size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
