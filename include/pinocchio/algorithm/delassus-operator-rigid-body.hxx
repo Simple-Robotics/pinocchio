@@ -221,22 +221,10 @@ namespace pinocchio {
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
     
-    for(auto & force: m_custom_data.f)
-      force.setZero();
-    
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
-    {
-      
-      for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
-        const RigidConstraintData & cdata = constraint_datas_ref[ee_id];
-        
-        const auto constraint_force = rhs.template segment<3>(Eigen::DenseIndex(ee_id*3));
-        cmodel.mapConstraintForceToJointForces(model_ref, data_ref, cdata, constraint_force, m_custom_data.f);
-      }
-    }
-    
+    mapConstraintForcesToJointForces(model_ref,data_ref,constraint_models_ref,constraint_datas_ref,rhs,m_custom_data.f);
+   
+    // Backward sweep: propagate joint force contributions
     {
       typedef DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperatorRigidBodyTpl> Pass1;
       typename Pass1::ArgsType args1(model_ref,this->m_custom_data);
@@ -246,6 +234,7 @@ namespace pinocchio {
       }
     }
     
+    // Forward sweep: compute joint accelerations
     {
       typedef DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperatorRigidBodyTpl> Pass2;
       for(auto & motion: m_custom_data.a)
@@ -257,7 +246,7 @@ namespace pinocchio {
       }
     }
     
-    // Make a pass over the whole set of constraints to project back the accelerations onto the
+    // Make a pass over the whole set of constraints to project back the accelerations onto the joint
     {
       for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
       {
