@@ -26,7 +26,8 @@ namespace pinocchio {
     
     typedef Eigen::Matrix<Scalar,Eigen::Dynamic,1,Options> Vector;
     typedef Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic,Options> DenseMatrix;
-    
+    typedef DenseMatrix Matrix;
+
     typedef ModelTpl<Scalar,Options,JointCollectionTpl> Model;
     typedef typename Model::Data Data;
 
@@ -41,16 +42,25 @@ namespace pinocchio {
   struct DelassusOperatorRigidBodyTpl
   : DelassusOperatorBase< DelassusOperatorRigidBodyTpl<_Scalar,_Options,JointCollectionTpl,Holder> >
   {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     typedef DelassusOperatorRigidBodyTpl Self;
     typedef DelassusOperatorBase<Self> Base;
     
     typedef typename traits<Self>::Scalar Scalar;
     enum { Options = traits<Self>::Options };
     
+    typedef typename traits<Self>::Vector Vector;
+    typedef typename traits<Self>::DenseMatrix DenseMatrix;
+
     typedef typename traits<Self>::Model Model;
     typedef Holder<const Model> ModelHolder;
     typedef typename traits<Self>::Data Data;
     typedef Holder<Data> DataHolder;
+    
+    typedef typename Data::Force Force;
+    typedef typename Data::VectorXs VectorXs;
+    typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
     
     typedef typename traits<Self>::ConstraintModel ConstraintModel;
     typedef typename traits<Self>::ConstraintModelVector ConstraintModelVector;
@@ -61,15 +71,18 @@ namespace pinocchio {
     typedef Holder<ConstraintDataVector> ConstraintDataVectorHolder;
 
     DelassusOperatorRigidBodyTpl(const ModelHolder &model_ref,
-                                        const DataHolder &data_ref,
-                                        const ConstraintModelVectorHolder &constraint_models_ref,
-                                        const ConstraintDataVectorHolder &constraint_datas_ref)
+                                 const DataHolder &data_ref,
+                                 const ConstraintModelVectorHolder &constraint_models_ref,
+                                 const ConstraintDataVectorHolder &constraint_datas_ref)
     : Base()
     , m_size(evalConstraintSize(get_ref(constraint_models_ref)))
     , m_model_ref(model_ref)
     , m_data_ref(data_ref)
     , m_constraint_models_ref(constraint_models_ref)
     , m_constraint_datas_ref(constraint_datas_ref)
+    , m_custom_data(get_ref(model_ref), get_ref(data_ref))
+    , m_dirty(true)
+    , m_damping(Vector::Zero(m_size))
     {
       assert(model().check(data()) && "data is not consistent with model.");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models().size(), constraint_datas().size(),
@@ -81,7 +94,7 @@ namespace pinocchio {
     /// \param[in] q Configuration vector
     ///
     template<typename ConfigVectorType>
-    void calc(const Eigen::MatrixBase<ConfigVectorType> & q);
+    void compute(const Eigen::MatrixBase<ConfigVectorType> & q);
     
     const Model & model() const { return get_ref(m_model_ref); }
     
@@ -94,7 +107,74 @@ namespace pinocchio {
     ConstraintDataVector & constraint_datas() { return get_ref(m_constraint_datas_ref); }
     
     Eigen::DenseIndex size() const { return m_size; }
+    Eigen::DenseIndex rows() const { return m_size; }
+    Eigen::DenseIndex cols() const { return m_size; }
+    
+    void update(const ConstraintModelVectorHolder &constraint_models_ref,
+                const ConstraintDataVectorHolder &constraint_datas_ref)
+    {
+      if(get_pointer(m_constraint_models_ref) == get_pointer(constraint_models_ref)
+         && get_pointer(m_constraint_datas_ref) == get_pointer(constraint_datas_ref))
+        return;
+      m_constraint_models_ref = constraint_models_ref;
+      m_constraint_datas_ref = constraint_datas_ref;
+      m_dirty = true;
+    }
+    
+    template<typename MatrixIn, typename MatrixOut>
+    void applyOnTheRight(const Eigen::MatrixBase<MatrixIn> & x,
+                         const Eigen::MatrixBase<MatrixOut> & res) const;
+    
+    template<typename VectorLike>
+    void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
+    {
+      m_damping = vec;
+//      mat_tmp = delassus_matrix;
+//      mat_tmp += vec.asDiagonal();
+//      llt.compute(mat_tmp);
+    }
+    
+    void updateDamping(const Scalar & mu)
+    {
+      updateDamping(Vector::Constant(size(),mu));
+    }
+    
+    const Vector & getDamping() const { return m_damping; }
 
+    struct CustomData
+    {
+      typedef typename Data::SE3 SE3;
+      typedef typename Data::Inertia Inertia;
+      typedef typename Data::Motion Motion;
+      typedef typename Data::Matrix6 Matrix6;
+      typedef typename Data::Force Force;
+
+      explicit CustomData(const Model & model,
+                          const Data & data)
+      : liMi(size_t(model.njoints),SE3::Identity())
+      , oMi(size_t(model.njoints),SE3::Identity())
+      , a(size_t(model.njoints),Motion::Zero())
+      , a_augmented(size_t(model.njoints),Motion::Zero())
+      , Yaba(size_t(model.njoints),Inertia::Zero())
+      , Yaba_augmented(size_t(model.njoints),Inertia::Zero())
+      , joints(data.joints)
+      , joints_augmented(data.joints)
+      , u(model.nv)
+      , ddq(model.nv)
+      , f(size_t(model.njoints))
+      {}
+      
+      PINOCCHIO_ALIGNED_STD_VECTOR(SE3) liMi, oMi;
+      PINOCCHIO_ALIGNED_STD_VECTOR(Motion) a, a_augmented;
+      PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Yaba, Yaba_augmented;
+      typename Data::JointDataVector joints;
+      typename Data::JointDataVector joints_augmented;
+      VectorXs u, ddq;
+      ForceVector f;
+    };
+    
+    const CustomData & getCustomData() const { return m_custom_data; }
+    
   protected:
     
     static Eigen::DenseIndex evalConstraintSize(const ConstraintModelVector & constraint_models)
@@ -106,12 +186,21 @@ namespace pinocchio {
       return size;
     }
     
+    inline void compute_conclude()
+    {
+      m_dirty = false;
+    }
+    
     // Holders
     Eigen::DenseIndex m_size;
     ModelHolder m_model_ref;
     DataHolder m_data_ref;
     ConstraintModelVectorHolder m_constraint_models_ref;
     ConstraintDataVectorHolder m_constraint_datas_ref;
+    
+    mutable CustomData m_custom_data;
+    bool m_dirty;
+    Vector m_damping;
   };
   
 } // namespace pinocchio

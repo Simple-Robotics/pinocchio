@@ -7,17 +7,17 @@
 
 #include "pinocchio/algorithm/check.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
-#include "pinocchio/algorithm/model.hpp"
-#include "pinocchio/multibody/fwd.hpp"
+#include "pinocchio/algorithm/aba.hpp"
+#include "pinocchio/algorithm/contact-jacobian.hpp"
 
 namespace pinocchio {
   
   template<typename DelassusOperator, typename ConfigVectorType>
-  struct DelassusOperatorRigidBodyTplCalcForwardPass
-  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplCalcForwardPass<DelassusOperator,ConfigVectorType> >
+  struct DelassusOperatorRigidBodyTplComputeForwardPass
+  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplComputeForwardPass<DelassusOperator,ConfigVectorType> >
   {
     typedef typename DelassusOperator::Model Model;
-    typedef typename DelassusOperator::Data Data;
+    typedef typename DelassusOperator::CustomData Data;
     
     typedef boost::fusion::vector<const Model &,
     Data &,
@@ -43,26 +43,235 @@ namespace pinocchio {
       else
         data.oMi[i] = data.liMi[i];
       
-      jmodel.jointCols(data.J) = data.oMi[i].act(jdata.S());
+      data.Yaba[i] = data.Yaba_augmented[i] = model.inertias[i].matrix();
+    }
+    
+  };
+  
+  template<typename DelassusOperator>
+  struct DelassusOperatorRigidBodyTplComputeBackwardPass
+  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperator> >
+  {
+    typedef typename DelassusOperator::Model Model;
+    typedef typename DelassusOperator::CustomData Data;
+    typedef typename Model::Scalar Scalar;
+    
+    typedef boost::fusion::vector<const Model &,
+    Data &
+    > ArgsType;
+    
+    template<typename JointModel>
+    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
+                     pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+                     const Model & model,
+                     Data & data)
+    {
+      typedef typename Model::JointIndex JointIndex;
+      typedef typename Data::Inertia Inertia;
       
-      data.oYcrb[i] = data.oMi[i].act(model.inertias[i]);
-      data.oYaba[i] = data.oYcrb[i].matrix();
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+      typename Inertia::Matrix6 & Ia = data.Yaba[i];
+      
+//      jmodel.jointVelocitySelector(data.u) -= jdata.S().transpose()*data.f[i];
+      jmodel.calc_aba(jdata.derived(),
+                      jmodel.jointVelocitySelector(model.armature),
+                      Ia, parent > 0);
+      
+      if (parent > 0)
+      {
+//        Force & pa = data.f[i];
+//        pa.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
+        data.Yaba[parent] += impl::internal::SE3actOn<Scalar>::run(data.liMi[i], Ia);
+//        data.f[parent] += data.liMi[i].act(pa);
+      }
     }
     
   };
   
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, template<typename T> class Holder>
   template<typename ConfigVectorType>
-  void DelassusOperatorRigidBodyTpl<Scalar,Options,JointCollectionTpl,Holder>::calc(const Eigen::MatrixBase<ConfigVectorType> & q)
+  void DelassusOperatorRigidBodyTpl<Scalar,Options,JointCollectionTpl,Holder>
+  ::compute(const Eigen::MatrixBase<ConfigVectorType> & q)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(q.size(), model().nq,
                                   "The joint configuration vector is not of right size");
-    typedef DelassusOperatorRigidBodyTplCalcForwardPass<DelassusOperatorRigidBodyTpl,ConfigVectorType> Pass1;
-    for(JointIndex i=1; i<(JointIndex)model().njoints; ++i)
+    
+    const Model & model_ref = model();
+    Data & data_ref = data();
+    
+    typedef DelassusOperatorRigidBodyTplComputeForwardPass<DelassusOperatorRigidBodyTpl,ConfigVectorType> Pass1;
+    for(JointIndex i=1; i<(JointIndex)model_ref.njoints; ++i)
     {
-      typename Pass1::ArgsType args(this->model,this->data,q.derived());
-      Pass1::run(this->model().joints[i],this->data().joints[i],args);
+      typename Pass1::ArgsType args(model_ref,this->m_custom_data,q.derived());
+      Pass1::run(model_ref.joints[i],this->m_custom_data.joints[i],args);
     }
+    
+    typedef DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperatorRigidBodyTpl> Pass2;
+    for(JointIndex i=JointIndex(model_ref.njoints-1); i>0; --i)
+    {
+      typename Pass2::ArgsType args(model_ref,this->m_custom_data);
+      Pass2::run(model_ref.joints[i],this->m_custom_data.joints[i],args);
+    }
+    
+    // Make a pass over the whole set of constraints to update the content
+    {
+      const ConstraintModelVector & constraint_models_ref = constraint_models();
+      ConstraintDataVector & constraint_datas_ref = constraint_datas();
+      
+      evalConstraints(model_ref,data_ref,constraint_models_ref,constraint_datas_ref);
+    }
+    
+    compute_conclude();
+  }
+  
+  template<typename DelassusOperator>
+  struct DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass
+  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperator> >
+  {
+    typedef typename DelassusOperator::Model Model;
+//    typedef typename DelassusOperator::Data Data;
+    typedef typename DelassusOperator::CustomData Data;
+    
+    typedef boost::fusion::vector<const Model &,
+//    Data &,
+    Data &
+    > ArgsType;
+    
+    template<typename JointModel>
+    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
+                     pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+                     const Model & model,
+//                     Data & data
+                     Data & data)
+    {
+      typedef typename Model::JointIndex JointIndex;
+      typedef typename Data::Force Force;
+      
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+      
+      jmodel.jointVelocitySelector(data.u) = jdata.S().transpose()*data.f[i]; // The sign is switched compare to ABA
+      
+      if (parent > 0)
+      {
+        Force & pa = data.f[i];
+        pa.toVector().noalias() -= jdata.UDinv() * jmodel.jointVelocitySelector(data.u); // The sign is switched compare to ABA as the sign of data.f[i] is switched too
+        data.f[parent] += data.liMi[i].act(pa);
+      }
+    }
+    
+  };
+  
+  template<typename DelassusOperator>
+  struct DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass
+  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperator> >
+  {
+    typedef typename DelassusOperator::Model Model;
+      //    typedef typename DelassusOperator::Data Data;
+    typedef typename DelassusOperator::CustomData Data;
+    
+    typedef boost::fusion::vector<const Model &,
+      //    Data &,
+    Data &
+    > ArgsType;
+    
+    template<typename JointModel>
+    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
+                     pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+                     const Model & model,
+                     //                     Data & data
+                     Data & data)
+    {
+      typedef typename Model::JointIndex JointIndex;
+      
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+      
+//      typename JointData::TangentVector_t ddq_joint;
+      auto ddq_joint = jmodel.jointVelocitySelector(data.ddq);
+      if(parent > 0)
+      {
+        data.a[i] += data.liMi[i].actInv(data.a[parent]);
+        ddq_joint = jdata.Dinv() * jmodel.jointVelocitySelector(data.u) - jdata.UDinv().transpose() * data.a[i].toVector();
+        data.a[i] += jdata.S() * ddq_joint;
+
+      }
+      else
+      {
+        ddq_joint.noalias() = jdata.Dinv() * jmodel.jointVelocitySelector(data.u);
+        data.a[i] = jdata.S() * ddq_joint;
+      }
+      
+    }
+    
+  }; // struct DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, template<typename T> class Holder>
+  template<typename MatrixIn, typename MatrixOut>
+  void DelassusOperatorRigidBodyTpl<Scalar,Options,JointCollectionTpl,Holder>
+  ::applyOnTheRight(const Eigen::MatrixBase<MatrixIn> & rhs,
+                    const Eigen::MatrixBase<MatrixOut> & res_) const
+  {
+    MatrixOut & res = res_.const_cast_derived();
+    PINOCCHIO_CHECK_SAME_MATRIX_SIZE(rhs,res);
+    
+    const Model & model_ref = model();
+    const Data & data_ref = data();
+    const ConstraintModelVector & constraint_models_ref = constraint_models();
+    const ConstraintDataVector & constraint_datas_ref = constraint_datas();
+    
+    for(auto & force: m_custom_data.f)
+      force.setZero();
+    
+    // Make a pass over the whole set of constraints to add the contributions of constraint forces
+    {
+      
+      for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const RigidConstraintData & cdata = constraint_datas_ref[ee_id];
+        
+        const auto constraint_force = rhs.template segment<3>(Eigen::DenseIndex(ee_id*3));
+        cmodel.mapConstraintForceToJointForces(model_ref, data_ref, cdata, constraint_force, m_custom_data.f);
+      }
+    }
+    
+    {
+      typedef DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperatorRigidBodyTpl> Pass1;
+      typename Pass1::ArgsType args1(model_ref,this->m_custom_data);
+      for(JointIndex i=JointIndex(model_ref.njoints-1); i>0; --i)
+      {
+        Pass1::run(model_ref.joints[i],this->m_custom_data.joints[i],args1);
+      }
+    }
+    
+    {
+      typedef DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperatorRigidBodyTpl> Pass2;
+      for(auto & motion: m_custom_data.a)
+        motion.setZero();
+      typename Pass2::ArgsType args2(model_ref,this->m_custom_data);
+      for(JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
+      {
+        Pass2::run(model_ref.joints[i],this->m_custom_data.joints[i],args2);
+      }
+    }
+    
+    // Make a pass over the whole set of constraints to project back the accelerations onto the
+    {
+      for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const RigidConstraintData & cdata = constraint_datas_ref[ee_id];
+        
+        auto constraint_value = res.template segment<3>(Eigen::DenseIndex(ee_id*3));
+        cmodel.mapJointMotionsToConstraintMotions(model_ref, data_ref, cdata, this->m_custom_data.a, constraint_value);
+      }
+    }
+    
+    // Add damping contribution
+    res.array() += m_damping.array() * rhs.array();
+    
   }
   
 } // namespace pinocchio
