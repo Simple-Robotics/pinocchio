@@ -29,6 +29,33 @@ namespace pinocchio
       cmodel.calc(model,data,cdata);
     }
   }
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class ConstraintModelAllocator, class ConstraintDataAllocator, typename ForceMatrix, class ForceAllocator>
+  void mapConstraintForceToJointForces(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                       const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                       const std::vector<RigidConstraintModelTpl<Scalar,Options>,ConstraintModelAllocator> & constraint_models,
+                                       const std::vector<RigidConstraintDataTpl<Scalar,Options>,ConstraintDataAllocator> & constraint_datas,
+                                       const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
+                                       std::vector<ForceTpl<Scalar,Options>,ForceAllocator> & joint_forces)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(),constraint_datas.size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(),size_t(model.njoints));
+    
+    const Eigen::DenseIndex constraint_size = Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), constraint_size);
+    
+    for(auto force: joint_forces)
+      force.setZero();
+    
+    for(size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
+    {
+      const RigidConstraintModel & cmodel = constraint_models[ee_id];
+      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      
+      const auto constraint_force = constraint_forces.template segment<3>(Eigen::DenseIndex(ee_id*3));
+      cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
+    }
+  }
 
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename Matrix6or3Like>
   void getConstraintJacobian(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
