@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2023 INRIA CNRS
+// Copyright (c) 2019-2024 INRIA CNRS
 //
 
 #ifndef __pinocchio_algorithm_contact_info_hpp__
@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "pinocchio/multibody/model.hpp"
+#include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
@@ -498,6 +499,37 @@ namespace pinocchio
 #undef INTERNAL_LOOP
       }
 
+      return res;
+    }
+    
+    ///
+    /// @brief This function computes the spatial inertia associated with the constraint.
+    /// This function is useful to express the constraint inertia associated with the constraint for AL settings.
+    ///
+    template<typename Vector3Like>
+    Matrix6 computeSpatialInertia(const SE3Tpl<Scalar,Options> & placement,
+                                  const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia) const
+    {
+      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like,Vector3);
+      Matrix6 res;
+      
+      const auto & R = placement.rotation();
+      const auto & t = placement.translation();
+      
+      typedef Eigen::Matrix<Scalar,3,3,Options> Matrix3;
+      const Matrix3 R_Sigma = R * diagonal_constraint_inertia.asDiagonal();
+      const Matrix3 t_skew = skew(t);
+      
+      auto block_LL = res.template block<3,3>(SE3::LINEAR,SE3::LINEAR);
+      auto block_LA = res.template block<3,3>(SE3::LINEAR,SE3::ANGULAR);
+      auto block_AL = res.template block<3,3>(SE3::ANGULAR,SE3::LINEAR);
+      auto block_AA = res.template block<3,3>(SE3::ANGULAR,SE3::ANGULAR);
+
+      block_LL.noalias() = R_Sigma * R.transpose();
+      block_LA.noalias() = -block_LL * t_skew;
+      block_AL.noalias() = block_LA.transpose();
+      block_AA.noalias() = t_skew * block_LA;
+      
       return res;
     }
 

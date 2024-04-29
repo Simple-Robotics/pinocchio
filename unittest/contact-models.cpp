@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2021 INRIA
+// Copyright (c) 2019-2024 INRIA
 //
 
 #include "pinocchio/algorithm/aba.hpp"
@@ -132,6 +132,27 @@ void check_A1_and_A2(const Model & model, const Data & data, const RigidConstrai
 
   BOOST_CHECK(res.isApprox(res_ref));
 
+}
+
+BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
+{
+  const pinocchio::Model model;
+  const pinocchio::Data data(model);
+  RigidConstraintModel cm(CONTACT_3D,model,0,SE3::Random(),LOCAL);
+  RigidConstraintData cd(cm);
+  cm.calc(model,data,cd);
+  
+  const pinocchio::SE3 placement = cm.joint1_placement;
+  
+  const Eigen::Vector3d diagonal_inertia(1,2,3);
+  
+  const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeSpatialInertia(placement,diagonal_inertia);
+  BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
+  
+  const auto A1 = cm.getA1(cd,LocalFrame());
+  const pinocchio::SE3::Matrix6 spatial_inertia_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+  
+  BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
 }
 
 BOOST_AUTO_TEST_CASE(contact_models_sparsity_and_jacobians)
