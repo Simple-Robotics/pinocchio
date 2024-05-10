@@ -103,6 +103,7 @@ namespace pinocchio
     }
 #endif
     collision_functors.reserve(geom_model.collisionPairs.size());
+    contact_patch_functors.reserve(geom_model.collisionPairs.size());
     distance_functors.reserve(geom_model.collisionPairs.size());
     
     for(size_t cp_index = 0;
@@ -113,6 +114,7 @@ namespace pinocchio
       const GeometryObject & obj_2 = geom_model.geometryObjects[cp.second];
       
       collision_functors.push_back(ComputeCollision(obj_1,obj_2));
+      contact_patch_functors.push_back(ComputeContactPatch(obj_1, obj_2));
       distance_functors.push_back(ComputeDistance(obj_1,obj_2));
     }
 #endif
@@ -132,6 +134,7 @@ namespace pinocchio
   , radius (other.radius)
   , collisionPairIndex (other.collisionPairIndex)
   , collision_functors (other.collision_functors)
+  , contact_patch_functors (other.contact_patch_functors)
   , distance_functors (other.distance_functors)
 #endif // PINOCCHIO_WITH_HPP_FCL
   , innerObjects (other.innerObjects)
@@ -154,6 +157,7 @@ namespace pinocchio
       radius = other.radius;
       collisionPairIndex = other.collisionPairIndex;
       collision_functors = other.collision_functors;
+      contact_patch_functors = other.contact_patch_functors;
       distance_functors = other.distance_functors;
 #endif // PINOCCHIO_WITH_HPP_FCL
       innerObjects = other.innerObjects;

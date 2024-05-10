@@ -249,6 +249,7 @@ namespace pinocchio
     
 #ifdef PINOCCHIO_WITH_HPP_FCL
     typedef ::pinocchio::ComputeCollision ComputeCollision;
+    typedef ::pinocchio::ComputeContactPatch ComputeContactPatch;
     typedef ::pinocchio::ComputeDistance ComputeDistance;
 #endif
     
@@ -314,6 +315,9 @@ namespace pinocchio
     
     /// \brief Functor associated to the computation of collisions.
     PINOCCHIO_ALIGNED_STD_VECTOR(ComputeCollision) collision_functors;
+
+    /// \brief Functor associated to the computation of contact patches.
+    PINOCCHIO_ALIGNED_STD_VECTOR(ComputeContactPatch) contact_patch_functors;
     
     /// \brief Functor associated to the computation of distances.
     PINOCCHIO_ALIGNED_STD_VECTOR(ComputeDistance) distance_functors;
