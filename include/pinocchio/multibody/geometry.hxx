@@ -83,6 +83,8 @@ namespace pinocchio
   , distanceResults(geom_model.collisionPairs.size())
   , collisionRequests(geom_model.collisionPairs.size(), hpp::fcl::CollisionRequest(::hpp::fcl::NO_REQUEST,1))
   , collisionResults(geom_model.collisionPairs.size())
+  , contactPatchRequests(geom_model.collisionPairs.size()) // use default constructor
+  , contactPatchResults(geom_model.collisionPairs.size()) // use default constructor
   , radius()
   , collisionPairIndex(0)
 #endif // PINOCCHIO_WITH_HPP_FCL
@@ -125,6 +127,8 @@ namespace pinocchio
   , distanceResults (other.distanceResults)
   , collisionRequests (other.collisionRequests)
   , collisionResults (other.collisionResults)
+  , contactPatchRequests (other.contactPatchRequests)
+  , contactPatchResults (other.contactPatchResults)
   , radius (other.radius)
   , collisionPairIndex (other.collisionPairIndex)
   , collision_functors (other.collision_functors)
@@ -145,6 +149,8 @@ namespace pinocchio
       distanceResults = other.distanceResults;
       collisionRequests = other.collisionRequests;
       collisionResults = other.collisionResults;
+      contactPatchRequests = other.contactPatchRequests;
+      contactPatchResults = other.contactPatchResults;
       radius = other.radius;
       collisionPairIndex = other.collisionPairIndex;
       collision_functors = other.collision_functors;
@@ -458,6 +464,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(security_margin_map.rows(),ngeoms,"Input map does not have the correct number of rows.");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(security_margin_map.cols(),ngeoms,"Input map does not have the correct number of columns.");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(geom_model.collisionPairs.size(),collisionRequests.size(),"Current geometry data and the input geometry model are not consistent.");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(geom_model.collisionPairs.size(),contactPatchRequests.size(),"Current geometry data and the input geometry model are not consistent.");
     
     for(size_t k = 0; k < geom_model.collisionPairs.size(); ++k)
     {

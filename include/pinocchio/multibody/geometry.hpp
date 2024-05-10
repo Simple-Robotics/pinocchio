@@ -289,6 +289,16 @@ namespace pinocchio
     std::vector<fcl::CollisionResult> collisionResults;
 
     ///
+    /// \brief Defines what information should be computed by contact patch test.
+    /// There is one request per pair of geometries.
+    std::vector<fcl::ContactPatchRequest> contactPatchRequests;
+
+    ///
+    /// \brief Vector gathering the result of the contact patch computation for all the collision pairs.
+    ///
+    std::vector<fcl::ContactPatchResult> contactPatchResults;
+
+    ///
     /// \brief Radius of the bodies, i.e. distance of the further point of the geometry model
     /// attached to the body from the joint center.
     ///
@@ -454,6 +464,8 @@ namespace pinocchio
       && distanceResults      == other.distanceResults
       && collisionRequests    == other.collisionRequests
       && collisionResults     == other.collisionResults
+      && contactPatchRequests == other.contactPatchRequests
+      && contactPatchResults  == other.contactPatchResults
       && radius               == other.radius
       && collisionPairIndex   == other.collisionPairIndex
 #endif
