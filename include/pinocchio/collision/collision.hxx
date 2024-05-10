@@ -32,14 +32,22 @@ namespace pinocchio
 
     fcl::CollisionResult & collision_result = geom_data.collisionResults[pair_id];
     collision_result.clear();
+    const fcl::ContactPatchRequest& patch_request = geom_data.contactPatchRequests[pair_id];
+    fcl::ContactPatchResult& patch_result = geom_data.contactPatchResults[pair_id];
+    patch_result.clear();
 
     fcl::Transform3f oM1 (toFclTransform3f(geom_data.oMg[pair.first ])),
                      oM2 (toFclTransform3f(geom_data.oMg[pair.second]));
 
     try
     {
-      GeometryData::ComputeCollision & do_computations = geom_data.collision_functors[pair_id];
-      do_computations(oM1, oM2, collision_request, collision_result);
+      GeometryData::ComputeCollision & calc_collision = geom_data.collision_functors[pair_id];
+      calc_collision(oM1, oM2, collision_request, collision_result);
+
+      if (collision_result.isCollision()) {
+        GeometryData::ComputeContactPatch & calc_patch = geom_data.contact_patch_functors[pair_id];
+        calc_patch(oM1, oM2, collision_result, patch_request, patch_result);
+      }
     }
     catch(std::invalid_argument & e)
     {
