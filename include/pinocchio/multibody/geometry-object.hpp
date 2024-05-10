@@ -494,6 +494,50 @@ GeometryObject(const std::string &name,
     const GeometryObject * go2_ptr;
   };
 
+  struct ComputeContactPatch
+  : ::hpp::fcl::ComputeContactPatch
+  {
+    typedef ::hpp::fcl::ComputeContactPatch Base;
+
+    ComputeContactPatch(const GeometryObject & go1, const GeometryObject & go2)
+    : Base(go1.geometry.get(),go2.geometry.get())
+    , go1_ptr(&go1)
+    , go2_ptr(&go2)
+    {}
+
+    virtual ~ComputeContactPatch() {};
+
+     void run(const fcl::Transform3f& tf1, const fcl::Transform3f& tf2,
+                            const fcl::CollisionResult& collision_result, const fcl::ContactPatchRequest& request, fcl::ContactPatchResult& result) const override
+    {
+      typedef ::hpp::fcl::CollisionGeometry const * Pointer;
+      const_cast<Pointer&>(Base::o1) = go1_ptr->geometry.get();
+      const_cast<Pointer&>(Base::o2) = go2_ptr->geometry.get();
+      return Base::run(tf1, tf2, collision_result, request, result);
+    }
+
+    bool operator==(const ComputeContactPatch & other) const
+    {
+      return
+      Base::operator==(other)
+      && go1_ptr == other.go1_ptr
+      && go2_ptr == other.go2_ptr; // Maybe, it would be better to just check *go2_ptr == *other.go2_ptr
+    }
+
+    bool operator!=(const ComputeContactPatch & other) const
+    {
+      return !(*this == other);
+    }
+
+    const GeometryObject & getGeometryObject1() const { return * go1_ptr; }
+    const GeometryObject & getGeometryObject2() const { return * go2_ptr; }
+
+  protected:
+
+    const GeometryObject * go1_ptr;
+    const GeometryObject * go2_ptr;
+  };
+
   struct ComputeDistance
   : ::hpp::fcl::ComputeDistance
   {
