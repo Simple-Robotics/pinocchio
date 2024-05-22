@@ -174,6 +174,7 @@ namespace pinocchio
                                       GeometryMaterialReturnInternalVariant()),
                       bp::make_setter(&GeometryObject::meshMaterial),
                       "Material associated to the mesh (applied only if overrideMaterial is True)")
+        .def_readwrite("physicsMaterial", &GeometryObject::physicsMaterial, "Physics material of the GeometryObject.")
 
         .def(bp::self == bp::self)
         .def(bp::self != bp::self)
@@ -274,6 +275,28 @@ namespace pinocchio
           .value("COLLISION",COLLISION)
           .export_values()
           ;
+        }
+
+        if(!register_symbolic_link_to_registered_type<PhysicsMaterialType>())
+        {
+          bp::enum_<PhysicsMaterialType>("PhysicsMaterialType")
+          .value("ICE", ICE)
+          .value("METAL", METAL)
+          .value("PLASTIC", PLASTIC)
+          .value("WOOD", WOOD)
+          .value("CONCRETE", CONCRETE)
+          .export_values()
+          ;
+        }
+
+        if(!register_symbolic_link_to_registered_type<PhysicsMaterial>())
+        {
+          bp::class_<PhysicsMaterial>("PhysicsMaterial", bp::init<>())
+            .def(bp::init<PhysicsMaterial>())
+            .def(bp::init<PhysicsMaterialType, double, double>())
+            .def_readwrite("materialType", &PhysicsMaterial::materialType, "Type of the material")
+            .def_readwrite("compliance", &PhysicsMaterial::compliance, "Compliance of the material")
+            .def_readwrite("elasticity", &PhysicsMaterial::elasticity, "Elasticity of the material");
         }
       }
 

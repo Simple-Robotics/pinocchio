@@ -93,9 +93,18 @@ namespace pinocchio
         .def_readwrite("collisionResults",
                        &GeometryData::collisionResults,
                        "Vector of collision results.")
+        .def_readwrite("contactPatchRequests",
+                       &GeometryData::contactPatchRequests,
+                       "Defines which information should be computed by FCL for contact patch requests.\n")
+        .def_readwrite("contactPatchResults",
+                       &GeometryData::contactPatchResults,
+                       "Vector of contact patch results.")
         .def_readwrite("collision_functors",
                        &GeometryData::collision_functors,
                        "Vector of collision functors.")
+        .def_readwrite("contact_patch_functors",
+                       &GeometryData::contact_patch_functors,
+                       "Vector of contact patch functors.")
         .def_readwrite("distance_functors",
                        &GeometryData::distance_functors,
                        "Vector of distance functors.")

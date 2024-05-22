@@ -462,9 +462,9 @@ namespace pinocchio
           {
             const Frame & frame = model.frames[0];
               
-            PINOCCHIO_THROW(!model.existJointName("root_joint"),
-                            std::invalid_argument,
-                            "root_joint already exists as a joint in the kinematic tree.");
+            PINOCCHIO_THROW_IF(!model.existJointName("root_joint"),
+                               std::invalid_argument,
+                               "root_joint already exists as a joint in the kinematic tree.");
             
             JointIndex idx = model.addJoint(frame.parentJoint, root_joint,
                 SE3::Identity(), "root_joint"

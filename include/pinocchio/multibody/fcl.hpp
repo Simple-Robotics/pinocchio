@@ -36,6 +36,7 @@
   
   #include <hpp/fcl/collision_object.h>
   #include <hpp/fcl/collision.h>
+  #include <hpp/fcl/contact_patch.h>
   #include <hpp/fcl/distance.h>
   #include <hpp/fcl/shape/geometric_shapes.h>
   #include "pinocchio/collision/fcl-pinocchio-conversions.hpp"

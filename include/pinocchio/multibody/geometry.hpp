@@ -249,6 +249,7 @@ namespace pinocchio
     
 #ifdef PINOCCHIO_WITH_HPP_FCL
     typedef ::pinocchio::ComputeCollision ComputeCollision;
+    typedef ::pinocchio::ComputeContactPatch ComputeContactPatch;
     typedef ::pinocchio::ComputeDistance ComputeDistance;
 #endif
     
@@ -289,6 +290,16 @@ namespace pinocchio
     std::vector<fcl::CollisionResult> collisionResults;
 
     ///
+    /// \brief Defines what information should be computed by contact patch test.
+    /// There is one request per pair of geometries.
+    std::vector<fcl::ContactPatchRequest> contactPatchRequests;
+
+    ///
+    /// \brief Vector gathering the result of the contact patch computation for all the collision pairs.
+    ///
+    std::vector<fcl::ContactPatchResult> contactPatchResults;
+
+    ///
     /// \brief Radius of the bodies, i.e. distance of the further point of the geometry model
     /// attached to the body from the joint center.
     ///
@@ -304,6 +315,9 @@ namespace pinocchio
     
     /// \brief Functor associated to the computation of collisions.
     PINOCCHIO_ALIGNED_STD_VECTOR(ComputeCollision) collision_functors;
+
+    /// \brief Functor associated to the computation of contact patches.
+    PINOCCHIO_ALIGNED_STD_VECTOR(ComputeContactPatch) contact_patch_functors;
     
     /// \brief Functor associated to the computation of distances.
     PINOCCHIO_ALIGNED_STD_VECTOR(ComputeDistance) distance_functors;
@@ -454,6 +468,8 @@ namespace pinocchio
       && distanceResults      == other.distanceResults
       && collisionRequests    == other.collisionRequests
       && collisionResults     == other.collisionResults
+      && contactPatchRequests == other.contactPatchRequests
+      && contactPatchResults  == other.contactPatchResults
       && radius               == other.radius
       && collisionPairIndex   == other.collisionPairIndex
 #endif

@@ -70,6 +70,58 @@ struct GeometryPhongMaterial
 
 typedef boost::variant<GeometryNoMaterial, GeometryPhongMaterial> GeometryMaterial;
 
+/// Type of physics material.
+/// When two objects collide, the physics material of the two objects is notably used
+/// to compute the coefficient of friction of the collision pair.
+enum PhysicsMaterialType
+{
+  ICE,
+  METAL,
+  CONCRETE,
+  PLASTIC,
+  WOOD,
+  PHYSICS_MATERIAL_COUNT
+};
+
+struct FrictionCoefficientMatrix {
+  typedef Eigen::Matrix<double, PHYSICS_MATERIAL_COUNT, PHYSICS_MATERIAL_COUNT> Matrix;
+  typedef Eigen::Index Index;
+
+  Matrix friction_coefficient_matrix;
+
+  FrictionCoefficientMatrix();
+
+  double getFrictionFromMaterialPair(PhysicsMaterialType type1, PhysicsMaterialType type2) const {
+    return friction_coefficient_matrix(type1, type2);
+  }
+};
+
+inline FrictionCoefficientMatrix& getFrictionCoefficientMatrix() {
+  static FrictionCoefficientMatrix table;
+  return table;
+}
+
+/// Physics material associated to a geometry.
+struct PhysicsMaterial {
+  PhysicsMaterialType materialType;
+  double compliance;
+  double elasticity;
+
+  // Default constructor
+  explicit PhysicsMaterial(PhysicsMaterialType materialType = PLASTIC, double compliance = 0.0, double elasticity = 0.)
+    : materialType(materialType)
+    , compliance(compliance)
+    , elasticity(elasticity)
+  {}
+
+  bool operator==(const PhysicsMaterial& other) const
+  {
+    return materialType == other.materialType
+           && compliance == other.compliance
+           && elasticity == other.elasticity;
+  }
+};
+
 struct GeometryObject; //fwd
 
 template<>
@@ -124,6 +176,9 @@ struct GeometryObject
   /// \brief If true, no collision or distance check will be done between the Geometry and any other geometry
   bool disableCollision;
 
+  /// \brief The physics property of the object.
+  PhysicsMaterial physicsMaterial;
+
   ///
   /// \brief Full constructor.
   ///
@@ -149,7 +204,8 @@ GeometryObject(const std::string &name,
                const bool overrideMaterial = false,
                const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                const std::string &meshTexturePath = "",
-               const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+               const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+               const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
     : Base(name, parent_joint, parent_frame, placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)
@@ -159,6 +215,7 @@ GeometryObject(const std::string &name,
     , meshMaterial(meshMaterial)
     , meshTexturePath(meshTexturePath)
     , disableCollision(false)
+    , physicsMaterial(physicsMaterial)
 {}
 
   ///
@@ -188,7 +245,8 @@ GeometryObject(const std::string &name,
                                       const bool overrideMaterial = false,
                                       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0,0,0,1),
                                       const std::string & meshTexturePath = "",
-                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                                      const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
   : Base(name, parent_joint, parent_frame, placement)
   , geometry(collision_geometry)
   , meshPath(meshPath)
@@ -198,6 +256,7 @@ GeometryObject(const std::string &name,
   , meshMaterial(meshMaterial)
   , meshTexturePath(meshTexturePath)
   , disableCollision(false)
+  , physicsMaterial(physicsMaterial)
   {}
 
   ///
@@ -224,7 +283,8 @@ GeometryObject(const std::string &name,
                  const bool overrideMaterial = false,
                  const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                  const std::string &meshTexturePath = "",
-                 const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                 const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                 const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
       : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
       , geometry(collision_geometry)
       , meshPath(meshPath)
@@ -234,6 +294,7 @@ GeometryObject(const std::string &name,
       , meshMaterial(meshMaterial)
       , meshTexturePath(meshTexturePath)
       , disableCollision(false)
+      , physicsMaterial(physicsMaterial)
   {}
 
 
@@ -263,7 +324,8 @@ GeometryObject(const std::string &name,
                                       const bool overrideMaterial = false,
                                       const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                                       const std::string &meshTexturePath = "",
-                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                                      const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
       : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
       , geometry(collision_geometry)
       , meshPath(meshPath)
@@ -273,6 +335,7 @@ GeometryObject(const std::string &name,
       , meshMaterial(meshMaterial)
       , meshTexturePath(meshTexturePath)
       , disableCollision(false)
+      , physicsMaterial(physicsMaterial)
   {}
 
 
@@ -297,6 +360,7 @@ GeometryObject(const std::string &name,
     meshMaterial        = other.meshMaterial;
     meshTexturePath     = other.meshTexturePath;
     disableCollision    = other.disableCollision;
+    physicsMaterial     = other.physicsMaterial;
     return *this;
   }
   
@@ -330,6 +394,7 @@ GeometryObject(const std::string &name,
     && meshMaterial        == other.meshMaterial
     && meshTexturePath     == other.meshTexturePath
     && disableCollision    == other.disableCollision
+    && physicsMaterial     == other.physicsMaterial
     && compare_shared_ptr(geometry,other.geometry)
     ;
   }
@@ -425,6 +490,50 @@ GeometryObject(const std::string &name,
     
   protected:
     
+    const GeometryObject * go1_ptr;
+    const GeometryObject * go2_ptr;
+  };
+
+  struct ComputeContactPatch
+  : ::hpp::fcl::ComputeContactPatch
+  {
+    typedef ::hpp::fcl::ComputeContactPatch Base;
+
+    ComputeContactPatch(const GeometryObject & go1, const GeometryObject & go2)
+    : Base(go1.geometry.get(),go2.geometry.get())
+    , go1_ptr(&go1)
+    , go2_ptr(&go2)
+    {}
+
+    virtual ~ComputeContactPatch() {};
+
+     void run(const fcl::Transform3f& tf1, const fcl::Transform3f& tf2,
+                            const fcl::CollisionResult& collision_result, const fcl::ContactPatchRequest& request, fcl::ContactPatchResult& result) const override
+    {
+      typedef ::hpp::fcl::CollisionGeometry const * Pointer;
+      const_cast<Pointer&>(Base::o1) = go1_ptr->geometry.get();
+      const_cast<Pointer&>(Base::o2) = go2_ptr->geometry.get();
+      return Base::run(tf1, tf2, collision_result, request, result);
+    }
+
+    bool operator==(const ComputeContactPatch & other) const
+    {
+      return
+      Base::operator==(other)
+      && go1_ptr == other.go1_ptr
+      && go2_ptr == other.go2_ptr; // Maybe, it would be better to just check *go2_ptr == *other.go2_ptr
+    }
+
+    bool operator!=(const ComputeContactPatch & other) const
+    {
+      return !(*this == other);
+    }
+
+    const GeometryObject & getGeometryObject1() const { return * go1_ptr; }
+    const GeometryObject & getGeometryObject2() const { return * go2_ptr; }
+
+  protected:
+
     const GeometryObject * go1_ptr;
     const GeometryObject * go2_ptr;
   };

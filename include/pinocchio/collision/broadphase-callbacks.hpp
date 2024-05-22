@@ -108,7 +108,7 @@ struct CollisionCallBackDefault : CollisionCallBackBase
     count++;
     
     fcl::CollisionRequest collision_request(geometry_data_ptr->collisionRequests[size_t(pair_index)]);
-    collision_request.gjk_variant = fcl::GJKVariant::NesterovAcceleration;
+    // collision_request.gjk_variant = fcl::GJKVariant::PolyakAcceleration;
 //    collision_request.gjk_initial_guess = fcl::GJKInitialGuess::BoundingVolumeGuess;
 
     if(co1.collisionGeometry().get() != geometry_model.geometryObjects[size_t(go1_index)].geometry.get() ||

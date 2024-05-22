@@ -42,6 +42,9 @@ namespace pinocchio
                const Eigen::DenseBase<VectorLikeOut> & x,
                const Scalar over_relax = Scalar(1));
 
+    /// \returns the solution of the problem
+    const VectorXs & getSolution() const { return x; }
+
   protected:
 
     /// \brief Previous temporary value of the optimum.
