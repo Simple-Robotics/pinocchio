@@ -89,6 +89,10 @@ struct FrictionCoefficientMatrix {
   Matrix friction_coefficient_matrix;
 
   FrictionCoefficientMatrix();
+
+  double getFrictionFromMaterialPair(PhysicsMaterialType type1, PhysicsMaterialType type2) const {
+    return friction_coefficient_matrix(type1, type2);
+  }
 };
 
 inline FrictionCoefficientMatrix& getFrictionCoefficientMatrix() {
