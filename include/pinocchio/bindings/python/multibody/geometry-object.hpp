@@ -293,11 +293,10 @@ namespace pinocchio
         {
           bp::class_<PhysicsMaterial>("PhysicsMaterial", bp::init<>())
             .def(bp::init<PhysicsMaterial>())
-            .def(bp::init<PhysicsMaterialType, double, double, double>())
+            .def(bp::init<PhysicsMaterialType, double, double>())
             .def_readwrite("materialType", &PhysicsMaterial::materialType, "Type of the material")
             .def_readwrite("compliance", &PhysicsMaterial::compliance, "Compliance of the material")
-            .def_readwrite("elasticity", &PhysicsMaterial::elasticity, "Elasticity of the material")
-            .def_readwrite("baumgarte_stabilization", &PhysicsMaterial::baumgarte_stabilization, "Baumgarte stabilization factor");
+            .def_readwrite("elasticity", &PhysicsMaterial::elasticity, "Elasticity of the material");
         }
       }
 
