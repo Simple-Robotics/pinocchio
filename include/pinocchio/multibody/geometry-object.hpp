@@ -70,6 +70,48 @@ struct GeometryPhongMaterial
 
 typedef boost::variant<GeometryNoMaterial, GeometryPhongMaterial> GeometryMaterial;
 
+/// Type of physics material.
+/// When two objects collide, the physics material of the two objects is notably used
+/// to compute the coefficient of friction of the collision pair.
+enum PhysicsMaterialType
+{
+  ICE,
+  METAL,
+  PLASTIC,
+  WOOD,
+  PHYSICS_MATERIAL_COUNT
+};
+
+struct FrictionCoefficientMatrix {
+  typedef Eigen::Matrix<double, PHYSICS_MATERIAL_COUNT, PHYSICS_MATERIAL_COUNT> Matrix;
+  typedef Eigen::Index Index;
+
+  Matrix friction_coefficient_matrix;
+
+  FrictionCoefficientMatrix();
+};
+
+inline FrictionCoefficientMatrix& getFrictionCoefficientMatrix() {
+  static FrictionCoefficientMatrix table;
+  return table;
+}
+
+/// Physics material associated to a geometry.
+/// It is composed of the type of material (metal, wood, plastic etc.) as well as the compliance of the material.
+struct PhysicsMaterial {
+  PhysicsMaterialType materialType;
+  double compliance;
+
+  // Default constructor
+  explicit PhysicsMaterial(PhysicsMaterialType materialType = PLASTIC, double compliance = 0.0)
+    : materialType(materialType), compliance(compliance) {}
+
+  bool operator==(const PhysicsMaterial& other) const
+  {
+    return materialType == other.materialType && compliance == other.compliance;
+  }
+};
+
 struct GeometryObject; //fwd
 
 template<>
@@ -124,6 +166,9 @@ struct GeometryObject
   /// \brief If true, no collision or distance check will be done between the Geometry and any other geometry
   bool disableCollision;
 
+  /// \brief The physics property of the object.
+  PhysicsMaterial physicsMaterial;
+
   ///
   /// \brief Full constructor.
   ///
@@ -149,7 +194,8 @@ GeometryObject(const std::string &name,
                const bool overrideMaterial = false,
                const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                const std::string &meshTexturePath = "",
-               const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+               const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+               const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
     : Base(name, parent_joint, parent_frame, placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)
@@ -159,6 +205,7 @@ GeometryObject(const std::string &name,
     , meshMaterial(meshMaterial)
     , meshTexturePath(meshTexturePath)
     , disableCollision(false)
+    , physicsMaterial(physicsMaterial)
 {}
 
   ///
@@ -188,7 +235,8 @@ GeometryObject(const std::string &name,
                                       const bool overrideMaterial = false,
                                       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0,0,0,1),
                                       const std::string & meshTexturePath = "",
-                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                                      const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
   : Base(name, parent_joint, parent_frame, placement)
   , geometry(collision_geometry)
   , meshPath(meshPath)
@@ -198,6 +246,7 @@ GeometryObject(const std::string &name,
   , meshMaterial(meshMaterial)
   , meshTexturePath(meshTexturePath)
   , disableCollision(false)
+  , physicsMaterial(physicsMaterial)
   {}
 
   ///
@@ -224,7 +273,8 @@ GeometryObject(const std::string &name,
                  const bool overrideMaterial = false,
                  const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                  const std::string &meshTexturePath = "",
-                 const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                 const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                 const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
       : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
       , geometry(collision_geometry)
       , meshPath(meshPath)
@@ -234,6 +284,7 @@ GeometryObject(const std::string &name,
       , meshMaterial(meshMaterial)
       , meshTexturePath(meshTexturePath)
       , disableCollision(false)
+      , physicsMaterial(physicsMaterial)
   {}
 
 
@@ -263,7 +314,8 @@ GeometryObject(const std::string &name,
                                       const bool overrideMaterial = false,
                                       const Eigen::Vector4d &meshColor = Eigen::Vector4d(0, 0, 0, 1),
                                       const std::string &meshTexturePath = "",
-                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial())
+                                      const GeometryMaterial& meshMaterial = GeometryNoMaterial(),
+                                      const PhysicsMaterial &physicsMaterial = PhysicsMaterial())
       : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
       , geometry(collision_geometry)
       , meshPath(meshPath)
@@ -273,6 +325,7 @@ GeometryObject(const std::string &name,
       , meshMaterial(meshMaterial)
       , meshTexturePath(meshTexturePath)
       , disableCollision(false)
+      , physicsMaterial(physicsMaterial)
   {}
 
 
@@ -297,6 +350,7 @@ GeometryObject(const std::string &name,
     meshMaterial        = other.meshMaterial;
     meshTexturePath     = other.meshTexturePath;
     disableCollision    = other.disableCollision;
+    physicsMaterial     = other.physicsMaterial;
     return *this;
   }
   
@@ -330,6 +384,7 @@ GeometryObject(const std::string &name,
     && meshMaterial        == other.meshMaterial
     && meshTexturePath     == other.meshTexturePath
     && disableCollision    == other.disableCollision
+    && physicsMaterial     == other.physicsMaterial
     && compare_shared_ptr(geometry,other.geometry)
     ;
   }

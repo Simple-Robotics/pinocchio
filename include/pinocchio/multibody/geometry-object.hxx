@@ -23,6 +23,35 @@ namespace pinocchio
     return os;
   }
 
+  inline FrictionCoefficientMatrix::FrictionCoefficientMatrix() {
+    // Initialize the matrix with zeros, in case we forget to set some coefficients.
+    for (Index i = 0; i < friction_coefficient_matrix.rows(); ++i) {
+      for (Index j = 0; j < friction_coefficient_matrix.cols(); ++j) {
+        friction_coefficient_matrix.coeffRef(i, j) = 0.0;
+      }
+    }
+
+    // Sources: https://en.wikipedia.org/wiki/Friction
+    //          https://www.engineeringtoolbox.com/friction-coefficients-d_778.html
+    // These are really rough estimates, and should be replaced by more accurate values if available.
+    friction_coefficient_matrix.coeffRef(METAL, METAL)     = 0.75;
+    friction_coefficient_matrix.coeffRef(METAL, WOOD)      = 0.5;
+    friction_coefficient_matrix.coeffRef(METAL, PLASTIC)   = 0.2;
+    friction_coefficient_matrix.coeffRef(METAL, ICE)       = 0.03;
+
+    friction_coefficient_matrix.coeffRef(WOOD, WOOD)       = 0.4;
+    friction_coefficient_matrix.coeffRef(WOOD, PLASTIC)    = 0.3;
+    friction_coefficient_matrix.coeffRef(WOOD, ICE)        = 0.03;
+
+    friction_coefficient_matrix.coeffRef(PLASTIC, PLASTIC) = 0.2;
+    friction_coefficient_matrix.coeffRef(PLASTIC, ICE)     = 0.02;
+
+    friction_coefficient_matrix.coeffRef(ICE, ICE)         = 0.01;
+
+    // Symmetrize the matrix
+    friction_coefficient_matrix.triangularView<Eigen::StrictlyLower>() = friction_coefficient_matrix.transpose();
+  }
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_multibody_geometry_object_hxx__
