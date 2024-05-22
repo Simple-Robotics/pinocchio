@@ -101,18 +101,26 @@ inline FrictionCoefficientMatrix& getFrictionCoefficientMatrix() {
 }
 
 /// Physics material associated to a geometry.
-/// It is composed of the type of material (metal, wood, plastic etc.) as well as the compliance of the material.
 struct PhysicsMaterial {
   PhysicsMaterialType materialType;
   double compliance;
+  double elasticity;
+  double baumgarte_stabilization;
 
   // Default constructor
-  explicit PhysicsMaterial(PhysicsMaterialType materialType = PLASTIC, double compliance = 0.0)
-    : materialType(materialType), compliance(compliance) {}
+  explicit PhysicsMaterial(PhysicsMaterialType materialType = PLASTIC, double compliance = 0.0, double elasticity = 0., double baumgarte_stabilization = 0.)
+    : materialType(materialType)
+    , compliance(compliance)
+    , elasticity(elasticity)
+    , baumgarte_stabilization(baumgarte_stabilization)
+  {}
 
   bool operator==(const PhysicsMaterial& other) const
   {
-    return materialType == other.materialType && compliance == other.compliance;
+    return materialType == other.materialType
+           && compliance == other.compliance
+           && elasticity == other.elasticity
+           && baumgarte_stabilization == other.baumgarte_stabilization;
   }
 };
 
