@@ -140,6 +140,9 @@ namespace pinocchio
     typedef typename Base::BooleanVector BooleanVector;
     typedef typename Base::IndexVector IndexVector;
     typedef Eigen::Matrix<Scalar,3,6,Options> Matrix36;
+    typedef Eigen::Matrix<Scalar,6,6,Options> Matrix6;
+    typedef Eigen::Matrix<Scalar,3,1,Options> Vector3;
+    typedef Eigen::Matrix<Scalar,6,1,Options> Vector6;
 
     /// \brief Type of the contact.
     ContactType type;
@@ -185,11 +188,14 @@ namespace pinocchio
 
     IndexVector loop_span_indexes;
 
-    /// \brief Dimensions of the models
+    /// \brief Dimensions of the model
     int nv;
     
     /// \brief Depth of the kinematic tree for joint1 and joint2
     size_t depth_joint1, depth_joint2;
+    
+    /// \brief Compliance associated with the contact model
+    Vector3 compliance;
 
   protected:
     ///
@@ -238,6 +244,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
+    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -272,6 +279,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
+    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -305,6 +313,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
+    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -338,6 +347,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
+    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -374,6 +384,7 @@ namespace pinocchio
       && depth_joint1 == other.depth_joint1
       && depth_joint2 == other.depth_joint2
       && loop_span_indexes == other.loop_span_indexes
+      && compliance == other.compliance
       ;
     }
     
@@ -507,8 +518,8 @@ namespace pinocchio
     /// This function is useful to express the constraint inertia associated with the constraint for AL settings.
     ///
     template<typename Vector3Like>
-    Matrix6 computeSpatialInertia(const SE3Tpl<Scalar,Options> & placement,
-                                  const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia) const
+    Matrix6 computeConstraintSpatialInertia(const SE3Tpl<Scalar,Options> & placement,
+                                            const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia) const
     {
       EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like,Vector3);
       Matrix6 res;
@@ -531,6 +542,32 @@ namespace pinocchio
       block_AA.noalias() = t_skew * block_LA;
       
       return res;
+    }
+    
+    template<template<typename,int> class JointCollectionTpl, typename Vector3Like, typename Matrix6Like, typename Matrix6LikeAllocator>
+    void appendConstraintDiagonalInertiaToJointInertias(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                                        const DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                                        const RigidConstraintDataTpl<Scalar,Options> & cdata,
+                                                        const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia,
+                                                        std::vector<Matrix6Like,Matrix6LikeAllocator> & inertias) const
+    {
+      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like,Vector3);
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(cdata);
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(inertias.size(),size_t(model.njoints));
+      assert(((joint1_id > 0 && joint2_id == 0) || (joint1_id == 0 && joint2_id > 0)) && "The behavior is only defined for this context");
+      
+      if(this->joint1_id != 0)
+      {
+        const SE3 & placement = this->joint1_placement;
+        inertias[this->joint1_id] += computeConstraintSpatialInertia(placement,diagonal_constraint_inertia);
+      }
+      
+      if(this->joint2_id != 0)
+      {
+        const SE3 & placement = this->joint2_placement;
+        inertias[this->joint2_id] += computeConstraintSpatialInertia(placement,diagonal_constraint_inertia);
+      }
     }
 
     template<typename InputMatrix, typename OutputMatrix, template<typename,int> class JointCollectionTpl>
