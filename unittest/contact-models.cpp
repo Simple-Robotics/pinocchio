@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
   
   const Eigen::Vector3d diagonal_inertia(1,2,3);
   
-  const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeSpatialInertia(placement,diagonal_inertia);
+  const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeConstraintSpatialInertia(placement,diagonal_inertia);
   BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
   
   const auto A1 = cm.getA1(cd,LocalFrame());
