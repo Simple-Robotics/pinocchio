@@ -27,17 +27,15 @@ namespace pinocchio
         typedef SE3Tpl<Scalar,Options> SE3;
         typedef typename SE3::Matrix3 Matrix3;
         typedef typename SE3::Vector3 Vector3;
-
-        typedef const Eigen::Block<Matrix6Type,3,3> constBlock3;
+        typedef Eigen::Block<ReturnType,3,3> Block3;
+        typedef const Eigen::Block<Matrix6Type,3,3> ConstBlock3;
 
         typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Matrix6Type) ReturnType;
-        typedef Eigen::Block<ReturnType,3,3> Block3;
-        typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Block3) Matrix3;
 
         Matrix6Type & I_ = PINOCCHIO_EIGEN_CONST_CAST(Matrix6Type,I);
-        const constBlock3 Ai = I_.template block<3,3>(Inertia::LINEAR, Inertia::LINEAR);
-        const constBlock3 Bi = I_.template block<3,3>(Inertia::LINEAR, Inertia::ANGULAR);
-        const constBlock3 Di = I_.template block<3,3>(Inertia::ANGULAR, Inertia::ANGULAR);
+        const ConstBlock3 Ai = I_.template block<3,3>(Inertia::LINEAR, Inertia::LINEAR);
+        const ConstBlock3 Bi = I_.template block<3,3>(Inertia::LINEAR, Inertia::ANGULAR);
+        const ConstBlock3 Di = I_.template block<3,3>(Inertia::ANGULAR, Inertia::ANGULAR);
 
         const Matrix3 & R = M.rotation();
         const Vector3 & t = M.translation();
