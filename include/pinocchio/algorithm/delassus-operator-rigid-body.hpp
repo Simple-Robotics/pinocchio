@@ -72,12 +72,12 @@ namespace pinocchio {
                                  const ConstraintModelVectorHolder &constraint_models_ref,
                                  const ConstraintDataVectorHolder &constraint_datas_ref)
     : Base()
-    , m_size(evalConstraintSize(get_ref(constraint_models_ref)))
+    , m_size(evalConstraintSize(helper::get_ref(constraint_models_ref)))
     , m_model_ref(model_ref)
     , m_data_ref(data_ref)
     , m_constraint_models_ref(constraint_models_ref)
     , m_constraint_datas_ref(constraint_datas_ref)
-    , m_custom_data(get_ref(model_ref), get_ref(data_ref))
+    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref), m_size)
     , m_dirty(true)
     , m_damping(Vector::Zero(m_size))
     {
@@ -99,15 +99,15 @@ namespace pinocchio {
     ///
     void compute();
     
-    const Model & model() const { return get_ref(m_model_ref); }
+    const Model & model() const { return helper::get_ref(m_model_ref); }
     
-    Data & data() { return get_ref(m_data_ref); }
-    const Data & data() const { return get_ref(m_data_ref); }
+    Data & data() { return helper::get_ref(m_data_ref); }
+    const Data & data() const { return helper::get_ref(m_data_ref); }
     
-    const ConstraintModelVector & constraint_models() const { return get_ref(m_constraint_models_ref); }
+    const ConstraintModelVector & constraint_models() const { return helper::get_ref(m_constraint_models_ref); }
     
-    const ConstraintDataVector & constraint_datas() const { return get_ref(m_constraint_datas_ref); }
-    ConstraintDataVector & constraint_datas() { return get_ref(m_constraint_datas_ref); }
+    const ConstraintDataVector & constraint_datas() const { return helper::get_ref(m_constraint_datas_ref); }
+    ConstraintDataVector & constraint_datas() { return helper::get_ref(m_constraint_datas_ref); }
     
     Eigen::DenseIndex size() const { return m_size; }
     Eigen::DenseIndex rows() const { return m_size; }
@@ -116,8 +116,8 @@ namespace pinocchio {
     void update(const ConstraintModelVectorHolder &constraint_models_ref,
                 const ConstraintDataVectorHolder &constraint_datas_ref)
     {
-      if(get_pointer(m_constraint_models_ref) == get_pointer(constraint_models_ref)
-         && get_pointer(m_constraint_datas_ref) == get_pointer(constraint_datas_ref))
+      if(helper::get_pointer(m_constraint_models_ref) == helper::get_pointer(constraint_models_ref)
+         && helper::get_pointer(m_constraint_datas_ref) == helper::get_pointer(constraint_datas_ref))
         return;
       m_constraint_models_ref = constraint_models_ref;
       m_constraint_datas_ref = constraint_datas_ref;

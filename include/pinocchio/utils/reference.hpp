@@ -10,6 +10,8 @@
 
 namespace pinocchio
 {
+namespace helper
+  {
   // std::reference_wrapper
   template<typename T>
   T & get_ref(const std::reference_wrapper<T> & ref) { return ref.get(); }
@@ -31,7 +33,8 @@ namespace pinocchio
   T * get_pointer(const std::shared_ptr<T> & ptr) { return ptr.get(); }
   template<typename T>
   const T * get_pointer(const std::shared_ptr<const T> & ptr) { return ptr.get(); }
-
-}
+  
+} // namespace helper
+} // namespace pinocchio
 
 #endif // ifndef __pinocchio_utils_reference_hpp__
