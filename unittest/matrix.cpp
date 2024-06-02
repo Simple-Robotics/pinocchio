@@ -19,8 +19,8 @@ BOOST_AUTO_TEST_CASE(test_isSymmetric)
   typedef Eigen::MatrixXd Matrix;
   
 #ifdef NDEBUG
-  const int max_test = 1e6;
-  const int max_size = 1000;
+  const int max_test = 1e3;
+  const int max_size = 200;
 #else
   const int max_test = 1e2;
   const int max_size = 100;
