@@ -77,7 +77,7 @@ namespace pinocchio {
     , m_data_ref(data_ref)
     , m_constraint_models_ref(constraint_models_ref)
     , m_constraint_datas_ref(constraint_datas_ref)
-    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref), m_size)
+    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref))
     , m_dirty(true)
     , m_damping(Vector::Zero(m_size))
     {
