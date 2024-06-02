@@ -144,15 +144,34 @@ BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
   
   const pinocchio::SE3 placement = cm.joint1_placement;
   
-  const Eigen::Vector3d diagonal_inertia(1,2,3);
+  {
+    const Eigen::Vector3d diagonal_inertia(1,2,3);
+    
+    const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeConstraintSpatialInertia(placement,diagonal_inertia);
+    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
+    
+    const auto A1 = cm.getA1(cd,LocalFrame());
+    const pinocchio::SE3::Matrix6 spatial_inertia_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+    
+    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
+  }
   
-  const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeConstraintSpatialInertia(placement,diagonal_inertia);
-  BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
-  
-  const auto A1 = cm.getA1(cd,LocalFrame());
-  const pinocchio::SE3::Matrix6 spatial_inertia_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
-  
-  BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
+  // Scalar
+  {
+    const double constant_value = 10;
+    const Eigen::Vector3d diagonal_inertia = Eigen::Vector3d::Constant(constant_value);
+    
+    const pinocchio::SE3::Matrix6 spatial_inertia = cm.computeConstraintSpatialInertia(placement,diagonal_inertia);
+    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
+    
+    const auto A1 = cm.getA1(cd,LocalFrame());
+    const pinocchio::SE3::Matrix6 spatial_inertia_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+    
+    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
+    
+    const Inertia spatial_inertia_ref2(constant_value,placement.translation(),Symmetric3::Zero());
+    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref2.matrix()));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(contact_models_sparsity_and_jacobians)
