@@ -1464,8 +1464,12 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_updateDamping)
   {
     ContactCholeskyDecomposition contact_chol_decomposition;
     contact_chol_decomposition.allocate(model, contact_models);
+    
     contact_chol_decomposition.compute(model,data,contact_models,contact_datas,mu1);
+    BOOST_CHECK(contact_chol_decomposition.getDamping().isConstant(mu1));
+    
     contact_chol_decomposition.updateDamping(mu2);
+    BOOST_CHECK(contact_chol_decomposition.getDamping().isConstant(mu2));
 
     ContactCholeskyDecomposition contact_chol_decomposition_ref;
     contact_chol_decomposition_ref.allocate(model, contact_models);

@@ -41,6 +41,7 @@ namespace pinocchio
       OSIMinv_tmp.resize(num_total_constraints,num_total_constraints);
       U4inv.resize(nv,nv);
       Minv_tmp.resize(nv,nv);
+      damping = Vector::Zero(num_total_constraints);
 
       const Eigen::DenseIndex total_dim = nv + num_total_constraints;
       
@@ -280,6 +281,7 @@ namespace pinocchio
     updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorLike)
+      damping = vec;
       const Eigen::DenseIndex total_dim = size();
       const Eigen::DenseIndex total_constraints_dim = total_dim - nv;
       

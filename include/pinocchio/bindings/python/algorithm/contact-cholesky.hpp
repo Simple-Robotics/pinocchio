@@ -87,6 +87,10 @@ namespace pinocchio
              bp::args("self","mus"),
              "Update the damping terms on the upper left block part of the KKT matrix. The damping terms should be all positives.")
         
+        .def("getDamping",&Self::getDamping,bp::arg("self"),
+             "Returns the current damping vector.",
+             bp::return_value_policy<bp::copy_const_reference>())
+        
         .def("getInverseOperationalSpaceInertiaMatrix",
              (Matrix (Self::*)(void) const)&Self::getInverseOperationalSpaceInertiaMatrix,
              bp::arg("self"),

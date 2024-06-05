@@ -373,6 +373,11 @@ namespace pinocchio
       /// \param[in] mu Regularization factor allowing to enforce the definite property of the KKT matrix.
       ///
       void updateDamping(const Scalar & mu);
+      
+      ///
+      /// \brief Returns the current damping vector.
+      ///
+      const Vector & getDamping() const { return damping; }
 
       /// \brief Size of the decomposition
       Eigen::DenseIndex size() const { return D.size(); }
@@ -525,6 +530,9 @@ namespace pinocchio
       mutable Matrix U4inv;
       
       mutable RowMatrix OSIMinv_tmp, Minv_tmp;
+      
+      /// \brief Store the current damping value
+      Vector damping;
       
     };
 
