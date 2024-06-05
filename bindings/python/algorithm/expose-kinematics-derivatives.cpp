@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2018-2021 CNRS INRIA
+// Copyright (c) 2018-2021 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
@@ -101,10 +102,22 @@ namespace pinocchio
       enum { Options = context::Options };
       
       bp::def("computeForwardKinematicsDerivatives",
+              &computeForwardKinematicsDerivatives<Scalar,Options,JointCollectionDefaultTpl,VectorXs,VectorXs>,
+              bp::args("model","data","q","v"),
+              "Computes all the terms required to compute the derivatives of the placement and spatial velocities\n"
+              "for any joint/frame of the model.\n"
+              "The results are stored in data.\n\n"
+              "Parameters:\n"
+              "\tmodel: model of the kinematic tree\n"
+              "\tdata: data related to the model\n"
+              "\tq: the joint configuration vector (size model.nq)\n"
+              "\tv: the joint velocity vector (size model.nv)\n");
+      
+      bp::def("computeForwardKinematicsDerivatives",
               &computeForwardKinematicsDerivatives<Scalar,Options,JointCollectionDefaultTpl,VectorXs,VectorXs,VectorXs>,
               bp::args("model","data","q","v","a"),
-              "Computes all the terms required to compute the derivatives of the placement, spatial velocity and acceleration\n"
-              "for any joint of the model.\n"
+              "Computes all the terms required to compute the derivatives of the placement, spatial velocities and accelerations\n"
+              "for any joint/frame of the model.\n"
               "The results are stored in data.\n\n"
               "Parameters:\n"
               "\tmodel: model of the kinematic tree\n"
