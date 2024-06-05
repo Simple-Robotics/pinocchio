@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2020 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_kinematics_derivatives_hxx__
@@ -13,6 +14,85 @@
 namespace pinocchio
 {
   namespace impl {
+    
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType>
+  struct ForwardKinematicsDerivativesForwardStepOrder1
+  : public fusion::JointUnaryVisitorBase< ForwardKinematicsDerivativesForwardStepOrder1<Scalar,Options,JointCollectionTpl,ConfigVectorType,TangentVectorType> >
+  {
+    typedef ModelTpl<Scalar,Options,JointCollectionTpl> Model;
+    typedef DataTpl<Scalar,Options,JointCollectionTpl> Data;
+    
+    typedef boost::fusion::vector<const Model &,
+                                  Data &,
+                                  const ConfigVectorType &,
+                                  const TangentVectorType &
+                                  > ArgsType;
+    
+    template<typename JointModel>
+    static void algo(const JointModelBase<JointModel> & jmodel,
+                     JointDataBase<typename JointModel::JointDataDerived> & jdata,
+                     const Model & model,
+                     Data & data,
+                     const Eigen::MatrixBase<ConfigVectorType> & q,
+                     const Eigen::MatrixBase<TangentVectorType> & v)
+    {
+      typedef typename Model::JointIndex JointIndex;
+      typedef typename Data::SE3 SE3;
+      typedef typename Data::Motion Motion;
+      
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+      SE3 & oMi = data.oMi[i];
+      Motion & vi = data.v[i];
+      Motion & ov = data.ov[i];
+      
+      jmodel.calc(jdata.derived(),q.derived(),v.derived());
+      
+      data.liMi[i] = model.jointPlacements[i]*jdata.M();
+      
+      if(parent>0)
+        oMi = data.oMi[parent]*data.liMi[i];
+      else
+        oMi = data.liMi[i];
+      
+      vi = jdata.v();
+      if(parent>0)
+        vi += data.liMi[i].actInv(data.v[parent]);
+      
+      typedef typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type ColsBlock;
+      ColsBlock dJcols = jmodel.jointCols(data.dJ);
+      ColsBlock Jcols = jmodel.jointCols(data.J);
+      
+      Jcols = oMi.act(jdata.S());
+      ov = oMi.act(vi); // Spatial velocity of joint i expressed in the global frame o
+      motionSet::motionAction(ov,Jcols,dJcols);
+    }
+    
+  };
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType>
+  void computeForwardKinematicsDerivatives(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                           DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                           const Eigen::MatrixBase<ConfigVectorType> & q,
+                                           const Eigen::MatrixBase<TangentVectorType> & v)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(q.size(), model.nq, "The configuration vector is not of right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(v.size(), model.nv, "The velocity vector is not of right size");
+    assert(model.check(data) && "data is not consistent with model.");
+    
+    typedef ModelTpl<Scalar,Options,JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+    
+    data.v[0].setZero();
+    
+    typedef ForwardKinematicsDerivativesForwardStepOrder1<Scalar,Options,JointCollectionTpl,ConfigVectorType,TangentVectorType> Pass;
+    typename Pass::ArgsType args(model,data,q.derived(),v.derived());
+    for(JointIndex i=1; i<(JointIndex) model.njoints; ++i)
+    {
+      Pass::run(model.joints[i],data.joints[i],args);
+    }
+  }  
+    
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2>
   struct ForwardKinematicsDerivativesForwardStep
   : public fusion::JointUnaryVisitorBase< ForwardKinematicsDerivativesForwardStep<Scalar,Options,JointCollectionTpl,ConfigVectorType,TangentVectorType1,TangentVectorType2> >
@@ -1136,6 +1216,15 @@ namespace pinocchio
         assert(false && "must never happened");
         break;
     }
+  }
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType>
+  void computeForwardKinematicsDerivatives(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                           DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                           const Eigen::MatrixBase<ConfigVectorType> & q,
+                                           const Eigen::MatrixBase<TangentVectorType> & v)
+  {
+    impl::computeForwardKinematicsDerivatives(model,data,make_const_ref(q.derived()),make_const_ref(v.derived()));
   }
 
   template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType1, typename TangentVectorType2>

@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2020 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #include <iostream>
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_kinematics_derivatives_velocity)
   VectorXd v(VectorXd::Random(model.nv));
   VectorXd a(VectorXd::Random(model.nv));
   
-  computeForwardKinematicsDerivatives(model,data,q,v,a);
+  computeForwardKinematicsDerivatives(model,data,q,v);
   
   const Model::JointIndex jointId = model.existJointName("rarm2_joint")?model.getJointId("rarm2_joint"):(Model::Index)(model.njoints-1);
   Data::Matrix6x partial_dq(6,model.nv); partial_dq.setZero();

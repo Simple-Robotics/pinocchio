@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2020 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_kinematics_derivatives_hpp__
@@ -12,6 +13,28 @@
 
 namespace pinocchio
 {
+  
+  ///
+  /// \brief Computes all the terms required to compute the derivatives of the placement, spatial velocity
+  ///        for any joint of the model.
+  ///
+  /// \tparam JointCollection Collection of Joint types.
+  /// \tparam ConfigVectorType Type of the joint configuration vector.
+  /// \tparam TangentVectorType Type of the joint velocity vector.
+  ///
+  /// \param[in] model The model structure of the rigid body system.
+  /// \param[in] data The data structure of the rigid body system.
+  /// \param[in] q The joint configuration (vector dim model.nq).
+  /// \param[in] v The joint velocity (vector dim model.nv).
+  ///
+  /// \remarks This function is similar to do a forwardKinematics(model,data,q,v) followed by a computeJointJacobians(model,data,q).
+  ///          In addition, it computes the spatial velocity of the joint expressed in the world frame (see data.ov).
+  ///
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, typename TangentVectorType>
+  void computeForwardKinematicsDerivatives(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
+                                           DataTpl<Scalar,Options,JointCollectionTpl> & data,
+                                           const Eigen::MatrixBase<ConfigVectorType> & q,
+                                           const Eigen::MatrixBase<TangentVectorType> & v);
   
   ///
   /// \brief Computes all the terms required to compute the derivatives of the placement, spatial velocity and acceleration
