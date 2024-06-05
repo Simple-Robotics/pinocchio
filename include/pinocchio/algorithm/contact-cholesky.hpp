@@ -660,6 +660,13 @@ namespace pinocchio
       {
         return self.getInverseOperationalSpaceInertiaMatrix();
       }
+      
+      /// \brief Fill the input matrix with the matrix resulting from the decomposition
+      template<typename MatrixType>
+      void matrix(const Eigen::MatrixBase<MatrixType> & mat) const
+      {
+        return self.getInverseOperationalSpaceInertiaMatrix(mat.const_cast_derived());
+      }
 
       Matrix inverse() const
       {
