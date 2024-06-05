@@ -44,7 +44,7 @@ namespace pinocchio
              bp::args("self","mus"),
              "Add a damping term to the diagonal of the Delassus matrix. The damping terms should be all positive.")
 
-        .def("matrix",&DelassusOperator::matrix,bp::arg("self"),"Returns the Delassus expression as a dense matrix.")
+        .def("matrix",(Matrix (DelassusOperator::*)() const)&DelassusOperator::matrix,bp::arg("self"),"Returns the Delassus expression as a dense matrix.")
         .def("inverse",&DelassusOperator::inverse,bp::arg("self"),"Returns the inverse of the Delassus expression as a dense matrix.")
 
         .def("size",&DelassusOperator::size,bp::arg("self"),"Returns the size of the decomposition.")
