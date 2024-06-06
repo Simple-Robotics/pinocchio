@@ -667,6 +667,11 @@ namespace pinocchio
       {
         return self.getInverseOperationalSpaceInertiaMatrix(mat.const_cast_derived());
       }
+      
+      ///
+      /// \brief Returns the current damping vector.
+      ///
+      const Vector & getDamping() const { return self.getDamping(); }
 
       Matrix inverse() const
       {
