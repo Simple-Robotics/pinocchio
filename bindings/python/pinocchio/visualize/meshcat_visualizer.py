@@ -703,6 +703,9 @@ class MeshcatVisualizer(BaseVisualizer):
                     obj = self.loadPrimitive(geometry_object)
                 elif hppfcl.WITH_OCTOMAP and isinstance(geometry_object.geometry, hppfcl.OcTree):
                     obj = loadOctree(geometry_object.geometry)
+                elif hasMeshFileInfo(geometry_object):
+                    obj = self.loadMeshFromFile(geometry_object) 
+                    is_mesh = True
                 elif isinstance(geometry_object.geometry, (hppfcl.BVHModelBase,hppfcl.HeightFieldOBBRSS,hppfcl.HeightFieldAABB)):
                     obj = loadMesh(geometry_object.geometry)
             if obj is None and hasMeshFileInfo(geometry_object):
