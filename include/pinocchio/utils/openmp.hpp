@@ -10,6 +10,8 @@
 #include <mutex>
 #include <omp.h>
 
+#include "pinochio/deprecated.hpp"
+
 namespace pinocchio
 {
 
@@ -24,6 +26,18 @@ namespace pinocchio
       num_threads = atoi(env_p);
 
     return num_threads;
+  }
+  
+  inline void setDefaultOpenMPSettings(const size_t num_threads = (size_t)omp_get_max_threads())
+  {
+    omp_set_num_threads((int)num_threads);
+    omp_set_dynamic(0);
+  }
+  
+  PINOCCHIO_DEPRECATED_MESSAGE("This function is now deprecated and has been renamed setDefaultOpenMPSettings.")
+  inline void set_default_omp_options(const size_t num_threads = (size_t)omp_get_max_threads())
+  {
+    setDefaultOpenMPSettings(num_threads);
   }
   
   struct OpenMPException
