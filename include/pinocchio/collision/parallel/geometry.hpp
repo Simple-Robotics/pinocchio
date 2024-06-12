@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2022 INRIA
+// Copyright (c) 2021-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_parallel_geometry_hpp__
@@ -23,24 +23,33 @@ namespace pinocchio
     setDefaultOpenMPSettings(num_threads);
     std::size_t cp_index = 0;
     
+    OpenMPException openmp_exception;
+    
 #pragma omp parallel for schedule(dynamic)
     for(cp_index = 0; cp_index < geom_model.collisionPairs.size(); ++cp_index)
     {
       if(stopAtFirstCollision && is_colliding) continue;
         
-      const CollisionPair & collision_pair = geom_model.collisionPairs[cp_index];
-      
-      if(geom_data.activeCollisionPairs[cp_index]
-         && !(geom_model.geometryObjects[collision_pair.first].disableCollision || geom_model.geometryObjects[collision_pair.second].disableCollision))
-      {
-        bool res = computeCollision(geom_model,geom_data,cp_index);
-        if(!is_colliding && res)
+      openmp_exception.
+      run([=,&is_colliding,&geom_model,&geom_data]{
+        // lambda start corpus
+        const CollisionPair & collision_pair = geom_model.collisionPairs[cp_index];
+        
+        if(geom_data.activeCollisionPairs[cp_index]
+           && !(geom_model.geometryObjects[collision_pair.first].disableCollision || geom_model.geometryObjects[collision_pair.second].disableCollision))
         {
-          is_colliding = true;
-          geom_data.collisionPairIndex = cp_index; // first pair to be in collision
+          bool res = computeCollision(geom_model,geom_data,cp_index);
+          if(!is_colliding && res)
+          {
+            is_colliding = true;
+            geom_data.collisionPairIndex = cp_index; // first pair to be in collision
+          }
         }
-      }
+        // lambda end corpus
+      });
     }
+    
+    openmp_exception.rethrowException();
     
     return is_colliding;
   }
@@ -93,6 +102,12 @@ namespace pinocchio
     setDefaultOpenMPSettings(num_threads);
     const Eigen::DenseIndex batch_size = res.size();
     
+    typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(ConfigVectorPool) ConfigVectorPoolPlain;
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConfigVectorPoolPlain) q_thread(num_threads,q);
+    
+    OpenMPException openmp_exception;
+    
+    // TODO(jcarpent): set one res_ per thread to enhance efficiency
     if(stopAtFirstCollisionInBatch)
     {
       bool is_colliding = false;
@@ -104,16 +119,24 @@ namespace pinocchio
         
         const int thread_id = omp_get_thread_num();
         
-        const Model & model = models[(size_t)thread_id];
-        Data & data = datas[(size_t)thread_id];
-        const GeometryModel & geometry_model = geometry_models[(size_t)thread_id];
-        GeometryData & geometry_data = geometry_datas[(size_t)thread_id];
-        res_[i] = computeCollisions(model,data,geometry_model,geometry_data,q.col(i),stopAtFirstCollisionInConfiguration);
+        const Model & model = models[size_t(thread_id)];
+        Data & data = datas[size_t(thread_id)];
+        const GeometryModel & geometry_model = geometry_models[size_t(thread_id)];
+        GeometryData & geometry_data = geometry_datas[size_t(thread_id)];
+        const ConfigVectorPoolPlain & q = q_thread[size_t(thread_id)];
         
-        if(res_[i])
-        {
-          is_colliding = true;
-        }
+        openmp_exception.
+        run([=,&is_colliding,&model,&data,&geometry_model,&geometry_data,&q,&res_]{
+          // lambda start corpus
+          
+          res_[i] = computeCollisions(model,data,geometry_model,geometry_data,q.col(i),stopAtFirstCollisionInConfiguration);
+          
+          if(res_[i])
+          {
+            is_colliding = true;
+          }
+          // lambda end corpus
+        });
       }
     }
     else
@@ -128,9 +151,18 @@ namespace pinocchio
         Data & data = datas[(size_t)thread_id];
         const GeometryModel & geometry_model = geometry_models[(size_t)thread_id];
         GeometryData & geometry_data = geometry_datas[(size_t)thread_id];
-        res_[i] = computeCollisions(model,data,geometry_model,geometry_data,q.col(i),stopAtFirstCollisionInConfiguration);
+        const ConfigVectorPoolPlain & q = q_thread[size_t(thread_id)];
+        
+        openmp_exception.
+        run([=,&model,&data,&geometry_model,&geometry_data,&q,&res_]{
+            // lambda start corpus
+          res_[i] = computeCollisions(model,data,geometry_model,geometry_data,q.col(i),stopAtFirstCollisionInConfiguration);
+            // lambda end corpus
+        });
       }
     }
+    
+    openmp_exception.rethrowException();
   }
 }
 
