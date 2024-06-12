@@ -40,7 +40,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(q.cols(), res.size());
     res_.fill(false);
 
-    set_default_omp_options(num_threads);
+    setDefaultOpenMPSettings(num_threads);
     const Eigen::DenseIndex batch_size = res.size();
 
     if(stopAtFirstCollisionInBatch)
@@ -111,7 +111,7 @@ void computeCollisionsInParallel(const size_t num_threads,
     PINOCCHIO_CHECK_ARGUMENT_SIZE(trajectories[k].rows(), model_check.nq);
   }
 
-  set_default_omp_options(num_threads);
+  setDefaultOpenMPSettings(num_threads);
   const size_t batch_size = trajectories.size();
 
   size_t i = 0;
