@@ -8,7 +8,7 @@
 #include "pinocchio/collision/pool/broadphase-manager.hpp"
 #include "pinocchio/collision/broadphase.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
-#include "pinocchio/algorithm/parallel/omp.hpp"
+#include "pinocchio/utils/openmp.hpp"
 
 namespace pinocchio
 {

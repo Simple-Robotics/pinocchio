@@ -8,7 +8,7 @@
 #include "pinocchio/multibody/pool/geometry.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
 #include "pinocchio/collision/collision.hpp"
-#include "pinocchio/algorithm/parallel/omp.hpp"
+#include "pinocchio/utils/openmp.hpp"
   
 namespace pinocchio
 {

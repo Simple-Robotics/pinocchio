@@ -7,7 +7,7 @@
 
 #include "pinocchio/multibody/pool/model.hpp"
 #include "pinocchio/algorithm/aba.hpp"
-#include "pinocchio/algorithm/parallel/omp.hpp"
+#include "pinocchio/utils/openmp.hpp"
   
 namespace pinocchio
 {
