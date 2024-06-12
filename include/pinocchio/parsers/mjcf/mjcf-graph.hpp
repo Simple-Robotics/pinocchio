@@ -20,8 +20,7 @@
 #include <sstream>
 #include <limits>
 #include <iostream>
-
-
+#include <unordered_map>
 
 namespace pinocchio
 {
