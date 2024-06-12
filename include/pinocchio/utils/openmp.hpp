@@ -10,7 +10,7 @@
 #include <mutex>
 #include <omp.h>
 
-#include "pinochio/deprecated.hpp"
+#include "pinocchio/deprecated.hpp"
 
 namespace pinocchio
 {
