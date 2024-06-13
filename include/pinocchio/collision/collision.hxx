@@ -18,7 +18,8 @@ namespace pinocchio
   inline bool computeCollision(const GeometryModel & geom_model,
                                GeometryData & geom_data,
                                const PairIndex pair_id,
-                               fcl::CollisionRequest & collision_request)
+                               fcl::CollisionRequest & collision_request,
+                               bool compute_patch_info = true)
   {
     PINOCCHIO_CHECK_INPUT_ARGUMENT( geom_model.collisionPairs.size() == geom_data.collisionResults.size() );
     PINOCCHIO_CHECK_INPUT_ARGUMENT( pair_id < geom_model.collisionPairs.size() );
@@ -34,7 +35,8 @@ namespace pinocchio
     collision_result.clear();
     const fcl::ContactPatchRequest& patch_request = geom_data.contactPatchRequests[pair_id];
     fcl::ContactPatchResult& patch_result = geom_data.contactPatchResults[pair_id];
-    patch_result.clear();
+    if(compute_patch_info)
+      patch_result.clear();
 
     fcl::Transform3f oM1 (toFclTransform3f(geom_data.oMg[pair.first ])),
                      oM2 (toFclTransform3f(geom_data.oMg[pair.second]));
@@ -44,9 +46,10 @@ namespace pinocchio
       GeometryData::ComputeCollision & calc_collision = geom_data.collision_functors[pair_id];
       calc_collision(oM1, oM2, collision_request, collision_result);
 
-      if (collision_result.isCollision()) {
-        GeometryData::ComputeContactPatch & calc_patch = geom_data.contact_patch_functors[pair_id];
-        calc_patch(oM1, oM2, collision_result, patch_request, patch_result);
+      compute_patch_info &= patch_request.max_num_patch > 0;
+      if (compute_patch_info && collision_result.isCollision()) {
+        GeometryData::ComputeContactPatch & contact_patch_functor = geom_data.contact_patch_functors[pair_id];
+        contact_patch_functor(oM1, oM2, collision_result, patch_request, patch_result);
       }
     }
     catch(std::invalid_argument & e)
