@@ -19,7 +19,7 @@ namespace pinocchio
                                GeometryData & geom_data,
                                const PairIndex pair_id,
                                fcl::CollisionRequest & collision_request,
-                               bool compute_patch_info = true)
+                               bool compute_patch_info)
   {
     PINOCCHIO_CHECK_INPUT_ARGUMENT( geom_model.collisionPairs.size() == geom_data.collisionResults.size() );
     PINOCCHIO_CHECK_INPUT_ARGUMENT( pair_id < geom_model.collisionPairs.size() );

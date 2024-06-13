@@ -23,6 +23,7 @@ namespace pinocchio
   /// \param[out] GeomData the corresponding geometry data, where computations are done.
   /// \param[in] pair_id The collsion pair index in the GeometryModel.
   /// \param[in] collision_request The collision request associated to the collision pair.
+  /// \param[in] compute_patch_info whether we need to also compute the contact patch info associated with the collision pair.
   ///
   /// \return Return true is the collision objects are colliding.
   /// \note The complete collision result is also available in geom_data.collisionResults[pair_id]
@@ -30,7 +31,8 @@ namespace pinocchio
   bool computeCollision(const GeometryModel & geom_model,
                         GeometryData & geom_data,
                         const PairIndex pair_id,
-                        fcl::CollisionRequest & collision_request);
+                        fcl::CollisionRequest & collision_request,
+                        bool compute_patch_info = true);
 
   ///
   /// \brief Compute the collision status between a *SINGLE* collision pair.
