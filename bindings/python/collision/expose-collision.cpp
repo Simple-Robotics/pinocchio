@@ -51,6 +51,12 @@ namespace pinocchio
               "The collision pair is given by the two index of the collision objects."
               );
       
+      bp::def("computeContactPatch",
+              static_cast<bool (*)(const GeometryModel &,GeometryData &, const PairIndex)>(computeContactPatch),
+              bp::args("geometry_model", "geometry_data", "pair_index"),
+              "Compute the contact patch info associated with the collision pair given by pair_id."
+              );
+      
       bp::def("computeCollision",
               static_cast<bool (*)(const GeometryModel &,GeometryData &, const PairIndex)>(computeCollision),
               bp::args("geometry_model", "geometry_data", "pair_index"),
