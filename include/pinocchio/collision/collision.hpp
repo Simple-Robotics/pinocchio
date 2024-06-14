@@ -34,7 +34,7 @@ namespace pinocchio
                         fcl::CollisionRequest & collision_request,
                         bool compute_patch_info = true);
   ///
-  /// \brief Compute the contact patch info associated with the collision pair givan by pair_id
+  /// \brief Compute the contact patch info associated with the collision pair given by pair_id
   ///
   /// \param[in] geom_model the geometry model (const)
   /// \param[out] geom_data the corresponding geometry data, where computations are done.
