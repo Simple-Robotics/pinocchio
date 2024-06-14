@@ -19,8 +19,8 @@ namespace pinocchio
   /// \brief Compute the collision status between a *SINGLE* collision pair.
   /// The result is store in the collisionResults vector.
   ///
-  /// \param[in] GeomModel the geometry model (const)
-  /// \param[out] GeomData the corresponding geometry data, where computations are done.
+  /// \param[in] geom_model the geometry model (const)
+  /// \param[out] geom_data the corresponding geometry data, where computations are done.
   /// \param[in] pair_id The collsion pair index in the GeometryModel.
   /// \param[in] collision_request The collision request associated to the collision pair.
   /// \param[in] compute_patch_info whether we need to also compute the contact patch info associated with the collision pair.
@@ -38,8 +38,8 @@ namespace pinocchio
   /// \brief Compute the collision status between a *SINGLE* collision pair.
   /// The result is store in the collisionResults vector.
   ///
-  /// \param[in] GeomModel the geometry model (const)
-  /// \param[out] GeomData the corresponding geometry data, where computations are done.
+  /// \param[in] geom_model the geometry model (const)
+  /// \param[out] geom_data the corresponding geometry data, where computations are done.
   /// \param[in] pair_id The collsion pair index in the GeometryModel.
   ///
   /// \return Return true is the collision objects are colliding.
