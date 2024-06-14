@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2021 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_collision_collision_hpp__
@@ -33,6 +33,18 @@ namespace pinocchio
                         const PairIndex pair_id,
                         fcl::CollisionRequest & collision_request,
                         bool compute_patch_info = true);
+  ///
+  /// \brief Compute the contact patch info associated with the collision pair givan by pair_id
+  ///
+  /// \param[in] geom_model the geometry model (const)
+  /// \param[out] geom_data the corresponding geometry data, where computations are done.
+  /// \param[in] pair_id The collsion pair index in the GeometryModel.
+  ///
+  /// \note The complete contact patch result is available in geom_data.contactPatchResults[pair_id]
+  ///
+  void computeContactPatch(const GeometryModel & geom_model,
+                           GeometryData & geom_data,
+                           const PairIndex pair_id);
 
   ///
   /// \brief Compute the collision status between a *SINGLE* collision pair.

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2021 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_collision_collision_hxx__
@@ -14,6 +14,25 @@
 
 namespace pinocchio
 {
+  
+  inline void computeContactPatch(const GeometryModel & geom_model,
+                                  GeometryData & geom_data,
+                                  const PairIndex pair_id)
+  {
+    const CollisionPair & pair = geom_model.collisionPairs[pair_id];
+    fcl::Transform3f 
+    oM1 (toFclTransform3f(geom_data.oMg[pair.first ])),
+    oM2 (toFclTransform3f(geom_data.oMg[pair.second]));
+    
+    fcl::CollisionResult & collision_result = geom_data.collisionResults[pair_id];
+    const fcl::ContactPatchRequest& patch_request = geom_data.contactPatchRequests[pair_id];
+    fcl::ContactPatchResult & patch_result = geom_data.contactPatchResults[pair_id];
+    patch_result.clear();
+    if(patch_request.max_num_patch > 0) {
+      GeometryData::ComputeContactPatch & contact_patch_functor = geom_data.contact_patch_functors[pair_id];
+      contact_patch_functor(oM1, oM2, collision_result, patch_request, patch_result);
+    }
+  }
 
   inline bool computeCollision(const GeometryModel & geom_model,
                                GeometryData & geom_data,
@@ -33,10 +52,6 @@ namespace pinocchio
 
     fcl::CollisionResult & collision_result = geom_data.collisionResults[pair_id];
     collision_result.clear();
-    const fcl::ContactPatchRequest& patch_request = geom_data.contactPatchRequests[pair_id];
-    fcl::ContactPatchResult& patch_result = geom_data.contactPatchResults[pair_id];
-    if(compute_patch_info)
-      patch_result.clear();
 
     fcl::Transform3f oM1 (toFclTransform3f(geom_data.oMg[pair.first ])),
                      oM2 (toFclTransform3f(geom_data.oMg[pair.second]));
@@ -46,11 +61,8 @@ namespace pinocchio
       GeometryData::ComputeCollision & calc_collision = geom_data.collision_functors[pair_id];
       calc_collision(oM1, oM2, collision_request, collision_result);
 
-      compute_patch_info &= patch_request.max_num_patch > 0;
-      if (compute_patch_info && collision_result.isCollision()) {
-        GeometryData::ComputeContactPatch & contact_patch_functor = geom_data.contact_patch_functors[pair_id];
-        contact_patch_functor(oM1, oM2, collision_result, patch_request, patch_result);
-      }
+      if (compute_patch_info && collision_result.isCollision())
+        computeContactPatch(geom_model, geom_data, pair_id);
     }
     catch(std::invalid_argument & e)
     {
