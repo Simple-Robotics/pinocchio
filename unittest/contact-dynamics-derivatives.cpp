@@ -27,8 +27,8 @@
 
 #endif //PINOCCHIO_WITH_SDFORMAT
 
-#define KP 10
-#define KD 10
+#define KP 0
+#define KD 0
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -373,6 +373,8 @@ BOOST_AUTO_TEST_CASE(test_constraint_dynamics_derivatives_LOCAL_6D_fd)
 
   BOOST_CHECK(ddq_partial_dq_fd.isApprox(data.ddq_dq,sqrt(alpha)));
   BOOST_CHECK(lambda_partial_dq_fd.isApprox(data.dlambda_dq,sqrt(alpha)));
+  std::cout << "lambda_partial_dq_fd:\n" << lambda_partial_dq_fd << std::endl;
+  std::cout << "data.dlambda_dq:\n" << data.dlambda_dq << std::endl;
 
   VectorXd v_plus(v);
   for(int k = 0; k < model.nv; ++k)

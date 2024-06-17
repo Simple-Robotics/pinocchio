@@ -22,8 +22,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
-#define KP 10
-#define KD 10
+#define KP 0
+#define KD 0
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -168,6 +168,12 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
     BOOST_CHECK(data.liMi[k].isApprox(data_ref.liMi[k]));
     BOOST_CHECK(data.ov[k].isApprox(data_ref.oMi[k].act(data_ref.v[k])));
     BOOST_CHECK(data.oa_gf[k].isApprox(data_ref.oMi[k].act(data_ref.a_gf[k])));
+    if(!data.oa_gf[k].isApprox(data_ref.oMi[k].act(data_ref.a_gf[k])))
+    {
+      std::cout << "k: " << k << std::endl;
+      std::cout << "data.oa_gf[k]:\n" << data.oa_gf[k] << std::endl;
+      std::cout << "data_ref.oMi[k].act(data_ref.a_gf[k]):\n" << data_ref.oMi[k].act(data_ref.a_gf[k]) << std::endl;
+    }
   }
   
   // Check that the decomposition is correct

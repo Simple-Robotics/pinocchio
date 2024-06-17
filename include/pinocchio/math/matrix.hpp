@@ -21,6 +21,18 @@ namespace pinocchio
     return !((m.derived().array()==m.derived().array()).all());
   }
 
+  template<typename Matrix1, typename Matrix2>
+  bool isApproxOrZero(const Eigen::MatrixBase<Matrix1> & mat1,
+                      const Eigen::MatrixBase<Matrix2> & mat2,
+                      const typename Matrix1::RealScalar & prec =  Eigen::NumTraits<typename Matrix1::RealScalar>::dummy_precision())
+  {
+    const bool mat1_is_zero = mat1.isZero(prec);
+    const bool mat2_is_zero = mat2.isZero(prec);
+
+    const bool mat1_is_approx_mat2 = mat1.isApprox(mat2,prec);
+    return mat1_is_approx_mat2 || (mat1_is_zero && mat2_is_zero);
+  }
+
   namespace internal
   {
     template<typename MatrixLike, bool value = is_floating_point<typename MatrixLike::Scalar>::value>
