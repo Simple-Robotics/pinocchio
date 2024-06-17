@@ -1,9 +1,12 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2020 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #ifndef __pinocchio_spatial_force_dense_hpp__
 #define __pinocchio_spatial_force_dense_hpp__
+
+#include "pinocchio/math/matrix.hpp"
 
 namespace pinocchio
 {
@@ -142,7 +145,7 @@ namespace pinocchio
     template<typename D2>
     bool isApprox_impl(const ForceDense<D2> & f, const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const
     {
-      return linear().isApprox(f.linear(), prec) && angular().isApprox(f.angular(), prec);
+      return isApproxOrZero(linear(),f.linear(),prec) && isApproxOrZero(angular(),f.angular(),prec);
     }
     
     bool isZero_impl(const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const
