@@ -117,20 +117,27 @@ BOOST_AUTO_TEST_CASE(test_compute)
   std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
   std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
   
+  const double min_damping_value = 1e-8;
+  
   DelassusOperatorRigidBodyReferenceWrapper delassus_operator(model_ref, data_ref,
                                                               constraint_models_ref,
-                                                              constraint_datas_ref);
+                                                              constraint_datas_ref,
+                                                              min_damping_value);
   // Eval J Minv Jt
   auto Minv_gt = computeMinverse(model, data_gt, q_neutral);
   make_symmetric(Minv_gt);
   BOOST_CHECK(Minv_gt.isApprox(Minv_gt.transpose()));
+  
+  auto M_gt = crba(model, data_gt, q_neutral);
+  make_symmetric(M_gt);
   
   Eigen::MatrixXd constraints_jacobian_gt(delassus_operator.size(),model.nv);
   constraints_jacobian_gt.setZero();
   evalConstraints(model,data_gt,constraint_models,constraint_datas_gt);
   getConstraintsJacobian(model,data_gt,constraint_models,constraint_datas_gt,constraints_jacobian_gt);
   
-  const Eigen::MatrixXd delassus_dense_gt = constraints_jacobian_gt * Minv_gt * constraints_jacobian_gt.transpose();
+  const Eigen::MatrixXd delassus_dense_gt_undamped = constraints_jacobian_gt * Minv_gt * constraints_jacobian_gt.transpose();
+  const Eigen::MatrixXd delassus_dense_gt = delassus_dense_gt_undamped + Eigen::MatrixXd(delassus_operator.getDamping().asDiagonal()) ;
   
   // Test Jacobian transpose operator
   {
@@ -227,8 +234,46 @@ BOOST_AUTO_TEST_CASE(test_compute)
     
     Eigen::VectorXd res_damped(delassus_operator.size());
     delassus_operator.applyOnTheRight(rhs,res_damped);
-    const auto res_gt_damped = ((delassus_dense_gt + mu * Eigen::MatrixXd::Identity(delassus_operator.size(),delassus_operator.size())) * rhs).eval();
+    const auto res_gt_damped = ((delassus_dense_gt_undamped + mu * Eigen::MatrixXd::Identity(delassus_operator.size(),delassus_operator.size())) * rhs).eval();
     BOOST_CHECK(res_damped.isApprox(res_gt_damped));
+  }
+  
+  // Test solveInPlace
+  {
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+    Eigen::VectorXd res = rhs;
+    
+    delassus_operator.updateDamping(min_damping_value);
+    delassus_operator.compute(q_neutral);
+    delassus_operator.solveInPlace(res);
+    
+    const Eigen::VectorXd res_gt = delassus_dense_gt.llt().solve(rhs);
+    
+    BOOST_CHECK(res.isApprox(res_gt));
+    std::cout << "res:\n" << res.transpose() << std::endl; 
+    std::cout << "res_gt:\n" << res_gt.transpose() << std::endl; 
+    
+    // Check accuracy
+    
+    const double min_damping_value_sqrt = math::sqrt(min_damping_value);
+    const double min_damping_value_sqrt_inv = 1./min_damping_value_sqrt;
+    const Eigen::MatrixXd scaled_matrix = Eigen::MatrixXd::Identity(model.nv,model.nv) * min_damping_value_sqrt;
+    const Eigen::MatrixXd scaled_matrix_inv = Eigen::MatrixXd::Identity(delassus_operator.size(),delassus_operator.size()) * min_damping_value_sqrt_inv;
+    const Eigen::MatrixXd M_gt_scaled = scaled_matrix * M_gt * scaled_matrix;
+    std::cout << "M_gt_scaled:\n" << M_gt_scaled << std::endl;
+    std::cout << "M_gt:\n" << M_gt << std::endl;
+    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J = M_gt_scaled + constraints_jacobian_gt.transpose() * constraints_jacobian_gt;
+    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J_inv = M_gt_scaled_plus_Jt_J.inverse();
+    const Eigen::MatrixXd damped_delassus_inverse_woodbury 
+    = 1./min_damping_value * Eigen::MatrixXd::Identity(delassus_operator.size(),delassus_operator.size())
+    - scaled_matrix_inv * (constraints_jacobian_gt * M_gt_scaled_plus_Jt_J * constraints_jacobian_gt.transpose()).eval() * scaled_matrix_inv;
+    
+    const Eigen::VectorXd res_gt_woodbury = damped_delassus_inverse_woodbury * rhs;
+    
+    std::cout << "res: " << res.transpose() << std::endl;
+    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
+    std::cout << "res_gt_woodbury: " << res_gt_woodbury.transpose() << std::endl;
+    std::cout << "res - res_gt: " << (res-res_gt).norm() << std::endl;
   }
 }
 
