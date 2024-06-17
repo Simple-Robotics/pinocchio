@@ -52,7 +52,7 @@ namespace pinocchio
               );
       
       bp::def("computeContactPatch",
-              static_cast<bool (*)(const GeometryModel &,GeometryData &, const PairIndex)>(computeContactPatch),
+              static_cast<void (*)(const GeometryModel &,GeometryData &, const PairIndex)>(computeContactPatch),
               bp::args("geometry_model", "geometry_data", "pair_index"),
               "Compute the contact patch info associated with the collision pair given by pair_id."
               );
