@@ -70,16 +70,18 @@ namespace pinocchio {
     DelassusOperatorRigidBodyTpl(const ModelHolder &model_ref,
                                  const DataHolder &data_ref,
                                  const ConstraintModelVectorHolder &constraint_models_ref,
-                                 const ConstraintDataVectorHolder &constraint_datas_ref)
+                                 const ConstraintDataVectorHolder &constraint_datas_ref,
+                                 const Scalar min_damping_value = Scalar(1e-8))
     : Base()
     , m_size(evalConstraintSize(helper::get_ref(constraint_models_ref)))
     , m_model_ref(model_ref)
     , m_data_ref(data_ref)
     , m_constraint_models_ref(constraint_models_ref)
     , m_constraint_datas_ref(constraint_datas_ref)
-    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref))
+    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref),evalConstraintSize(helper::get_ref(constraint_models_ref)))
     , m_dirty(true)
-    , m_damping(Vector::Zero(m_size))
+    , m_damping(Vector::Constant(m_size,min_damping_value))
+    , m_damping_inverse(Vector::Constant(m_size,Scalar(1)/min_damping_value))
     {
       assert(model().check(data()) && "data is not consistent with model.");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models().size(), constraint_datas().size(),
@@ -132,6 +134,7 @@ namespace pinocchio {
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       m_damping = vec;
+      m_damping_inverse = m_damping.cwiseInverse();
 //      mat_tmp = delassus_matrix;
 //      mat_tmp += vec.asDiagonal();
 //      llt.compute(mat_tmp);
@@ -143,6 +146,9 @@ namespace pinocchio {
     }
     
     const Vector & getDamping() const { return m_damping; }
+    
+    template<typename MatrixLike>
+    void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const;
 
     struct CustomData
     {
@@ -151,9 +157,14 @@ namespace pinocchio {
       typedef typename Data::Motion Motion;
       typedef typename Data::Matrix6 Matrix6;
       typedef typename Data::Force Force;
+      
+      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(SE3) SE3Vector;
+      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Motion) MotionVector;
+      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Matrix6Vector;
 
       explicit CustomData(const Model & model,
-                          const Data & data)
+                          const Data & data,
+                          const Eigen::DenseIndex size)
       : liMi(size_t(model.njoints),SE3::Identity())
       , oMi(size_t(model.njoints),SE3::Identity())
       , a(size_t(model.njoints),Motion::Zero())
@@ -165,15 +176,18 @@ namespace pinocchio {
       , u(model.nv)
       , ddq(model.nv)
       , f(size_t(model.njoints))
+      , tmp_vec(size)
       {}
       
-      PINOCCHIO_ALIGNED_STD_VECTOR(SE3) liMi, oMi;
-      PINOCCHIO_ALIGNED_STD_VECTOR(Motion) a, a_augmented;
-      PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Yaba, Yaba_augmented;
+      SE3Vector liMi, oMi;
+      MotionVector a, a_augmented;
+      Matrix6Vector Yaba, Yaba_augmented;
+      
       typename Data::JointDataVector joints;
       typename Data::JointDataVector joints_augmented;
       VectorXs u, ddq;
       ForceVector f;
+      Vector tmp_vec;
     };
     
     const CustomData & getCustomData() const { return m_custom_data; }
@@ -203,7 +217,7 @@ namespace pinocchio {
     
     mutable CustomData m_custom_data;
     bool m_dirty;
-    Vector m_damping;
+    Vector m_damping, m_damping_inverse;
   };
   
 } // namespace pinocchio

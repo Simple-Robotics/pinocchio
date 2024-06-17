@@ -73,7 +73,7 @@ namespace pinocchio {
       typename Inertia::Matrix6 & Ia = data.Yaba[i];
       typename Inertia::Matrix6 & Ia_augmented = data.Yaba_augmented[i];
       
-      JointData & jdata_augmented = boost::get<JointData>(data.joints[i]);
+      JointData & jdata_augmented = boost::get<JointData>(data.joints_augmented[i]);
 
       jmodel.calc_aba(jdata.derived(),
                       jmodel.jointVelocitySelector(model.armature),
@@ -119,10 +119,29 @@ namespace pinocchio {
     const Model & model_ref = model();
     Data & data_ref = data();
     CustomData & custom_data = this->m_custom_data;
+    const ConstraintModelVector & constraint_models_ref = constraint_models();
+    ConstraintDataVector & constraint_datas_ref = constraint_datas();
+    typedef typename Data::Vector3 Vector3;
     
     for(JointIndex i=1; i<(JointIndex)model_ref.njoints; ++i)
     {
       custom_data.Yaba[i] = custom_data.Yaba_augmented[i] = model_ref.inertias[i].matrix();
+    }
+    
+    // Append constraint inertia to Yaba_augmented
+    for(size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+    {
+      const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
+      RigidConstraintData & cdata = constraint_datas_ref[ee_id];
+      
+      const Vector3 constraint_diagonal_inertia = this->m_damping_inverse.template segment<3>(Eigen::DenseIndex(ee_id*3));
+      
+      typedef typename CustomData::Matrix6Vector InertiaAlignedVector;
+      typedef typename InertiaAlignedVector::vector_base InertiaStdVector;
+      cmodel.appendConstraintDiagonalInertiaToJointInertias(model_ref,data_ref,cdata,
+                                                            constraint_diagonal_inertia,
+                                                            static_cast<InertiaStdVector&>(custom_data.Yaba_augmented));
+      
     }
     
     typedef DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperatorRigidBodyTpl> Pass2;
@@ -134,9 +153,6 @@ namespace pinocchio {
     
     // Make a pass over the whole set of constraints to update the content
     {
-      const ConstraintModelVector & constraint_models_ref = constraint_models();
-      ConstraintDataVector & constraint_datas_ref = constraint_datas();
-      
       // TODO(jcarpent): change data_ref for custom_data
       evalConstraints(model_ref,data_ref,constraint_models_ref,constraint_datas_ref);
     }
@@ -271,6 +287,91 @@ namespace pinocchio {
     // Add damping contribution
     res.array() += m_damping.array() * rhs.array();
     
+  }
+  
+//  template<typename DelassusOperator>
+//  struct DelassusOperatorRigidBodyTplSolveInPlaceBackwardPass
+//  : public fusion::JointUnaryVisitorBase< DelassusOperatorRigidBodyTplSolveInPlaceBackwardPass<DelassusOperator> >
+//  {
+//    typedef typename DelassusOperator::Model Model;
+//      //    typedef typename DelassusOperator::Data Data;
+//    typedef typename DelassusOperator::CustomData Data;
+//    
+//    typedef boost::fusion::vector<const Model &,
+//      //    Data &,
+//    Data &
+//    > ArgsType;
+//    
+//    template<typename JointModel>
+//    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
+//                     pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+//                     const Model & model,
+//                     //                     Data & data
+//                     Data & data)
+//    {
+//      typedef typename Model::JointIndex JointIndex;
+//      typedef typename Data::Force Force;
+//      
+//      const JointIndex i = jmodel.id();
+//      const JointIndex parent = model.parents[i];
+//      
+//      jmodel.jointVelocitySelector(data.u) = jdata.S().transpose()*data.f[i]; // The sign is switched compare to ABA
+//      
+//      if (parent > 0)
+//      {
+//        Force & pa = data.f[i];
+//        pa.toVector().noalias() -= jdata.UDinv() * jmodel.jointVelocitySelector(data.u); // The sign is switched compare to ABA as the sign of data.f[i] is switched too
+//        data.f[parent] += data.liMi[i].act(pa);
+//      }
+//    }
+//    
+//  };
+  
+  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, template<typename T> class Holder>
+  template<typename MatrixLike>
+  void DelassusOperatorRigidBodyTpl<Scalar,Options,JointCollectionTpl,Holder>
+  ::solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat_) const
+  {
+    MatrixLike & mat = mat_.const_cast_derived();
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), size(),
+                                  "The input matrix does not match the size of the Delassus.");
+    
+    const Model & model_ref = model();
+    const Data & data_ref = data();
+    const ConstraintModelVector & constraint_models_ref = constraint_models();
+    const ConstraintDataVector & constraint_datas_ref = constraint_datas();
+    
+    mat.array() *= m_damping_inverse.array();
+    
+    // Make a pass over the whole set of constraints to add the contributions of constraint forces
+    mapConstraintForcesToJointForces(model_ref,data_ref,constraint_models_ref,constraint_datas_ref,mat,m_custom_data.f);
+    
+    // Backward sweep: propagate joint force contributions
+    {
+      typedef DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperatorRigidBodyTpl> Pass1;
+      typename Pass1::ArgsType args1(model_ref,this->m_custom_data);
+      for(JointIndex i=JointIndex(model_ref.njoints-1); i>0; --i)
+      {
+        Pass1::run(model_ref.joints[i],this->m_custom_data.joints_augmented[i],args1);
+      }
+    }
+    
+    // Forward sweep: compute joint accelerations
+    {
+      typedef DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperatorRigidBodyTpl> Pass2;
+      for(auto & motion: m_custom_data.a)
+        motion.setZero();
+      typename Pass2::ArgsType args2(model_ref,this->m_custom_data);
+      for(JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
+      {
+        Pass2::run(model_ref.joints[i],this->m_custom_data.joints_augmented[i],args2);
+      }
+    }
+    
+    // Make a pass over the whole set of constraints to project back the joint accelerations onto the constraints
+    mapJointMotionsToConstraintMotions(model_ref,data_ref,constraint_models_ref,constraint_datas_ref,this->m_custom_data.a,this->m_custom_data.tmp_vec);
+    
+    mat.noalias() -= m_damping_inverse.asDiagonal() * this->m_custom_data.tmp_vec;
   }
   
 } // namespace pinocchio
