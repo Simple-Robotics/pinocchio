@@ -439,9 +439,9 @@ namespace pinocchio
     * and \f$ S(c) \f$ is the the skew matrix representation of the cross product operator.
     */
     template<typename Vector10Like>
-    void toDynamicParameters(const Eigen::MatrixBase<Vector10> & vec10_) const
+    void toDynamicParameters(const Eigen::MatrixBase<Vector10Like> & vec10_) const
     {
-      Vector10 & vec10 = vec10_.const_cast_derived(); 
+      Vector10Like & vec10 = vec10_.const_cast_derived(); 
       vec10[0] = mass();
       vec10.template segment<3>(1).noalias() = mass() * lever();
       vec10.template segment<6>(4) = (inertia() - AlphaSkewSquare(mass(),lever())).data();
