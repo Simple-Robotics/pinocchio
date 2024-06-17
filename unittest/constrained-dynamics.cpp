@@ -168,12 +168,6 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
     BOOST_CHECK(data.liMi[k].isApprox(data_ref.liMi[k]));
     BOOST_CHECK(data.ov[k].isApprox(data_ref.oMi[k].act(data_ref.v[k])));
     BOOST_CHECK(data.oa_gf[k].isApprox(data_ref.oMi[k].act(data_ref.a_gf[k])));
-    if(!data.oa_gf[k].isApprox(data_ref.oMi[k].act(data_ref.a_gf[k])))
-    {
-      std::cout << "k: " << k << std::endl;
-      std::cout << "data.oa_gf[k]:\n" << data.oa_gf[k] << std::endl;
-      std::cout << "data_ref.oMi[k].act(data_ref.a_gf[k]):\n" << data_ref.oMi[k].act(data_ref.a_gf[k]) << std::endl;
-    }
   }
   
   // Check that the decomposition is correct
@@ -1016,8 +1010,6 @@ BOOST_AUTO_TEST_CASE(test_correction_CONTACT_6D)
   
   const Motion contact_RF_velocity_error_fd = log6(contact_datas[0].c1Mc2.act(contact_datas_plus[0].c1Mc2.inverse()))/dt;
   BOOST_CHECK(contact_RF_velocity_error_fd.isApprox(contact_datas[0].contact_velocity_error,sqrt(dt)));
-  std::cout << "contact_RF_velocity_error_fd:\n" << contact_RF_velocity_error_fd << std::endl;
-  std::cout << "contact_velocity_error:\n" << contact_datas[0].contact_velocity_error << std::endl;
   
   // Simulation loop
   {
@@ -1345,27 +1337,17 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
   BOOST_CHECK(data.ddq.isApprox(data_ref.ddq));
   BOOST_CHECK((J_ref*data.ddq+rhs_ref).isZero());
   
-  std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
-  std::cout << "data.ddq: " << data.ddq.transpose() << std::endl;
-  std::cout << "res: " << (J_ref*data.ddq+rhs_ref).transpose() << std::endl;
-  std::cout << "res_ref: " << (J_ref*data_ref.ddq+rhs_ref).transpose() << std::endl;
-  
   const Motion vel_1_final = ci_RF.joint2_placement.actInv(data.v[ci_RF.joint2_id]);
   const Motion::Vector3 acc_1_final = ci_RF.joint2_placement.actInv(data.a[ci_RF.joint2_id]).linear() + vel_1_final.angular().cross(vel_1_final.linear());
   BOOST_CHECK(acc_1_final.isZero());
 
-  std::cout << "acc_1_final:" << acc_1_final.transpose() << std::endl;
-  
   const Motion vel_2_final = ci_LF.joint2_placement.actInv(data.v[ci_LF.joint2_id]);
   const Motion::Vector3 acc_2_final = ci_LF.joint2_placement.actInv(data.a[ci_LF.joint2_id]).linear() + vel_2_final.angular().cross(vel_2_final.linear());
   BOOST_CHECK(acc_2_final.isZero());
   
-  std::cout << "acc_2_final:" << acc_2_final.transpose() << std::endl;
   
   Motion acc_3_final = c1Mc2_3.act(data.a[ci_RA.joint2_id]);
   BOOST_CHECK(acc_3_final.isZero());
-
-  std::cout << "acc_3_final:\n" << acc_3_final << std::endl;
 
   Eigen::DenseIndex constraint_id = 0;
   for(size_t k = 0; k < contact_models.size(); ++k)
@@ -1412,8 +1394,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
   constraintDynamics(model,data_bis,q,v,tau,contact_models_bis,contact_datas_bis,prox_settings);
 
   BOOST_CHECK(data_bis.ddq.isApprox(data.ddq));
-  std::cout << "ddq: " << data_bis.ddq.transpose() << std::endl;
-  std::cout << "ddq: " << data.ddq.transpose() << std::endl;
 
   for(size_t k = 0; k < contact_models.size(); ++k)
   {
@@ -1429,7 +1409,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     BOOST_CHECK(cdata.oMc2.isApprox(cdata_bis.oMc1));
     BOOST_CHECK(cdata.c1Mc2.isApprox(cdata_bis.c1Mc2.inverse()));
 
-    std::cout << "cdata.c1Mc2:\n" << cdata.c1Mc2 << std::endl;
     Force contact_force, contact_force_bis;
     switch(cmodel.reference_frame)
     {
@@ -1468,8 +1447,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
         break;
     }
 
-    std::cout << "contact_force: " << contact_force.toVector().transpose() << std::endl;
-    std::cout << "contact_force_bis: " << contact_force_bis.toVector().transpose() << std::endl;
   }
 }
 
@@ -1670,8 +1647,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
   const double mu = prox_settings.mu;
   contactABA(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   
-  std::cout << "data.ddq: " << data.ddq.transpose() << std::endl;
-  std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
   BOOST_CHECK((J_ref*data.ddq + gamma).isZero());
   
   forwardKinematics(model, data_ref, q, v, 0*v);
