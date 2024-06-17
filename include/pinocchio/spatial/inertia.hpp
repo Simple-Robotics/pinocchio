@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2021 CNRS INRIA
+// Copyright (c) 2015-2021 CNRS
+// Copyright (c) 2018-2024 INRIA
 // Copyright (c) 2016 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -427,12 +428,23 @@ namespace pinocchio
     Vector10 toDynamicParameters() const
     {
       Vector10 v;
-
-      v[0] = mass();
-      v.template segment<3>(1).noalias() = mass() * lever();
-      v.template segment<6>(4) = (inertia() - AlphaSkewSquare(mass(),lever())).data();
-
+      toDynamicParameters(v);
       return v;
+    }
+
+    /** Fill the vector of dynamic parameters.
+    * The parameters are given as
+    * \f$ v = [m, mc_x, mc_y, mc_z, I_{xx}, I_{xy}, I_{yy}, I_{xz}, I_{yz}, I_{zz}]^T \f$
+    * where \f$ c \f$ is the center of mass, \f$ I = I_C + mS^T(c)S(c) \f$ and \f$ I_C \f$ has its origin at the barycenter
+    * and \f$ S(c) \f$ is the the skew matrix representation of the cross product operator.
+    */
+    template<typename Vector10Like>
+    void toDynamicParameters(const Eigen::MatrixBase<Vector10> & vec10_) const
+    {
+      Vector10 & vec10 = vec10_.const_cast_derived(); 
+      vec10[0] = mass();
+      vec10.template segment<3>(1).noalias() = mass() * lever();
+      vec10.template segment<6>(4) = (inertia() - AlphaSkewSquare(mass(),lever())).data();
     }
 
     /** Builds and inertia matrix from a vector of dynamic parameters.
