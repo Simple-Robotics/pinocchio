@@ -464,13 +464,13 @@ namespace pinocchio
             const Motion v2_in_c1 = cdata.c1Mc2.act(cdata.contact2_velocity);
             const Motion a2_in_c1 = cdata.oMc1.actInv(data.oa[cmodel.joint2_id]);
 
-            Eigen::DenseIndex k = Eigen::DenseIndex(loop_span_indexes.size())-1;
+            Eigen::DenseIndex k = Eigen::DenseIndex(cmodel.colwise_span_indexes.size())-1;
             Eigen::DenseIndex col_id;
-            while(cmodel.reference_frame==LOCAL && loop_span_indexes.size() > 0)
+            while(cmodel.reference_frame==LOCAL && cmodel.colwise_span_indexes.size() > 0)
             {
               if(k >= 0)
               {
-                col_id = loop_span_indexes[size_t(k)];
+                col_id = cmodel.colwise_span_indexes[size_t(k)];
                 k--;
               }
               else
@@ -574,7 +574,7 @@ namespace pinocchio
           break;
       }
       
-      assert(loop_span_indexes.size() > 0 && "Must never happened, the sparsity pattern is empty");
+      assert(colwise_span_indexes.size() > 0 && "Must never happened, the sparsity pattern is empty");
       
       // Derivative of closed loop kinematic tree
       if(cmodel.joint2_id > 0)
@@ -609,9 +609,9 @@ namespace pinocchio
             }
             
             // d./dq
-            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(loop_span_indexes.size()); ++k)
+            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size()); ++k)
             {
-              const Eigen::DenseIndex col_id = loop_span_indexes[size_t(k)];
+              const Eigen::DenseIndex col_id = cmodel.colwise_span_indexes[size_t(k)];
 
               const MotionRef<typename Data::Matrix6x::ColXpr> J_col(data.J.col(col_id));
               const Force J_col_cross_contact_force_in_WORLD = J_col.cross(contact_force_in_WORLD);
@@ -661,9 +661,9 @@ namespace pinocchio
             }
             
             // d./dq
-            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(loop_span_indexes.size()); ++k)
+            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.loop_span_indexes.size()); ++k)
             {
-              const Eigen::DenseIndex col_id = loop_span_indexes[size_t(k)];
+              const Eigen::DenseIndex col_id = cmodel.loop_span_indexes[size_t(k)];
 
               const MotionRef<typename Data::Matrix6x::ColXpr> J_col(data.J.col(col_id));
               
@@ -732,9 +732,9 @@ namespace pinocchio
             contact_dac_dq += cmodel.corrector.Kd.asDiagonal() * contact_dvc_dq;
             contact_dac_dv += cmodel.corrector.Kd.asDiagonal() * contact_dac_da;
             // d./dq
-            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(loop_span_indexes.size()); ++k)
+            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size()); ++k)
             {
-              const Eigen::DenseIndex row_id = loop_span_indexes[size_t(k)];
+              const Eigen::DenseIndex row_id = cmodel.colwise_span_indexes[size_t(k)];
               //contact_dac_dq.col(row_id) += cmodel.corrector.Kd * contact_dvc_dq.col(row_id);
               contact_dac_dq.col(row_id).noalias() += cmodel.corrector.Kp.asDiagonal() * Jlog * contact_dac_da.col(row_id);
             }
@@ -753,9 +753,9 @@ namespace pinocchio
               typename SE3::Matrix3 vc2_cross_in_c1, vc2_cross_in_world;
               skew(a_tmp.linear(), vc2_cross_in_world);
               vc2_cross_in_c1.noalias() = cdata.oMc1.rotation().transpose() * vc2_cross_in_world;
-              for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(loop_span_indexes.size()); ++k)
+              for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.loop_span_indexes.size()); ++k)
               {
-                const Eigen::DenseIndex row_id = loop_span_indexes[size_t(k)];
+                const Eigen::DenseIndex row_id = cmodel.loop_span_indexes[size_t(k)];
                 const MotionRef<typename Data::Matrix6x::ColXpr> J_col(data.J.col(row_id));
                 if(joint2_indexes[row_id])
                 {
