@@ -574,7 +574,7 @@ namespace pinocchio
           break;
       }
       
-      assert(colwise_span_indexes.size() > 0 && "Must never happened, the sparsity pattern is empty");
+      assert(loop_span_indexes.size() > 0 && "Must never happened, the sparsity pattern is empty");
       
       // Derivative of closed loop kinematic tree
       if(cmodel.joint2_id > 0)
