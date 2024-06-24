@@ -7,7 +7,8 @@
 
 #include "pinocchio/macros.hpp"
 
-PINOCCHIO_PRAGMA_DEPRECATED_HEADER(pinocchio/algorithm/dynamics.hpp,pinocchio/algorithm/constrained-dynamics.hpp)
+PINOCCHIO_PRAGMA_DEPRECATED_HEADER(
+  pinocchio / algorithm / dynamics.hpp, pinocchio / algorithm / constrained - dynamics.hpp)
 
 #include "pinocchio/algorithm/constrained-dynamics.hpp"
 

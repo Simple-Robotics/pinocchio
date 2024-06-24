@@ -11,11 +11,16 @@
 namespace pinocchio
 {
 
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, class Allocator>
-  inline void
-  initPvDelassus(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                         DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                         const std::vector<RigidConstraintModelTpl<Scalar,Options>,Allocator> & contact_models);
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    class Allocator>
+  inline void initPvDelassus(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models);
 
   ///
   /// \brief Computes the Delassus matrix associated to a set of given constraints.
@@ -35,14 +40,23 @@ namespace pinocchio
   ///
   /// \return The (damped) Delassus matrix.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, class ModelAllocator, class DataAllocator, typename MatrixType>
-  void computeDelassusMatrix(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                             DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                             const Eigen::MatrixBase<ConfigVectorType> & q,
-                             const std::vector<RigidConstraintModelTpl<Scalar,Options>,ModelAllocator> & contact_models,
-                             std::vector<RigidConstraintDataTpl<Scalar,Options>,DataAllocator> & contact_data,
-                             const Eigen::MatrixBase<MatrixType> & delassus,
-                             const Scalar mu = 0);
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    typename ConfigVectorType,
+    class ModelAllocator,
+    class DataAllocator,
+    typename MatrixType>
+  void computeDelassusMatrix(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ModelAllocator> & contact_models,
+    std::vector<RigidConstraintDataTpl<Scalar, Options>, DataAllocator> & contact_data,
+    const Eigen::MatrixBase<MatrixType> & delassus,
+    const Scalar mu = 0);
 
   ///
   /// \brief Computes the inverse of the Delassus matrix associated to a set of given constraints.
@@ -59,23 +73,33 @@ namespace pinocchio
   /// \param[in] contact_datas Vector of contact data.
   /// \param[out] damped_delassus_inverse The resulting damped Delassus matrix.
   /// \param[in] mu Damping factor well-posdnessed of the problem.
-  /// \param[in] scaled If set to true, the solution is scaled my a factor \f$ \mu \f$ to avoid numerical rounding issues.
-  /// \param[in] Pv If set to true, uses PV-OSIMr, otherwise uses EFPA.
+  /// \param[in] scaled If set to true, the solution is scaled my a factor \f$ \mu \f$ to avoid
+  /// numerical rounding issues. \param[in] Pv If set to true, uses PV-OSIMr, otherwise uses EFPA.
   ///
-  /// \note A hint: a typical value for mu is 1e-4 when two contact constraints or more are redundant.
+  /// \note A hint: a typical value for mu is 1e-4 when two contact constraints or more are
+  /// redundant.
   ///
   /// \return The damped inverse Delassus matrix.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType, class ModelAllocator, class DataAllocator, typename MatrixType>
-  void computeDampedDelassusMatrixInverse(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                                          DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                                          const Eigen::MatrixBase<ConfigVectorType> & q,
-                                          const std::vector<RigidConstraintModelTpl<Scalar,Options>,ModelAllocator> & contact_models,
-                                          std::vector<RigidConstraintDataTpl<Scalar,Options>,DataAllocator> & contact_data,
-                                          const Eigen::MatrixBase<MatrixType> & damped_delassus_inverse,
-                                          const Scalar mu,
-                                          const bool scaled = false,
-                                          const bool Pv = true);
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    typename ConfigVectorType,
+    class ModelAllocator,
+    class DataAllocator,
+    typename MatrixType>
+  void computeDampedDelassusMatrixInverse(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ModelAllocator> & contact_models,
+    std::vector<RigidConstraintDataTpl<Scalar, Options>, DataAllocator> & contact_data,
+    const Eigen::MatrixBase<MatrixType> & damped_delassus_inverse,
+    const Scalar mu,
+    const bool scaled = false,
+    const bool Pv = true);
 
 } // namespace pinocchio
 

@@ -11,6 +11,6 @@ namespace pinocchio
   {
     void exposeSampleModels();
   }
-} // namespace pinocchio::python
+} // namespace pinocchio
 
 #endif // ifndef __pinocchio_python_sample_models_hpp__

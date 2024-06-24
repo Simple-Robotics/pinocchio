@@ -7,6 +7,7 @@ import os.path as osp
 
 try:
     import imageio
+
     IMAGEIO_SUPPORT = True
 except ImportError:
     IMAGEIO_SUPPORT = False
@@ -17,6 +18,7 @@ class BaseVisualizer(object):
     BaseVisualizer is not meant to be directly employed, but only to provide a uniform interface and a few common methods.
     New visualizers should extend this class and override its methods as neeeded.
     """
+
     _video_writer = None
 
     _video_writer = None
@@ -93,11 +95,11 @@ class BaseVisualizer(object):
     def displayCollisions(self, visibility):
         """Set whether to display collision objects or not."""
         raise NotImplementedError()
- 
+
     def displayVisuals(self, visibility):
         """Set whether to display visual objects or not."""
         raise NotImplementedError()
-    
+
     def setBackgroundColor(self):
         """Set the visualizer background color."""
         raise NotImplementedError()
@@ -180,7 +182,11 @@ class BaseVisualizer(object):
         """
         if not IMAGEIO_SUPPORT:
             import warnings, contextlib
-            warnings.warn("Video context cannot be created because imageio is not available.", UserWarning)
+
+            warnings.warn(
+                "Video context cannot be created because imageio is not available.",
+                UserWarning,
+            )
             return contextlib.nullcontext()
         if filename is None:
             if directory is None:

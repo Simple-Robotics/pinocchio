@@ -21,49 +21,51 @@ namespace pinocchio
   inline int getOpenMPNumThreadsEnv()
   {
     int num_threads = 1;
-    
-    if(const char* env_p = std::getenv("OMP_NUM_THREADS"))
+
+    if (const char * env_p = std::getenv("OMP_NUM_THREADS"))
       num_threads = atoi(env_p);
 
     return num_threads;
   }
-  
+
   inline void setDefaultOpenMPSettings(const size_t num_threads = (size_t)omp_get_max_threads())
   {
     omp_set_num_threads((int)num_threads);
     omp_set_dynamic(0);
   }
-  
-  PINOCCHIO_DEPRECATED_MESSAGE("This function is now deprecated and has been renamed setDefaultOpenMPSettings.")
+
+  PINOCCHIO_DEPRECATED_MESSAGE(
+    "This function is now deprecated and has been renamed setDefaultOpenMPSettings.")
   inline void set_default_omp_options(const size_t num_threads = (size_t)omp_get_max_threads())
   {
     setDefaultOpenMPSettings(num_threads);
   }
-  
+
   struct OpenMPException
   {
     explicit OpenMPException(const bool throw_on_deletion = false)
     : m_exception_ptr(nullptr)
     , m_throw_on_deletion(throw_on_deletion)
-    {}
-    
+    {
+    }
+
     void rethrowException() const
     {
-      if(this->m_exception_ptr)
+      if (this->m_exception_ptr)
         std::rethrow_exception(this->m_exception_ptr);
     }
-    
+
     std::exception_ptr getException() const
     {
       return m_exception_ptr;
     }
-    
+
     bool hasThrown() const
     {
       return this->m_exception_ptr != nullptr;
     }
-    
-    template <typename Function, typename... Parameters>
+
+    template<typename Function, typename... Parameters>
     void run(Function f, Parameters... params)
     {
       try
@@ -75,30 +77,29 @@ namespace pinocchio
         this->captureException();
       }
     }
-    
-    void captureException() 
+
+    void captureException()
     {
       std::unique_lock<std::mutex> guard(this->m_lock);
       this->m_exception_ptr = std::current_exception();
     }
-    
+
     void reset()
     {
       this->m_exception_ptr = nullptr;
     }
-    
+
     ~OpenMPException()
     {
-      if(m_throw_on_deletion)
+      if (m_throw_on_deletion)
         this->rethrowException();
     }
-    
+
   protected:
-    
     std::exception_ptr m_exception_ptr;
-    std::mutex         m_lock;
-    const bool         m_throw_on_deletion;
+    std::mutex m_lock;
+    const bool m_throw_on_deletion;
   }; // struct OpenMPException
-}
+} // namespace pinocchio
 
 #endif // ifndef __pinocchio_utils_openmp_hpp__

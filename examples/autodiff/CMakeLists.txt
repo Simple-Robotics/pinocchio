@@ -2,24 +2,23 @@
 # Copyright (c) 2022 INRIA
 #
 
-IF(BUILD_WITH_AUTODIFF_SUPPORT)
-  FUNCTION(ADD_PINOCCHIO_CPP_AUTODIFF_EXAMPLE EXAMPLE)
-    INCLUDE_DIRECTORIES(SYSTEM ${cppadcg_INCLUDE_DIR})
-    ADD_PINOCCHIO_CPP_EXAMPLE(${EXAMPLE})
-    SET_PROPERTY(TARGET example-cpp-${EXAMPLE} PROPERTY CXX_STANDARD 11)
-    TARGET_LINK_LIBRARIES(example-cpp-${EXAMPLE} PUBLIC ${CMAKE_DL_LIBS})
-  ENDFUNCTION()
-  
-  ADD_PINOCCHIO_CPP_AUTODIFF_EXAMPLE(autodiff-rnea)
+if(BUILD_WITH_AUTODIFF_SUPPORT)
+  function(ADD_PINOCCHIO_CPP_AUTODIFF_EXAMPLE EXAMPLE)
+    include_directories(SYSTEM ${cppadcg_INCLUDE_DIR})
+    add_pinocchio_cpp_example(${EXAMPLE})
+    set_property(TARGET example-cpp-${EXAMPLE} PROPERTY CXX_STANDARD 11)
+    target_link_libraries(example-cpp-${EXAMPLE} PUBLIC ${CMAKE_DL_LIBS})
+  endfunction()
 
-  IF(BUILD_PYTHON_INTERFACE)
-    SET(${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES
-      autodiff-rnea
-       )
+  add_pinocchio_cpp_autodiff_example(autodiff-rnea)
 
-    FOREACH(EXAMPLE ${${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES})
-      ADD_PYTHON_UNIT_TEST("example-py-${EXAMPLE}" "examples/autodiff/${EXAMPLE}.py" "bindings/python")
-    ENDFOREACH(EXAMPLE ${${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES})
-  ENDIF(BUILD_PYTHON_INTERFACE)
+  if(BUILD_PYTHON_INTERFACE)
+    set(${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES autodiff-rnea)
 
-ENDIF(BUILD_WITH_AUTODIFF_SUPPORT)
+    foreach(EXAMPLE ${${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES})
+      add_python_unit_test("example-py-${EXAMPLE}" "examples/autodiff/${EXAMPLE}.py"
+                           "bindings/python")
+    endforeach(EXAMPLE ${${PROJECT_NAME}_AUTODIFF_PYTHON_EXAMPLES})
+  endif(BUILD_PYTHON_INTERFACE)
+
+endif(BUILD_WITH_AUTODIFF_SUPPORT)

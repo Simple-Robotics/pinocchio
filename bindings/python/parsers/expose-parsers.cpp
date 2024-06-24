@@ -13,17 +13,16 @@ namespace pinocchio
 {
   namespace python
   {
-    
+
     void exposeParsers()
     {
       exposeSDFParser();
       exposeURDFParser();
       exposeSRDFParser();
       exposeMJCFParser();
-      
+
       exposeSampleModels();
     }
-    
+
   } // namespace python
 } // namespace pinocchio
-

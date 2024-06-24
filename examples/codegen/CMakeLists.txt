@@ -2,25 +2,33 @@
 # Copyright (c) 2020-2023 INRIA
 #
 
-IF(cppadcg_FOUND AND BUILD_WITH_CODEGEN_SUPPORT AND BUILD_WITH_URDF_SUPPORT)
-  FUNCTION(ADD_PINOCCHIO_CPP_CODEGEN_EXAMPLE EXAMPLE)
-    ADD_PINOCCHIO_CPP_EXAMPLE(${EXAMPLE} CPPADCG PARSERS)
-    SET_PROPERTY(TARGET example-cpp-${EXAMPLE} PROPERTY CXX_STANDARD 11)
-    TARGET_LINK_LIBRARIES(example-cpp-${EXAMPLE} PUBLIC ${CMAKE_DL_LIBS})
-    TARGET_COMPILE_DEFINITIONS(example-cpp-${EXAMPLE} PUBLIC PINOCCHIO_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\")
-  ENDFUNCTION()
-  
-  ADD_PINOCCHIO_CPP_CODEGEN_EXAMPLE(codegen-crba)
-  ADD_PINOCCHIO_CPP_CODEGEN_EXAMPLE(codegen-rnea)
+if(cppadcg_FOUND
+   AND BUILD_WITH_CODEGEN_SUPPORT
+   AND BUILD_WITH_URDF_SUPPORT)
+  function(ADD_PINOCCHIO_CPP_CODEGEN_EXAMPLE EXAMPLE)
+    add_pinocchio_cpp_example(
+      ${EXAMPLE}
+      CPPADCG
+      PARSERS)
+    set_property(TARGET example-cpp-${EXAMPLE} PROPERTY CXX_STANDARD 11)
+    target_link_libraries(example-cpp-${EXAMPLE} PUBLIC ${CMAKE_DL_LIBS})
+    target_compile_definitions(example-cpp-${EXAMPLE}
+                               PUBLIC PINOCCHIO_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\")
+  endfunction()
 
-  IF(BUILD_PYTHON_INTERFACE)
-    SET(${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES
-      codegen-rnea
-       )
+  add_pinocchio_cpp_codegen_example(codegen-crba)
+  add_pinocchio_cpp_codegen_example(codegen-rnea)
 
-    FOREACH(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
-      ADD_PYTHON_UNIT_TEST("example-py-${EXAMPLE}" "examples/codegen/${EXAMPLE}.py" "bindings/python")
-    ENDFOREACH(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
-  ENDIF(BUILD_PYTHON_INTERFACE)
+  if(BUILD_PYTHON_INTERFACE)
+    set(${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES codegen-rnea)
 
-ENDIF(cppadcg_FOUND AND BUILD_WITH_CODEGEN_SUPPORT AND BUILD_WITH_URDF_SUPPORT)
+    foreach(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
+      add_python_unit_test("example-py-${EXAMPLE}" "examples/codegen/${EXAMPLE}.py"
+                           "bindings/python")
+    endforeach(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
+  endif(BUILD_PYTHON_INTERFACE)
+
+endif(
+  cppadcg_FOUND
+  AND BUILD_WITH_CODEGEN_SUPPORT
+  AND BUILD_WITH_URDF_SUPPORT)

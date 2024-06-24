@@ -13,14 +13,16 @@ import hppfcl as fcl
 
 with_octomap = fcl.WITH_OCTOMAP
 if not with_octomap:
-   print("This example is skiped as HPP-FCL has not been compiled with octomap support.")
+    print(
+        "This example is skiped as HPP-FCL has not been compiled with octomap support."
+    )
 
 model = pin.Model()
 collision_model = pin.GeometryModel()
 
-octree = fcl.makeOctree(np.random.rand(1000,3),0.01)
-octree_object = pin.GeometryObject("octree",0,pin.SE3.Identity(),octree)
-octree_object.meshColor[0] = 1.
+octree = fcl.makeOctree(np.random.rand(1000, 3), 0.01)
+octree_object = pin.GeometryObject("octree", 0, pin.SE3.Identity(), octree)
+octree_object.meshColor[0] = 1.0
 collision_model.addGeometryObject(octree_object)
 
 visual_model = collision_model
@@ -35,10 +37,11 @@ viz = MeshcatVisualizer(model, collision_model, visual_model)
 try:
     viz.initViewer(open=True)
 except ImportError as err:
-    print("Error while initializing the viewer. It seems you should install Python meshcat")
+    print(
+        "Error while initializing the viewer. It seems you should install Python meshcat"
+    )
     print(err)
     sys.exit(0)
 
 viz.loadViewerModel()
 viz.clearDefaultLights()
-

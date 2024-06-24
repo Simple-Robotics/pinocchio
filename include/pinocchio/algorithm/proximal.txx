@@ -5,7 +5,8 @@
 #ifndef __pinocchio_algorithm_proximal_txx__
 #define __pinocchio_algorithm_proximal_txx__
 
-namespace pinocchio {
+namespace pinocchio
+{
   extern template struct PINOCCHIO_DLLAPI ProximalSettingsTpl<context::Scalar>;
 
 } // namespace pinocchio

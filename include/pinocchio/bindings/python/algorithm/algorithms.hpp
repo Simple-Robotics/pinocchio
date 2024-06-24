@@ -12,7 +12,7 @@ namespace pinocchio
   namespace python
   {
     namespace bp = boost::python;
-    
+
     void exposeJointsAlgo();
     void exposeABA();
     void exposeCRBA();
@@ -36,7 +36,7 @@ namespace pinocchio
     void exposeCholesky();
     void exposeModelAlgo();
     void exposeImpulseDynamics();
-    
+
     void exposeRNEADerivatives();
     void exposeABADerivatives();
     void exposeKinematicsDerivatives();
@@ -47,14 +47,13 @@ namespace pinocchio
     void exposeCones();
 
     void exposeContactSolvers();
-    
+
 #if defined(PINOCCHIO_WITH_EXTRA_SUPPORT)
     void exposeReachableWorkspace();
 #endif // defined(PINOCCHIO_WITH_EXTRA_SUPPORT)
     void exposeAlgorithms();
-    
+
   } // namespace python
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_python_algorithms_hpp__
-

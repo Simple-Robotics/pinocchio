@@ -23,16 +23,18 @@ namespace pinocchio
   /// \param[out] geom_data the corresponding geometry data, where computations are done.
   /// \param[in] pair_id The collsion pair index in the GeometryModel.
   /// \param[in] collision_request The collision request associated to the collision pair.
-  /// \param[in] compute_patch_info whether we need to also compute the contact patch info associated with the collision pair.
+  /// \param[in] compute_patch_info whether we need to also compute the contact patch info
+  /// associated with the collision pair.
   ///
   /// \return Return true is the collision objects are colliding.
   /// \note The complete collision result is also available in geom_data.collisionResults[pair_id]
   ///
-  bool computeCollision(const GeometryModel & geom_model,
-                        GeometryData & geom_data,
-                        const PairIndex pair_id,
-                        fcl::CollisionRequest & collision_request,
-                        bool compute_patch_info = true);
+  bool computeCollision(
+    const GeometryModel & geom_model,
+    GeometryData & geom_data,
+    const PairIndex pair_id,
+    fcl::CollisionRequest & collision_request,
+    bool compute_patch_info = true);
   ///
   /// \brief Compute the contact patch info associated with the collision pair given by pair_id
   ///
@@ -42,9 +44,8 @@ namespace pinocchio
   ///
   /// \note The complete contact patch result is available in geom_data.contactPatchResults[pair_id]
   ///
-  void computeContactPatch(const GeometryModel & geom_model,
-                           GeometryData & geom_data,
-                           const PairIndex pair_id);
+  void computeContactPatch(
+    const GeometryModel & geom_model, GeometryData & geom_data, const PairIndex pair_id);
 
   ///
   /// \brief Compute the collision status between a *SINGLE* collision pair.
@@ -57,9 +58,8 @@ namespace pinocchio
   /// \return Return true is the collision objects are colliding.
   /// \note The complete collision result is also available in geom_data.collisionResults[pair_id]
   ///
-  bool computeCollision(const GeometryModel & geom_model,
-                        GeometryData & geom_data,
-                        const PairIndex pair_id);
+  bool computeCollision(
+    const GeometryModel & geom_model, GeometryData & geom_data, const PairIndex pair_id);
 
   ///
   /// \brief Calls computeCollision for every active pairs of GeometryData.
@@ -67,14 +67,16 @@ namespace pinocchio
   ///
   /// \param[in] geom_model: geometry model (const)
   /// \param[out] geom_data: corresponding geometry data (nonconst) where collisions are computed
-  /// \param[in] stopAtFirstCollision if true, stop the loop over the collision pairs when the first collision is detected.
+  /// \param[in] stopAtFirstCollision if true, stop the loop over the collision pairs when the first
+  /// collision is detected.
   ///
   /// \warning if stopAtFirstcollision = true, then the collisions vector will
   /// not be entirely fulfilled (of course).
   ///
-  bool computeCollisions(const GeometryModel & geom_model,
-                         GeometryData & geom_data,
-                         const bool stopAtFirstCollision = false);
+  bool computeCollisions(
+    const GeometryModel & geom_model,
+    GeometryData & geom_data,
+    const bool stopAtFirstCollision = false);
 
   ///
   /// Compute the forward kinematics, update the geometry placements and
@@ -88,19 +90,27 @@ namespace pinocchio
   /// \param[in] geom_model geometry model (const)
   /// \param[out] geom_data corresponding geometry data (nonconst) where distances are computed
   /// \param[in] q robot configuration.
-  /// \param[in] stopAtFirstCollision if true, stop the loop over the collision pairs when the first collision is detected.
+  /// \param[in] stopAtFirstCollision if true, stop the loop over the collision pairs when the first
+  /// collision is detected.
   ///
   /// \warning if stopAtFirstcollision = true, then the collisions vector will
   /// not be entirely fulfilled (of course).
-  /// \note A similar function is available without model, data and q, not recomputing the forward kinematics.
+  /// \note A similar function is available without model, data and q, not recomputing the forward
+  /// kinematics.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType>
-  bool computeCollisions(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                         DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                         const GeometryModel & geom_model,
-                         GeometryData & geom_data,
-                         const Eigen::MatrixBase<ConfigVectorType> & q,
-                         const bool stopAtFirstCollision = false);
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    typename ConfigVectorType>
+  bool computeCollisions(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const GeometryModel & geom_model,
+    GeometryData & geom_data,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const bool stopAtFirstCollision = false);
 
   ///
   /// Compute the radius of the geometry volumes attached to every joints.
@@ -111,10 +121,11 @@ namespace pinocchio
   ///
   /// \sa GeometryData::radius
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl>
-  void computeBodyRadius(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                         const GeometryModel & geom_model,
-                         GeometryData & geom_data);
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  void computeBodyRadius(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const GeometryModel & geom_model,
+    GeometryData & geom_data);
 
 } // namespace pinocchio
 
@@ -122,7 +133,7 @@ namespace pinocchio
 #include "pinocchio/collision/collision.hxx"
 
 #if PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
-#include "pinocchio/collision/collision.txx"
+  #include "pinocchio/collision/collision.txx"
 #endif // PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
 
 #endif // ifndef __pinocchio_collision_collision_hpp__

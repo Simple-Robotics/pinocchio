@@ -22,20 +22,20 @@ using namespace pinocchio;
 BOOST_AUTO_TEST_CASE(test_memory_allocation)
 {
   const Eigen::DenseIndex mat_size = 100;
-  const Eigen::MatrixXd mat_ = Eigen::MatrixXd::Random(mat_size,mat_size);
+  const Eigen::MatrixXd mat_ = Eigen::MatrixXd::Random(mat_size, mat_size);
   const Eigen::MatrixXd symmetric_mat = mat_.transpose() * mat_;
-  
+
   BOOST_CHECK(isSymmetric(symmetric_mat));
-  
+
   DelassusOperatorDense delassus(symmetric_mat);
-  
+
   Eigen::VectorXd res(mat_size);
   const Eigen::VectorXd rhs = Eigen::VectorXd::Random(mat_size);
   res = delassus * rhs;
   BOOST_CHECK(res.isApprox((symmetric_mat * rhs).eval()));
-  
+
   PowerIterationAlgoTpl<Eigen::VectorXd> power_iteration(mat_size);
-  
+
   // Check memory allocations
   Eigen::internal::set_is_malloc_allowed(false);
   res = delassus * rhs;
@@ -49,4 +49,3 @@ BOOST_AUTO_TEST_CASE(test_memory_allocation)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

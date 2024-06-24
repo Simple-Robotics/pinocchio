@@ -23,31 +23,40 @@ namespace pinocchio
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
   /// \param[in] geom_model The geometry model containing the collision objects.
-  /// \param[out] geom_data The geometry data containing the placements of the collision objects. See oMg field in GeometryData.
-  /// \param[in] q The joint configuration vector (dim model.nq).
+  /// \param[out] geom_data The geometry data containing the placements of the collision objects.
+  /// See oMg field in GeometryData. \param[in] q The joint configuration vector (dim model.nq).
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl, typename ConfigVectorType>
-  inline void updateGeometryPlacements(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                                       DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                                       const GeometryModel & geom_model,
-                                       GeometryData & geom_data,
-                                       const Eigen::MatrixBase<ConfigVectorType> & q);
-  
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    typename ConfigVectorType>
+  inline void updateGeometryPlacements(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const GeometryModel & geom_model,
+    GeometryData & geom_data,
+    const Eigen::MatrixBase<ConfigVectorType> & q);
+
   ///
-  /// \brief Update the placement of the geometry objects according to the current joint placements contained in data.
+  /// \brief Update the placement of the geometry objects according to the current joint placements
+  /// contained in data.
   ///
   /// \tparam JointCollection Collection of Joint types.
   ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
   /// \param[in] geom_model The geometry model containing the collision objects.
-  /// \param[out] geom_data The geometry data containing the placements of the collision objects. See oMg field in GeometryData.
+  /// \param[out] geom_data The geometry data containing the placements of the collision objects.
+  /// See oMg field in GeometryData.
   ///
-  template<typename Scalar, int Options, template<typename,int> class JointCollectionTpl>
-  inline void updateGeometryPlacements(const ModelTpl<Scalar,Options,JointCollectionTpl> & model,
-                                       const DataTpl<Scalar,Options,JointCollectionTpl> & data,
-                                       const GeometryModel & geom_model,
-                                       GeometryData & geom_data);
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  inline void updateGeometryPlacements(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const GeometryModel & geom_model,
+    GeometryData & geom_data);
 
   ///
   /// \brief Set a mesh scaling vector to each GeometryObject contained in the the GeometryModel.
@@ -58,26 +67,28 @@ namespace pinocchio
   /// \deprecated This function is now deprecated without replacement.
   ///
   template<typename Vector3Like>
-  PINOCCHIO_DEPRECATED
-  inline void setGeometryMeshScales(GeometryModel & geom_model, const Eigen::MatrixBase<Vector3Like> & meshScale)
+  PINOCCHIO_DEPRECATED inline void setGeometryMeshScales(
+    GeometryModel & geom_model, const Eigen::MatrixBase<Vector3Like> & meshScale)
   {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like,3);
-    for(GeomIndex index=0; index<geom_model.ngeoms; index++)
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+    for (GeomIndex index = 0; index < geom_model.ngeoms; index++)
       geom_model.geometryObjects[index].meshScale = meshScale;
   }
 
   ///
-  /// \brief     Set an isotropic mesh scaling to each GeometryObject contained in the the GeometryModel.
+  /// \brief     Set an isotropic mesh scaling to each GeometryObject contained in the the
+  /// GeometryModel.
   ///
   /// \param[in]  geom_model The geometry model containing the collision objects.
-  /// \param[in]  meshScale The scale, to be applied to each GeometryObject, equally in all directions
+  /// \param[in]  meshScale The scale, to be applied to each GeometryObject, equally in all
+  /// directions
   ///
   /// \deprecated This function is now deprecated without replacement.
   ///
   PINOCCHIO_DEPRECATED
   inline void setGeometryMeshScales(GeometryModel & geom_model, const double meshScale)
   {
-    for(GeomIndex index=0; index<geom_model.ngeoms; index++)
+    for (GeomIndex index = 0; index < geom_model.ngeoms; index++)
       geom_model.geometryObjects[index].meshScale.setConstant(meshScale);
   }
 
@@ -98,16 +109,15 @@ namespace pinocchio
   /// and should be updated (or more simply, re-created from the new setting of geom_model1).
   /// \todo This function is not asserted in unittest.
   ///
-  inline void appendGeometryModel(GeometryModel & geom_model1,
-                                  const GeometryModel & geom_model2);
+  inline void appendGeometryModel(GeometryModel & geom_model1, const GeometryModel & geom_model2);
 
-} // namespace pinocchio 
+} // namespace pinocchio
 
 /* --- Details -------------------------------------------------------------------- */
 #include "pinocchio/algorithm/geometry.hxx"
 
 #if PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
-#include "pinocchio/algorithm/geometry.txx"
+  #include "pinocchio/algorithm/geometry.txx"
 #endif // PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
 
 #endif // ifndef __pinocchio_algo_geometry_hpp__

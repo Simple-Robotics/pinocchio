@@ -4,8 +4,9 @@
 
 #include "pinocchio/algorithm/proximal.hpp"
 
-namespace pinocchio {
-  
+namespace pinocchio
+{
+
   template struct ProximalSettingsTpl<context::Scalar>;
 
-} // namespace pinocchio 
+} // namespace pinocchio

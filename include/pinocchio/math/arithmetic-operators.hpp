@@ -11,14 +11,15 @@ namespace pinocchio
 {
   template<typename LhsType, typename RhsType>
   struct MultiplicationOperatorReturnType;
-  
+
   template<typename LhsMatrixDerived, typename RhsMatrixDerived>
-  struct MultiplicationOperatorReturnType<Eigen::MatrixBase<LhsMatrixDerived>,Eigen::MatrixBase<RhsMatrixDerived>>
-  : MatrixMatrixProduct<LhsMatrixDerived,RhsMatrixDerived>
+  struct MultiplicationOperatorReturnType<
+    Eigen::MatrixBase<LhsMatrixDerived>,
+    Eigen::MatrixBase<RhsMatrixDerived>> : MatrixMatrixProduct<LhsMatrixDerived, RhsMatrixDerived>
   {
-    typedef MatrixMatrixProduct<LhsMatrixDerived,RhsMatrixDerived> Base;
+    typedef MatrixMatrixProduct<LhsMatrixDerived, RhsMatrixDerived> Base;
     typedef typename Base::type type;
   };
-}
+} // namespace pinocchio
 
-#endif //#ifndef __pinocchio_math_arithmetic_operators_hpp__
+#endif // #ifndef __pinocchio_math_arithmetic_operators_hpp__

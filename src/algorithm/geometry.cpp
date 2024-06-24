@@ -6,17 +6,25 @@
 
 #ifndef PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
-#include "pinocchio/algorithm/geometry.hpp"
+  #include "pinocchio/algorithm/geometry.hpp"
 
-namespace pinocchio {
+namespace pinocchio
+{
 
-  template void updateGeometryPlacements
-    <context::Scalar, context::Options, JointCollectionDefaultTpl, context::VectorXs>
-  (const context::Model &, context::Data &, const GeometryModel &, GeometryData &, const Eigen::MatrixBase<context::VectorXs> &);
+  template void updateGeometryPlacements<
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs>(
+    const context::Model &,
+    context::Data &,
+    const GeometryModel &,
+    GeometryData &,
+    const Eigen::MatrixBase<context::VectorXs> &);
 
-  template void updateGeometryPlacements
-    <context::Scalar, context::Options, JointCollectionDefaultTpl>
-  (const context::Model &, const context::Data &, const GeometryModel &, GeometryData &);
+  template void
+  updateGeometryPlacements<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &, const context::Data &, const GeometryModel &, GeometryData &);
 
 } // namespace pinocchio
 
