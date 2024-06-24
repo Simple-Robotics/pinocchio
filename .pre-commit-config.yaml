@@ -39,6 +39,8 @@ repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
+      - id: remove-tabs
+        args: [--whitespaces-count, '2']  # defaults to: 4
       - id: forbid-tabs
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
