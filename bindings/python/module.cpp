@@ -135,10 +135,12 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
   exposeConversions();
 
   typedef std::vector<::pinocchio::VectorXb> StdVec_VectorXb;
+  typedef std::vector<::Eigen::DenseIndex> StdVec_Index;
   typedef std::vector<context::MatrixXs> StdVec_MatrixXs;
 
   StdVectorPythonVisitor<StdVec_VectorXb, false>::expose(
     "StdVec_VectorXb", eigenpy::details::overload_base_get_item_for_std_vector<StdVec_VectorXb>());
+  StdVectorPythonVisitor<StdVec_Index, true>::expose("StdVec_long");
   StdVectorPythonVisitor<StdVec_MatrixXs, false>::expose(
     "StdVec_MatrixXs", eigenpy::details::overload_base_get_item_for_std_vector<StdVec_MatrixXs>());
 }
