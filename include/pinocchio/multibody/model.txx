@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_multibody_model_txx__
@@ -56,6 +56,9 @@ namespace pinocchio
   extern template PINOCCHIO_DLLAPI FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addFrame(
     const Frame &, const bool);
+
+  extern template PINOCCHIO_DLLAPI std::vector<JointIndex>
+  ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::getChildJoints() const;
 
 } // namespace pinocchio
 
