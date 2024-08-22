@@ -467,14 +467,14 @@ namespace pinocchio
     ///
     /// \return Returns list of boolean of size model.nq.
     ///
-    std::vector<bool> hasConfigurationLimit();
+    std::vector<bool> hasConfigurationLimit() const;
 
     ///
     /// \brief Check if joints have configuration limits
     ///
     /// \return Returns list of boolean of size model.nq.
     ///
-    std::vector<bool> hasConfigurationLimitInTangent();
+    std::vector<bool> hasConfigurationLimitInTangent() const;
 
     /// Run check(fusion::list) with DEFAULT_CHECKERS as argument.
     bool check() const;

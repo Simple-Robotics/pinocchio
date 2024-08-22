@@ -501,7 +501,7 @@ namespace pinocchio
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  std::vector<bool> ModelTpl<Scalar, Options, JointCollectionTpl>::hasConfigurationLimit()
+  std::vector<bool> ModelTpl<Scalar, Options, JointCollectionTpl>::hasConfigurationLimit() const
   {
     std::vector<bool> vec;
     for (Index i = 1; i < (Index)(njoints); ++i)
@@ -513,7 +513,8 @@ namespace pinocchio
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  std::vector<bool> ModelTpl<Scalar, Options, JointCollectionTpl>::hasConfigurationLimitInTangent()
+  std::vector<bool>
+  ModelTpl<Scalar, Options, JointCollectionTpl>::hasConfigurationLimitInTangent() const
   {
     std::vector<bool> vec;
     for (Index i = 1; i < (Index)(njoints); ++i)
