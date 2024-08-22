@@ -157,7 +157,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
       ss << "From file: " << __FILE__ << "\n";                                                     \
       ss << "in function: " << PINOCCHIO_PRETTY_FUNCTION << "\n";                                  \
       ss << "at line: " << __LINE__ << "\n";                                                       \
-      ss << "message: " << message << "\n";                                                        \
+      ss << "message:\n" << message << "\n";                                                       \
       throw exception(ss.str());                                                                   \
     }
   #define PINOCCHIO_THROW_PRETTY_IF(condition, exception_type, message)                            \
