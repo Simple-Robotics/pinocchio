@@ -53,4 +53,7 @@ namespace pinocchio
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addFrame(
     const Frame &, const bool);
 
+  template std::vector<JointIndex>
+  ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::getChildJoints() const;
+
 } // namespace pinocchio
