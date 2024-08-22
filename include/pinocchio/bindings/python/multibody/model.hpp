@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2023 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 // Copyright (c) 2015 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -218,7 +218,10 @@ namespace pinocchio
           .def(
             "hasConfigurationLimitInTangent", &Model::hasConfigurationLimitInTangent,
             bp::args("self"),
-            "Returns list of boolean if joints have configuration limit in tangent space  .")
+            "Returns list of boolean if joints have configuration limit in tangent space.")
+          .def(
+            "getChildJoints", &Model::getChildJoints, bp::args("self"),
+            "Returns a vector of the children joints of the kinematic tree..")
 
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
 
