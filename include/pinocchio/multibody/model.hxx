@@ -525,6 +525,18 @@ namespace pinocchio
     return vec;
   }
 
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  std::vector<JointIndex> ModelTpl<Scalar, Options, JointCollectionTpl>::getChildJoints() const
+  {
+    std::vector<JointIndex> res;
+    for (JointIndex joint_id = 1; joint_id < JointIndex(njoints); ++joint_id)
+    {
+      if (this->children[joint_id].empty())
+        res.push_back(joint_id);
+    }
+    return res;
+  }
+
 } // namespace pinocchio
 
 /// @endcond

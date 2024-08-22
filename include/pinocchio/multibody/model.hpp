@@ -488,6 +488,10 @@ namespace pinocchio
     ///
     bool check(const Data & data) const;
 
+    /// Returns a vector of the children joints of the kinematic tree.
+    /// \remark: a child joint is a node without any child joint.
+    std::vector<JointIndex> getChildJoints() const;
+
   protected:
     ///
     /// \brief Add the joint_id to its parent subtrees.
