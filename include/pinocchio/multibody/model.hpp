@@ -325,7 +325,7 @@ namespace pinocchio
     ///
     /// \return The index of the new frame
     ///
-    FrameIndex addJointFrame(const JointIndex & joint_index, int previous_frame_index = -1);
+    FrameIndex addJointFrame(const JointIndex joint_index, int previous_frame_index = -1);
 
     ///
     /// \brief Append a body to a given joint of the kinematic tree.

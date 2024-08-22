@@ -200,7 +200,7 @@ namespace pinocchio
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   FrameIndex ModelTpl<Scalar, Options, JointCollectionTpl>::addJointFrame(
-    const JointIndex & joint_index, int previous_frame_index)
+    const JointIndex joint_index, int previous_frame_index)
   {
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       joint_index < joints.size(),

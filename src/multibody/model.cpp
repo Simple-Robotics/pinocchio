@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #include "pinocchio/multibody/model.hpp"
@@ -39,7 +39,7 @@ namespace pinocchio
 
   template FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJointFrame(
-    const JointIndex &, int);
+    const JointIndex, int);
 
   template void
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::appendBodyToJoint(
