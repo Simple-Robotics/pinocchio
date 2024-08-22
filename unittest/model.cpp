@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2022 CNRS INRIA
+// Copyright (c) 2016-2024 CNRS INRIA
 //
 
 #include "pinocchio/multibody/data.hpp"
@@ -107,6 +107,31 @@ BOOST_AUTO_TEST_CASE(test_model_subspace_dimensions)
 
     BOOST_CHECK(model.nvs[joint_id] == jmodel.nv());
     BOOST_CHECK(model.idx_vs[joint_id] == jmodel.idx_v());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_model_getChildJoints)
+{
+  Model model;
+  buildModels::humanoidRandom(model);
+  const Model::IndexVector child_joints = model.getChildJoints();
+
+  for (const Model::Index joint_id : child_joints)
+  {
+    const long cnt = std::count(model.parents.begin(), model.parents.end(), joint_id);
+    BOOST_CHECK(cnt == 0);
+  }
+
+  // Check that child_joints contains all child joints
+  for (JointIndex joint_id = 1; joint_id < (JointIndex)model.njoints; ++joint_id)
+  {
+    const long cnt = std::count(model.parents.begin(), model.parents.end(), joint_id);
+    if (cnt == 0)
+    {
+      const bool joint_id_in_child_joints =
+        std::count(child_joints.begin(), child_joints.end(), joint_id) == 1;
+      BOOST_CHECK(joint_id_in_child_joints);
+    }
   }
 }
 
