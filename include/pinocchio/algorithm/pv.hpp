@@ -122,8 +122,7 @@ namespace pinocchio
     class ContactModelAllocator,
     class ContactDataAllocator>
   PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  inline const
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility") inline const
     typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & constrainedABA(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       DataTpl<Scalar, Options, JointCollectionTpl> & data,

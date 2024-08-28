@@ -13,7 +13,6 @@ from . import pinocchio_pywrap_default as pin
 from .pinocchio_pywrap_default.rpy import matrixToRpy, rpyToMatrix, rotate
 
 
-
 def npToTTuple(M):
     L = M.tolist()
     for i in range(len(L)):
@@ -42,7 +41,6 @@ def zero(n):
 
 def rand(n):
     return np.random.rand(n) if isinstance(n, int) else np.random.rand(n[0], n[1])
-
 
 
 def isapprox(a, b, epsilon=1e-6):

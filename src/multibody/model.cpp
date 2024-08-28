@@ -40,7 +40,7 @@ namespace pinocchio
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJointFrame(
-    const JointIndex &, int);
+    const JointIndex, int);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::appendBodyToJoint(

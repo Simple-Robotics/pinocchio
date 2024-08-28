@@ -147,11 +147,9 @@ namespace pinocchio
       const Vector3 constraint_diagonal_inertia =
         this->m_damping_inverse.template segment<3>(Eigen::DenseIndex(ee_id * 3));
 
-      typedef typename CustomData::Matrix6Vector InertiaAlignedVector;
-      typedef typename InertiaAlignedVector::vector_base InertiaStdVector;
       cmodel.appendConstraintDiagonalInertiaToJointInertias(
         model_ref, data_ref, cdata, constraint_diagonal_inertia,
-        static_cast<InertiaStdVector &>(custom_data.Yaba_augmented));
+        custom_data.Yaba_augmented);
     }
 
     typedef DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperatorRigidBodyTpl> Pass2;

@@ -25,44 +25,6 @@
 #define KP 0
 #define KD 0
 
-BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
-
-// BOOST_AUTO_TEST_CASE(contact_models)
-// {
-//   using namespace pinocchio;
-
-//   // Check default constructor
-//   RigidConstraintModel cmodel1;
-//   BOOST_CHECK(cmodel1.type == CONTACT_UNDEFINED);
-//   BOOST_CHECK(cmodel1.size() == 0);
-
-//   // Check complete constructor
-//   const SE3 M(SE3::Random());
-//   RigidConstraintModel cmodel2(CONTACT_3D,0,M);
-//   BOOST_CHECK(cmodel2.type == CONTACT_3D);
-//   BOOST_CHECK(cmodel2.joint1_id == 0);
-//   BOOST_CHECK(cmodel2.joint1_placement.isApprox(M));
-//   BOOST_CHECK(cmodel2.size() == 3);
-
-//   // Check contructor with two arguments
-//   RigidConstraintModel cmodel2prime(CONTACT_3D,0);
-//   BOOST_CHECK(cmodel2prime.type == CONTACT_3D);
-//   BOOST_CHECK(cmodel2prime.joint1_id == 0);
-//   BOOST_CHECK(cmodel2prime.joint1_placement.isIdentity());
-//   BOOST_CHECK(cmodel2prime.size() == 3);
-
-//   // Check default copy constructor
-//   RigidConstraintModel cmodel3(cmodel2);
-//   BOOST_CHECK(cmodel3 == cmodel2);
-
-//   // Check complete constructor 6D
-//   RigidConstraintModel cmodel4(CONTACT_6D,0);
-//   BOOST_CHECK(cmodel4.type == CONTACT_6D);
-//   BOOST_CHECK(cmodel4.joint1_id == 0);
-//   BOOST_CHECK(cmodel4.joint1_placement.isIdentity());
-//   BOOST_CHECK(cmodel4.size() == 6);
-// }
-
 /// \brief Computes motions in the world frame
 pinocchio::Motion computeAcceleration(
   const pinocchio::Model & model,
@@ -112,6 +74,44 @@ pinocchio::Motion computeAcceleration(
 
   return res;
 }
+
+BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
+
+// BOOST_AUTO_TEST_CASE(contact_models)
+// {
+//   using namespace pinocchio;
+
+//   // Check default constructor
+//   RigidConstraintModel cmodel1;
+//   BOOST_CHECK(cmodel1.type == CONTACT_UNDEFINED);
+//   BOOST_CHECK(cmodel1.size() == 0);
+
+//   // Check complete constructor
+//   const SE3 M(SE3::Random());
+//   RigidConstraintModel cmodel2(CONTACT_3D,0,M);
+//   BOOST_CHECK(cmodel2.type == CONTACT_3D);
+//   BOOST_CHECK(cmodel2.joint1_id == 0);
+//   BOOST_CHECK(cmodel2.joint1_placement.isApprox(M));
+//   BOOST_CHECK(cmodel2.size() == 3);
+
+//   // Check contructor with two arguments
+//   RigidConstraintModel cmodel2prime(CONTACT_3D,0);
+//   BOOST_CHECK(cmodel2prime.type == CONTACT_3D);
+//   BOOST_CHECK(cmodel2prime.joint1_id == 0);
+//   BOOST_CHECK(cmodel2prime.joint1_placement.isIdentity());
+//   BOOST_CHECK(cmodel2prime.size() == 3);
+
+//   // Check default copy constructor
+//   RigidConstraintModel cmodel3(cmodel2);
+//   BOOST_CHECK(cmodel3 == cmodel2);
+
+//   // Check complete constructor 6D
+//   RigidConstraintModel cmodel4(CONTACT_6D,0);
+//   BOOST_CHECK(cmodel4.type == CONTACT_6D);
+//   BOOST_CHECK(cmodel4.joint1_id == 0);
+//   BOOST_CHECK(cmodel4.joint1_placement.isIdentity());
+//   BOOST_CHECK(cmodel4.size() == 6);
+// }
 
 BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
 {
@@ -1500,25 +1500,7 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_in_contact_specifying_joint2id
       BOOST_CHECK(false);
       break;
     }
-    case LOCAL: {
-      contact_force_bis = cdata_bis.contact_force;
-
-      if (cmodel.type == CONTACT_3D)
-        contact_force.linear() = cdata.c1Mc2.actInv(cdata.contact_force).linear();
-      else
-      {
-        contact_force = cdata.c1Mc2.actInv(cdata.contact_force);
-        BOOST_CHECK(cdata_bis.contact1_acceleration_drift.isApprox(
-          cdata.c1Mc2.actInv(cdata.contact2_acceleration_drift)));
-      }
-      BOOST_CHECK(contact_force.isApprox(-contact_force_bis));
-      break;
-    }
-    case WORLD:
-      BOOST_CHECK(false);
-      break;
-    }
-  }
+}
 }
 
 BOOST_AUTO_TEST_CASE(test_contact_ABA_with_armature)

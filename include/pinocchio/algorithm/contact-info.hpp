@@ -759,8 +759,6 @@ namespace pinocchio
           }
 
           case CONTACT_6D: {
-            assert(
-              check_expression_if_real<Scalar>(sign != 0) && "sign should be equal to +1 or -1.");
             switch (cmodel.reference_frame)
             {
             case LOCAL: {

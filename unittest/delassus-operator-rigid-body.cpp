@@ -12,7 +12,7 @@
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/context.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/algorithm/delassus-operator-rigid-body.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -193,9 +193,9 @@ BOOST_AUTO_TEST_CASE(test_compute)
       size_t(model.njoints), Data::Force::Zero());
     mapConstraintForcesToJointForces(
       model, data_gt, constraint_models, constraint_datas_gt, rhs, joint_forces_gt);
-    minimal::aba(
+    aba(
       model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), Eigen::VectorXd::Zero(model.nv),
-      joint_forces_gt);
+      joint_forces_gt, Convention::LOCAL);
 
     for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
     {

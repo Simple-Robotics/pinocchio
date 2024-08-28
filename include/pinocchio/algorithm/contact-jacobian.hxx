@@ -221,11 +221,10 @@ namespace pinocchio
       }
       case CONTACT_6D: {
         MotionRef<ColXprOut> Jcol_motion_out(Jcol_out);
-        assert(check_expression_if_real<Scalar>(sign != 0) && "sign should be equal to +1 or -1.");
         switch (constraint_model.reference_frame)
         {
         case WORLD: {
-          Jcol_motion_out = Jcol_motion_in;
+          Jcol_motion_out = Scalar(sign) * Jcol_motion_in;
           break;
         }
         case LOCAL: {

@@ -221,7 +221,7 @@ namespace pinocchio
       }
     }
     PINOCCHIO_THROW_IF(
-      it != geometryObjects.end(), std::invalid_argument,
+      (it != geometryObjects.end()), std::invalid_argument,
       (std::string("Object ") + name + std::string(" does not belong to model")).c_str());
     // Remove all collision pairs that contain i as first or second index,
     for (CollisionPairVector::iterator itCol = collisionPairs.begin();

@@ -86,17 +86,17 @@ namespace pinocchio
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
   PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  constraintDynamics(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<ConfigVectorType> & q,
-    const Eigen::MatrixBase<TangentVectorType1> & v,
-    const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
-    ProximalSettingsTpl<Scalar> & settings);
+  inline const
+    typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & constraintDynamics(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const Eigen::MatrixBase<ConfigVectorType> & q,
+      const Eigen::MatrixBase<TangentVectorType1> & v,
+      const Eigen::MatrixBase<TangentVectorType2> & tau,
+      const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
+        contact_models,
+      std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
+      ProximalSettingsTpl<Scalar> & settings);
 
   ///
   /// \brief Computes the forward dynamics with contact constraints according to a given list of
@@ -143,16 +143,16 @@ namespace pinocchio
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
   PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  constraintDynamics(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<ConfigVectorType> & q,
-    const Eigen::MatrixBase<TangentVectorType1> & v,
-    const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas)
+  inline const
+    typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & constraintDynamics(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const Eigen::MatrixBase<ConfigVectorType> & q,
+      const Eigen::MatrixBase<TangentVectorType1> & v,
+      const Eigen::MatrixBase<TangentVectorType2> & tau,
+      const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
+        contact_models,
+      std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas)
   {
     ProximalSettingsTpl<Scalar> settings;
     return constraintDynamics(model, data, q, v, tau, contact_models, contact_datas, settings);
@@ -169,15 +169,15 @@ namespace pinocchio
     class ModelAllocator,
     class DataAllocator>
   PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  contactABA(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<ConfigVectorType> & q,
-    const Eigen::MatrixBase<TangentVectorType1> & v,
-    const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ModelAllocator> & contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, DataAllocator> & contact_data)
+  inline const
+    typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & contactABA(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const Eigen::MatrixBase<ConfigVectorType> & q,
+      const Eigen::MatrixBase<TangentVectorType1> & v,
+      const Eigen::MatrixBase<TangentVectorType2> & tau,
+      const std::vector<RigidConstraintModelTpl<Scalar, Options>, ModelAllocator> & contact_models,
+      std::vector<RigidConstraintDataTpl<Scalar, Options>, DataAllocator> & contact_data)
   {
     ProximalSettingsTpl<Scalar> settings = ProximalSettingsTpl<Scalar>();
     return contactABA(

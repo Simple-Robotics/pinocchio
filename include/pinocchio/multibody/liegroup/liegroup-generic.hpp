@@ -51,17 +51,6 @@ namespace pinocchio
     {
     }
 
-    LieGroupGenericTpl(const LieGroupGenericTpl & other)
-    : Base(other.toVariant())
-    {
-    }
-
-    LieGroupGenericTpl & operator=(const LieGroupGenericTpl & other)
-    {
-      static_cast<Base &>(*this) = other.toVariant();
-      return *this;
-    }
-
     LieGroupGenericTpl(const LieGroupGenericTpl & lg_generic) = default;
     LieGroupGenericTpl & operator=(const LieGroupGenericTpl & other) = default;
 

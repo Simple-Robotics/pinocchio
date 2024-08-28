@@ -163,8 +163,8 @@ namespace pinocchio
   };
 
   template<typename _Scalar>
-  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  struct ADMMContactSolverTpl : ContactSolverBaseTpl<_Scalar>
+  struct PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
+  ADMMContactSolverTpl : ContactSolverBaseTpl<_Scalar>
   {
     typedef _Scalar Scalar;
     typedef ContactSolverBaseTpl<_Scalar> Base;
