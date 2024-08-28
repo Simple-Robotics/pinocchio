@@ -118,6 +118,8 @@ namespace pinocchio
             Self, colwise_joint2_sparsity, "Sparsity pattern associated to joint 2.")
           .PINOCCHIO_ADD_PROPERTY(
             Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
+          .PINOCCHIO_ADD_PROPERTY(
+            Self, colwise_sparsity, "Sparsity pattern associated to the constraint;.")
 
           .def("size", &RigidConstraintModel::size, "Size of the constraint")
 
