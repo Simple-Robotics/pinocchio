@@ -218,6 +218,26 @@ namespace pinocchio
     size_t & index_ancestor_in_support1,
     size_t & index_ancestor_in_support2);
 
+  /**
+   *
+   *  \brief Computes the common ancestor between two joints belonging to the same kinematic tree.
+   *
+   *  \param[in] model the input model.
+   *  \param[in] joint1_id index of the first joint.
+   *  \param[in] joint2_id index of the second joint.
+   *
+   */
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  JointIndex findCommonAncestor(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    JointIndex joint1_id,
+    JointIndex joint2_id)
+  {
+    size_t index_ancestor_in_support1, index_ancestor_in_support2;
+    return findCommonAncestor(
+      model, joint1_id, joint2_id, index_ancestor_in_support1, index_ancestor_in_support2);
+  }
+
 } // namespace pinocchio
 
 #include "pinocchio/algorithm/model.hxx"
