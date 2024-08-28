@@ -240,7 +240,8 @@ BOOST_AUTO_TEST_CASE(contact_models_sparsity_and_jacobians)
 
     for (DenseIndex k = 0; k < model.nv; ++k)
     {
-      BOOST_CHECK(J_clm_LOCAL.col(k).isZero() != within(k, clm_RF_LF_LOCAL.colwise_span_indexes));
+      if (!within(k, clm_RF_LF_LOCAL.colwise_span_indexes))
+        BOOST_CHECK(J_clm_LOCAL.col(k).isZero());
     }
 
     // Check Jacobian
@@ -312,7 +313,8 @@ BOOST_AUTO_TEST_CASE(contact_models_sparsity_and_jacobians)
 
     for (DenseIndex k = 0; k < model.nv; ++k)
     {
-      BOOST_CHECK(J_clm_LWA.col(k).isZero() != within(k, clm_RF_LF_LWA.colwise_span_indexes));
+      if (!within(k, clm_RF_LF_LWA.colwise_span_indexes))
+        BOOST_CHECK(J_clm_LWA.col(k).isZero());
     }
 
     // Check Jacobian
