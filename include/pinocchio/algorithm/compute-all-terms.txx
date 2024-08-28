@@ -9,7 +9,7 @@ namespace pinocchio
 {
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI void computeAllTerms<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void computeAllTerms<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

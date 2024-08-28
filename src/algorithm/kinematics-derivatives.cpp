@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022 INRIA
 //
 
 #include "pinocchio/algorithm/kinematics-derivatives.hpp"
@@ -9,18 +9,8 @@ namespace pinocchio
   namespace impl
   {
 
-    template void computeForwardKinematicsDerivatives<
-      context::Scalar,
-      context::Options,
-      JointCollectionDefaultTpl,
-      Eigen::Ref<const context::VectorXs>,
-      Eigen::Ref<const context::VectorXs>>(
-      const context::Model &,
-      context::Data &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
-
-    template void computeForwardKinematicsDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    computeForwardKinematicsDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -33,7 +23,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    template void getJointVelocityDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void getJointVelocityDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -46,7 +36,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
 
-    template void getJointAccelerationDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    getJointAccelerationDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -63,7 +54,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
 
-    template void getJointAccelerationDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    getJointAccelerationDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -82,7 +74,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
 
-    template void getPointVelocityDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void getPointVelocityDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -96,7 +88,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix3x>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix3x>> &);
 
-    template void getPointClassicAccelerationDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    getPointClassicAccelerationDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -114,7 +107,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix3x>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix3x>> &);
 
-    template void getPointClassicAccelerationDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    getPointClassicAccelerationDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -135,18 +129,18 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix3x>> &);
   } // namespace impl
 
-  template void
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
   computeJointKinematicHessians<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
 
-  template void computeJointKinematicHessians<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeJointKinematicHessians<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
     context::VectorXs>(
     const context::Model &, context::Data &, const Eigen::MatrixBase<context::VectorXs> &);
 
-  template void
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
   getJointKinematicHessian<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Data &,
@@ -154,7 +148,8 @@ namespace pinocchio
     const ReferenceFrame,
     Tensor<context::Scalar, 3, context::Options> &);
 
-  template Tensor<context::Scalar, 3, context::Options>
-  getJointKinematicHessian<context::Scalar, context::Options, JointCollectionDefaultTpl>(
-    const context::Model &, const context::Data &, const JointIndex, const ReferenceFrame);
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    Tensor<context::Scalar, 3, context::Options>
+    getJointKinematicHessian<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+      const context::Model &, const context::Data &, const JointIndex, const ReferenceFrame);
 } // namespace pinocchio

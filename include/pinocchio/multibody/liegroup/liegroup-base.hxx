@@ -552,8 +552,11 @@ namespace pinocchio
     const AssignmentOperatorType op) const
   {
     Index nv_(nv());
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
     JacobianMatrix_t J(nv_, nv_);
     dIntegrate(q, v, J, arg);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     switch (op)
     {
     case SETTO:
@@ -593,8 +596,11 @@ namespace pinocchio
     const AssignmentOperatorType op) const
   {
     Index nv_(nv());
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
     JacobianMatrix_t J(nv_, nv_);
     dDifference<arg>(q0, q1, J);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     switch (op)
     {
     case SETTO:
@@ -635,8 +641,11 @@ namespace pinocchio
   typename LieGroupBase<Derived>::Scalar LieGroupBase<Derived>::squaredDistance_impl(
     const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1) const
   {
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
     TangentVector_t t(nv());
     difference(q0.derived(), q1.derived(), t);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     return t.squaredNorm();
   }
 

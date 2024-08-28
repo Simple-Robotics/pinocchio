@@ -232,10 +232,13 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigR_t> & q1,
       const Eigen::MatrixBase<Tangent_t> & d)
     {
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R0, R1;
       Vector2 t0, t1;
       forwardKinematics(R0, t0, q0);
       forwardKinematics(R1, t1, q1);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       Matrix2 R(R0.transpose() * R1);
       Vector2 t(R0.transpose() * (t1 - t0));
 
@@ -248,17 +251,23 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigR_t> & q1,
       const Eigen::MatrixBase<JacobianOut_t> & J) const
     {
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R0, R1;
       Vector2 t0, t1;
       forwardKinematics(R0, t0, q0);
       forwardKinematics(R1, t1, q1);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       Matrix2 R(R0.transpose() * R1);
       Vector2 t(R0.transpose() * (t1 - t0));
 
       if (arg == ARG0)
       {
+        PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+        PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
         JacobianMatrix_t J1;
         Jlog(R, t, J1);
+        PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
         // pcross = [ y1-y0, - (x1 - x0) ]
         Vector2 pcross(q1(1) - q0(1), q0(0) - q1(0));
@@ -284,10 +293,13 @@ namespace pinocchio
     {
       ConfigOut_t & out = PINOCCHIO_EIGEN_CONST_CAST(ConfigOut_t, qout);
 
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R0, R;
       Vector2 t0, t;
       forwardKinematics(R0, t0, q);
       exp(v, R, t);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       out.template head<2>().noalias() = R0 * t + t0;
       out.template tail<2>().noalias() = R0 * R.col(0);
@@ -317,9 +329,12 @@ namespace pinocchio
     {
       JacobianOut_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, J);
 
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R;
       Vector2 t;
       exp(v, R, t);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       toInverseActionMatrix(R, t, Jout, op);
     }
@@ -335,8 +350,11 @@ namespace pinocchio
       // TODO sparse version
       MotionTpl<Scalar, 0> nu;
       nu.toVector() << v.template head<2>(), 0, 0, 0, v[2];
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
       Jexp6(nu, Jtmp6);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       switch (op)
       {
@@ -363,16 +381,19 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & J_out) const
+      const Eigen::MatrixBase<JacobianOut_t> & J_out)
     {
       JacobianOut_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, J_out);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R;
       Vector2 t;
       exp(v, R, t);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       Vector2 tinv = (R.transpose() * t).reverse();
       tinv[0] *= Scalar(-1.);
@@ -383,18 +404,21 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & J_out) const
+      const Eigen::MatrixBase<JacobianOut_t> & J_out)
     {
       JacobianOut_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, J_out);
       MotionTpl<Scalar, 0> nu;
       nu.toVector() << v.template head<2>(), 0, 0, 0, v[2];
 
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
       Jexp6(nu, Jtmp6);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       Jout.template topRows<2>().noalias() =
         Jtmp6.template topLeftCorner<2, 2>() * Jin.template topRows<2>();
@@ -407,15 +431,18 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
-      const Eigen::MatrixBase<Jacobian_t> & J) const
+      const Eigen::MatrixBase<Jacobian_t> & J)
     {
       Jacobian_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(Jacobian_t, J);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix2 R;
       Vector2 t;
       exp(v, R, t);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       Vector2 tinv = (R.transpose() * t).reverse();
       tinv[0] *= Scalar(-1);
@@ -426,17 +453,20 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
-      const Eigen::MatrixBase<Jacobian_t> & J) const
+      const Eigen::MatrixBase<Jacobian_t> & J)
     {
       Jacobian_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(Jacobian_t, J);
       MotionTpl<Scalar, 0> nu;
       nu.toVector() << v.template head<2>(), 0, 0, 0, v[2];
 
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
       Jexp6(nu, Jtmp6);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       // TODO: Remove aliasing
       Jout.template topRows<2>() =
         Jtmp6.template topLeftCorner<2, 2>() * Jout.template topRows<2>();
@@ -463,16 +493,16 @@ namespace pinocchio
     }
 
     template<class Config_t>
-    void random_impl(const Eigen::MatrixBase<Config_t> & qout) const
+    static void random_impl(const Eigen::MatrixBase<Config_t> & qout)
     {
       R2crossSO2_t().random(qout);
     }
 
     template<class ConfigL_t, class ConfigR_t, class ConfigOut_t>
-    void randomConfiguration_impl(
+    static void randomConfiguration_impl(
       const Eigen::MatrixBase<ConfigL_t> & lower,
       const Eigen::MatrixBase<ConfigR_t> & upper,
-      const Eigen::MatrixBase<ConfigOut_t> & qout) const
+      const Eigen::MatrixBase<ConfigOut_t> & qout)
     {
       R2crossSO2_t().randomConfiguration(lower, upper, qout);
     }
@@ -585,10 +615,10 @@ namespace pinocchio
     /// \cheatsheet \f$ \frac{\partial\ominus}{\partial q_1} {}^1X_0 = -
     /// \frac{\partial\ominus}{\partial q_0} \f$
     template<ArgumentPosition arg, class ConfigL_t, class ConfigR_t, class JacobianOut_t>
-    void dDifference_impl(
+    static void dDifference_impl(
       const Eigen::MatrixBase<ConfigL_t> & q0,
       const Eigen::MatrixBase<ConfigR_t> & q1,
-      const Eigen::MatrixBase<JacobianOut_t> & J) const
+      const Eigen::MatrixBase<JacobianOut_t> & J)
     {
       typedef typename SE3::Vector3 Vector3;
 
@@ -608,8 +638,11 @@ namespace pinocchio
 
       if (arg == ARG0)
       {
+        PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+        PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
         JacobianMatrix_t J1;
         Jlog6(M, J1);
+        PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
         const Vector3 p1_p0 = quat1.conjugate() * dv_pre;
 
@@ -692,6 +725,8 @@ namespace pinocchio
 
       typedef Eigen::Matrix<Scalar, 4, 3, JacobianPlainType::Options | Eigen::RowMajor> Jacobian43;
       typedef SE3Tpl<Scalar, ConfigPlainType::Options> SE3;
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Jacobian43 Jexp3QuatCoeffWise;
 
       Scalar theta;
@@ -699,6 +734,7 @@ namespace pinocchio
       quaternion::Jexp3CoeffWise(v, Jexp3QuatCoeffWise);
       typename SE3::Matrix3 Jlog;
       Jlog3(theta, v, Jlog);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       //      std::cout << "Jexp3QuatCoeffWise\n" << Jexp3QuatCoeffWise << std::endl;
       //      std::cout << "Jlog\n" << Jlog << std::endl;
@@ -765,11 +801,11 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & J_out) const
+      const Eigen::MatrixBase<JacobianOut_t> & J_out)
     {
       JacobianOut_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, J_out);
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
@@ -784,15 +820,18 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & J_out) const
+      const Eigen::MatrixBase<JacobianOut_t> & J_out)
     {
       JacobianOut_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, J_out);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
       Jexp6<SETTO>(MotionRef<const Tangent_t>(v.derived()), Jtmp6);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       Jout.template topRows<3>().noalias() =
         Jtmp6.template topLeftCorner<3, 3>() * Jin.template topRows<3>();
@@ -803,10 +842,10 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
-      const Eigen::MatrixBase<Jacobian_t> & J_out) const
+      const Eigen::MatrixBase<Jacobian_t> & J_out)
     {
       Jacobian_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(Jacobian_t, J_out);
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
@@ -822,14 +861,17 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & v,
-      const Eigen::MatrixBase<Jacobian_t> & J_out) const
+      const Eigen::MatrixBase<Jacobian_t> & J_out)
     {
       Jacobian_t & Jout = PINOCCHIO_EIGEN_CONST_CAST(Jacobian_t, J_out);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Eigen::Matrix<Scalar, 6, 6> Jtmp6;
       Jexp6<SETTO>(MotionRef<const Tangent_t>(v.derived()), Jtmp6);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
       Jout.template topRows<3>() =
         Jtmp6.template topLeftCorner<3, 3>() * Jout.template topRows<3>();
@@ -843,8 +885,11 @@ namespace pinocchio
     static Scalar squaredDistance_impl(
       const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1)
     {
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       TangentVector_t t;
       difference_impl(q0, q1, t);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       return t.squaredNorm();
     }
 
@@ -863,16 +908,16 @@ namespace pinocchio
     }
 
     template<class Config_t>
-    void random_impl(const Eigen::MatrixBase<Config_t> & qout) const
+    static void random_impl(const Eigen::MatrixBase<Config_t> & qout)
     {
       R3crossSO3_t().random(qout);
     }
 
     template<class ConfigL_t, class ConfigR_t, class ConfigOut_t>
-    void randomConfiguration_impl(
+    static void randomConfiguration_impl(
       const Eigen::MatrixBase<ConfigL_t> & lower,
       const Eigen::MatrixBase<ConfigR_t> & upper,
-      const Eigen::MatrixBase<ConfigOut_t> & qout) const
+      const Eigen::MatrixBase<ConfigOut_t> & qout)
     {
       R3crossSO3_t().randomConfiguration(lower, upper, qout);
     }

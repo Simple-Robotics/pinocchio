@@ -205,8 +205,7 @@ namespace pinocchio
       const ForceDense<D2> & f,
       const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const
     {
-      return isApproxOrZero(linear(), f.linear(), prec)
-             && isApproxOrZero(angular(), f.angular(), prec);
+      return derived().isApprox_impl(f, prec);
     }
 
     bool isZero_impl(const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const

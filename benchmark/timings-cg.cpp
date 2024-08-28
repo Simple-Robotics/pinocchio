@@ -18,7 +18,7 @@
 #include "pinocchio/algorithm/compute-all-terms.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/container/aligned-vector.hpp"
 
 #include "pinocchio/codegen/code-generator-algo.hpp"
@@ -161,14 +161,14 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
   }
   timer.toc();
 
   timer.tic();
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
   }
   std::cout << "CRBA = \t\t";
   timer.toc(std::cout, NBT);
@@ -200,7 +200,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
   }
   std::cout << "ABA = \t\t";
   timer.toc(std::cout, NBT);

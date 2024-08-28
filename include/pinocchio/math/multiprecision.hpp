@@ -12,7 +12,7 @@
 #endif
 
 #include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/random.hpp>
+#include <boost/random.hpp>
 #include <Eigen/Dense>
 
 namespace pinocchio
@@ -24,7 +24,7 @@ namespace pinocchio
   : boost::integral_constant<
       bool,
       ((!std::numeric_limits<boost::multiprecision::number<Backend, ET>>::is_integer
-        and std::numeric_limits<boost::multiprecision::number<Backend, ET>>::has_infinity))>
+        && std::numeric_limits<boost::multiprecision::number<Backend, ET>>::has_infinity))>
   {
   };
 } // namespace pinocchio

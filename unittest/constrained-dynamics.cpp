@@ -13,7 +13,7 @@
 #include "pinocchio/algorithm/constrained-dynamics.hpp"
 #include "pinocchio/algorithm/contact-dynamics.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/utils/timer.hpp"
 #include "pinocchio/spatial/classic-acceleration.hpp"
 
@@ -168,7 +168,17 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
     BOOST_CHECK(data.oMi[k].isApprox(data_ref.oMi[k]));
     BOOST_CHECK(data.liMi[k].isApprox(data_ref.liMi[k]));
     BOOST_CHECK(data.ov[k].isApprox(data_ref.oMi[k].act(data_ref.v[k])));
-    BOOST_CHECK(data.oa_gf[k].isApprox(data_ref.oMi[k].act(data_ref.a_gf[k])));
+    // Since it's gravity, we know linear can't be zero. Angular might be though.
+    const Motion motion_tmp = data_ref.oMi[k].act(data_ref.a_gf[k]);
+    if (data.oa_gf[k].angular().isZero())
+    {
+      BOOST_CHECK(data.oa_gf[k].linear().isApprox(motion_tmp.linear()));
+      BOOST_CHECK(motion_tmp.angular().isZero());
+    }
+    else
+    {
+      BOOST_CHECK(data.oa_gf[k].isApprox(motion_tmp));
+    }
   }
 
   // Check that the decomposition is correct
@@ -180,7 +190,7 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
   BOOST_CHECK(KKT_matrix.isApprox(KKT_matrix_ref));
 
   // Check solutions
-  aba(model, data_ref, q, v, tau);
+  aba(model, data_ref, q, v, tau, Convention::WORLD);
   BOOST_CHECK(data.ddq.isApprox(data_ref.ddq));
 }
 
@@ -1067,7 +1077,7 @@ BOOST_AUTO_TEST_CASE(test_correction_CONTACT_6D)
 
     Eigen::VectorXd q(q0), v(v0);
 
-    tau = rnea(model, data_sim, q, v, 0 * a);
+    tau = rnea(model, data_sim, q, v, Eigen::VectorXd::Zero(model.nv));
     ProximalSettings prox_settings(1e-12, mu, 1);
     constraintDynamics(
       model, data_sim, q0, v0, tau, contact_models, contact_data_sim, prox_settings);
@@ -1490,6 +1500,24 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_in_contact_specifying_joint2id
       BOOST_CHECK(false);
       break;
     }
+    case LOCAL: {
+      contact_force_bis = cdata_bis.contact_force;
+
+      if (cmodel.type == CONTACT_3D)
+        contact_force.linear() = cdata.c1Mc2.actInv(cdata.contact_force).linear();
+      else
+      {
+        contact_force = cdata.c1Mc2.actInv(cdata.contact_force);
+        BOOST_CHECK(cdata_bis.contact1_acceleration_drift.isApprox(
+          cdata.c1Mc2.actInv(cdata.contact2_acceleration_drift)));
+      }
+      BOOST_CHECK(contact_force.isApprox(-contact_force_bis));
+      break;
+    }
+    case WORLD:
+      BOOST_CHECK(false);
+      break;
+    }
   }
 }
 
@@ -1602,12 +1630,20 @@ BOOST_AUTO_TEST_CASE(test_contact_ABA_6D)
     BOOST_CHECK(data.liMi[joint_id].isApprox(data_ref.liMi[joint_id]));
     BOOST_CHECK(data.oMi[joint_id].isApprox(data_ref.oMi[joint_id]));
     BOOST_CHECK(data.ov[joint_id].isApprox(data_ref.oMi[joint_id].act(data_ref.v[joint_id])));
-    BOOST_CHECK(data.oa_drift[joint_id].isApprox(data_ref.oMi[joint_id].act(data_ref.a[joint_id])));
+    if (data.oa_drift[joint_id].isZero())
+    {
+      BOOST_CHECK((data_ref.oMi[joint_id].act(data_ref.a[joint_id])).isZero());
+    }
+    else
+    {
+      BOOST_CHECK(
+        data.oa_drift[joint_id].isApprox(data_ref.oMi[joint_id].act(data_ref.a[joint_id])));
+    }
   }
 
   computeJointJacobians(model, data_ref, q);
   BOOST_CHECK(data.J.isApprox(data_ref.J));
-  minimal::aba(model, data_ref, q, v, tau);
+  aba(model, data_ref, q, v, tau, Convention::LOCAL);
 
   for (JointIndex joint_id = 1; joint_id < (JointIndex)model.njoints; ++joint_id)
   {
@@ -1702,10 +1738,18 @@ BOOST_AUTO_TEST_CASE(test_contact_ABA_6D)
   forwardKinematics(model, data_ref, q, v, 0 * v);
   for (JointIndex joint_id = 1; joint_id < (JointIndex)model.njoints; ++joint_id)
   {
-    BOOST_CHECK(data.oa_drift[joint_id].isApprox(data_ref.oMi[joint_id].act(data_ref.a[joint_id])));
+    if (data.oa_drift[joint_id].isZero())
+    {
+      BOOST_CHECK((data_ref.oMi[joint_id].act(data_ref.a[joint_id])).isZero());
+    }
+    else
+    {
+      BOOST_CHECK(
+        data.oa_drift[joint_id].isApprox(data_ref.oMi[joint_id].act(data_ref.a[joint_id])));
+    }
   }
 
-  aba(model, data_ref, q, v, 0 * v);
+  aba(model, data_ref, q, v, 0 * v, Convention::WORLD);
   for (size_t contact_id = 0; contact_id < contact_models.size(); ++contact_id)
   {
     const RigidConstraintModel & cmodel = contact_models[contact_id];

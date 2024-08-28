@@ -11,7 +11,8 @@
 namespace pinocchio
 {
 
-  template void computeKKTContactDynamicMatrixInverse<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+  computeKKTContactDynamicMatrixInverse<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

@@ -10,7 +10,8 @@
 namespace pinocchio
 {
 
-  extern template PINOCCHIO_DLLAPI void computeConstraintDynamicsDerivatives<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeConstraintDynamicsDerivatives<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -34,7 +35,8 @@ namespace pinocchio
     const Eigen::MatrixBase<context::MatrixXs> &,
     const Eigen::MatrixBase<context::MatrixXs> &);
 
-  extern template PINOCCHIO_DLLAPI void computeConstraintDynamicsDerivatives<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeConstraintDynamicsDerivatives<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -57,7 +59,8 @@ namespace pinocchio
     const Eigen::MatrixBase<context::MatrixXs> &,
     const Eigen::MatrixBase<context::MatrixXs> &);
 
-  extern template PINOCCHIO_DLLAPI void computeConstraintDynamicsDerivatives<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeConstraintDynamicsDerivatives<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -69,7 +72,8 @@ namespace pinocchio
     context::RigidConstraintDataVector &,
     const ProximalSettingsTpl<context::Scalar> &);
 
-  extern template PINOCCHIO_DLLAPI void computeConstraintDynamicsDerivatives<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeConstraintDynamicsDerivatives<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

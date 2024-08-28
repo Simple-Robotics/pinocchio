@@ -59,40 +59,6 @@ namespace pinocchio
     GeometryData & geom_data);
 
   ///
-  /// \brief Set a mesh scaling vector to each GeometryObject contained in the the GeometryModel.
-  ///
-  /// \param[in]  geom_model The geometry model containing the collision objects.
-  /// \param[in]  meshScale The scale to be applied to each GeometryObject
-  ///
-  /// \deprecated This function is now deprecated without replacement.
-  ///
-  template<typename Vector3Like>
-  PINOCCHIO_DEPRECATED inline void setGeometryMeshScales(
-    GeometryModel & geom_model, const Eigen::MatrixBase<Vector3Like> & meshScale)
-  {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
-    for (GeomIndex index = 0; index < geom_model.ngeoms; index++)
-      geom_model.geometryObjects[index].meshScale = meshScale;
-  }
-
-  ///
-  /// \brief     Set an isotropic mesh scaling to each GeometryObject contained in the the
-  /// GeometryModel.
-  ///
-  /// \param[in]  geom_model The geometry model containing the collision objects.
-  /// \param[in]  meshScale The scale, to be applied to each GeometryObject, equally in all
-  /// directions
-  ///
-  /// \deprecated This function is now deprecated without replacement.
-  ///
-  PINOCCHIO_DEPRECATED
-  inline void setGeometryMeshScales(GeometryModel & geom_model, const double meshScale)
-  {
-    for (GeomIndex index = 0; index < geom_model.ngeoms; index++)
-      geom_model.geometryObjects[index].meshScale.setConstant(meshScale);
-  }
-
-  ///
   /// Append geom_model2 to geom_model1
   ///
   /// The steps for appending are:
@@ -119,5 +85,11 @@ namespace pinocchio
 #if PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
   #include "pinocchio/algorithm/geometry.txx"
 #endif // PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION
+
+// In Pinocchio 2, this header declare computeCollision and computeDistances
+#if defined(PINOCCHIO_WITH_HPP_FCL) && defined(PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2)
+  #include "pinocchio/collision/collision.hpp"
+  #include "pinocchio/collision/distance.hpp"
+#endif // PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2
 
 #endif // ifndef __pinocchio_algo_geometry_hpp__

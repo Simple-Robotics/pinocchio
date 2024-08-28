@@ -77,13 +77,10 @@ namespace pinocchio
               const CollisionPair & cp = *cp_iterator;
               const PairIndex cp_index = geom_model.findCollisionPair(cp);
               const bool remove =
-              (
-               (geom_model.geometryObjects[cp.first ].parentFrame == frame_id1)
-               && (geom_model.geometryObjects[cp.second].parentFrame == frame_id2)
-               ) || (
-                     (geom_model.geometryObjects[cp.second].parentFrame == frame_id1)
-                     && (geom_model.geometryObjects[cp.first ].parentFrame == frame_id2)
-                     );
+                ((geom_model.geometryObjects[cp.first].parentFrame == frame_id1)
+                 && (geom_model.geometryObjects[cp.second].parentFrame == frame_id2))
+                || ((geom_model.geometryObjects[cp.second].parentFrame == frame_id1)
+                    && (geom_model.geometryObjects[cp.first].parentFrame == frame_id2));
 
               if (remove)
               {

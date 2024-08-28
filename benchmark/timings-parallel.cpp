@@ -5,7 +5,7 @@
 #include "pinocchio/algorithm/parallel/rnea.hpp"
 #include "pinocchio/algorithm/parallel/aba.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
   #include "pinocchio/collision/tree-broadphase-manager.hpp"
@@ -25,7 +25,7 @@
 
 #include "pinocchio/parsers/urdf.hpp"
 #include "pinocchio/parsers/srdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -148,7 +148,7 @@ int main(int /*argc*/, const char ** /*argv*/)
   SMOOTH(NBT)
   {
     for (Eigen::DenseIndex i = 0; i < BATCH_SIZE; ++i)
-      res.col(i) = aba(model, data, qs.col(i), vs.col(i), taus.col(i));
+      res.col(i) = aba(model, data, qs.col(i), vs.col(i), taus.col(i), Convention::WORLD);
   }
   std::cout << "mean ABA = \t\t\t\t";
   timer.toc(std::cout, NBT * BATCH_SIZE);

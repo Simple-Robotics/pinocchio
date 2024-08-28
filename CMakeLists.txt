@@ -28,9 +28,23 @@ option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
-if(NOT EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
-  if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
-    message(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
+if(EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
+  message(STATUS "JRL cmakemodules found in 'cmake/' git submodule")
+else()
+  find_package(jrl-cmakemodules QUIET CONFIG)
+  if(jrl-cmakemodules_FOUND)
+    get_property(
+      JRL_CMAKE_MODULES
+      TARGET jrl-cmakemodules::jrl-cmakemodules
+      PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "JRL cmakemodules found on system at ${JRL_CMAKE_MODULES}")
+  elseif(${CMAKE_VERSION} VERSION_LESS "3.14.0")
+    message(
+      FATAL_ERROR
+        "\nCan't find jrl-cmakemodules. Please either:\n"
+        "  - use git submodule: 'git submodule update --init'\n"
+        "  - or install https://github.com/jrl-umi3218/jrl-cmakemodules\n"
+        "  - or upgrade your CMake version to >= 3.14 to allow automatic fetching\n")
   else()
     message(STATUS "JRL cmakemodules not found. Let's fetch it.")
     include(FetchContent)
@@ -60,7 +74,7 @@ elseif(UNIX)
   if(${CMAKE_VERSION} VERSION_EQUAL "3.20.0")
     set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
   endif()
-endif(APPLE)
+endif()
 include(CMakeDependentOption)
 
 # If needed, set CMake policy for APPLE systems
@@ -68,6 +82,9 @@ apply_default_apple_configuration()
 if(CMAKE_VERSION VERSION_GREATER "3.12")
   cmake_policy(SET CMP0074 NEW)
 endif()
+
+# Force C++ standard to be C++11 at least
+check_minimal_cxx_standard(11 ENFORCE)
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_BENCHMARK "Build the benchmarks" OFF)
@@ -95,8 +112,11 @@ option(BUILD_WITH_COLLISION_SUPPORT
 option(BUILD_WITH_AUTODIFF_SUPPORT
        "Build the library with the automatic differentiation support (via CppAD)" OFF)
 option(BUILD_WITH_CASADI_SUPPORT "Build the library with the support of CASADI" OFF)
-option(BUILD_WITH_CODEGEN_SUPPORT
-       "Build the library with the support of code generation (via CppADCodeGen)" OFF)
+# cppadcodgen don't build well with CL
+if(NOT WIN32)
+  option(BUILD_WITH_CODEGEN_SUPPORT
+         "Build the library with the support of code generation (via CppADCodeGen)" OFF)
+endif()
 option(BUILD_WITH_OPENMP_SUPPORT "Build the library with the OpenMP support" OFF)
 option(BUILD_WITH_EXTRA_SUPPORT "Build the library with extra algorithms support" OFF)
 cmake_dependent_option(
@@ -107,7 +127,7 @@ cmake_dependent_option(
   BUILD_WITH_LIBPYTHON "Link to libpython to embed an interpreter for the python_parser feature" ON
   "BUILD_PYTHON_INTERFACE" OFF)
 if(APPLE)
-  option(BUILD_WITH_ACCELERATE_SUPPORT "Build EigenPy with the Accelerate support" OFF)
+  option(BUILD_WITH_ACCELERATE_SUPPORT "Build Pinocchio with the Accelerate support" OFF)
 else(APPLE)
   set(BUILD_WITH_ACCELERATE_SUPPORT FALSE)
 endif(APPLE)
@@ -118,8 +138,10 @@ option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at r
 
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 
-# Variable containing all the cflags definition relative to build options
+# Variable containing all the cflags definition, options and libraries to setup pkg-config.
 set(CFLAGS_OPTIONS)
+set(CFLAGS_DEPENDENCIES)
+set(LIBRARIES_DEPENDENCIES)
 
 if(BUILD_WITH_COLLISION_SUPPORT)
   set(BUILD_WITH_HPP_FCL_SUPPORT TRUE)
@@ -147,6 +169,7 @@ endif(CHECK_RUNTIME_MALLOC)
 if(ENABLE_TEMPLATE_INSTANTIATION)
   message(STATUS "Template instantiation of the main library")
   list(APPEND CFLAGS_OPTIONS "-DPINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION")
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_default)
 endif(ENABLE_TEMPLATE_INSTANTIATION)
 
 macro(TAG_LIBRARY_VERSION target)
@@ -161,14 +184,12 @@ set(PINOCCHIO_MODEL_DIR "${PROJECT_SOURCE_DIR}/models")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 add_project_dependency(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
 
-# Variable containing all the cflags definition relative to optional dependencies
-set(CFLAGS_DEPENDENCIES)
-
 if(BUILD_WITH_URDF_SUPPORT)
   add_project_dependency(urdfdom_headers REQUIRED)
   add_project_dependency(urdfdom REQUIRED PKG_CONFIG_REQUIRES "urdfdom >= 0.2.0")
   set(urdfdom_VERSION ${urdfdom_headers_VERSION})
   list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_URDFDOM")
+  list(APPEND LIBRARIES_DEPENDENCIES "urdfdom_world")
 
   if(${urdfdom_VERSION} VERSION_GREATER "0.4.2")
     check_minimal_cxx_standard(11 ENFORCE)
@@ -185,7 +206,6 @@ if(BUILD_WITH_SDF_SUPPORT)
   if(SDFormat_FOUND)
     check_minimal_cxx_standard(11 REQUIRED)
     include_directories(${SDFormat_INCLUDE_DIRS})
-    list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_SDFORMAT")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDFormat_CXX_FLAGS}")
   endif(SDFormat_FOUND)
 endif(BUILD_WITH_SDF_SUPPORT)
@@ -195,10 +215,13 @@ set(BUILD_WITH_PARSERS_SUPPORT BUILD_WITH_URDF_SUPPORT OR BUILD_WITH_SDF_SUPPORT
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   # Check first CppADCodeGen
   if(BUILD_WITH_CODEGEN_SUPPORT)
-    find_package(cppadcg 2.4.1 REQUIRED)
+    add_project_dependency(cppadcg 2.4.1 REQUIRED)
   endif(BUILD_WITH_CODEGEN_SUPPORT)
 
-  add_project_dependency(cppad 20180000.0 REQUIRED PKG_CONFIG_REQUIRES "cppad >= 20220624.0")
+  add_project_dependency(
+    cppad 20180000.0 REQUIRED
+    PKG_CONFIG_REQUIRES "cppad >= 20220624.0"
+    FIND_EXTERNAL "CppAD")
 endif(BUILD_WITH_AUTODIFF_SUPPORT)
 
 if(BUILD_WITH_CASADI_SUPPORT)
@@ -206,14 +229,11 @@ if(BUILD_WITH_CASADI_SUPPORT)
 endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
-  add_project_dependency(OpenMP)
+  add_project_dependency(OpenMP REQUIRED)
 endif()
 
 if(BUILD_WITH_EXTRA_SUPPORT)
-  find_package(
-    Qhull
-    COMPONENTS qhullcpp qhull_r
-    REQUIRED)
+  add_project_dependency(Qhull COMPONENTS qhullcpp qhull_r REQUIRED)
   message(STATUS "Found Qhull.")
 endif()
 
@@ -245,9 +265,12 @@ if(BUILD_PYTHON_INTERFACE)
   set(PYTHON_COMPONENTS Interpreter Development NumPy)
   add_project_dependency(eigenpy 2.7.10 REQUIRED)
 
-  if(BUILD_WITH_AUTODIFF_SUPPORT)
-    add_project_dependency(pycppad 1.1.0 REQUIRED)
-  endif(BUILD_WITH_AUTODIFF_SUPPORT)
+  if(BUILD_WITH_URDF_SUPPORT)
+    # console_bridge is urdfdom dependency.
+    #
+    # We bind some enum of this library and then must link against it.
+    add_project_dependency(console_bridge REQUIRED)
+  endif()
 
   # Check wether this a PyPy Python
   execute_process(
@@ -269,6 +292,7 @@ endif(BUILD_PYTHON_INTERFACE)
 
 if(BUILD_WITH_HPP_FCL_SUPPORT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_HPP_FCL")
+  list(APPEND LIBRARIES_DEPENDENCIES "hpp-fcl")
   add_project_dependency(hpp-fcl 2.1.2 REQUIRED PKG_CONFIG_REQUIRES "hpp-fcl >= 2.1.2")
   # Check whether hpp-fcl python bindings are available.
   set(BUILD_WITH_HPP_FCL_PYTHON_BINDINGS FALSE)
@@ -296,10 +320,10 @@ if(BUILD_WITH_ACCELERATE_SUPPORT)
   endif()
 
   set(CMAKE_MODULE_PATH ${JRL_CMAKE_MODULES}/find-external/Accelerate ${CMAKE_MODULE_PATH})
-  find_package(
-    Accelerate REQUIRED # FIND_EXTERNAL "Accelerate" # We don't export yet as there might be an
-                        # issue on AMR64 platforms
-  )
+  # FIND_EXTERNAL "Accelerate".
+  #
+  # We don't export yet as there might be an issue on AMR64 platforms.
+  find_package(Accelerate REQUIRED)
   message(STATUS "Build with Accelerate support framework.")
   add_definitions(-DPINOCCHIO_WITH_ACCELERATE_SUPPORT)
 endif(BUILD_WITH_ACCELERATE_SUPPORT)
@@ -395,34 +419,13 @@ if(BUILD_PYTHON_INTERFACE)
   list(APPEND ${PROJECT_NAME}_HEADERS ${${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS})
 endif()
 
-# Macros to update sources path in subdirs
-function(REMOVE_PATH_FROM_LIST list_name path_name dest_list)
-  set(list_name_)
-  foreach(header ${${list_name}})
-    string(REGEX REPLACE "^${path_name}" "" header ${header})
-    list(APPEND list_name_ ${header})
-  endforeach(header ${list_name_})
-  set(${dest_list}
-      ${list_name_}
-      PARENT_SCOPE)
-endfunction(REMOVE_PATH_FROM_LIST)
-
-function(PREPEND_PATH_FROM_LIST list_name path_name dest_list)
-  set(list_name_)
-  foreach(header ${${list_name}})
-    set(header "${path_name}/${header}")
-    list(APPEND list_name_ ${header})
-  endforeach(header ${list_name_})
-  set(${dest_list}
-      ${list_name_}
-      PARENT_SCOPE)
-endfunction(PREPEND_PATH_FROM_LIST)
-
 # Define PINOCCHIO_WINDOWS_DLL_PATH environment variable on Windows
 function(ADD_WINDOWS_DLL_PATH_TO_TEST TEST_NAME)
   if(WIN32)
     get_test_property(${TEST_NAME} ENVIRONMENT ENV_VARIABLES)
-    list(APPEND ENV_VARIABLES "PINOCCHIO_WINDOWS_DLL_PATH=$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+    # TODO don't do this in the future
+    list(APPEND ENV_VARIABLES
+         "PINOCCHIO_WINDOWS_DLL_PATH=$<TARGET_FILE_DIR:${PROJECT_NAME}_default>")
     set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${ENV_VARIABLES}")
   endif()
 endfunction()
@@ -489,9 +492,11 @@ if(BUILD_WITH_EXTRA_SUPPORT)
   set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_EXTRA \"\")")
 endif()
 
-pkg_config_append_libs(${PROJECT_NAME})
-pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
-
+# Setup pkg-configs flags and libs
+pkg_config_append_libs("${LIBRARIES_DEPENDENCIES}")
+foreach(boostlib ${BOOST_REQUIRED_COMPONENTS})
+  pkg_config_append_libs("boost_${boostlib}")
+endforeach()
 pkg_config_append_cflags("${CFLAGS_DEPENDENCIES}")
 pkg_config_append_cflags("${CFLAGS_OPTIONS}")
 

@@ -8,7 +8,8 @@ namespace pinocchio
 {
   namespace impl
   {
-    template void computeGeneralizedGravityDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+    computeGeneralizedGravityDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -19,7 +20,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeStaticTorqueDerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeStaticTorqueDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -31,7 +32,7 @@ namespace pinocchio
       const container::aligned_vector<context::Force> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -50,7 +51,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -69,7 +70,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::RowMatrixXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -89,7 +90,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -109,7 +110,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::RowMatrixXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::MatrixXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -122,7 +123,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    template void computeRNEADerivatives<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeRNEADerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

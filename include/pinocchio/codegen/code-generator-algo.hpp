@@ -186,7 +186,7 @@ namespace pinocchio
       ad_tau = ad_X.segment(it, ad_model.nv);
       it += ad_model.nv;
 
-      pinocchio::aba(ad_model, ad_data, ad_q, ad_v, ad_tau);
+      pinocchio::aba(ad_model, ad_data, ad_q, ad_v, ad_tau, Convention::WORLD);
       ad_Y = ad_data.ddq;
 
       ad_fun.Dependent(ad_X, ad_Y);
@@ -298,7 +298,7 @@ namespace pinocchio
       ad_q = ad_X.segment(it, ad_model.nq);
       it += ad_model.nq;
 
-      pinocchio::crba(ad_model, ad_data, ad_q);
+      pinocchio::crba(ad_model, ad_data, ad_q, pinocchio::Convention::WORLD);
       Eigen::DenseIndex it_Y = 0;
 
       for (Eigen::DenseIndex i = 0; i < ad_model.nv; ++i)

@@ -197,8 +197,8 @@ namespace pinocchio
       q.size(), model.nq, "The configuration vector is not of right size");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       J.cols(), model.nv,
-      "The numbers of columns in the Jacobian matrix does not math the number of Dofs in the "
-      "model.");
+      "The numbers of columns in the Jacobian matrix does not math the "
+      "number of Dofs in the model.");
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -282,8 +282,8 @@ namespace pinocchio
     assert(model.check(data) && "data is not consistent with model.");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       dJ.cols(), model.nv,
-      "The numbers of columns in the Jacobian matrix does not math the number of Dofs in the "
-      "model.");
+      "The numbers of columns in the Jacobian matrix does not math the "
+      "number of Dofs in the model.");
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;

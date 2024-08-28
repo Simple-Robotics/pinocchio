@@ -11,7 +11,7 @@
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/center-of-mass.hpp"
 #include "pinocchio/utils/timer.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_com)
   VectorXd v = VectorXd::Ones(model.nv);
   VectorXd a = VectorXd::Ones(model.nv);
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
 
   /* Test COM against CRBA*/
   Vector3d com = centerOfMass(model, data, q);

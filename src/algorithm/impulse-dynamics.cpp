@@ -11,7 +11,8 @@
 namespace pinocchio
 {
 
-  template const context::VectorXs & impulseDynamics<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI const context::VectorXs &
+  impulseDynamics<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

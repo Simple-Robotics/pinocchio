@@ -52,8 +52,8 @@ namespace pinocchio
 
           .add_property(
             "iter", &ProximalSettings::iter,
-            "Final number of iteration of the algorithm when it has converged or reached the "
-            "maximal number of allowed iterations.")
+            "Final number of iteration of the algorithm when it has converged or "
+            "reached the maximal number of allowed iterations.")
           .def("__repr__", &repr);
       }
 

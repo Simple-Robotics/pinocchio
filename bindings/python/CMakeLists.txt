@@ -16,10 +16,6 @@ set(PYWRAP
     PARENT_SCOPE)
 
 # --- COMPILE WRAPPER
-remove_path_from_list(${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES "bindings/python/"
-                      ${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES)
-prepend_path_from_list(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS "../../"
-                       ${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS)
 make_directory("${${PROJECT_NAME}_BINARY_DIR}/bindings/python/${PROJECT_NAME}")
 set(${PYWRAP}_SOURCES ${${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES})
 set(${PYWRAP}_HEADERS ${${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS})
@@ -31,9 +27,6 @@ function(PINOCCHIO_PYTHON_BINDINGS_SPECIFIC_TYPE scalar_name)
   string(TOUPPER ${scalar_name} upper_scalar_name)
   set(EXTRA_SOURCES ${${PROJECT_NAME}_BINDINGS_PYTHON_EXTRA_${upper_scalar_name}_SOURCES})
   set(EXTRA_HEADERS ${${PROJECT_NAME}_BINDINGS_PYTHON_EXTRA_${upper_scalar_name}_PUBLIC_HEADERS})
-
-  remove_path_from_list(EXTRA_SOURCES "bindings/python/" EXTRA_SOURCES)
-  prepend_path_from_list(EXTRA_HEADERS "../../" EXTRA_HEADERS)
 
   set(${PYTHON_LIB_NAME}_SOURCES ${${PYWRAP}_SOURCES} ${EXTRA_SOURCES})
   set(${PYTHON_LIB_NAME}_HEADERS ${${PYWRAP}_HEADERS} ${EXTRA_HEADERS})
@@ -49,18 +42,23 @@ function(PINOCCHIO_PYTHON_BINDINGS_SPECIFIC_TYPE scalar_name)
   if(BUILD_WITH_OPENMP_SUPPORT)
     # OpenMP is linked with pinocchio_parallel target
     target_compile_definitions(${PYTHON_LIB_NAME} PRIVATE -DPINOCCHIO_PYTHON_INTERFACE_WITH_OPENMP)
-  endif(BUILD_WITH_OPENMP_SUPPORT)
+  endif()
   add_dependencies(python ${PYTHON_LIB_NAME})
 
-  set_target_properties(${PYTHON_LIB_NAME} PROPERTIES PREFIX "") # Remove lib prefix for the target
+  # Remove lib prefix for the target and use the right define for DLLAPI definition
+  set_target_properties(${PYTHON_LIB_NAME} PROPERTIES PREFIX "" DEFINE_SYMBOL "${PYWRAP}_EXPORTS")
 
-  # Do not report: -Wconversion as the BOOST_PYTHON_FUNCTION_OVERLOADS implicitly converts.
-  # -Wcomment as latex equations have multi-line comments. -Wself-assign-overloaded as bp::self
-  # operations trigger this
-  if(NOT WIN32)
-    target_compile_options(${PYTHON_LIB_NAME} PRIVATE -Wno-conversion -Wno-comment
-                                                      -Wno-self-assign-overloaded)
-  endif(NOT WIN32)
+  # Do not report:
+  #
+  # * -Wconversion as the BOOST_PYTHON_FUNCTION_OVERLOADS implicitly converts.
+  # * -Wcomment as latex equations have multi-line comments.
+  # * -Wself-assign-overloaded as bp::self operations trigger this (Clang only).
+  cxx_flags_by_compiler_frontend(
+    GNU -Wno-conversion -Wno-comment -Wno-self-assign-overloaded
+    OUTPUT PRIVATE_OPTIONS
+    FILTER)
+  target_compile_options(${PYTHON_LIB_NAME} PRIVATE ${PRIVATE_OPTIONS})
+
   set(PINOCCHIO_PYTHON_CONTEXT_FILE_VALUE "pinocchio/bindings/python/context/${scalar_name}.hpp")
   target_compile_options(
     ${PYTHON_LIB_NAME}
@@ -79,12 +77,17 @@ function(PINOCCHIO_PYTHON_BINDINGS_SPECIFIC_TYPE scalar_name)
     SCOPE PUBLIC
     TARGETS eigenpy::eigenpy)
   target_link_libraries(${PYTHON_LIB_NAME} PUBLIC ${PROJECT_NAME})
+
+  if(BUILD_WITH_URDF_SUPPORT)
+    # Link directly against console_bridge since we bind some enums and call
+    # console_bridge::setLogLevel function.
+    target_link_libraries(${PYTHON_LIB_NAME} PUBLIC console_bridge::console_bridge)
+  endif()
   if(BUILD_WITH_HPP_FCL_PYTHON_BINDINGS)
     target_compile_definitions(${PYTHON_LIB_NAME}
                                PRIVATE -DPINOCCHIO_PYTHON_INTERFACE_WITH_HPP_FCL_PYTHON_BINDINGS)
   endif(BUILD_WITH_HPP_FCL_PYTHON_BINDINGS)
   if(WIN32)
-    target_compile_definitions(${PYTHON_LIB_NAME} PRIVATE -DNOMINMAX)
     target_link_libraries(${PYTHON_LIB_NAME} PUBLIC ${PYTHON_LIBRARY})
   endif(WIN32)
 
@@ -150,8 +153,13 @@ if(BUILD_PYTHON_INTERFACE)
 
   if(BUILD_WITH_AUTODIFF_SUPPORT)
     pinocchio_python_bindings_specific_type(cppad cppad)
-    target_compile_definitions(${PYWRAP}_cppad
-                               PRIVATE PYCPPAD_EXCLUDE_EIGEN_NUMTRAITS_SPECIALIZATION)
+    # CPPAD_DEBUG_AND_RELEASE allow to mix debug and release versions of CppAD in the same program.
+    # This can happen when Pinocchio is build in Debug mode and pycppad is build in Release mode.
+    # See
+    # https://coin-or.github.io/CppAD/doc/preprocessor.htm#Documented%20Here.CPPAD_DEBUG_AND_RELEASE.
+    target_compile_definitions(
+      ${PYWRAP}_cppad PRIVATE PYCPPAD_EXCLUDE_EIGEN_NUMTRAITS_SPECIALIZATION
+                              CPPAD_DEBUG_AND_RELEASE)
     target_include_directories(${PYWRAP}_cppad SYSTEM PUBLIC ${cppad_INCLUDE_DIR})
     target_link_libraries(${PYWRAP}_cppad PUBLIC ${cppad_LIBRARY})
     list(APPEND STUBGEN_DEPENDENCIES "${PYWRAP}_cppad")
@@ -162,8 +170,10 @@ if(BUILD_PYTHON_INTERFACE)
 
   if(BUILD_WITH_CODEGEN_SUPPORT)
     pinocchio_python_bindings_specific_type(cppadcg cppadcg)
-    target_compile_definitions(${PYWRAP}_cppadcg
-                               PRIVATE PYCPPAD_EXCLUDE_EIGEN_NUMTRAITS_SPECIALIZATION)
+    # CPPAD_DEBUG_AND_RELEASE allow to mix debug and release versions of CppAD in the same program.
+    target_compile_definitions(
+      ${PYWRAP}_cppadcg PRIVATE PYCPPAD_EXCLUDE_EIGEN_NUMTRAITS_SPECIALIZATION
+                                CPPAD_DEBUG_AND_RELEASE)
     target_include_directories(${PYWRAP}_cppadcg SYSTEM PUBLIC ${cppadcg_INCLUDE_DIR})
     target_link_libraries(${PYWRAP}_cppadcg PUBLIC ${cppadcg_LIBRARY} ${cppad_LIBRARY})
     list(APPEND STUBGEN_DEPENDENCIES "${PYWRAP}_cppadcg")
@@ -187,7 +197,6 @@ if(BUILD_PYTHON_INTERFACE)
     pinocchio_python_bindings_specific_type(mpfr)
 
     target_link_libraries(${PYWRAP}_mpfr PRIVATE gmp mpfr)
-    set_property(TARGET ${PYWRAP}_mpfr PROPERTY CXX_STANDARD 11)
     list(APPEND STUBGEN_DEPENDENCIES "${PYWRAP}_mpfr")
 
     # --- INSTALL SCRIPTS
@@ -216,11 +225,20 @@ if(BUILD_PYTHON_INTERFACE)
 
   # --- STUBS --- #
   if(GENERATE_PYTHON_STUBS)
+    python_build_get_target(python_build_target_name)
     load_stubgen()
-    generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${ABSOLUTE_PYTHON_SITELIB}
-                   ${STUBGEN_DEPENDENCIES})
-    # FIND_AND_REPLACE_STUBS(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} "__init__.pyi"
-    # "pinocchio.pinocchio_pywrap_default" "pinocchio")
+    # Set PYWRAP and PROJECT_NAME as stubs dependencies.
+    #
+    # PROJECT_NAME is mandatory (even if it's a PYWRAP dependency) to find PROJECT_NAME name DLL on
+    # windows.
+    generate_stubs(
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${PROJECT_NAME}
+      ${ABSOLUTE_PYTHON_SITELIB}
+      ${PYWRAP}_default
+      ${PROJECT_NAME}_default
+      ${STUBGEN_DEPENDENCIES}
+      ${python_build_target_name})
   endif(GENERATE_PYTHON_STUBS)
 
   # --- PACKAGING --- #

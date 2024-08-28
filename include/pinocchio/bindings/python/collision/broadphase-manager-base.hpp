@@ -61,8 +61,8 @@ namespace pinocchio
           .def(
             "update", (void(Self::*)(const bool)) & Self::update,
             (bp::arg("self"), bp::arg("compute_local_aabb") = false),
-            "Update the manager from the current geometry positions and update the underlying FCL "
-            "broad phase manager.")
+            "Update the manager from the current geometry positions and update the underlying "
+            "FCL broad phase manager.")
           .def(
             "update", (void(Self::*)(GeometryData * geom_data_new)) & Self::update,
             (bp::arg("self"), bp::arg("geom_data_new")),

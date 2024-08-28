@@ -2,6 +2,9 @@
 # Copyright (c) 2015-2022 CNRS INRIA
 #
 
+# Compute flags outside the macro to avoid recomputing it for each tests
+cxx_flags_by_compiler_frontend(MSVC _USE_MATH_DEFINES OUTPUT EXAMPLE_PRIVATE_DEFINITIONS)
+
 function(ADD_PINOCCHIO_CPP_EXAMPLE EXAMPLE)
   set(options PARSERS CPPAD CPPADCG CASADI)
   set(oneValueArgs)
@@ -29,11 +32,8 @@ function(ADD_PINOCCHIO_CPP_EXAMPLE EXAMPLE)
     target_link_libraries(${EXAMPLE_NAME} PUBLIC ${PROJECT_NAME}_casadi)
   endif()
 
-  target_compile_definitions(${EXAMPLE_NAME} PRIVATE PINOCCHIO_MODEL_DIR="${PINOCCHIO_MODEL_DIR}")
-
-  if(WIN32)
-    target_compile_definitions(${EXAMPLE_NAME} PRIVATE NOMINMAX _USE_MATH_DEFINES)
-  endif()
+  target_compile_definitions(${EXAMPLE_NAME} PRIVATE ${EXAMPLE_PRIVATE_DEFINITIONS}
+                                                     PINOCCHIO_MODEL_DIR="${PINOCCHIO_MODEL_DIR}")
 
   # There is no RPATH in Windows, then we must use the PATH to find the DLL
   if(WIN32)
@@ -79,17 +79,23 @@ if(BUILD_PYTHON_INTERFACE)
       overview-urdf
       gepetto-viewer
       build-reduced-model
-      meshcat-viewer-dae
       robot-wrapper-viewer
       geometry-models)
   endif()
 
   if(BUILD_WITH_COLLISION_SUPPORT)
     list(APPEND ${PROJECT_NAME}_PYTHON_EXAMPLES sample-model-viewer display-shapes
-         simulation-contact-dynamics simulation-pendulum)
+         simulation-pendulum)
     if(BUILD_WITH_URDF_SUPPORT)
-      list(APPEND ${PROJECT_NAME}_PYTHON_EXAMPLES meshcat-viewer collisions
-           collision-with-point-clouds append-urdf-model-with-another-model)
+      list(
+        APPEND
+        ${PROJECT_NAME}_PYTHON_EXAMPLES
+        meshcat-viewer
+        meshcat-viewer-dae
+        collisions
+        collision-with-point-clouds
+        append-urdf-model-with-another-model
+        simulation-contact-dynamics)
       if(PYTHON_VERSION_MAJOR EQUAL 3)
         list(APPEND ${PROJECT_NAME}_PYTHON_EXAMPLES static-contact-dynamics)
       endif()

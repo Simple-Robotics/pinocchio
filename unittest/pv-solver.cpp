@@ -9,7 +9,7 @@
 #include "pinocchio/algorithm/compute-all-terms.hpp"
 #include "pinocchio/algorithm/constrained-dynamics.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/spatial/classic-acceleration.hpp"
 #include "pinocchio/algorithm/pv.hpp"
 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_empty)
   pv(model, data, q, v, tau, empty_contact_models, empty_contact_datas, prox_settings);
 
   // Check solutions
-  aba(model, data_ref, q, v, tau);
+  aba(model, data_ref, q, v, tau, Convention::WORLD);
   BOOST_CHECK(data.ddq.isApprox(data_ref.ddq));
 
   // Checking if solving again the same problem gives the same solution

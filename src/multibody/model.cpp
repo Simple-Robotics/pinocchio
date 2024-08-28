@@ -7,13 +7,14 @@
 namespace pinocchio
 {
 
-  template ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::ModelTpl();
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+  ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::ModelTpl();
 
-  template JointIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJoint(
     const JointIndex, const JointModel &, const SE3 &, const std::string &);
 
-  template JointIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJoint(
     const JointIndex,
     const JointModel &,
@@ -24,7 +25,7 @@ namespace pinocchio
     const context::VectorXs &,
     const context::VectorXs &);
 
-  template JointIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJoint(
     const JointIndex,
     const JointModel &,
@@ -37,23 +38,20 @@ namespace pinocchio
     const context::VectorXs &,
     const context::VectorXs &);
 
-  template FrameIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJointFrame(
-    const JointIndex, int);
+    const JointIndex &, int);
 
-  template void
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::appendBodyToJoint(
     const JointIndex, const Inertia &, const SE3 &);
 
-  template FrameIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addBodyFrame(
     const std::string &, const JointIndex &, const SE3 &, int);
 
-  template FrameIndex
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI FrameIndex
   ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addFrame(
     const Frame &, const bool);
-
-  template std::vector<JointIndex>
-  ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::getChildJoints() const;
 
 } // namespace pinocchio

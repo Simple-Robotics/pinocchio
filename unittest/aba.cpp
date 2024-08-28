@@ -7,7 +7,7 @@
 #include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/crba.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include "pinocchio/algorithm/compute-all-terms.hpp"
 #include "pinocchio/utils/timer.hpp"
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(test_aba_simple)
 
   tau = rnea(model, data_ref, q, v, a);
   forwardKinematics(model, data_ref, q);
-  aba(model, data, q, v, tau);
+  aba(model, data, q, v, tau, Convention::WORLD);
 
   for (size_t k = 1; k < (size_t)model.njoints; ++k)
   {
@@ -155,15 +155,15 @@ BOOST_AUTO_TEST_CASE(test_aba_simple)
 
   // Test against deprecated ABA
   Data data_deprecated(model);
-  minimal::aba(model, data_deprecated, q, v, tau);
+  aba(model, data_deprecated, q, v, tau, Convention::LOCAL);
   BOOST_CHECK(data_deprecated.ddq.isApprox(data.ddq));
 
   // Test multiple calls
   {
     Data datas(model);
-    VectorXd a1 = minimal::aba(model, datas, q, v, tau);
-    VectorXd a2 = minimal::aba(model, datas, q, v, tau);
-    VectorXd a3 = minimal::aba(model, datas, q, v, tau);
+    VectorXd a1 = aba(model, datas, q, v, tau, Convention::LOCAL);
+    VectorXd a2 = aba(model, datas, q, v, tau, Convention::LOCAL);
+    VectorXd a3 = aba(model, datas, q, v, tau, Convention::LOCAL);
 
     BOOST_CHECK(a1.isApprox(a2));
     BOOST_CHECK(a1.isApprox(a3));
@@ -173,9 +173,9 @@ BOOST_AUTO_TEST_CASE(test_aba_simple)
   // Test multiple calls
   {
     Data datas(model);
-    VectorXd a1 = aba(model, datas, q, v, tau);
-    VectorXd a2 = aba(model, datas, q, v, tau);
-    VectorXd a3 = aba(model, datas, q, v, tau);
+    VectorXd a1 = aba(model, datas, q, v, tau, Convention::WORLD);
+    VectorXd a2 = aba(model, datas, q, v, tau, Convention::WORLD);
+    VectorXd a3 = aba(model, datas, q, v, tau, Convention::WORLD);
 
     BOOST_CHECK(a1.isApprox(a2));
     BOOST_CHECK(a1.isApprox(a3));
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_aba_with_fext)
 
   PINOCCHIO_ALIGNED_STD_VECTOR(Force) fext(model.joints.size(), Force::Random());
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
   computeJointJacobians(model, data, q);
   nonLinearEffects(model, data, q, v);
   data.M.triangularView<Eigen::StrictlyLower>() =
@@ -216,13 +216,13 @@ BOOST_AUTO_TEST_CASE(test_aba_with_fext)
     tau -= J.transpose() * fext[i].toVector();
     J.setZero();
   }
-  aba(model, data, q, v, tau, fext);
+  aba(model, data, q, v, tau, fext, Convention::WORLD);
 
   BOOST_CHECK(data.ddq.isApprox(a, 1e-12));
 
   // Test against deprecated ABA
   Data data_deprecated(model);
-  minimal::aba(model, data_deprecated, q, v, tau, fext);
+  aba(model, data_deprecated, q, v, tau, fext, Convention::LOCAL);
   BOOST_CHECK(data_deprecated.ddq.isApprox(data.ddq));
 }
 
@@ -245,20 +245,20 @@ BOOST_AUTO_TEST_CASE(test_aba_vs_rnea)
   VectorXd tau = VectorXd::Zero(model.nv);
   VectorXd a = VectorXd::Ones(model.nv);
 
-  crba(model, data_ref, q);
+  crba(model, data_ref, q, Convention::WORLD);
   nonLinearEffects(model, data_ref, q, v);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
 
   tau = data_ref.M * a + data_ref.nle;
-  aba(model, data, q, v, tau);
+  aba(model, data, q, v, tau, Convention::WORLD);
 
   VectorXd tau_ref = rnea(model, data_ref, q, v, a);
   BOOST_CHECK(tau_ref.isApprox(tau, 1e-12));
   BOOST_CHECK(data.ddq.isApprox(a, 1e-12));
 
   Data data_deprecated(model);
-  minimal::aba(model, data_deprecated, q, v, tau);
+  aba(model, data_deprecated, q, v, tau, Convention::LOCAL);
   BOOST_CHECK(data_deprecated.ddq.isApprox(a, 1e-12));
 }
 
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(test_computeMinverse)
   VectorXd q = randomConfiguration(model);
   VectorXd v = VectorXd::Random(model.nv);
 
-  crba(model, data_ref, q);
+  crba(model, data_ref, q, Convention::WORLD);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
   MatrixXd Minv_ref(data_ref.M.inverse());
@@ -318,12 +318,12 @@ BOOST_AUTO_TEST_CASE(test_computeMinverse_noupdate)
   VectorXd v = VectorXd::Random(model.nv);
   VectorXd tau = VectorXd::Random(model.nv);
 
-  crba(model, data_ref, q);
+  crba(model, data_ref, q, Convention::WORLD);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
   MatrixXd Minv_ref(data_ref.M.inverse());
 
-  aba(model, data, q, v, tau);
+  aba(model, data, q, v, tau, Convention::WORLD);
   computeMinverse(model, data);
   BOOST_CHECK(data.Minv.topRows<6>().isApprox(Minv_ref.topRows<6>()));
 
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(test_roto_inertia_effects)
   pinocchio::Data data(model), data_ref(model);
 
   Eigen::VectorXd q = randomConfiguration(model);
-  crba(model, data_ref, q);
+  pinocchio::crba(model, data_ref, q, pinocchio::Convention::WORLD);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
 

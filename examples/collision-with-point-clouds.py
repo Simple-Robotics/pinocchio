@@ -61,14 +61,14 @@ height_field_placement = point_cloud_placement * pin.SE3(
 )
 
 go_point_cloud = pin.GeometryObject(
-    "point_cloud", 0, point_cloud, point_cloud_placement
+    "point_cloud", 0, point_cloud_placement, point_cloud
 )
 go_point_cloud.meshColor = np.ones((4))
 collision_model.addGeometryObject(go_point_cloud)
 visual_model.addGeometryObject(go_point_cloud)
 
 go_height_field = pin.GeometryObject(
-    "height_field", 0, height_field, height_field_placement
+    "height_field", 0, height_field_placement, height_field
 )
 go_height_field.meshColor = np.ones((4))
 height_field_collision_id = collision_model.addGeometryObject(go_height_field)

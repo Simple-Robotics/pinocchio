@@ -7,7 +7,7 @@
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/crba.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_kinematics_zero)
   VectorXd q = randomConfiguration(model);
 
   forwardKinematics(model, data_ref, q);
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
   updateGlobalPlacements(model, data);
 
   for (Model::JointIndex i = 1; i < (Model::JointIndex)model.njoints; ++i)

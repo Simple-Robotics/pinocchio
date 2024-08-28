@@ -18,7 +18,7 @@
 #include "pinocchio/algorithm/kinematics.hpp"
 
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -240,7 +240,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    minimal::crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::LOCAL);
   }
   std::cout << "CRBA (original) = \t\t";
   timer.toc(std::cout, NBT);
@@ -248,7 +248,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
   }
   std::cout << "CRBA = \t\t";
   timer.toc(std::cout, NBT);
@@ -264,7 +264,7 @@ int main(int argc, const char ** argv)
   double total = 0;
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
     timer.tic();
     cholesky::decompose(model, data);
     total += timer.toc(timer.DEFAULT_UNIT);
@@ -276,7 +276,7 @@ int main(int argc, const char ** argv)
   Eigen::LDLT<Eigen::MatrixXd> Mldlt(data.M);
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
     data.M.triangularView<Eigen::StrictlyLower>() =
       data.M.transpose().triangularView<Eigen::StrictlyLower>();
     timer.tic();
@@ -372,7 +372,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    minimal::aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::LOCAL);
   }
   std::cout << "ABA (minimal) = \t\t";
   timer.toc(std::cout, NBT);
@@ -380,7 +380,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
   }
   std::cout << "ABA = \t\t";
   timer.toc(std::cout, NBT);
@@ -404,7 +404,7 @@ int main(int argc, const char ** argv)
   total = 0;
   SMOOTH(NBT)
   {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
     timer.tic();
     computeMinverse(model, data);
     total += timer.toc(timer.DEFAULT_UNIT);

@@ -1,7 +1,28 @@
 name: CI - Windows via Conda
 on:
-  pull_request:
   push:
+    paths-ignore:
+      - doc/**
+      - .gitlab-ci.yml
+      - .gitignore
+      - '*.md'
+      - CITATION.*
+      - COPYING.LESSER
+      - colcon.pkg
+      - .pre-commit-config.yaml
+  pull_request:
+    paths-ignore:
+      - doc/**
+      - .gitlab-ci.yml
+      - .gitignore
+      - '*.md'
+      - CITATION.*
+      - COPYING.LESSER
+      - colcon.pkg
+      - .pre-commit-config.yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -11,7 +32,7 @@ jobs:
       CCACHE_BASEDIR: ${GITHUB_WORKSPACE}
       CCACHE_DIR: ${GITHUB_WORKSPACE}/.ccache
       CCACHE_COMPRESS: true
-      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_COMPRESSLEVEL: 5
 
     strategy:
       fail-fast: false
@@ -24,9 +45,10 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: .ccache
+          save-always: true
           key: ccache-windows-conda-${{ matrix.compiler }}-${{ matrix.os }}-${{ github.sha }}
           restore-keys: ccache-windows-conda-${{ matrix.compiler }}-${{ matrix.os }}-
 
@@ -40,13 +62,15 @@ jobs:
 
       - name: Build Pinocchio
         shell: cmd /C CALL {0}
-        env:
-          CC: ${{ matrix.compiler }}
-          CXX: ${{ matrix.compiler }}
         run: |
-          call conda list
+          :: Set compiler to use.
+          :: This must be done here and not in env since
+          :: cxx-compiler activation script set this variable
+          :: and is called before.
+          set CC=${{ matrix.compiler.cmd }}
+          set CXX=${{ matrix.compiler.cmd }}
 
-          call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+          call conda list
 
           :: Create build directory
           mkdir build
@@ -56,19 +80,22 @@ jobs:
           cmake ^
             -G "Ninja" ^
             -DCMAKE_INSTALL_PREFIX=%CONDA_PREFIX%\Library ^
+            -DPYTHON_SITELIB=%CONDA_PREFIX%\Lib\site-packages ^
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ^
             -DCMAKE_BUILD_TYPE=Release ^
-            -DPYTHON_SITELIB=%CONDA_PREFIX%\Lib\site-packages ^
-            -DPYTHON_EXECUTABLE=%CONDA_PREFIX%\python.exe ^
-            -DBUILD_WITH_URDF_SUPPORT=ON ^
-            -DBUILD_PYTHON_INTERFACE=ON ^
             -DBUILD_WITH_COLLISION_SUPPORT=ON ^
-            -DBUILD_TESTING=ON ^
+            -DBUILD_WITH_CASADI_SUPPORT=ON ^
+            -DBUILD_WITH_AUTODIFF_SUPPORT=ON ^
+            -DBUILD_WITH_CODEGEN_SUPPORT=OFF ^
+            -DBUILD_WITH_EXTRA_SUPPORT=ON ^
+            -DBUILD_WITH_OPENMP_SUPPORT=ON ^
+            -DBUILD_PYTHON_BINDINGS_WITH_BOOST_MPFR_SUPPORT=ON ^
             -DINSTALL_DOCUMENTATION=ON ^
+            -DGENERATE_PYTHON_STUBS=ON ^
             ..
 
           :: Build
-          cmake --build .
+          cmake --build . -j2
           if errorlevel 1 exit 1
 
           :: Testing

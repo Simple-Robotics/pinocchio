@@ -144,6 +144,7 @@ namespace pinocchio
     using Base::setIndexes;
 
     JointModelRevoluteUnboundedUnalignedTpl()
+    : axis(Vector3::UnitX())
     {
     }
 

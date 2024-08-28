@@ -10,7 +10,6 @@ if(cppadcg_FOUND
       ${EXAMPLE}
       CPPADCG
       PARSERS)
-    set_property(TARGET example-cpp-${EXAMPLE} PROPERTY CXX_STANDARD 11)
     target_link_libraries(example-cpp-${EXAMPLE} PUBLIC ${CMAKE_DL_LIBS})
     target_compile_definitions(example-cpp-${EXAMPLE}
                                PUBLIC PINOCCHIO_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\")
@@ -23,8 +22,9 @@ if(cppadcg_FOUND
     set(${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES codegen-rnea)
 
     foreach(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
-      add_python_unit_test("example-py-${EXAMPLE}" "examples/codegen/${EXAMPLE}.py"
-                           "bindings/python")
+      set(EXAMPLE_NAME "example-py-${EXAMPLE}")
+      add_python_unit_test(${EXAMPLE_NAME} "examples/codegen/${EXAMPLE}.py" "bindings/python")
+      add_windows_dll_path_to_test(${EXAMPLE_NAME})
     endforeach(EXAMPLE ${${PROJECT_NAME}_CODEGEN_PYTHON_EXAMPLES})
   endif(BUILD_PYTHON_INTERFACE)
 

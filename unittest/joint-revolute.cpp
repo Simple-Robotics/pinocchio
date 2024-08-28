@@ -85,15 +85,15 @@ BOOST_AUTO_TEST_CASE(vsRX)
   BOOST_CHECK(tauRX.isApprox(tauRevoluteUnaligned));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaRX = aba(modelRX, dataRX, q, v, tauRX);
-  Eigen::VectorXd aAbaRevoluteUnaligned =
-    aba(modelRevoluteUnaligned, dataRevoluteUnaligned, q, v, tauRevoluteUnaligned);
+  Eigen::VectorXd aAbaRX = aba(modelRX, dataRX, q, v, tauRX, Convention::WORLD);
+  Eigen::VectorXd aAbaRevoluteUnaligned = aba(
+    modelRevoluteUnaligned, dataRevoluteUnaligned, q, v, tauRevoluteUnaligned, Convention::WORLD);
 
   BOOST_CHECK(aAbaRX.isApprox(aAbaRevoluteUnaligned));
 
   // CRBA
-  crba(modelRX, dataRX, q);
-  crba(modelRevoluteUnaligned, dataRevoluteUnaligned, q);
+  crba(modelRX, dataRX, q, Convention::WORLD);
+  crba(modelRevoluteUnaligned, dataRevoluteUnaligned, q, Convention::WORLD);
 
   BOOST_CHECK(dataRX.M.isApprox(dataRevoluteUnaligned.M));
 
@@ -172,15 +172,16 @@ BOOST_AUTO_TEST_CASE(vsRUX)
   BOOST_CHECK(tauRX.isApprox(tauRevoluteUnaligned));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaRX = aba(modelRUX, dataRUX, q, v, tauRX);
-  Eigen::VectorXd aAbaRevoluteUnaligned =
-    aba(modelRevoluteUboundedUnaligned, dataRevoluteUnboundedUnaligned, q, v, tauRevoluteUnaligned);
+  Eigen::VectorXd aAbaRX = aba(modelRUX, dataRUX, q, v, tauRX, Convention::WORLD);
+  Eigen::VectorXd aAbaRevoluteUnaligned = aba(
+    modelRevoluteUboundedUnaligned, dataRevoluteUnboundedUnaligned, q, v, tauRevoluteUnaligned,
+    Convention::WORLD);
 
   BOOST_CHECK(aAbaRX.isApprox(aAbaRevoluteUnaligned));
 
   // CRBA
-  crba(modelRUX, dataRUX, q);
-  crba(modelRevoluteUboundedUnaligned, dataRevoluteUnboundedUnaligned, q);
+  crba(modelRUX, dataRUX, q, Convention::WORLD);
+  crba(modelRevoluteUboundedUnaligned, dataRevoluteUnboundedUnaligned, q, Convention::WORLD);
 
   BOOST_CHECK(dataRUX.M.isApprox(dataRevoluteUnboundedUnaligned.M));
 
@@ -291,15 +292,16 @@ BOOST_AUTO_TEST_CASE(vsRX)
   BOOST_CHECK(tauRX.isApprox(tauRevoluteUnbounded));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaRX = aba(modelRX, dataRX, q_rx, v_rx, tauRX);
-  Eigen::VectorXd aAbaRevoluteUnbounded =
-    aba(modelRevoluteUnbounded, dataRevoluteUnbounded, q_rubx, v_rubx, tauRevoluteUnbounded);
+  Eigen::VectorXd aAbaRX = aba(modelRX, dataRX, q_rx, v_rx, tauRX, Convention::WORLD);
+  Eigen::VectorXd aAbaRevoluteUnbounded = aba(
+    modelRevoluteUnbounded, dataRevoluteUnbounded, q_rubx, v_rubx, tauRevoluteUnbounded,
+    Convention::WORLD);
 
   BOOST_CHECK(aAbaRX.isApprox(aAbaRevoluteUnbounded));
 
   // crba
-  crba(modelRX, dataRX, q_rx);
-  crba(modelRevoluteUnbounded, dataRevoluteUnbounded, q_rubx);
+  crba(modelRX, dataRX, q_rx, Convention::WORLD);
+  crba(modelRevoluteUnbounded, dataRevoluteUnbounded, q_rubx, Convention::WORLD);
 
   BOOST_CHECK(dataRX.M.isApprox(dataRevoluteUnbounded.M));
 

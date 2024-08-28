@@ -598,9 +598,10 @@ namespace pinocchio
       const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const
     {
       using math::fabs;
-      return fabs(static_cast<Scalar>(mass() - other.mass()))
-               <= (prec * math::max(math::fabs(mass()), math::fabs(other.mass())))
-             && lever().isApprox(other.lever(), prec) && inertia().isApprox(other.inertia(), prec);
+      return (fabs(static_cast<Scalar>(mass() - other.mass()))
+               <= (prec * math::max(math::fabs(mass()), math::fabs(other.mass())))) 
+               && lever().isApprox(other.lever(), prec) && inertia().isApprox(other.inertia(), prec)
+             ;
     }
 
     bool isZero_impl(const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const

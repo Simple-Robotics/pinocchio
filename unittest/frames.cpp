@@ -10,7 +10,7 @@
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/crba.hpp"
 #include "pinocchio/spatial/act-on-set.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/utils/timer.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
@@ -721,7 +721,7 @@ BOOST_AUTO_TEST_CASE(test_supported_inertia_and_force)
 
   // Compute inertia/force for both models differently
   forwardKinematics(model_fix, data_fix, q_fix, v_fix, a_fix);
-  crba(model_free, data_free, q_free);
+  crba(model_free, data_free, q_free, Convention::WORLD);
 
   Inertia inertia_fix = computeSupportedInertiaByFrame(model_fix, data_fix, frame_id, false);
   Inertia inertia_free(model_free.inertias[joint_id]);

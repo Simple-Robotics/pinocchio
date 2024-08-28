@@ -9,8 +9,10 @@ if(CMAKE_VERSION VERSION_GREATER 4.11)
     FetchContent_Populate(pybind11)
     add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
 
-    # pybind11_add_module(cpp2pybind11 cpp2pybind11.cpp) # BUG: might not work out of the box on OSX
-    # with conda: https://github.com/pybind/pybind11/issues/3081
+    # pybind11_add_module(cpp2pybind11 cpp2pybind11.cpp)
+    #
+    # BUG: might not work out of the box on OSX with conda:
+    # https://github.com/pybind/pybind11/issues/3081
     if(NOT BUILD_TESTING)
       add_library(cpp2pybind11 MODULE EXCLUDE_FROM_ALL cpp2pybind11.cpp)
     else()

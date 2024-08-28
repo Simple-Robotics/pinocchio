@@ -93,14 +93,15 @@ BOOST_AUTO_TEST_CASE(vsRXRY)
   BOOST_CHECK(tauUniversal.isApprox(tauRXRY));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaRXRY = aba(modelRXRY, dataRXRY, q, v, tauRXRY);
-  Eigen::VectorXd aAbaUniversal = aba(modelUniversal, dataUniversal, q, v, tauUniversal);
+  Eigen::VectorXd aAbaRXRY = aba(modelRXRY, dataRXRY, q, v, tauRXRY, Convention::WORLD);
+  Eigen::VectorXd aAbaUniversal =
+    aba(modelUniversal, dataUniversal, q, v, tauUniversal, Convention::WORLD);
 
   BOOST_CHECK(aAbaUniversal.isApprox(aAbaRXRY));
 
   // CRBA
-  crba(modelRXRY, dataRXRY, q);
-  crba(modelUniversal, dataUniversal, q);
+  crba(modelRXRY, dataRXRY, q, Convention::WORLD);
+  crba(modelUniversal, dataUniversal, q, Convention::WORLD);
 
   BOOST_CHECK(dataUniversal.M.isApprox(dataRXRY.M));
 
@@ -181,14 +182,16 @@ BOOST_AUTO_TEST_CASE(vsRandomAxis)
   BOOST_CHECK(tauUniversal.isApprox(tauRandomAxis));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaRandomAxis = aba(modelRandomAxis, dataRandomAxis, q, v, tauRandomAxis);
-  Eigen::VectorXd aAbaUniversal = aba(modelUniversal, dataUniversal, q, v, tauUniversal);
+  Eigen::VectorXd aAbaRandomAxis =
+    aba(modelRandomAxis, dataRandomAxis, q, v, tauRandomAxis, Convention::WORLD);
+  Eigen::VectorXd aAbaUniversal =
+    aba(modelUniversal, dataUniversal, q, v, tauUniversal, Convention::WORLD);
 
   BOOST_CHECK(aAbaUniversal.isApprox(aAbaRandomAxis));
 
   // CRBA
-  crba(modelRandomAxis, dataRandomAxis, q);
-  crba(modelUniversal, dataUniversal, q);
+  crba(modelRandomAxis, dataRandomAxis, q, Convention::WORLD);
+  crba(modelUniversal, dataUniversal, q, Convention::WORLD);
 
   BOOST_CHECK(dataUniversal.M.isApprox(dataRandomAxis.M));
 

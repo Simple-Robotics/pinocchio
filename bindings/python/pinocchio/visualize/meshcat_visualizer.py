@@ -1,5 +1,4 @@
 from .. import pinocchio_pywrap_default as pin
-from ..shortcuts import buildModelsFromUrdf, createDatas
 from ..utils import npToTuple
 
 from . import BaseVisualizer
@@ -21,7 +20,7 @@ else:
 import xml.etree.ElementTree as Et
 import base64
 
-from typing import Optional, Any, Dict, Union, Type, Set
+from typing import Optional, Any, Dict, Union, Set
 
 MsgType = Dict[str, Union[str, bytes, bool, float, "MsgType"]]
 
@@ -201,7 +200,11 @@ if import_meshcat_succeed:
             }
 
 
-if WITH_HPP_FCL_BINDINGS and hppfcl.WITH_OCTOMAP:
+if (
+    WITH_HPP_FCL_BINDINGS
+    and tuple(map(int, hppfcl.__version__.split("."))) >= (3, 0, 0)
+    and hppfcl.WITH_OCTOMAP
+):
 
     def loadOctree(octree: hppfcl.OcTree):
         boxes = octree.toBoxes()
@@ -225,7 +228,7 @@ if WITH_HPP_FCL_BINDINGS and hppfcl.WITH_OCTOMAP:
         )
 
         all_points = np.empty((8 * num_boxes, 3))
-        all_faces = np.empty((12 * num_boxes, 3), dtype=np.int)
+        all_faces = np.empty((12 * num_boxes, 3), dtype=int)
         face_id = 0
         for box_id, box_properties in enumerate(boxes):
             box_center = box_properties[:3]
@@ -548,7 +551,16 @@ class MeshcatVisualizer(BaseVisualizer):
         "talos2": [[0.0, 1.1, 0.0], [1.2, 0.6, 1.5]],
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        model=pin.Model(),
+        collision_model=None,
+        visual_model=None,
+        copy_models=False,
+        data=None,
+        collision_data=None,
+        visual_data=None,
+    ):
         if not import_meshcat_succeed:
             msg = (
                 "Error while importing the viewer client.\n"
@@ -556,7 +568,15 @@ class MeshcatVisualizer(BaseVisualizer):
             )
             raise ImportError(msg)
 
-        super(MeshcatVisualizer, self).__init__(*args, **kwargs)
+        super(MeshcatVisualizer, self).__init__(
+            model,
+            collision_model,
+            visual_model,
+            copy_models,
+            data,
+            collision_data,
+            visual_data,
+        )
         self.static_objects = []
 
     def getViewerNodeName(self, geometry_object, geometry_type):
@@ -742,13 +762,12 @@ class MeshcatVisualizer(BaseVisualizer):
             if WITH_HPP_FCL_BINDINGS:
                 if isinstance(geometry_object.geometry, hppfcl.ShapeBase):
                     obj = self.loadPrimitive(geometry_object)
-                elif hppfcl.WITH_OCTOMAP and isinstance(
-                    geometry_object.geometry, hppfcl.OcTree
+                elif (
+                    tuple(map(int, hppfcl.__version__.split("."))) >= (3, 0, 0)
+                    and hppfcl.WITH_OCTOMAP
+                    and isinstance(geometry_object.geometry, hppfcl.OcTree)
                 ):
                     obj = loadOctree(geometry_object.geometry)
-                elif hasMeshFileInfo(geometry_object):
-                    obj = self.loadMeshFromFile(geometry_object)
-                    is_mesh = True
                 elif isinstance(
                     geometry_object.geometry,
                     (
@@ -836,14 +855,18 @@ class MeshcatVisualizer(BaseVisualizer):
         # Collisions
         self.viewerCollisionGroupName = self.viewerRootNodeName + "/" + "collisions"
 
-        for collision in self.collision_model.geometryObjects:
-            self.loadViewerGeometryObject(collision, pin.GeometryType.COLLISION, color)
+        if self.collision_model is not None:
+            for collision in self.collision_model.geometryObjects:
+                self.loadViewerGeometryObject(
+                    collision, pin.GeometryType.COLLISION, color
+                )
         self.displayCollisions(False)
 
         # Visuals
         self.viewerVisualGroupName = self.viewerRootNodeName + "/" + "visuals"
-        for visual in self.visual_model.geometryObjects:
-            self.loadViewerGeometryObject(visual, pin.GeometryType.VISUAL, color)
+        if self.visual_model is not None:
+            for visual in self.visual_model.geometryObjects:
+                self.loadViewerGeometryObject(visual, pin.GeometryType.VISUAL, color)
         self.displayVisuals(True)
 
         # Frames

@@ -16,20 +16,45 @@
 #include "pinocchio/multibody/joint/joints.hpp"
 
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem/fstream.hpp>
 
-static std::string createTempFile(const std::istringstream & data)
+namespace
 {
-  char template_name[] = "/tmp/mytempfileXXXXXX"; // Template for the temporary file name
-  // Create the temporary file securely
-  if ((mkstemp(template_name)) == -1)
+
+  struct TemporaryFileHolder
   {
-    perror("mkstemp"); // Print an error message if mkstemp fails
-    exit(EXIT_FAILURE);
-  }
+    TemporaryFileHolder()
+    : path(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
+    {
+    }
+
+    ~TemporaryFileHolder()
+    {
+      boost::filesystem::remove(path);
+    }
+
+    TemporaryFileHolder(const TemporaryFileHolder &) = delete;
+    TemporaryFileHolder & operator=(const TemporaryFileHolder &) = delete;
+
+    TemporaryFileHolder(TemporaryFileHolder &&) = default;
+    TemporaryFileHolder & operator=(TemporaryFileHolder &&) = default;
+
+    std::string name() const
+    {
+      return path.string();
+    }
+
+    boost::filesystem::path path;
+  };
+
+} // namespace
+
+static TemporaryFileHolder createTempFile(const std::istringstream & data)
+{
+  TemporaryFileHolder temp_file;
 
   // Write the XML data to the temporary file
-  std::ofstream file_stream;
-  file_stream.open(template_name);
+  boost::filesystem::ofstream file_stream(temp_file.path);
   if (!file_stream)
   {
     std::cerr << "Error opening file for writing" << std::endl;
@@ -38,7 +63,7 @@ static std::string createTempFile(const std::istringstream & data)
   file_stream << data.rdbuf();
   file_stream.close();
 
-  return std::string(template_name);
+  return temp_file;
 }
 
 static bool comparePropertyTrees(
@@ -85,9 +110,9 @@ BOOST_AUTO_TEST_CASE(convert_inertia_fullinertia)
   boost::property_tree::ptree pt;
   boost::property_tree::read_xml(xmlData, pt);
 
-  pinocchio::Model model;
-  pinocchio::urdf::details::UrdfVisitor visitor(model);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model;
+  MjcfGraph::UrdfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -119,9 +144,9 @@ BOOST_AUTO_TEST_CASE(convert_inertia_diaginertia)
   boost::property_tree::ptree pt;
   boost::property_tree::read_xml(xmlData, pt);
 
-  pinocchio::Model model;
-  pinocchio::urdf::details::UrdfVisitor visitor(model);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model;
+  MjcfGraph::UrdfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -167,14 +192,14 @@ BOOST_AUTO_TEST_CASE(geoms_construction)
                                     </worldbody>
                                   </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
 
   // Test Cylinder
   pinocchio::mjcf::details::MjcfBody bodyTest = graph.mapOfBodies.at("bodyCylinder");
@@ -258,14 +283,14 @@ BOOST_AUTO_TEST_CASE(inertia_from_geom)
                                     </worldbody>
                                   </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   // only one inertias since only one body
@@ -302,9 +327,9 @@ BOOST_AUTO_TEST_CASE(convert_orientation)
   boost::property_tree::ptree pt;
   boost::property_tree::read_xml(xmlData, pt);
 
-  pinocchio::Model model;
-  pinocchio::urdf::details::UrdfVisitor visitor(model);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model;
+  MjcfGraph::UrdfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -356,9 +381,9 @@ BOOST_AUTO_TEST_CASE(merge_default)
   pt::ptree ptr;
   pt::read_xml(xmlIn, ptr, pt::xml_parser::trim_whitespace);
 
-  pinocchio::Model model;
-  pinocchio::urdf::details::UrdfVisitor visitor(model);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model;
+  MjcfGraph::UrdfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseDefault(ptr.get_child("default"), ptr);
@@ -420,6 +445,7 @@ BOOST_AUTO_TEST_CASE(merge_default)
     comparePropertyTrees(graph.mapOfClasses.at("layerP").classElement, p4.get_child("default")));
 }
 
+#ifdef PINOCCHIO_WITH_URDFDOM
 // @brief Test to check that default classes and child classes are taken into account
 BOOST_AUTO_TEST_CASE(parse_default_class)
 {
@@ -444,10 +470,21 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
   for (int i = 0; i < model_m.njoints; i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], model_u.joints[i]);
 }
+#endif // PINOCCHIO_WITH_URDFDOM
 
 /// @brief Test to see if path options work
 BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
 {
+#ifdef _WIN32
+  std::istringstream xmlDataNoStrip(R"(<mujoco model="parseDirs">
+                                    <compiler meshdir="meshes" texturedir="textures"/>
+                                    <asset>
+                                        <texture name="testTexture" file="texture.png" type="2d"/>
+                                        <material name="matTest" texture="testTexture"/>
+                                        <mesh file="C://auto/mesh.obj"/>
+                                    </asset>
+                                  </mujoco>)");
+#else
   std::istringstream xmlDataNoStrip(R"(<mujoco model="parseDirs">
                                     <compiler meshdir="meshes" texturedir="textures"/>
                                     <asset>
@@ -456,26 +493,32 @@ BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
                                         <mesh file="/auto/mesh.obj"/>
                                     </asset>
                                   </mujoco>)");
+#endif
 
-  std::string namefile = createTempFile(xmlDataNoStrip);
+  auto namefile = createTempFile(xmlDataNoStrip);
 
-  pinocchio::Model model_m;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
 
   // Test texture
   pinocchio::mjcf::details::MjcfTexture text = graph.mapOfTextures.at("testTexture");
-  BOOST_CHECK(text.textType == "2d");
-  BOOST_CHECK(text.filePath == "/fakeMjcf/textures/texture.png");
+  BOOST_CHECK_EQUAL(text.textType, "2d");
+  BOOST_CHECK_EQUAL(
+    boost::filesystem::path(text.filePath).generic_string(), "/fakeMjcf/textures/texture.png");
   // Test Material
   pinocchio::mjcf::details::MjcfMaterial mat = graph.mapOfMaterials.at("matTest");
-  BOOST_CHECK(mat.texture == "testTexture");
+  BOOST_CHECK_EQUAL(mat.texture, "testTexture");
   // Test Meshes
   pinocchio::mjcf::details::MjcfMesh mesh = graph.mapOfMeshes.at("mesh");
-  BOOST_CHECK(mesh.filePath == "/auto/mesh.obj");
+#ifdef _WIN32
+  BOOST_CHECK_EQUAL(boost::filesystem::path(mesh.filePath).generic_string(), "C://auto/mesh.obj");
+#else
+  BOOST_CHECK_EQUAL(boost::filesystem::path(mesh.filePath).generic_string(), "/auto/mesh.obj");
+#endif
 }
 
 /// @brief Test strippath option
@@ -489,18 +532,19 @@ BOOST_AUTO_TEST_CASE(parse_dirs_strippath)
                                     </asset>
                                   </mujoco>)");
 
-  std::string namefile = createTempFile(xmlDataNoStrip);
+  auto namefile = createTempFile(xmlDataNoStrip);
 
-  pinocchio::Model model_m;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
 
   // Test Meshes
   pinocchio::mjcf::details::MjcfMesh mesh = graph.mapOfMeshes.at("mesh");
-  BOOST_CHECK(mesh.filePath == "/fakeMjcf/meshes/mesh.obj");
+  BOOST_CHECK_EQUAL(
+    boost::filesystem::path(mesh.filePath).generic_string(), "/fakeMjcf/meshes/mesh.obj");
 }
 
 // Test for parsing Revolute
@@ -520,14 +564,14 @@ BOOST_AUTO_TEST_CASE(parse_RX)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelRX;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelRX;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -557,14 +601,14 @@ BOOST_AUTO_TEST_CASE(parse_PX)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelPX;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelPX;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -594,14 +638,14 @@ BOOST_AUTO_TEST_CASE(parse_Sphere)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelS;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelS;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -631,14 +675,14 @@ BOOST_AUTO_TEST_CASE(parse_Free)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelF;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelF;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -669,14 +713,14 @@ BOOST_AUTO_TEST_CASE(parse_composite_RXRY)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelRXRY;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelRXRY;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -711,14 +755,14 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXPY)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelPXPY;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelPXPY;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -753,14 +797,14 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXRY)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelPXRY;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelPXRY;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -795,14 +839,14 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXSphere)
                 </worldbody>
             </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
-  pinocchio::Model model_m, modelPXSphere;
-  pinocchio::urdf::details::UrdfVisitor visitor(model_m);
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m, modelPXSphere;
+  MjcfGraph::UrdfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
-  graph.parseGraphFromXML(namefile);
+  graph.parseGraphFromXML(namefile.name());
   graph.parseRootTree();
 
   pinocchio::Model::JointIndex idx;
@@ -851,6 +895,155 @@ BOOST_AUTO_TEST_CASE(parse_composite_Mujoco_comparison)
   pos << .8522, 4, 0.5223;
   BOOST_CHECK(pinPos.isApprox(SE3(refOrient, pos), 1e-4));
 }
+
+// Test laoding a model with a spherical joint and verify that keyframe is valid
+BOOST_AUTO_TEST_CASE(adding_keyframes)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="testKeyFrame">
+                <default>
+                    <position ctrllimited="true" ctrlrange="-.1 .1" kp="30"/>
+                    <default class="joint">
+                    <geom type="cylinder" size=".006" fromto="0 0 0 0 0 .05" rgba=".9 .6 1 1"/>
+                    </default>
+                </default>
+                <worldbody>
+                    <body name="body1">
+                        <freejoint/>
+                        <geom type="capsule" size=".01" fromto="0 0 0 .2 0 0"/>
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="ball" damping=".1"/>
+                            <geom type="capsule" size=".01" fromto="0 -.15 0 0 0 0"/>
+                        </body>
+                    </body>
+                </worldbody>
+                <keyframe>
+                    <key name="test"
+                    qpos="0 0 0.596
+                        0.988015 0 0.154359 0
+                        0.988015 0 0.154359 0"/>
+                </keyframe>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), pinocchio::JointModelFreeFlyer(), model_m);
+
+  Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
+
+  Eigen::VectorXd vect_ref(model_m.nq);
+  vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+
+  BOOST_CHECK(vect_model.size() == vect_ref.size());
+  BOOST_CHECK(vect_model == vect_ref);
+}
+
+// Test reference positions and how it's included in keyframe
+BOOST_AUTO_TEST_CASE(reference_positions)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="testRefPose">
+                <compiler angle="radian"/>
+                <worldbody>
+                    <body name="body1">
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="slide" ref="0.14"/>
+                            <body pos=".2 0 0" name="body3">
+                                <joint type="hinge" ref="0.1"/>
+                            </body>
+                        </body>
+                    </body>
+                </worldbody>
+                <keyframe>
+                    <key name="test" qpos=".8 .5"/>
+                </keyframe>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
+  Eigen::VectorXd vect_ref(model_m.nq);
+  vect_ref << 0.66, 0.4;
+
+  BOOST_CHECK(vect_model.size() == vect_ref.size());
+  BOOST_CHECK(vect_model == vect_ref);
+}
+
+// Test keyframe and composite joint
+BOOST_AUTO_TEST_CASE(keyframe_and_composite)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="keyframeComposite">
+                <compiler angle="radian"/>
+                <worldbody>
+                    <body name="body1">
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="slide"/>
+                            <joint type="hinge"/>
+                            <body pos=".2 0 0" name="body3">
+                                <joint type="hinge"/>
+                            </body>
+                        </body>
+                    </body>
+                </worldbody>
+                <keyframe>
+                    <key name="test" qpos=".8 .5 .5"/>
+                </keyframe>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
+  Eigen::VectorXd vect_ref(model_m.nq);
+  vect_ref << 0.8, 0.5, 0.5;
+
+  BOOST_CHECK(vect_model.size() == vect_ref.size());
+  BOOST_CHECK(vect_model == vect_ref);
+}
+
+// Test site of mjcf model
+BOOST_AUTO_TEST_CASE(adding_site)
+{
+  typedef pinocchio::SE3::Vector3 Vector3;
+  typedef pinocchio::SE3::Matrix3 Matrix3;
+
+  std::istringstream xmlData(R"(
+            <mujoco model="site">
+                <compiler angle="radian"/>
+                <worldbody>
+                    <body name="body1">
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="hinge"/>
+                            <body pos=".2 0 0" name="body3">
+                                <joint type="hinge"/>
+                                <site name="testSite" pos="0.03 0 -0.05"/>
+                            </body>
+                        </body>
+                    </body>
+                </worldbody>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  pinocchio::Data data(model_m);
+
+  Matrix3 rotation_matrix;
+  rotation_matrix << 1., 0., 0., 0., 1., 0., 0., 0., 1.;
+  pinocchio::SE3 real_placement(rotation_matrix, Vector3(0.03, 0, -0.05));
+
+  BOOST_CHECK(model_m.frames[model_m.getFrameId("testSite")].placement.isApprox(real_placement));
+}
+
 /// @brief test that a fixed model is well parsed
 /// @param
 BOOST_AUTO_TEST_CASE(build_model_no_root_joint)
@@ -864,6 +1057,7 @@ BOOST_AUTO_TEST_CASE(build_model_no_root_joint)
   BOOST_CHECK_EQUAL(model_m.nq, 29);
 }
 
+#ifdef PINOCCHIO_WITH_URDFDOM
 /// @brief Test all the data of the humanoid model (Need to find the urdf yet)
 /// @param
 BOOST_AUTO_TEST_CASE(compare_to_urdf)
@@ -954,6 +1148,7 @@ BOOST_AUTO_TEST_CASE(compare_to_urdf)
     BOOST_CHECK(model_urdf.frames[k] == model_m.frames[k]);
   }
 }
+#endif // PINOCCHIO_WITH_URDFDOM
 
 #if defined(PINOCCHIO_WITH_HPP_FCL)
 BOOST_AUTO_TEST_CASE(test_geometry_parsing)
@@ -983,13 +1178,13 @@ BOOST_AUTO_TEST_CASE(test_geometry_parsing)
                                     </worldbody>
                                   </mujoco>)");
 
-  std::string namefile = createTempFile(xmlData);
+  auto namefile = createTempFile(xmlData);
 
   Model model_m;
-  pinocchio::mjcf::buildModel(namefile, model_m);
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
 
   GeometryModel geomModel_m;
-  pinocchio::mjcf::buildGeom(model_m, namefile, pinocchio::COLLISION, geomModel_m);
+  pinocchio::mjcf::buildGeom(model_m, namefile.name(), pinocchio::COLLISION, geomModel_m);
 
   BOOST_CHECK(geomModel_m.ngeoms == 5);
 

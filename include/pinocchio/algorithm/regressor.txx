@@ -8,7 +8,8 @@
 namespace pinocchio
 {
 
-  extern template PINOCCHIO_DLLAPI void computeJointKinematicRegressor<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeJointKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -20,7 +21,7 @@ namespace pinocchio
     const SE3Tpl<context::Scalar, context::Options> &,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  extern template PINOCCHIO_DLLAPI context::Matrix6xs
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Matrix6xs
   computeJointKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Data &,
@@ -28,7 +29,8 @@ namespace pinocchio
     const ReferenceFrame,
     const SE3Tpl<context::Scalar, context::Options> &);
 
-  extern template PINOCCHIO_DLLAPI void computeJointKinematicRegressor<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeJointKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -39,11 +41,12 @@ namespace pinocchio
     const ReferenceFrame,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  extern template PINOCCHIO_DLLAPI context::Matrix6xs
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Matrix6xs
   computeJointKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, const context::Data &, const JointIndex, const ReferenceFrame);
 
-  extern template PINOCCHIO_DLLAPI void computeFrameKinematicRegressor<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  computeFrameKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -54,36 +57,38 @@ namespace pinocchio
     const ReferenceFrame,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  extern template PINOCCHIO_DLLAPI context::Matrix6xs
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Matrix6xs
   computeFrameKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, const FrameIndex, const ReferenceFrame);
 
-  extern template PINOCCHIO_DLLAPI context::Matrix3x & computeStaticRegressor<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Matrix3x &
+  computeStaticRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
     context::VectorXs>(
     const context::Model &, context::Data &, const Eigen::MatrixBase<context::VectorXs> &);
 
-  extern template PINOCCHIO_DLLAPI void
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   bodyRegressor<context::Motion, context::Motion, context::BodyRegressorType>(
     const MotionDense<context::Motion> &,
     const MotionDense<context::Motion> &,
     const Eigen::MatrixBase<context::BodyRegressorType> &);
 
-  extern template PINOCCHIO_DLLAPI context::BodyRegressorType
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::BodyRegressorType
   bodyRegressor<context::Motion, context::Motion>(
     const MotionDense<context::Motion> &, const MotionDense<context::Motion> &);
 
-  extern template PINOCCHIO_DLLAPI context::BodyRegressorType &
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::BodyRegressorType &
   jointBodyRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, JointIndex);
 
-  extern template PINOCCHIO_DLLAPI context::BodyRegressorType &
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::BodyRegressorType &
   frameBodyRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, FrameIndex);
 
-  extern template PINOCCHIO_DLLAPI context::MatrixXs & computeJointTorqueRegressor<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::MatrixXs &
+  computeJointTorqueRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

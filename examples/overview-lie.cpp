@@ -15,6 +15,7 @@ int main()
   SE2Operation aSE2;
   SE2Operation::ConfigVector_t pose_s, pose_g;
   SE2Operation::TangentVector_t delta_u;
+  delta_u.setZero();
 
   // Starting configuration
   pose_s(0) = 1.0;

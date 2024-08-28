@@ -5,10 +5,6 @@
 # ----------------------------------------------------
 # --- BENCHMARK --------------------------------------
 # ----------------------------------------------------
-if(WIN32)
-  add_definitions("-DNOMINMAX")
-endif()
-
 add_custom_target(bench)
 
 macro(ADD_BENCH bench_name)
@@ -51,8 +47,7 @@ endif(cppadcg_FOUND)
 add_bench(timings TRUE)
 if(cppadcg_FOUND)
   add_bench(timings-cg TRUE)
-  set_property(TARGET timings-cg PROPERTY CXX_STANDARD 11)
-  target_link_libraries(timings-cg PUBLIC ${CMAKE_DL_LIBS})
+  target_link_libraries(timings-cg PUBLIC ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
 endif(cppadcg_FOUND)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
@@ -71,10 +66,9 @@ if(CPPAD_FOUND)
   add_bench(timings-cppad-jit TRUE)
   target_link_libraries(timings-derivatives PUBLIC ${cppad_LIBRARY})
   target_link_libraries(timings-cppad-jit PUBLIC ${cppad_LIBRARY} ${CMAKE_DL_LIBS})
-endif(CPPAD_FOUND)
-if(cppadcg_FOUND)
-  set_property(TARGET timings-derivatives PROPERTY CXX_STANDARD 11)
-endif(cppadcg_FOUND)
+  target_compile_definitions(timings-cppad-jit
+                             PUBLIC PINOCCHIO_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\")
+endif()
 
 # timings-eigen
 #

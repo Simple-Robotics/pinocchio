@@ -1,7 +1,7 @@
 <robot name="test_mjcf">
 
   <!-- * * * Link Definitions * * * -->
-  <link name="link0">
+   <link name="link0">
     <inertial>
             <origin xyz="0 0 0.0" rpy="0 0 0"/>
             <mass value="0"/>
@@ -9,7 +9,7 @@
         </inertial>
   </link>
 
-  <link name="link1">
+   <link name="link1">
         <inertial>
             <origin xyz="0 0 0.0" rpy="0 0 0"/>
             <mass value="0"/>

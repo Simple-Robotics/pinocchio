@@ -7,12 +7,13 @@
 namespace pinocchio
 {
 
-  template context::Scalar
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
   computeKineticEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    template context::Scalar computeKineticEnergy<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
+    computeKineticEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -23,12 +24,13 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  template context::Scalar
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
   computePotentialEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    template context::Scalar computePotentialEnergy<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
+    computePotentialEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -37,12 +39,13 @@ namespace pinocchio
       context::Data &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  template context::Scalar
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
   computeMechanicalEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    template context::Scalar computeMechanicalEnergy<
+    template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Scalar
+    computeMechanicalEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

@@ -6,28 +6,10 @@
 # --- INCLUDE ----------------------------------------
 # ----------------------------------------------------
 
-# Extract the compile definitions of the project for export
-
-remove_path_from_list(${PROJECT_NAME}_CORE_SOURCES "src/" ${PROJECT_NAME}_CORE_SOURCES)
-remove_path_from_list(${PROJECT_NAME}_PARSERS_SOURCES "src/" ${PROJECT_NAME}_PARSERS_SOURCES)
-remove_path_from_list(${PROJECT_NAME}_COLLISION_SOURCES "src/" ${PROJECT_NAME}_COLLISION_SOURCES)
-remove_path_from_list(${PROJECT_NAME}_EXTRA_SOURCES "src/" ${PROJECT_NAME}_EXTRA_SOURCES)
-prepend_path_from_list(${PROJECT_NAME}_CORE_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_CORE_PUBLIC_HEADERS)
-prepend_path_from_list(${PROJECT_NAME}_PARALLEL_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_PARALLEL_PUBLIC_HEADERS)
-prepend_path_from_list(${PROJECT_NAME}_COLLISION_PARALLEL_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_COLLISION_PARALLEL_PUBLIC_HEADERS)
-prepend_path_from_list(${PROJECT_NAME}_PARSERS_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_PARSERS_PUBLIC_HEADERS)
-prepend_path_from_list(${PROJECT_NAME}_COLLISION_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_COLLISION_PUBLIC_HEADERS)
-prepend_path_from_list(${PROJECT_NAME}_EXTRA_PUBLIC_HEADERS "../"
-                       ${PROJECT_NAME}_EXTRA_PUBLIC_HEADERS)
-
-# Create header-only target All other target will depend on it
-add_library(${PROJECT_NAME}_headers INTERFACE ${${PROJECT_NAME}_CORE_PUBLIC_HEADERS}
-            ${${PROJECT_NAME}_CORE_GENERATED_PUBLIC_HEADERS})
+# Create header-only target All other target will depend on it.
+add_library(${PROJECT_NAME}_headers INTERFACE)
+# On CMake 3.16, we can't target_sources(${PROJECT_NAME}_headers INTERFACE
+# ${${PROJECT_NAME}_CORE_PUBLIC_HEADERS})
 
 # Enforce the preprocessed version of boost::list and boost::vector This information is redundant
 # with the content of include/pinocchio/container/boost-container-limits.hpp but it avoids any
@@ -58,20 +40,21 @@ modernize_target_link_libraries(
 
 target_include_directories(${PROJECT_NAME}_headers INTERFACE $<INSTALL_INTERFACE:include>)
 
-if(MSVC)
-  target_compile_options(${PROJECT_NAME}_headers INTERFACE "/bigobj")
-endif()
+cxx_flags_by_compiler_frontend(
+  MSVC "/bigobj"
+  OUTPUT PUBLIC_OPTIONS
+  FILTER)
+target_compile_options(${PROJECT_NAME}_headers INTERFACE ${PUBLIC_OPTIONS})
 
-if(WIN32)
-  target_compile_definitions(${LIB_NAME} PUBLIC NOMINMAX)
-endif()
+cxx_flags_by_compiler_frontend(MSVC "NOMINMAX" OUTPUT PUBLIC_DEFINITIONS)
+target_compile_definitions(${PROJECT_NAME}_headers INTERFACE ${PUBLIC_DEFINITIONS})
 
 install(
   TARGETS ${PROJECT_NAME}_headers
   EXPORT ${TARGETS_EXPORT_NAME}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Define a compiled target This functions take sources and scalar type to use
 function(PINOCCHIO_TARGET target_name)
@@ -97,15 +80,19 @@ function(PINOCCHIO_TARGET target_name)
         PARENT_SCOPE)
   endif()
 
-  add_library(${LIB_NAME} ${LIBRARY_TYPE} ${ARGS_SOURCES})
-
+  add_library(${LIB_NAME} ${LIBRARY_TYPE})
   target_link_libraries(${LIB_NAME} ${LIBRARY_PUBLIC_SCOPE} ${PROJECT_NAME}_headers)
 
-  set_target_properties(
-    ${LIB_NAME}
-    PROPERTIES LINKER_LANGUAGE CXX
-               INSTALL_RPATH "\$ORIGIN"
-               VERSION ${PROJECT_VERSION})
+  # On CMake 3.16 we can't call target_sources or set_target_properties with LINKER_LANGUAGE,
+  # INSTALL_RPATH and VERSION on an INTERFACE target.
+  if(NOT ARGS_INTERFACE)
+    target_sources(${LIB_NAME} PRIVATE ${ARGS_SOURCES})
+    set_target_properties(
+      ${LIB_NAME}
+      PROPERTIES LINKER_LANGUAGE CXX
+                 INSTALL_RPATH "\$ORIGIN"
+                 VERSION ${PROJECT_VERSION})
+  endif()
 
   if(ENABLE_TEMPLATE_INSTANTIATION AND NOT ARGS_INTERFACE)
     set(PINOCCHIO_CONTEXT_FILE_VALUE "pinocchio/context/${ARGS_SCALAR}.hpp")
@@ -124,9 +111,9 @@ function(PINOCCHIO_TARGET target_name)
   install(
     TARGETS ${LIB_NAME}
     EXPORT ${TARGETS_EXPORT_NAME}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endfunction()
 
 # Define a template instantiation target
@@ -138,6 +125,10 @@ function(PINOCCHIO_SPECIFIC_TYPE scalar_name scope)
       SCALAR ${scalar_name}
       SOURCES ${${PROJECT_NAME}_CORE_SOURCES}
       LIBRARY_PUBLIC_SCOPE PUBLIC_SCOPE)
+    # By default DEFINE_SYMBOL add -D${LIB_NAME}_EXPORTS. Don't use ${LIB_NAME}_EXPORTS define since
+    # pinocchio/config.hpp use pinocchio_EXPORTS. This allow to use the same DLLAPI define for all
+    # template instantiation libraries.
+    set_target_properties(${LIB_NAME} PROPERTIES DEFINE_SYMBOL "${PROJECT_NAME}_EXPORTS")
     set(${scope}
         ${PUBLIC_SCOPE}
         PARENT_SCOPE)
@@ -154,6 +145,21 @@ function(PINOCCHIO_SPECIFIC_TYPE scalar_name scope)
   endif()
 endfunction()
 
+function(PINOCCHIO_CONFIG directory lib_name)
+  string(TOUPPER ${lib_name} upper_lib_name)
+  generate_configuration_header_v2(
+    INCLUDE_DIR
+    ${PROJECT_BINARY_DIR}/include
+    HEADER_DIR
+    pinocchio/${directory}
+    FILENAME
+    config.hpp
+    LIBRARY_NAME
+    ${upper_lib_name}
+    EXPORT_SYMBOL
+    ${lib_name}_EXPORTS)
+endfunction()
+
 add_source_group(${PROJECT_NAME}_CORE_SOURCES)
 add_source_group(${PROJECT_NAME}_PARSERS_SOURCES)
 add_source_group(${PROJECT_NAME}_EXTRA_SOURCES)
@@ -163,10 +169,12 @@ add_header_group(${PROJECT_NAME}_COLLISION_PUBLIC_HEADERS)
 add_header_group(${PROJECT_NAME}_EXTRA_PUBLIC_HEADERS)
 add_header_group(${PROJECT_NAME}_CORE_GENERATED_PUBLIC_HEADERS)
 
-# Define the default target (double) This target will also have hpp-fcl and workspace module in it
+# Define the default target (double).
+#
+# This target will also have hpp-fcl and workspace module in it.
 pinocchio_specific_type(default DEFAULT_SCOPE)
 
-# Define the extra target This target hold extra algorithms
+# Define the extra target This target hold extra algorithms.
 if(BUILD_WITH_EXTRA_SUPPORT)
   set(EXTRA_LIB_NAME "${PROJECT_NAME}_extra")
 
@@ -174,6 +182,7 @@ if(BUILD_WITH_EXTRA_SUPPORT)
     ${EXTRA_LIB_NAME}
     SCALAR default
     SOURCES ${${PROJECT_NAME}_EXTRA_SOURCES} ${${PROJECT_NAME}_EXTRA_PUBLIC_HEADERS})
+  pinocchio_config(extra ${EXTRA_LIB_NAME})
 
   target_link_libraries(${EXTRA_LIB_NAME} PUBLIC ${PROJECT_NAME}_default Qhull::qhullcpp
                                                  Qhull::qhull_r)
@@ -181,7 +190,7 @@ if(BUILD_WITH_EXTRA_SUPPORT)
   target_compile_definitions(${EXTRA_LIB_NAME} PUBLIC PINOCCHIO_WITH_EXTRA_SUPPORT)
 endif()
 
-# Define the parallel target
+# Define the parallel target.
 if(BUILD_WITH_OPENMP_SUPPORT)
   set(PARALLEL_LIB_NAME "${PROJECT_NAME}_parallel")
 
@@ -194,7 +203,7 @@ if(BUILD_WITH_OPENMP_SUPPORT)
   target_link_libraries(${PARALLEL_LIB_NAME} INTERFACE ${PROJECT_NAME}_default OpenMP::OpenMP_CXX)
 endif()
 
-# Define the collision target
+# Define the collision target.
 if(BUILD_WITH_HPP_FCL_SUPPORT)
   set(COLLISION_LIB_NAME "${PROJECT_NAME}_collision")
 
@@ -202,6 +211,7 @@ if(BUILD_WITH_HPP_FCL_SUPPORT)
     ${COLLISION_LIB_NAME}
     SCALAR default
     SOURCES ${${PROJECT_NAME}_COLLISION_SOURCES} ${${PROJECT_NAME}_COLLISION_PUBLIC_HEADERS})
+  pinocchio_config(collision ${COLLISION_LIB_NAME})
 
   target_compile_definitions(${COLLISION_LIB_NAME} PUBLIC PINOCCHIO_WITH_HPP_FCL)
   target_link_libraries(${COLLISION_LIB_NAME} PUBLIC ${PROJECT_NAME}_default hpp-fcl::hpp-fcl)
@@ -221,8 +231,9 @@ if(BUILD_WITH_HPP_FCL_SUPPORT)
   endif()
 endif()
 
-# Define the parsers target This target will have common tools for parsing/managing files and
-# URDF/SRDF/SDF format support
+# Define the parsers target.
+#
+# This target will have common tools for parsing/managing files and URDF/SRDF/SDF format support.
 if(BUILD_WITH_PARSERS_SUPPORT)
   set(PARSERS_LIB_NAME "${PROJECT_NAME}_parsers")
 
@@ -230,6 +241,7 @@ if(BUILD_WITH_PARSERS_SUPPORT)
     ${PARSERS_LIB_NAME}
     SCALAR default
     SOURCES ${${PROJECT_NAME}_PARSERS_SOURCES} ${${PROJECT_NAME}_PARSERS_PUBLIC_HEADERS})
+  pinocchio_config(parsers ${PARSERS_LIB_NAME})
 
   target_link_libraries(${PARSERS_LIB_NAME} PUBLIC ${PROJECT_NAME}_default)
   if(BUILD_WITH_HPP_FCL_SUPPORT)
@@ -275,28 +287,34 @@ if(BUILD_WITH_PARSERS_SUPPORT)
   endif()
 endif()
 
-# Define cppad codegen target
+# Define cppad codegen target.
 if(BUILD_WITH_CODEGEN_SUPPORT)
   pinocchio_specific_type(cppadcg CPPADCG_SCOPE)
+  # CPPAD_DEBUG_AND_RELEASE allow to mix debug and release versions of CppAD in the same program.
+  # This can happen when Pinocchio is build in Debug mode using another library using cppad.
+  target_compile_definitions(${PROJECT_NAME}_cppadcg PUBLIC CPPAD_DEBUG_AND_RELEASE)
   target_include_directories(${PROJECT_NAME}_cppadcg SYSTEM ${CPPADCG_SCOPE} ${cppadcg_INCLUDE_DIR})
   target_link_libraries(${PROJECT_NAME}_cppadcg ${CPPADCG_SCOPE} ${cppadcg_LIBRARY}
                         ${cppad_LIBRARY})
 endif()
 
-# Define cppad target
+# Define cppad target.
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   pinocchio_specific_type(cppad CPPAD_SCOPE)
+  # CPPAD_DEBUG_AND_RELEASE allow to mix debug and release versions of CppAD in the same program.
+  # This can happen when Pinocchio is build in Debug mode using another library using cppad.
+  target_compile_definitions(${PROJECT_NAME}_cppad PUBLIC CPPAD_DEBUG_AND_RELEASE)
   target_include_directories(${PROJECT_NAME}_cppad SYSTEM ${CPPAD_SCOPE} ${cppad_INCLUDE_DIR})
   target_link_libraries(${PROJECT_NAME}_cppad ${CPPAD_SCOPE} ${cppad_LIBRARY})
 endif()
 
-# Define casadi target
+# Define casadi target.
 if(BUILD_WITH_CASADI_SUPPORT)
   pinocchio_specific_type(casadi CASADI_SCOPE)
   target_link_libraries(${PROJECT_NAME}_casadi ${CASADI_SCOPE} casadi)
 endif()
 
-# Define main target (default, parsers, extra)
+# Define main target (default, parsers, extra).
 add_library(${PROJECT_NAME} INTERFACE)
 if(ENABLE_TEMPLATE_INSTANTIATION)
   target_link_libraries(${PROJECT_NAME} INTERFACE ${PROJECT_NAME}_default)
@@ -320,6 +338,6 @@ endif()
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${TARGETS_EXPORT_NAME}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

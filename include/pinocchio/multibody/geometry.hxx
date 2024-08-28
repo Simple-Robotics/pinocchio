@@ -329,7 +329,8 @@ namespace pinocchio
         (int)(collisionPairs.size() - 1);
       collisionPairMapping((Eigen::DenseIndex)pair.first, (Eigen::DenseIndex)pair.second) =
         collisionPairMapping(
-          (Eigen::DenseIndex)pair.second, (Eigen::DenseIndex)pair.first); // make symmetric
+          (Eigen::DenseIndex)pair.second,
+          (Eigen::DenseIndex)pair.first); // make symmetric
     }
   }
 

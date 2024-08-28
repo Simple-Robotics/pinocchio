@@ -9,7 +9,8 @@ namespace pinocchio
 {
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & computeJointJacobians<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    computeJointJacobians<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -18,12 +19,12 @@ namespace pinocchio
       context::Data &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  extern template PINOCCHIO_DLLAPI const context::Matrix6xs &
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
   computeJointJacobians<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI void getJointJacobian<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void getJointJacobian<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -34,12 +35,12 @@ namespace pinocchio
       const ReferenceFrame,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
   } // namespace impl
-  extern template PINOCCHIO_DLLAPI context::Matrix6xs
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Matrix6xs
   getJointJacobian<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, const context::Data &, const JointIndex, const ReferenceFrame);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI void computeJointJacobian<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void computeJointJacobian<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -51,7 +52,8 @@ namespace pinocchio
       const JointIndex,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
 
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & computeJointJacobiansTimeVariation<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    computeJointJacobiansTimeVariation<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -62,7 +64,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    extern template PINOCCHIO_DLLAPI void getJointJacobianTimeVariation<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+    getJointJacobianTimeVariation<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

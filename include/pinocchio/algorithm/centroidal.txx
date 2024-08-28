@@ -8,45 +8,50 @@
 namespace pinocchio
 {
 
-  extern template PINOCCHIO_DLLAPI const ForceTpl<context::Scalar, context::Options> &
-  computeCentroidalMomentum<context::Scalar, context::Options, JointCollectionDefaultTpl>(
-    const context::Model &, context::Data &);
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const
+    ForceTpl<context::Scalar, context::Options> &
+    computeCentroidalMomentum<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+      const context::Model &, context::Data &);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI const ForceTpl<context::Scalar, context::Options> &
-    computeCentroidalMomentum<
-      context::Scalar,
-      context::Options,
-      JointCollectionDefaultTpl,
-      Eigen::Ref<const context::VectorXs>,
-      Eigen::Ref<const context::VectorXs>>(
-      const context::Model &,
-      context::Data &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const
+      ForceTpl<context::Scalar, context::Options> &
+      computeCentroidalMomentum<
+        context::Scalar,
+        context::Options,
+        JointCollectionDefaultTpl,
+        Eigen::Ref<const context::VectorXs>,
+        Eigen::Ref<const context::VectorXs>>(
+        const context::Model &,
+        context::Data &,
+        const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
+        const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  extern template PINOCCHIO_DLLAPI const ForceTpl<context::Scalar, context::Options> &
-  computeCentroidalMomentumTimeVariation<
-    context::Scalar,
-    context::Options,
-    JointCollectionDefaultTpl>(const context::Model &, context::Data &);
-  namespace impl
-  {
-    extern template PINOCCHIO_DLLAPI const ForceTpl<context::Scalar, context::Options> &
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const
+    ForceTpl<context::Scalar, context::Options> &
     computeCentroidalMomentumTimeVariation<
       context::Scalar,
       context::Options,
-      JointCollectionDefaultTpl,
-      Eigen::Ref<const context::VectorXs>,
-      Eigen::Ref<const context::VectorXs>,
-      Eigen::Ref<const context::VectorXs>>(
-      const context::Model &,
-      context::Data &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
-      const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
+      JointCollectionDefaultTpl>(const context::Model &, context::Data &);
+  namespace impl
+  {
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const
+      ForceTpl<context::Scalar, context::Options> &
+      computeCentroidalMomentumTimeVariation<
+        context::Scalar,
+        context::Options,
+        JointCollectionDefaultTpl,
+        Eigen::Ref<const context::VectorXs>,
+        Eigen::Ref<const context::VectorXs>,
+        Eigen::Ref<const context::VectorXs>>(
+        const context::Model &,
+        context::Data &,
+        const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
+        const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
+        const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & ccrba<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    ccrba<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -57,7 +62,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & computeCentroidalMap<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    computeCentroidalMap<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -66,7 +72,8 @@ namespace pinocchio
       context::Data &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & dccrba<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    dccrba<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -77,7 +84,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
 
-    extern template PINOCCHIO_DLLAPI const context::Matrix6xs & computeCentroidalMapTimeVariation<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::Matrix6xs &
+    computeCentroidalMapTimeVariation<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

@@ -828,7 +828,7 @@ namespace pinocchio
 
     damped_delassus_inverse *= -mu_inv;
     damped_delassus_inverse.diagonal().array() += Scalar(1);
-    if (not scaled)
+    if (!scaled)
       damped_delassus_inverse *= mu_inv;
   }
 

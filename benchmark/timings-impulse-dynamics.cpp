@@ -14,7 +14,7 @@
 #include "pinocchio/algorithm/impulse-dynamics.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -152,7 +152,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
     getFrameJacobian(model, data, ci_RF_6D.frame_id, ci_RF_6D.reference_frame, J.middleRows<6>(0));
     getFrameJacobian(model, data, ci_LF_6D.frame_id, ci_LF_6D.reference_frame, J.middleRows<6>(6));
     impulseDynamics(model, data, qdots[_smooth], J, r_coeffs[(Eigen::Index)_smooth]);

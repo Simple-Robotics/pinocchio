@@ -11,8 +11,10 @@
 #include "pinocchio/algorithm/frames.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
+#include "pinocchio/algorithm/center-of-mass.hpp"
 
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
+#include "pinocchio/spatial/fwd.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -107,31 +109,6 @@ BOOST_AUTO_TEST_CASE(test_model_subspace_dimensions)
 
     BOOST_CHECK(model.nvs[joint_id] == jmodel.nv());
     BOOST_CHECK(model.idx_vs[joint_id] == jmodel.idx_v());
-  }
-}
-
-BOOST_AUTO_TEST_CASE(test_model_getChildJoints)
-{
-  Model model;
-  buildModels::humanoidRandom(model);
-  const Model::IndexVector child_joints = model.getChildJoints();
-
-  for (const Model::Index joint_id : child_joints)
-  {
-    const long cnt = std::count(model.parents.begin(), model.parents.end(), joint_id);
-    BOOST_CHECK(cnt == 0);
-  }
-
-  // Check that child_joints contains all child joints
-  for (JointIndex joint_id = 1; joint_id < (JointIndex)model.njoints; ++joint_id)
-  {
-    const long cnt = std::count(model.parents.begin(), model.parents.end(), joint_id);
-    if (cnt == 0)
-    {
-      const bool joint_id_in_child_joints =
-        std::count(child_joints.begin(), child_joints.end(), joint_id) == 1;
-      BOOST_CHECK(joint_id_in_child_joints);
-    }
   }
 }
 
@@ -268,7 +245,7 @@ BOOST_AUTO_TEST_CASE(append)
       const JointModel & joint_model1 = model1.joints[joint_id];
       if (
         humanoid_config != humanoid.referenceConfigurations.end()
-        and humanoid.existJointName(model1.names[joint_id]))
+        && humanoid.existJointName(model1.names[joint_id]))
       { // key and joint exists in humanoid
         const JointModel & joint_model_humanoid =
           humanoid.joints[humanoid.getJointId(model1.names[joint_id])];
@@ -279,7 +256,7 @@ BOOST_AUTO_TEST_CASE(append)
       }
       else if (
         manipulator_config != manipulator.referenceConfigurations.end()
-        and manipulator.existJointName(model1.names[joint_id]))
+        && manipulator.existJointName(model1.names[joint_id]))
       { // key and joint exists in manipulator.
         const JointModel & joint_model_manipulator =
           manipulator.joints[manipulator.getJointId(model1.names[joint_id])];
@@ -320,6 +297,7 @@ BOOST_AUTO_TEST_CASE(append)
     "humanoid/add_manipulator", humanoid.getJointId("humanoid/chest2_joint"),
     humanoid.getFrameId("humanoid/chest2_joint"), aMb, OP_FRAME));
 
+  // Append manipulator to chest2_joint of humanoid
   appendModel(
     humanoid, manipulator, geomHumanoid, geomManipulator, fid, SE3::Identity(), model, geomModel);
 
@@ -342,7 +320,7 @@ BOOST_AUTO_TEST_CASE(append)
       const JointModel & joint_model = model.joints[joint_id];
       if (
         humanoid_config != humanoid.referenceConfigurations.end()
-        and humanoid.existJointName(model.names[joint_id]))
+        && humanoid.existJointName(model.names[joint_id]))
       { // key and joint exists in humanoid
         const JointModel & joint_model_humanoid =
           humanoid.joints[humanoid.getJointId(model.names[joint_id])];
@@ -353,7 +331,7 @@ BOOST_AUTO_TEST_CASE(append)
       }
       else if (
         manipulator_config != manipulator.referenceConfigurations.end()
-        and manipulator.existJointName(model.names[joint_id]))
+        && manipulator.existJointName(model.names[joint_id]))
       { // key and joint exists in manipulator.
         const JointModel & joint_model_manipulator =
           manipulator.joints[manipulator.getJointId(model.names[joint_id])];
@@ -392,45 +370,35 @@ BOOST_AUTO_TEST_CASE(append)
     model.parents[model.getJointId("manipulator/shoulder1_joint")]);
 
   // check the joint order and the inertias
+  // All the joints of the manipulator should be at the end of the merged model
+  JointIndex hnj = (JointIndex)humanoid.njoints;
   JointIndex chest2 = model.getJointId("humanoid/chest2_joint");
-  for (JointIndex jid = 1; jid < chest2; ++jid)
+  for (JointIndex jid = 1; jid < hnj; ++jid)
   {
     BOOST_TEST_MESSAGE("Checking joint " << jid << " " << model.names[jid]);
     BOOST_CHECK_EQUAL(model.names[jid], humanoid.names[jid]);
-    BOOST_CHECK_EQUAL(model.inertias[jid], humanoid.inertias[jid]);
+    if (jid != chest2)
+      BOOST_CHECK_EQUAL(model.inertias[jid], humanoid.inertias[jid]);
+    else
+      BOOST_CHECK_MESSAGE(
+        model.inertias[jid].isApprox(
+          manipulator.inertias[0].se3Action(aMb) + humanoid.inertias[jid]),
+        model.inertias[jid] << " != "
+                            << manipulator.inertias[0].se3Action(aMb) + humanoid.inertias[jid]);
+
     BOOST_CHECK_EQUAL(model.jointPlacements[jid], humanoid.jointPlacements[jid]);
   }
-  BOOST_TEST_MESSAGE("Checking joint " << chest2 << " " << model.names[chest2]);
-  BOOST_CHECK_EQUAL(model.names[chest2], humanoid.names[chest2]);
-  BOOST_CHECK_MESSAGE(
-    model.inertias[chest2].isApprox(
-      manipulator.inertias[0].se3Action(aMb) + humanoid.inertias[chest2]),
-    model.inertias[chest2] << " != "
-                           << manipulator.inertias[0].se3Action(aMb) + humanoid.inertias[chest2]);
-  BOOST_CHECK_EQUAL(model.jointPlacements[chest2], humanoid.jointPlacements[chest2]);
-
-  for (JointIndex jid = 1; jid < manipulator.joints.size(); ++jid)
+  for (JointIndex jid = 1; jid < manipulator.joints.size() - 1; ++jid)
   {
-    BOOST_TEST_MESSAGE("Checking joint " << chest2 + jid << " " << model.names[chest2 + jid]);
-    BOOST_CHECK_EQUAL(model.names[chest2 + jid], manipulator.names[jid]);
-    BOOST_CHECK_EQUAL(model.inertias[chest2 + jid], manipulator.inertias[jid]);
+    BOOST_TEST_MESSAGE("Checking joint " << hnj - 1 + jid << " " << model.names[hnj + jid]);
+    BOOST_CHECK_EQUAL(model.names[hnj - 1 + jid], manipulator.names[jid]);
+    BOOST_CHECK_EQUAL(model.inertias[hnj - 1 + jid], manipulator.inertias[jid]);
     if (jid == 1)
       BOOST_CHECK_EQUAL(
-        model.jointPlacements[chest2 + jid], aMb * manipulator.jointPlacements[jid]);
+        model.jointPlacements[hnj - 1 + jid], aMb * manipulator.jointPlacements[jid]);
     else
-      BOOST_CHECK_EQUAL(model.jointPlacements[chest2 + jid], manipulator.jointPlacements[jid]);
+      BOOST_CHECK_EQUAL(model.jointPlacements[hnj - 1 + jid], manipulator.jointPlacements[jid]);
   }
-  for (JointIndex jid = chest2 + 1; jid < humanoid.joints.size(); ++jid)
-  {
-    BOOST_TEST_MESSAGE(
-      "Checking joint " << jid + manipulator.joints.size() - 1 << " "
-                        << model.names[jid + manipulator.joints.size() - 1]);
-    BOOST_CHECK_EQUAL(model.names[jid + manipulator.joints.size() - 1], humanoid.names[jid]);
-    BOOST_CHECK_EQUAL(model.inertias[jid + manipulator.joints.size() - 1], humanoid.inertias[jid]);
-    BOOST_CHECK_EQUAL(
-      model.jointPlacements[jid + manipulator.joints.size() - 1], humanoid.jointPlacements[jid]);
-  }
-
   // Check the frames
   for (FrameIndex fid = 1; fid < humanoid.frames.size(); ++fid)
   {
@@ -452,6 +420,34 @@ BOOST_AUTO_TEST_CASE(append)
       BOOST_CHECK_EQUAL(parent.name, nparent.name);
       BOOST_CHECK_EQUAL(frame.placement, nframe.placement);
     }
+  }
+
+  {
+    Inertia inertia(2., Eigen::Vector3d(0.1, 0.1, 0.1), Eigen::Matrix3d::Identity());
+    Frame additional_frame("inertial_frame", 2, SE3::Identity(), FrameType::JOINT, inertia);
+    humanoid.addFrame(additional_frame);
+    double mass_humanoid = computeTotalMass(humanoid);
+    double mass_manipulator = computeTotalMass(manipulator);
+    double total_mass = mass_manipulator + mass_humanoid;
+
+    Model model4;
+    GeometryModel geomModel4;
+    appendModel(
+      humanoid, manipulator, geomHumanoid, geomManipulator, 0, SE3::Identity(), model4, geomModel4);
+    BOOST_CHECK_CLOSE(computeTotalMass(model4), total_mass, 1e-6);
+  }
+  {
+    Model ff_model;
+    auto ff_id = ff_model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "floating_base");
+    ff_model.addJointFrame(ff_id);
+    GeometryModel ff_geom_model = GeometryModel();
+    FrameIndex frame_id = ff_model.getFrameId("floating_base");
+    Model model4;
+    GeometryModel geomModel4;
+    appendModel(
+      ff_model, manipulator, ff_geom_model, geomManipulator, frame_id, SE3::Identity(), model4,
+      geomModel4);
+    BOOST_CHECK(model4.inertias[1] == model4.inertias[1]);
   }
 }
 #endif
@@ -654,6 +650,7 @@ BOOST_AUTO_TEST_CASE(test_buildReducedModel_with_geom)
     BOOST_CHECK_EQUAL(go1.overrideMaterial, go2.overrideMaterial);
     BOOST_CHECK_EQUAL(go1.meshColor, go2.meshColor);
     BOOST_CHECK_EQUAL(go1.meshTexturePath, go2.meshTexturePath);
+    BOOST_CHECK_EQUAL(go1.parentFrame, go2.parentFrame);
     BOOST_CHECK_EQUAL(
       humanoid_model.frames[go1.parentFrame].name,
       reduced_humanoid_model.frames[go2.parentFrame].name);

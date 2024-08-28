@@ -89,10 +89,11 @@ namespace pinocchio
           //        .def(bp::init<long int>("Copy constructor.",bp::args("self","value")))
           //        .def(bp::init<unsigned int>("Copy constructor.",bp::args("self","value")))
           //        .def(bp::init<unsigned long int>("Copy constructor.",bp::args("self","value")))
-          .def(bp::init<std::string>("Constructor from a string.", bp::args("self", "str_value")))
+          .def(bp::init<std::string>("Constructor from a string.", bp::args("self", "str_value")));
 
-            PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-              PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_SELF_ASSIGN_OVERLOADED.def(bp::self + bp::self)
+        PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+        PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_SELF_ASSIGN_OVERLOADED
+        cl.def(bp::self + bp::self)
           .def(bp::self += bp::self)
           .def(bp::self - bp::self)
           .def(bp::self -= bp::self)
@@ -107,9 +108,10 @@ namespace pinocchio
           .def(bp::self >= bp::self)
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
-          .def(bp::self_ns::pow(bp::self_ns::self, long())) PINOCCHIO_COMPILER_DIAGNOSTIC_POP
+          .def(bp::self_ns::pow(bp::self_ns::self, long()));
+        PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
-          .def("str", &BoostNumber::str, bp::args("self", "precision", "scientific"))
+        cl.def("str", &BoostNumber::str, bp::args("self", "precision", "scientific"))
 
           .def(
             "default_precision", static_cast<unsigned (*)()>(BoostNumber::default_precision),

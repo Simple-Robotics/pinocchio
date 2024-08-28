@@ -76,21 +76,13 @@ namespace eigenpy
     }
   };
 
-  template<
-    typename _Scalar,
-    int Rows,
-    int Cols,
-    int Options,
-    int MaxRows,
-    int MaxCols,
-    typename CasadiScalar>
+  template<typename CasadiScalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   struct EigenFromPy<
-    Eigen::Matrix<_Scalar, Rows, Cols, Options, MaxRows, MaxCols>,
-    ::casadi::Matrix<CasadiScalar>>
+    Eigen::Matrix<::casadi::Matrix<CasadiScalar>, Rows, Cols, Options, MaxRows, MaxCols>>
   {
-    typedef _Scalar Scalar;
     typedef ::casadi::Matrix<CasadiScalar> CasadiMatrix;
-    typedef Eigen::Matrix<_Scalar, Rows, Cols, Options, MaxRows, MaxCols> MatType;
+    typedef Eigen::Matrix<::casadi::Matrix<CasadiScalar>, Rows, Cols, Options, MaxRows, MaxCols>
+      MatType;
 
     /// \brief Determine if pyObj can be converted into a MatType object
     static void * convertible(PyObject * pyObj);
@@ -101,17 +93,10 @@ namespace eigenpy
     static void registration();
   };
 
-  template<
-    typename Scalar,
-    int Rows,
-    int Cols,
-    int Options,
-    int MaxRows,
-    int MaxCols,
-    typename CasadiScalar>
+  template<typename CasadiScalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   void * EigenFromPy<
-    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>,
-    ::casadi::Matrix<CasadiScalar>>::convertible(PyObject * pyObj)
+    Eigen::Matrix<::casadi::Matrix<CasadiScalar>, Rows, Cols, Options, MaxRows, MaxCols>>::
+    convertible(PyObject * pyObj)
   {
     if (std::strcmp(pyObj->ob_type->tp_name, CasadiMatrix::type_name().c_str()) != 0)
       return 0;
@@ -191,17 +176,9 @@ namespace eigenpy
 #undef RETURN_VALUE
   }
 
-  template<
-    typename Scalar,
-    int Rows,
-    int Cols,
-    int Options,
-    int MaxRows,
-    int MaxCols,
-    typename CasadiScalar>
+  template<typename CasadiScalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   void EigenFromPy<
-    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>,
-    ::casadi::Matrix<CasadiScalar>>::
+    Eigen::Matrix<::casadi::Matrix<CasadiScalar>, Rows, Cols, Options, MaxRows, MaxCols>>::
     construct(PyObject * pyObj, bp::converter::rvalue_from_python_stage1_data * memory)
   {
     eigenpy::PySwigObject * casadi_matrix_swig_obj = eigenpy::get_PySwigObject(pyObj);
@@ -229,17 +206,10 @@ namespace eigenpy
     Py_DECREF(reinterpret_cast<PyObject *>(casadi_matrix_swig_obj));
   }
 
-  template<
-    typename Scalar,
-    int Rows,
-    int Cols,
-    int Options,
-    int MaxRows,
-    int MaxCols,
-    typename CasadiScalar>
+  template<typename CasadiScalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   void EigenFromPy<
-    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>,
-    ::casadi::Matrix<CasadiScalar>>::registration()
+    Eigen::Matrix<::casadi::Matrix<CasadiScalar>, Rows, Cols, Options, MaxRows, MaxCols>>::
+    registration()
   {
     bp::converter::registry::push_back(
       reinterpret_cast<void * (*)(_object *)>(&EigenFromPy::convertible), &EigenFromPy::construct,
@@ -251,10 +221,10 @@ namespace eigenpy
     );
   }
 
-  template<typename MatType, typename _Scalar>
-  struct EigenToPy<MatType, ::casadi::Matrix<_Scalar>>
+  template<typename MatType>
+  struct EigenToPy<MatType, ::casadi::Matrix<::casadi::SXElem>>
   {
-    typedef ::casadi::Matrix<_Scalar> CasadiMatrix;
+    typedef ::casadi::Matrix<::casadi::SXElem> CasadiMatrix;
 
     static PyObject *
     convert(typename boost::add_reference<typename boost::add_const<MatType>::type>::type mat)
@@ -295,10 +265,21 @@ namespace eigenpy
     }
   };
 
-  template<typename MatType, int Options, typename Stride, typename _Scalar>
-  struct EigenToPy<Eigen::Ref<MatType, Options, Stride>, ::casadi::Matrix<_Scalar>>
+  template<typename SparseType, typename _Scalar>
+  struct expose_eigen_type_impl<
+    SparseType,
+    Eigen::SparseMatrixBase<SparseType>,
+    ::casadi::Matrix<_Scalar>>
   {
-    typedef ::casadi::Matrix<_Scalar> CasadiMatrix;
+    static void run()
+    {
+    }
+  };
+
+  template<typename MatType, int Options, typename Stride>
+  struct EigenToPy<Eigen::Ref<MatType, Options, Stride>, ::casadi::Matrix<::casadi::SXElem>>
+  {
+    typedef ::casadi::Matrix<::casadi::SXElem> CasadiMatrix;
 
     static PyObject * convert(const Eigen::Ref<MatType, Options, Stride> & mat)
     {

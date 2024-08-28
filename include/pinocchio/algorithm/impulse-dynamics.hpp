@@ -17,7 +17,7 @@ namespace pinocchio
   /// \brief Compute the impulse dynamics with contact constraints. Internally, pinocchio::crba is
   /// called. \note It computes the following problem: <BR>
   ///       <CENTER> \f$ \begin{eqnarray} \underset{\dot{q}^{+}}{\min} & & \| \dot{q}^{+} -
-  ///       \dot{q}^{-} \|_{M(q)} \\
+  ///       \dot{q}^{-} \|_{M(q)} \\\
   ///           \text{s.t.} & & J (q) \dot{q}^{+} = - \epsilon J (q) \dot{q}^{-}  \end{eqnarray} \f$
   ///           </CENTER> <BR>
   ///       where \f$ \dot{q}^{-} \f$ is the generalized velocity before impact,
@@ -54,6 +54,7 @@ namespace pinocchio
     typename TangentVectorType1,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & impulseDynamics(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,

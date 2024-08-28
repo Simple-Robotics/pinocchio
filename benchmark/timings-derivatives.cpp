@@ -13,7 +13,7 @@
 #include "pinocchio/algorithm/crba.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/container/aligned-vector.hpp"
 
 #include <iostream>
@@ -66,7 +66,7 @@ void rnea_fd(
   }
 
   // dRNEA/da
-  drnea_da = crba(model, data_fd, q);
+  drnea_da = pinocchio::crba(model, data_fd, q, pinocchio::Convention::WORLD);
   drnea_da.template triangularView<Eigen::StrictlyLower>() =
     drnea_da.transpose().template triangularView<Eigen::StrictlyLower>();
 }
@@ -87,14 +87,14 @@ void aba_fd(
   VectorXd a_plus(model.nv);
   const double alpha = 1e-8;
 
-  VectorXd a0 = pinocchio::minimal::aba(model, data_fd, q, v, tau);
+  VectorXd a0 = pinocchio::aba(model, data_fd, q, v, tau, pinocchio::Convention::LOCAL);
 
   // dABA/dq
   for (int k = 0; k < model.nv; ++k)
   {
     v_eps[k] += alpha;
     q_plus = integrate(model, q, v_eps);
-    a_plus = pinocchio::minimal::aba(model, data_fd, q_plus, v, tau);
+    a_plus = pinocchio::aba(model, data_fd, q_plus, v, tau, pinocchio::Convention::LOCAL);
 
     daba_dq.col(k) = (a_plus - a0) / alpha;
     v_eps[k] -= alpha;
@@ -105,7 +105,7 @@ void aba_fd(
   for (int k = 0; k < model.nv; ++k)
   {
     v_plus[k] += alpha;
-    a_plus = pinocchio::minimal::aba(model, data_fd, q, v_plus, tau);
+    a_plus = pinocchio::aba(model, data_fd, q, v_plus, tau, pinocchio::Convention::LOCAL);
 
     daba_dv.col(k) = (a_plus - a0) / alpha;
     v_plus[k] -= alpha;
@@ -243,7 +243,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    pinocchio::minimal::aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::LOCAL);
   }
   std::cout << "ABA= \t\t\t\t";
   timer.toc(std::cout, NBT);
@@ -261,7 +261,7 @@ int main(int argc, const char ** argv)
     double total = 0;
     SMOOTH(NBT)
     {
-      aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+      aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
       timer.tic();
       computeABADerivatives(model, data, daba_dq, daba_dv, daba_dtau);
       total += timer.toc(timer.DEFAULT_UNIT);
@@ -290,7 +290,7 @@ int main(int argc, const char ** argv)
     double total = 0;
     SMOOTH(NBT)
     {
-      aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+      aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
       timer.tic();
       computeMinverse(model, data);
       total += timer.toc(timer.DEFAULT_UNIT);
@@ -304,7 +304,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
     cholesky::decompose(model, data);
     cholesky::computeMinv(model, data, Minv);
   }

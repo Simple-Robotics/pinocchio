@@ -62,14 +62,30 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data);
 
+  /// \brief Computes the Jacobian of a specific joint frame expressed in one of the
+  /// pinocchio::ReferenceFrame options.
   ///
-  /// \brief Computes the Jacobian of a specific joint frame expressed either in the world (rf =
-  /// WORLD) frame or in the local frame (rf = LOCAL) of the joint.
+  /// \details For the LOCAL reference frame, the Jacobian \f${}^j J_{0j}\f$ from the joint frame
+  /// \f$j\f$ to the world frame \f$0\f$ is such that \f${}^j v_{0j} = {}^j J_{0j} \dot{q}\f$, where
+  /// \f${}^j v_{0j}\f$ is the velocity of the origin of the moving joint frame relative to the
+  /// fixed world frame, projected into the basis of the joint frame. LOCAL_WORLD_ALIGNED is the
+  /// same velocity but projected into the world frame basis.
   ///
-  /// For the world frame W, the Jacobian \f${}^0 J_{0j}$ from the joint frame \f$j$ to the world
-  /// frame $0$ is such that \f${}^0 v_{0j} = {}^0 J_{0j} \dot{q}$, where \f${}^0 v_{0j}$ is the
-  /// spatial velocity of the joint frame. (When serialized to a 6D vector, the three linear
-  /// coordinates are followed by the three angular coordinates).
+  /// For the WORLD reference frame, the Jacobian \f${}^0 J_{0j}\f$ from the joint frame \f$j\f$ to
+  /// the world frame \f$0\f$ is such that \f${}^0 v_{0j} = {}^0 J_{0j} \dot{q}\f$, where \f${}^0
+  /// v_{0j}\f$ is the spatial velocity of the joint frame. The linear component of this spatial
+  /// velocity is the velocity of a (possibly imaginary) point attached to the moving joint frame j
+  /// which is traveling through the origin of the world frame at that instant. The angular
+  /// component is the instantaneous angular velocity of the joint frame as viewed in the world
+  /// frame.
+  ///
+  /// When serialized to a 6D vector, the order of coordinates is: three linear followed by three
+  /// angular.
+  ///
+  /// For further details regarding the different velocities or the Jacobian see Chapters 2 and 3
+  /// respectively in [A Mathematical Introduction to Robotic
+  /// Manipulation](https://www.cse.lehigh.edu/~trink/Courses/RoboticsII/reading/murray-li-sastry-94-complete.pdf)
+  /// by Murray, Li and Sastry.
   ///
   /// \note This jacobian is extracted from data.J. You have to run pinocchio::computeJointJacobians
   /// before calling it.
@@ -163,28 +179,6 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const JointIndex joint_id,
     const Eigen::MatrixBase<Matrix6Like> & J);
-  ///
-  /// \brief This function is now deprecated and has been renamed into computeJointJacobian. It will
-  /// be removed in future releases of Pinocchio.
-  ///
-  /// \copydoc pinocchio::computeJointJacobian
-  ///
-  template<
-    typename Scalar,
-    int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    typename ConfigVectorType,
-    typename Matrix6Like>
-  PINOCCHIO_DEPRECATED void jointJacobian(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<ConfigVectorType> & q,
-    const JointIndex jointId,
-    const Eigen::MatrixBase<Matrix6Like> & J)
-  {
-    computeJointJacobian(model, data, q, jointId, PINOCCHIO_EIGEN_CONST_CAST(Matrix6Like, J));
-  }
 
   ///
   /// \brief Computes the full model Jacobian variations with respect to time. It corresponds to

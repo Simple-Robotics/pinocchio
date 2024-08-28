@@ -107,13 +107,13 @@ namespace pinocchio
       class ConfigR_t,
       class JacobianIn_t,
       class JacobianOut_t>
-    void dDifference_product_impl(
+    static void dDifference_product_impl(
       const ConfigL_t &,
       const ConfigR_t &,
       const JacobianIn_t & Jin,
       JacobianOut_t & Jout,
       bool,
-      const AssignmentOperatorType op) const
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -205,14 +205,14 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrate_product_impl(
+    static void dIntegrate_product_impl(
       const Config_t &,
       const Tangent_t &,
       const JacobianIn_t & Jin,
       JacobianOut_t & Jout,
       bool,
       const ArgumentPosition,
-      const AssignmentOperatorType op) const
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -232,38 +232,38 @@ namespace pinocchio
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & /*v*/,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & Jout) const
+      const Eigen::MatrixBase<JacobianOut_t> & Jout)
     {
       PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, Jout) = Jin;
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & /*v*/,
       const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & Jout) const
+      const Eigen::MatrixBase<JacobianOut_t> & Jout)
     {
       PINOCCHIO_EIGEN_CONST_CAST(JacobianOut_t, Jout) = Jin;
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dq_impl(
+    static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & /*v*/,
-      const Eigen::MatrixBase<Jacobian_t> & /*J*/) const
+      const Eigen::MatrixBase<Jacobian_t> & /*J*/)
     {
     }
 
     template<class Config_t, class Tangent_t, class Jacobian_t>
-    void dIntegrateTransport_dv_impl(
+    static void dIntegrateTransport_dv_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<Tangent_t> & /*v*/,
-      const Eigen::MatrixBase<Jacobian_t> & /*J*/) const
+      const Eigen::MatrixBase<Jacobian_t> & /*J*/)
     {
     }
 
@@ -284,7 +284,7 @@ namespace pinocchio
     }
 
     template<class Config_t>
-    void random_impl(const Eigen::MatrixBase<Config_t> & qout) const
+    static void random_impl(const Eigen::MatrixBase<Config_t> & qout)
     {
       PINOCCHIO_EIGEN_CONST_CAST(Config_t, qout).setRandom();
     }

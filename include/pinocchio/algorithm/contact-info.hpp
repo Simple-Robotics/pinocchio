@@ -102,6 +102,9 @@ namespace pinocchio
     }
   };
 
+  // TODO Remove when API is stabilized
+  PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+  PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
   template<typename NewScalar, typename Scalar, int Options>
   struct CastType<NewScalar, RigidConstraintModelTpl<Scalar, Options>>
   {
@@ -134,7 +137,8 @@ namespace pinocchio
   ///  \brief Contact model structure containg all the info describing the rigid contact model
   ///
   template<typename _Scalar, int _Options>
-  struct RigidConstraintModelTpl : ConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>>
+  struct PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
+    RigidConstraintModelTpl : ConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -746,6 +750,10 @@ namespace pinocchio
                 break;
               }
             }
+            case WORLD: {
+              PINOCCHIO_THROW_PRETTY(
+                std::invalid_argument, "Contact3D in world frame is not managed");
+            }
             }
             break;
           }
@@ -766,6 +774,10 @@ namespace pinocchio
                 oMc1.translation().cross(Jcol_local_world_aligned.angular());
               jacobian_matrix.col(jj) = Jcol_local_world_aligned.toVector() * Scalar(sign);
               break;
+            }
+            case WORLD: {
+              PINOCCHIO_THROW_PRETTY(
+                std::invalid_argument, "Contact6D in world frame is not managed");
             }
             }
             break;
@@ -1164,6 +1176,7 @@ namespace pinocchio
       return !(*this == other);
     }
   };
+  PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
 } // namespace pinocchio
 

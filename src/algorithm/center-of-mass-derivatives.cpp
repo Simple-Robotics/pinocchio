@@ -7,7 +7,8 @@
 namespace pinocchio
 {
 
-  template void getCenterOfMassVelocityDerivatives<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+  getCenterOfMassVelocityDerivatives<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

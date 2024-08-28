@@ -14,7 +14,7 @@
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_mass_matrix)
   ADTangentVectorType ad_a = a.cast<ADScalar>();
 
   typedef Eigen::Matrix<ADScalar, Eigen::Dynamic, 1> VectorXAD;
-  pinocchio::crba(model, data, q);
+  pinocchio::crba(model, data, q, pinocchio::Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
 
@@ -102,10 +102,10 @@ BOOST_AUTO_TEST_CASE(test_mass_matrix)
   data.Minv.triangularView<Eigen::StrictlyLower>() =
     data.Minv.transpose().triangularView<Eigen::StrictlyLower>();
 
-  pinocchio::aba(model, data, q, v, tau);
+  pinocchio::aba(model, data, q, v, tau, pinocchio::Convention::WORLD);
   {
     CppAD::Independent(ad_tau);
-    pinocchio::aba(ad_model, ad_data, ad_q, ad_v, ad_tau);
+    pinocchio::aba(ad_model, ad_data, ad_q, ad_v, ad_tau, pinocchio::Convention::WORLD);
 
     VectorXAD Y(model.nv);
     Eigen::Map<ADData::TangentVectorType>(Y.data(), model.nv, 1) = ad_data.ddq;
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(test_JSIM_jit)
 
   typedef Eigen::Matrix<ADScalar, Eigen::Dynamic, 1> VectorXAD;
   typedef Eigen::Matrix<ADScalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXAD;
-  pinocchio::crba(model, data, q);
+  pinocchio::crba(model, data, q, pinocchio::Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
 
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(test_JSIM_jit)
     ofs.close();
 
     // create dll_file
-    std::string dll_file = "jit_JSIM" DLL_EXT;
+    std::string dll_file = "./jit_JSIM" DLL_EXT;
     CPPAD_TESTVECTOR(std::string) csrc_files(1);
     csrc_files[0] = csrc_file;
     std::map<std::string, std::string> options;

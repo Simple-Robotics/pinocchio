@@ -8,7 +8,7 @@
 namespace pinocchio
 {
 
-  template bool computeCollisions<
+  template PINOCCHIO_COLLISION_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI bool computeCollisions<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -20,7 +20,7 @@ namespace pinocchio
     const Eigen::MatrixBase<context::VectorXs> &,
     const bool stopAtFirstCollision);
 
-  template std::size_t
+  template PINOCCHIO_COLLISION_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI std::size_t
   computeDistances<context::Scalar, context::Options, JointCollectionDefaultTpl, context::VectorXs>(
     const context::Model &,
     context::Data &,
@@ -28,7 +28,8 @@ namespace pinocchio
     GeometryData &,
     const Eigen::MatrixBase<context::VectorXs> &);
 
-  template void computeBodyRadius<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+  template PINOCCHIO_COLLISION_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+  computeBodyRadius<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, const GeometryModel &, GeometryData &);
 
 } // namespace pinocchio

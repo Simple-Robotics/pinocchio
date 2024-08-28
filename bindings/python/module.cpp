@@ -74,6 +74,13 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
       .export_values();
   }
 
+  if (!register_symbolic_link_to_registered_type<::pinocchio::Convention>())
+  {
+    bp::enum_<::pinocchio::Convention>("Convention")
+      .value("WORLD", ::pinocchio::Convention::WORLD)
+      .value("LOCAL", ::pinocchio::Convention::LOCAL);
+  }
+
   if (!register_symbolic_link_to_registered_type<::pinocchio::ArgumentPosition>())
   {
     bp::enum_<::pinocchio::ArgumentPosition>("ArgumentPosition")
@@ -102,12 +109,14 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
   exposeFrame();
   exposeModel();
   exposeData();
+  exposeSampleModels();
 #if defined(PINOCCHIO_PYTHON_INTERFACE_MAIN_MODULE)
   exposeGeometry();
   exposeParsers();
 #endif // defined(PINOCCHIO_PYTHON_INTERFACE_MAIN_MODULE)
 
   exposeAlgorithms();
+  exposeExtras();
   exposeSerialization();
 
 #if defined(PINOCCHIO_PYTHON_INTERFACE_WITH_HPP_FCL_PYTHON_BINDINGS)                               \

@@ -29,6 +29,7 @@ namespace pinocchio
 #include "pinocchio/deprecation.hpp"
 #include "pinocchio/warning.hpp"
 #include "pinocchio/config.hpp"
+#include "pinocchio/unsupported.hpp"
 
 // Include Eigen components
 #include <Eigen/Core>
@@ -49,6 +50,21 @@ namespace pinocchio
 #include "pinocchio/utils/check.hpp"
 
 #include "pinocchio/container/boost-container-limits.hpp"
+
+#ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
+  #ifndef EIGEN_RUNTIME_NO_MALLOC
+    #define EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED
+    #define EIGEN_RUNTIME_NO_MALLOC
+  #endif
+#endif
+
+#include <Eigen/Core>
+#include <Eigen/Sparse>
+#include <Eigen/SparseCholesky>
+
+#ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
+  #include <Eigen/AccelerateSupport>
+#endif
 
 #ifdef PINOCCHIO_EIGEN_CHECK_MALLOC
   #ifdef EIGEN_RUNTIME_NO_MALLOC_WAS_NOT_DEFINED

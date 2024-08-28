@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "pinocchio/config.hpp"
+#include "pinocchio/parsers/config.hpp"
 
 namespace pinocchio
 {
@@ -22,7 +22,7 @@ namespace pinocchio
    *
    * @return The vector of paths extracted from the environment variable value.
    */
-  PINOCCHIO_DLLAPI std::vector<std::string> extractPathFromEnvVar(
+  PINOCCHIO_PARSERS_DLLAPI std::vector<std::string> extractPathFromEnvVar(
     const std::string & env_var_name,
 #ifdef _WIN32
     const std::string & delimiter = ";"
@@ -38,7 +38,7 @@ namespace pinocchio
    * @param[in,out]  list_of_paths The vector of path names.
    * @param[in] suffix Suffix to be added to each element of the path names.
    */
-  PINOCCHIO_DLLAPI void
+  PINOCCHIO_PARSERS_DLLAPI void
   appendSuffixToPaths(std::vector<std::string> & list_of_paths, const std::string & suffix);
 
   /**
@@ -50,7 +50,7 @@ namespace pinocchio
    * variable value.
    * @param[in] delimiter The delimiter between two consecutive paths.
    */
-  PINOCCHIO_DLLAPI void extractPathFromEnvVar(
+  PINOCCHIO_PARSERS_DLLAPI void extractPathFromEnvVar(
     const std::string & env_var_name,
     std::vector<std::string> & list_of_paths,
 #ifdef _WIN32
@@ -67,7 +67,7 @@ namespace pinocchio
    * @return     The vector of paths extracted from the environment variables ROS_PACKAGE_PATH /
    * AMENT_PREFIX_PATH
    */
-  PINOCCHIO_DLLAPI std::vector<std::string> rosPaths();
+  PINOCCHIO_PARSERS_DLLAPI std::vector<std::string> rosPaths();
 
 } // namespace pinocchio
 

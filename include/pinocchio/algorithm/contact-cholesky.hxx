@@ -12,6 +12,10 @@
 namespace pinocchio
 {
 
+  // TODO Remove when API is stabilized
+  PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+  PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
+
   template<typename Scalar, int Options>
   template<
     typename S1,
@@ -718,6 +722,8 @@ namespace pinocchio
     res_.template triangularView<Eigen::StrictlyLower>() =
       res_.transpose().template triangularView<Eigen::StrictlyLower>();
   }
+
+  PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_contact_cholesky_hxx__

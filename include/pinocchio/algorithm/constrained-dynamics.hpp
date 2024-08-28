@@ -32,6 +32,7 @@ namespace pinocchio
     template<typename, int>
     class JointCollectionTpl,
     class Allocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void initConstraintDynamics(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -84,6 +85,7 @@ namespace pinocchio
     typename TangentVectorType2,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   constraintDynamics(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -140,6 +142,7 @@ namespace pinocchio
     typename TangentVectorType2,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   constraintDynamics(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -165,6 +168,7 @@ namespace pinocchio
     typename TangentVectorType2,
     class ModelAllocator,
     class DataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   contactABA(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,

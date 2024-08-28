@@ -111,7 +111,7 @@ namespace pinocchio
 
     /// Uniformly random quaternion sphere.
     template<typename Derived>
-    void uniformRandom(const Eigen::QuaternionBase<Derived> & q)
+    void uniformRandom(Eigen::QuaternionBase<Derived> & q)
     {
       typedef typename Derived::Scalar Scalar;
 

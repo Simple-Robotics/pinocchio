@@ -14,7 +14,7 @@
 #include "pinocchio/algorithm/constrained-dynamics.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/algorithm/pv.hpp"
 
 #include <iostream>
@@ -123,7 +123,7 @@ int main(int argc, const char ** argv)
   timer.tic();
   SMOOTH(NBT)
   {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth]);
+    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
   }
   std::cout << "ABA = \t\t";
   timer.toc(std::cout, NBT);
@@ -162,7 +162,7 @@ int main(int argc, const char ** argv)
   double total_time = 0;
   SMOOTH(NBT)
   {
-    crba(model, data, qs[_smooth]);
+    crba(model, data, qs[_smooth], Convention::WORLD);
     timer.tic();
     cholesky::decompose(model, data);
     total_time += timer.toc(timer.DEFAULT_UNIT);

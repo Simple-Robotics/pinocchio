@@ -30,7 +30,4 @@ add_custom_target(utils)
 
 if(urdfdom_FOUND)
   add_util(pinocchio_read_model pinocchio_read_model)
-  if(WIN32)
-    target_compile_definitions(pinocchio_read_model PRIVATE -DNOMINMAX)
-  endif(WIN32)
 endif(urdfdom_FOUND)

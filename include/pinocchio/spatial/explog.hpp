@@ -539,8 +539,11 @@ namespace pinocchio
       break;
     }
     case ADDTO: {
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix3 Jtmp3;
       Jexp3<SETTO>(w, Jtmp3);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       Jout.template bottomRightCorner<3, 3>() += Jtmp3;
       Jout.template topLeftCorner<3, 3>() += Jtmp3;
       const Vector3 p = Jtmp3.transpose() * v;
@@ -553,8 +556,11 @@ namespace pinocchio
       break;
     }
     case RMTO: {
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
       Matrix3 Jtmp3;
       Jexp3<SETTO>(w, Jtmp3);
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       Jout.template bottomRightCorner<3, 3>() -= Jtmp3;
       Jout.template topLeftCorner<3, 3>() -= Jtmp3;
       const Vector3 p = Jtmp3.transpose() * v;

@@ -17,6 +17,7 @@ namespace pinocchio
     template<typename, int>
     class JointCollectionTpl,
     class Allocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void initPvDelassus(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -49,6 +50,7 @@ namespace pinocchio
     class ModelAllocator,
     class DataAllocator,
     typename MatrixType>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   void computeDelassusMatrix(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -90,6 +92,7 @@ namespace pinocchio
     class ModelAllocator,
     class DataAllocator,
     typename MatrixType>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   void computeDampedDelassusMatrixInverse(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,

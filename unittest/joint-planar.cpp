@@ -105,15 +105,16 @@ BOOST_AUTO_TEST_CASE(vsFreeFlyer)
   BOOST_CHECK(tauPlanar.isApprox(tau_expected));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaPlanar = aba(modelPlanar, dataPlanar, q, v, tauPlanar);
-  Eigen::VectorXd aAbaFreeFlyer = aba(modelFreeflyer, dataFreeFlyer, qff, vff, tauff);
+  Eigen::VectorXd aAbaPlanar = aba(modelPlanar, dataPlanar, q, v, tauPlanar, Convention::WORLD);
+  Eigen::VectorXd aAbaFreeFlyer =
+    aba(modelFreeflyer, dataFreeFlyer, qff, vff, tauff, Convention::WORLD);
   Vector3 a_expected;
   a_expected << aAbaFreeFlyer[0], aAbaFreeFlyer[1], aAbaFreeFlyer[5];
   BOOST_CHECK(aAbaPlanar.isApprox(a_expected));
 
   // crba
-  crba(modelPlanar, dataPlanar, q);
-  crba(modelFreeflyer, dataFreeFlyer, qff);
+  crba(modelPlanar, dataPlanar, q, Convention::WORLD);
+  crba(modelFreeflyer, dataFreeFlyer, qff, Convention::WORLD);
 
   Eigen::Matrix<double, 3, 3> M_expected;
   M_expected.block<2, 2>(0, 0) = dataFreeFlyer.M.block<2, 2>(0, 0);

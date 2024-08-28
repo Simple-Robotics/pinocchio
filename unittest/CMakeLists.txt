@@ -7,14 +7,18 @@
 # --- MACROS ------------------------------------------------------------------
 # --- MACROS ------------------------------------------------------------------
 
-macro(ADD_TEST_CFLAGS target flag)
+function(ADD_TEST_CFLAGS target)
   get_cpp_test_name(${target} ${CMAKE_CURRENT_SOURCE_DIR} test_name)
-  set_property(
-    TARGET ${test_name}
-    APPEND_STRING
-    PROPERTY COMPILE_FLAGS " ${flag}")
-  unset(test_name)
-endmacro()
+  foreach(ARG ${ARGN})
+    set_property(
+      TARGET ${test_name}
+      APPEND_STRING
+      PROPERTY COMPILE_FLAGS "${ARG} ")
+  endforeach()
+endfunction()
+
+# Compute flags outside the macro to avoid recomputing it for each tests
+cxx_flags_by_compiler_frontend(MSVC _USE_MATH_DEFINES OUTPUT TEST_PRIVATE_DEFINITIONS)
 
 function(GET_CPP_TEST_NAME name src_dir full_test_name)
   string(REPLACE "${PINOCCHIO_UNIT_TEST_DIR}" "" prefix_name "${src_dir}")
@@ -47,6 +51,13 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} TEST_NAME)
   add_unit_test(${TEST_NAME} ${name}.cpp)
 
+  set(MODULE_NAME "${NAME}Test")
+  string(REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
+  target_compile_definitions(
+    ${TEST_NAME}
+    PRIVATE ${TEST_PRIVATE_DEFINITIONS} BOOST_TEST_DYN_LINK BOOST_TEST_MODULE=${MODULE_NAME}
+            PINOCCHIO_MODEL_DIR=\"${PINOCCHIO_MODEL_DIR}\")
+
   # There is no RPATH in Windows, then we must use the PATH to find the DLL
   if(WIN32)
     string(REPLACE ";" "\\\;" _PATH "$ENV{PATH}")
@@ -57,15 +68,6 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
 
   set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-  add_test_cflags(${name} "-DBOOST_TEST_DYN_LINK")
-  set(MODULE_NAME "${name}Test")
-  string(REGEX REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
-  add_test_cflags(${name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
-  add_test_cflags(${name} "-DPINOCCHIO_MODEL_DIR=\\\\\"${PINOCCHIO_MODEL_DIR}\\\\\"")
-  if(WIN32)
-    add_test_cflags(${name} "-DNOMINMAX -D_USE_MATH_DEFINES")
-  endif()
 
   if(NOT unit_test_HEADER_ONLY)
     target_link_libraries(${TEST_NAME} PUBLIC ${PROJECT_NAME}_default)
@@ -280,7 +282,14 @@ add_pinocchio_unit_test(finite-differences)
 add_pinocchio_unit_test(visitor)
 add_pinocchio_unit_test(algo-check)
 
+# Warning ignore with pragma doesn't work for a part of this test, so we ignore two warning globally
+cxx_flags_by_compiler_frontend(
+  GNU -Wno-maybe-uninitialized -Wuse-after-free=0
+  OUTPUT LIEGROUPS_OPTIONS
+  FILTER)
 add_pinocchio_unit_test(liegroups)
+add_test_cflags(liegroups ${LIEGROUPS_OPTIONS})
+
 add_pinocchio_unit_test(cartesian-product-liegroups)
 add_pinocchio_unit_test(regressor)
 add_pinocchio_unit_test(version)
@@ -294,10 +303,10 @@ make_directory("${CMAKE_CURRENT_BINARY_DIR}/serialization-data")
 add_pinocchio_unit_test(serialization COLLISION_OPTIONAL)
 add_test_cflags(
   serialization
-  "-DTEST_SERIALIZATION_FOLDER=\\\\\"${CMAKE_CURRENT_BINARY_DIR}/serialization-data\\\\\"")
+  "-DTEST_SERIALIZATION_FOLDER=\\\"${CMAKE_CURRENT_BINARY_DIR}/serialization-data\\\"")
 add_pinocchio_unit_test(csv)
 add_test_cflags(
-  csv "-DTEST_SERIALIZATION_FOLDER=\\\\\"${CMAKE_CURRENT_BINARY_DIR}/serialization-data\\\\\"")
+  csv "-DTEST_SERIALIZATION_FOLDER=\\\"${CMAKE_CURRENT_BINARY_DIR}/serialization-data\\\"")
 
 add_subdirectory(algorithm)
 

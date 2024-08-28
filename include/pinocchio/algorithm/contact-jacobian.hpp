@@ -118,6 +118,7 @@ namespace pinocchio
     template<typename, int>
     class JointCollectionTpl,
     typename Matrix6Like>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   void getConstraintJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,

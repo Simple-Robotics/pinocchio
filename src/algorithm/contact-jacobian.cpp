@@ -10,7 +10,7 @@
 
 namespace pinocchio
 {
-  template void getConstraintJacobian<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void getConstraintJacobian<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -21,7 +21,7 @@ namespace pinocchio
     context::RigidConstraintData &,
     const Eigen::MatrixBase<context::MatrixXs> &);
 
-  template void getConstraintsJacobian<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void getConstraintsJacobian<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

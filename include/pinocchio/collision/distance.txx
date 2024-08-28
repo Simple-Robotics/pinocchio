@@ -8,7 +8,7 @@
 namespace pinocchio
 {
 
-  extern template std::size_t
+  extern template PINOCCHIO_COLLISION_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI std::size_t
   computeDistances<context::Scalar, context::Options, JointCollectionDefaultTpl, context::VectorXs>(
     const context::Model &,
     context::Data &,

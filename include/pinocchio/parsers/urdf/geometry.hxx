@@ -5,6 +5,7 @@
 #ifndef __pinocchio_multibody_parsers_urdf_geometry_hxx__
 #define __pinocchio_multibody_parsers_urdf_geometry_hxx__
 
+#include "pinocchio/parsers/config.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 
 #include <sstream>
@@ -63,7 +64,7 @@ namespace pinocchio
        * COLLISION)
        *
        */
-      PINOCCHIO_DLLAPI void parseTreeForGeom(
+      PINOCCHIO_PARSERS_DLLAPI void parseTreeForGeom(
         UrdfGeomVisitorBase & visitor,
         const std::istream & xmlStream,
         const GeometryType type,

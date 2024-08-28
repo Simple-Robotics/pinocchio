@@ -620,6 +620,7 @@ namespace pinocchio
     using Base::setIndexes;
 
     JointModelRevoluteUnalignedTpl()
+    : axis(Vector3::UnitX())
     {
     }
 

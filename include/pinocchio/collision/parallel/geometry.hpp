@@ -2,13 +2,15 @@
 // Copyright (c) 2021-2024 INRIA
 //
 
-#ifndef __pinocchio_algorithm_parallel_geometry_hpp__
-#define __pinocchio_algorithm_parallel_geometry_hpp__
+#ifndef __pinocchio_collision_parallel_geometry_hpp__
+#define __pinocchio_collision_parallel_geometry_hpp__
 
 #include "pinocchio/multibody/pool/geometry.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
 #include "pinocchio/collision/collision.hpp"
 #include "pinocchio/utils/openmp.hpp"
+
+#include <cstdint>
 
 namespace pinocchio
 {
@@ -187,4 +189,4 @@ namespace pinocchio
   }
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_parallel_geometry_hpp__
+#endif // ifndef __pinocchio_collision_parallel_geometry_hpp__

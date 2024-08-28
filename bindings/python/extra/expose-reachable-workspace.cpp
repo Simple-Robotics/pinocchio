@@ -6,7 +6,7 @@
 #include "pinocchio/bindings/python/utils/namespace.hpp"
 #include "pinocchio/bindings/python/utils/eigen.hpp"
 
-#include "pinocchio/algorithm/reachable-workspace.hpp"
+#include "pinocchio/extra/reachable-workspace.hpp"
 
 namespace pinocchio
 {
@@ -106,8 +106,8 @@ namespace pinocchio
       bp::def(
         "reachableWorkspace", &reachableWorkspace_,
         bp::args("model", "q0", "time_horizon", "frame_id", "n_samples", "facet_dims"),
-        "Computes the reachable workspace on a fixed time horizon. For more information, please "
-        "see https://gitlab.inria.fr/auctus-team/people/antunskuric/pycapacity\n\n"
+        "Computes the reachable workspace on a fixed time horizon. For more information, "
+        "please see https://gitlab.inria.fr/auctus-team/people/antunskuric/pycapacity\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
         "\ttime_horizon: time horizon for which the polytope will be computed\n"
@@ -116,8 +116,8 @@ namespace pinocchio
       bp::def(
         "reachableWorkspaceHull", &reachableWorkspaceHull_,
         bp::args("model", "q0", "time_horizon", "frame_id", "n_samples", "facet_dims"),
-        "Computes the convex hull of the reachable workspace on a fixed time horizon. For more "
-        "information, please see "
+        "Computes the convex hull of the reachable workspace on a fixed time horizon. For "
+        "more information, please see "
         "https://gitlab.inria.fr/auctus-team/people/antunskuric/pycapacity\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
@@ -144,8 +144,8 @@ namespace pinocchio
         "reachableWorkspaceWithCollisionsHull", &reachableWorkspaceWithCollisionsHull_,
         bp::args(
           "model", "geom_model", "q0", "time_horizon", "frame_id", "n_samples", "facet_dims"),
-        "Computes the convex hull of the reachable workspace taking geometry model into account on "
-        "a fixed time horizon. For more information, please see "
+        "Computes the convex hull of the reachable workspace taking geometry model into "
+        "account on a fixed time horizon. For more information, please see "
         "https://gitlab.inria.fr/auctus-team/people/antunskuric/pycapacity\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"

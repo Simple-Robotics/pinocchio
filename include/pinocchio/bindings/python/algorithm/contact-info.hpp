@@ -103,8 +103,8 @@ namespace pinocchio
             Self, joint2_placement, "Relative placement with respect to the frame of joint2.")
           .PINOCCHIO_ADD_PROPERTY(
             Self, reference_frame,
-            "Reference frame where the constraint is expressed (WORLD, LOCAL_WORLD_ALIGNED or "
-            "LOCAL).")
+            "Reference frame where the constraint is expressed (WORLD, "
+            "LOCAL_WORLD_ALIGNED or LOCAL).")
           .PINOCCHIO_ADD_PROPERTY(Self, desired_contact_placement, "Desired contact placement.")
           .PINOCCHIO_ADD_PROPERTY(
             Self, desired_contact_velocity, "Desired contact spatial velocity.")
@@ -217,8 +217,8 @@ namespace pinocchio
       {
         bp::class_<RigidConstraintData>(
           "RigidConstraintData",
-          "Rigid constraint data associated to a RigidConstraintModel for contact dynamic "
-          "algorithms.",
+          "Rigid constraint data associated to a "
+          "RigidConstraintModel for contact dynamic algorithms.",
           bp::no_init)
           .def(RigidConstraintDataPythonVisitor());
 

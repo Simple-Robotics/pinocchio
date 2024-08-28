@@ -53,7 +53,8 @@ namespace pinocchio
   ///  \tparam _Options Alignment Options of the Eigen objects contained in the data structure.
   ///
   template<typename _Scalar, int _Options>
-  struct ContactCholeskyDecompositionTpl
+  struct PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
+    ContactCholeskyDecompositionTpl
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -69,8 +70,12 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> Matrix;
     typedef typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(Matrix) RowMatrix;
+    // TODO Remove when API is stabilized
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
     typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     typedef Eigen::Matrix<Eigen::DenseIndex, Eigen::Dynamic, 1, Options> IndexVector;
     typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(IndexVector) VectorOfIndexVector;
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
@@ -112,7 +117,11 @@ namespace pinocchio
     template<typename S1, int O1, template<typename, int> class JointCollectionTpl>
     explicit ContactCholeskyDecompositionTpl(const ModelTpl<S1, O1, JointCollectionTpl> & model)
     {
+      // TODO Remove when API is stabilized
+      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) empty_contact_models;
+      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       allocate(model, empty_contact_models);
     }
 
@@ -123,6 +132,9 @@ namespace pinocchio
     /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact
     /// information
     ///
+    // TODO Remove when API is stabilized
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
     template<typename S1, int O1, template<typename, int> class JointCollectionTpl, class Allocator>
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
@@ -134,6 +146,7 @@ namespace pinocchio
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
       allocate(model, wrapped_contact_models);
     }
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
     ///
     /// \brief Constructor from a model and a collection of RigidConstraintModel objects.
@@ -314,6 +327,9 @@ namespace pinocchio
     /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed
     /// first. This can be achieved by simply calling pinocchio::crba.
     ///
+    // TODO Remove when API is stabilized
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
     template<
       typename S1,
       int O1,
@@ -366,6 +382,7 @@ namespace pinocchio
     {
       compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(), mu));
     }
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
     ///
     /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
@@ -576,6 +593,9 @@ namespace pinocchio
     template<typename MatrixLike, int ColsAtCompileTime>
     friend struct details::UtivAlgo;
 
+    // TODO Remove when API is stabilized
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
     template<typename Scalar, int Options, typename VectorLike>
     friend VectorLike & details::inverseAlgo(
       const ContactCholeskyDecompositionTpl<Scalar, Options> & chol,
@@ -613,6 +633,7 @@ namespace pinocchio
     {
       return !(*this == other);
     }
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
   protected:
     IndexVector parents_fromRow;

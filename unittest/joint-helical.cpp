@@ -89,31 +89,31 @@ BOOST_AUTO_TEST_CASE(vsPXRX)
   BOOST_CHECK(tauHX.isApprox(Eigen::Matrix<double, 1, 1>(tauPXRX.dot(Eigen::VectorXd::Ones(2)))));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaHX = aba(modelHX, dataHX, q_hx, v_hx, tauHX);
-  Eigen::VectorXd aAbaPXRX = aba(modelPXRX, dataPXRX, q_PXRX, v_PXRX, tauPXRX);
+  Eigen::VectorXd aAbaHX = aba(modelHX, dataHX, q_hx, v_hx, tauHX, Convention::WORLD);
+  Eigen::VectorXd aAbaPXRX = aba(modelPXRX, dataPXRX, q_PXRX, v_PXRX, tauPXRX, Convention::WORLD);
 
   BOOST_CHECK(aAbaHX.isApprox(aHX));
   BOOST_CHECK(aAbaPXRX.isApprox(aPXRX));
   BOOST_CHECK(aAbaPXRX.isApprox(Eigen::Matrix<double, 2, 1>(aHX(0) * h * h, aHX(0))));
 
-  aAbaHX = minimal::aba(modelHX, dataHX, q_hx, v_hx, tauHX);
-  aAbaPXRX = minimal::aba(modelPXRX, dataPXRX, q_PXRX, v_PXRX, tauPXRX);
+  aAbaHX = aba(modelHX, dataHX, q_hx, v_hx, tauHX, Convention::LOCAL);
+  aAbaPXRX = aba(modelPXRX, dataPXRX, q_PXRX, v_PXRX, tauPXRX, Convention::LOCAL);
 
   BOOST_CHECK(aAbaHX.isApprox(aHX));
   BOOST_CHECK(aAbaPXRX.isApprox(aPXRX));
   BOOST_CHECK(aAbaPXRX.isApprox(Eigen::Matrix<double, 2, 1>(aHX(0) * h * h, aHX(0))));
 
   // crba
-  crba(modelHX, dataHX, q_hx);
-  crba(modelPXRX, dataPXRX, q_PXRX);
+  crba(modelHX, dataHX, q_hx, Convention::WORLD);
+  crba(modelPXRX, dataPXRX, q_PXRX, Convention::WORLD);
 
   tauHX = dataHX.M * aHX;
   tauPXRX = dataPXRX.M * aPXRX;
 
   BOOST_CHECK(tauHX.isApprox(Eigen::Matrix<double, 1, 1>(tauPXRX.dot(Eigen::VectorXd::Ones(2)))));
 
-  minimal::crba(modelHX, dataHX, q_hx);
-  minimal::crba(modelPXRX, dataPXRX, q_PXRX);
+  crba(modelHX, dataHX, q_hx, Convention::LOCAL);
+  crba(modelPXRX, dataPXRX, q_PXRX, Convention::LOCAL);
 
   tauHX = dataHX.M * aHX;
   tauPXRX = dataPXRX.M * aPXRX;
@@ -245,15 +245,15 @@ BOOST_AUTO_TEST_CASE(vsHX)
   BOOST_CHECK(tauHX.isApprox(tauHelicalUnaligned));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaHX = aba(modelHX, dataHX, q, v, tauHX);
+  Eigen::VectorXd aAbaHX = aba(modelHX, dataHX, q, v, tauHX, Convention::WORLD);
   Eigen::VectorXd aAbaHelicalUnaligned =
-    aba(modelHelicalUnaligned, dataHelicalUnaligned, q, v, tauHelicalUnaligned);
+    aba(modelHelicalUnaligned, dataHelicalUnaligned, q, v, tauHelicalUnaligned, Convention::WORLD);
 
   BOOST_CHECK(aAbaHX.isApprox(aAbaHelicalUnaligned));
 
   // crba
-  crba(modelHX, dataHX, q);
-  crba(modelHelicalUnaligned, dataHelicalUnaligned, q);
+  crba(modelHX, dataHX, q, Convention::WORLD);
+  crba(modelHelicalUnaligned, dataHelicalUnaligned, q, Convention::WORLD);
 
   BOOST_CHECK(dataHX.M.isApprox(dataHelicalUnaligned.M));
 

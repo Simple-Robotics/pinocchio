@@ -76,8 +76,8 @@ namespace pinocchio
           .def(
             "isZero", &TridiagonalSymmetricMatrix::isZero,
             (bp::arg("self"), bp::arg("prec") = dummy_precision),
-            "Returns true if *this is approximately equal to the zero matrix, within the precision "
-            "given by prec.")
+            "Returns true if *this is approximately equal to the zero matrix, within the "
+            "precision given by prec.")
           .def(
             "isDiagonal", &TridiagonalSymmetricMatrix::isDiagonal,
             (bp::arg("self"), bp::arg("prec") = dummy_precision),

@@ -24,6 +24,7 @@ namespace pinocchio
     typename MatrixType4,
     typename MatrixType5,
     typename MatrixType6>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void computeConstraintDynamicsDerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -51,6 +52,7 @@ namespace pinocchio
     typename MatrixType4,
     typename MatrixType5,
     typename MatrixType6>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void computeConstraintDynamicsDerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -79,6 +81,7 @@ namespace pinocchio
     class JointCollectionTpl,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void computeConstraintDynamicsDerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -99,6 +102,7 @@ namespace pinocchio
     class JointCollectionTpl,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator>
+  PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   inline void computeConstraintDynamicsDerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,

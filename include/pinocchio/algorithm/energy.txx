@@ -8,12 +8,13 @@
 namespace pinocchio
 {
 
-  extern template PINOCCHIO_DLLAPI context::Scalar
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
   computeKineticEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI context::Scalar computeKineticEnergy<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
+    computeKineticEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -24,12 +25,13 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  extern template PINOCCHIO_DLLAPI context::Scalar
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
   computePotentialEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI context::Scalar computePotentialEnergy<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
+    computePotentialEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -38,12 +40,13 @@ namespace pinocchio
       context::Data &,
       const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &);
   } // namespace impl
-  extern template PINOCCHIO_DLLAPI context::Scalar
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
   computeMechanicalEnergy<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &);
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI context::Scalar computeMechanicalEnergy<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Scalar
+    computeMechanicalEnergy<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

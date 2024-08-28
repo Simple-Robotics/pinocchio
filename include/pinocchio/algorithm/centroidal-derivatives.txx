@@ -9,7 +9,8 @@ namespace pinocchio
 {
   namespace impl
   {
-    extern template PINOCCHIO_DLLAPI void computeCentroidalDynamicsDerivatives<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+    computeCentroidalDynamicsDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,
@@ -30,7 +31,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &,
       const Eigen::MatrixBase<Eigen::Ref<context::Matrix6xs>> &);
 
-    extern template PINOCCHIO_DLLAPI void getCentroidalDynamicsDerivatives<
+    extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+    getCentroidalDynamicsDerivatives<
       context::Scalar,
       context::Options,
       JointCollectionDefaultTpl,

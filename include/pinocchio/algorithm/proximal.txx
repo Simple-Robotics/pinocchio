@@ -7,7 +7,8 @@
 
 namespace pinocchio
 {
-  extern template struct PINOCCHIO_DLLAPI ProximalSettingsTpl<context::Scalar>;
+  extern template struct PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    ProximalSettingsTpl<context::Scalar>;
 
 } // namespace pinocchio
 

@@ -8,7 +8,7 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/center-of-mass.hpp"
 
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 #include <boost/test/unit_test.hpp>
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_kinetic_energy)
   VectorXd q = randomConfiguration(model, -qmax, qmax);
   VectorXd v = VectorXd::Random(model.nv);
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_kinetic_energy_with_armature)
   VectorXd q = randomConfiguration(model, -qmax, qmax);
   VectorXd v = VectorXd::Random(model.nv);
 
-  crba(model, data_ref, q);
+  crba(model, data_ref, q, Convention::WORLD);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
 
@@ -117,7 +117,7 @@ Eigen::VectorXd evalMv(
   const Eigen::MatrixBase<TangentVectorType> & v)
 {
   pinocchio::Data data(model);
-  crba(model, data, q);
+  pinocchio::crba(model, data, q, pinocchio::Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
   return data.M * v;

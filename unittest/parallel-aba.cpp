@@ -6,7 +6,7 @@
 #include "pinocchio/algorithm/parallel/aba.hpp"
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/utils/timer.hpp"
 
 #include <iostream>
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_parallel_aba)
 
   for (Eigen::DenseIndex i = 0; i < batch_size; ++i)
   {
-    a_ref.col(i) = aba(model, data_ref, q.col(i), v.col(i), tau.col(i));
+    a_ref.col(i) = aba(model, data_ref, q.col(i), v.col(i), tau.col(i), Convention::WORLD);
   }
 
   BOOST_CHECK(a == a_ref);

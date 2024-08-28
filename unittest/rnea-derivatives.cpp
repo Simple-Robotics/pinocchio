@@ -11,7 +11,7 @@
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/rnea-derivatives.hpp"
 #include "pinocchio/algorithm/crba.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(test_rnea_derivatives)
 
   computeJointJacobiansTimeVariation(model, data_ref, q, v);
   BOOST_CHECK(data.dJ.isApprox(data_ref.dJ));
-  crba(model, data_ref, q);
+  crba(model, data_ref, q, Convention::WORLD);
   data_ref.M.triangularView<Eigen::StrictlyLower>() =
     data_ref.M.transpose().triangularView<Eigen::StrictlyLower>();
 

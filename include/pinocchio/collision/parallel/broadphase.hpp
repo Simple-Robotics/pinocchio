@@ -10,6 +10,8 @@
 #include "pinocchio/algorithm/geometry.hpp"
 #include "pinocchio/utils/openmp.hpp"
 
+#include <cstdint>
+
 namespace pinocchio
 {
 

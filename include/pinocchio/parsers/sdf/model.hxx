@@ -6,6 +6,7 @@
 #define __pinocchio_multibody_parsers_sdf_model_hxx__
 
 #include "pinocchio/math/matrix.hpp"
+#include "pinocchio/parsers/config.hpp"
 #include "pinocchio/parsers/sdf.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 #include "pinocchio/multibody/model.hpp"
@@ -664,8 +665,9 @@ namespace pinocchio
         }
       }; // Struct sdfGraph
 
-      void PINOCCHIO_DLLAPI parseRootTree(SdfGraph & graph, const std::string & rootLinkName);
-      void PINOCCHIO_DLLAPI parseContactInformation(
+      PINOCCHIO_PARSERS_DLLAPI void
+      parseRootTree(SdfGraph & graph, const std::string & rootLinkName);
+      PINOCCHIO_PARSERS_DLLAPI void parseContactInformation(
         const SdfGraph & graph,
         const urdf::details::UrdfVisitorBase & visitor,
         const Model & model,
@@ -677,7 +679,7 @@ namespace pinocchio
        * @param[in] filename     SDF rootLinkName
        *
        */
-      const std::string PINOCCHIO_DLLAPI findRootLink(const SdfGraph & graph);
+      PINOCCHIO_PARSERS_DLLAPI const std::string findRootLink(const SdfGraph & graph);
 
     } // namespace details
 

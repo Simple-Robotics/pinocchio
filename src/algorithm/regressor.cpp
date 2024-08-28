@@ -7,7 +7,7 @@
 namespace pinocchio
 {
 
-  template void computeJointKinematicRegressor<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeJointKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -19,7 +19,7 @@ namespace pinocchio
     const SE3Tpl<context::Scalar, context::Options> &,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  template context::Matrix6xs
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Matrix6xs
   computeJointKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Data &,
@@ -27,7 +27,7 @@ namespace pinocchio
     const ReferenceFrame,
     const SE3Tpl<context::Scalar, context::Options> &);
 
-  template void computeJointKinematicRegressor<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeJointKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -38,11 +38,11 @@ namespace pinocchio
     const ReferenceFrame,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  template context::Matrix6xs
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Matrix6xs
   computeJointKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, const context::Data &, const JointIndex, const ReferenceFrame);
 
-  template void computeFrameKinematicRegressor<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void computeFrameKinematicRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -53,34 +53,38 @@ namespace pinocchio
     const ReferenceFrame,
     const Eigen::MatrixBase<context::Matrix6xs> &);
 
-  template context::Matrix6xs
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Matrix6xs
   computeFrameKinematicRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, const FrameIndex, const ReferenceFrame);
 
-  template context::Matrix3x & computeStaticRegressor<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::Matrix3x &
+  computeStaticRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
     context::VectorXs>(
     const context::Model &, context::Data &, const Eigen::MatrixBase<context::VectorXs> &);
 
-  template void bodyRegressor<context::Motion, context::Motion, context::BodyRegressorType>(
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
+  bodyRegressor<context::Motion, context::Motion, context::BodyRegressorType>(
     const MotionDense<context::Motion> &,
     const MotionDense<context::Motion> &,
     const Eigen::MatrixBase<context::BodyRegressorType> &);
 
-  template context::BodyRegressorType bodyRegressor<context::Motion, context::Motion>(
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::BodyRegressorType
+  bodyRegressor<context::Motion, context::Motion>(
     const MotionDense<context::Motion> &, const MotionDense<context::Motion> &);
 
-  template context::BodyRegressorType &
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::BodyRegressorType &
   jointBodyRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, JointIndex);
 
-  template context::BodyRegressorType &
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::BodyRegressorType &
   frameBodyRegressor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, context::Data &, FrameIndex);
 
-  template context::MatrixXs & computeJointTorqueRegressor<
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::MatrixXs &
+  computeJointTorqueRegressor<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,

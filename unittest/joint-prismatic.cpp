@@ -197,20 +197,20 @@ BOOST_AUTO_TEST_CASE(test_crba)
   Eigen::VectorXd q(Eigen::VectorXd::Zero(model.nq));
   Eigen::MatrixXd M_expected(model.nv, model.nv);
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
   M_expected << 1.0;
 
   BOOST_CHECK(M_expected.isApprox(data.M, 1e-14));
 
   q = Eigen::VectorXd::Ones(model.nq);
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
 
   BOOST_CHECK(M_expected.isApprox(data.M, 1e-12));
 
   q << 3;
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
 
   BOOST_CHECK(M_expected.isApprox(data.M, 1e-10));
 }
@@ -285,15 +285,16 @@ BOOST_AUTO_TEST_CASE(vsPX)
   BOOST_CHECK(tauPX.isApprox(tauPrismaticUnaligned));
 
   // ForwardDynamics == aba
-  Eigen::VectorXd aAbaPX = aba(modelPX, dataPX, q, v, tauPX);
-  Eigen::VectorXd aAbaPrismaticUnaligned =
-    aba(modelPrismaticUnaligned, dataPrismaticUnaligned, q, v, tauPrismaticUnaligned);
+  Eigen::VectorXd aAbaPX = aba(modelPX, dataPX, q, v, tauPX, Convention::WORLD);
+  Eigen::VectorXd aAbaPrismaticUnaligned = aba(
+    modelPrismaticUnaligned, dataPrismaticUnaligned, q, v, tauPrismaticUnaligned,
+    Convention::WORLD);
 
   BOOST_CHECK(aAbaPX.isApprox(aAbaPrismaticUnaligned));
 
   // crba
-  crba(modelPX, dataPX, q);
-  crba(modelPrismaticUnaligned, dataPrismaticUnaligned, q);
+  crba(modelPX, dataPX, q, Convention::WORLD);
+  crba(modelPrismaticUnaligned, dataPrismaticUnaligned, q, Convention::WORLD);
 
   BOOST_CHECK(dataPX.M.isApprox(dataPrismaticUnaligned.M));
 

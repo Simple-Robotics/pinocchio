@@ -18,7 +18,7 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/math/multiprecision.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -145,17 +145,17 @@ BOOST_AUTO_TEST_CASE(test_mutliprecision)
   BOOST_CHECK_IS_APPROX(data.tau, data_multi.tau, double);
 
   // Forward Dynamics
-  aba(model_multi, data_multi, q_multi, v_multi, tau_multi);
-  aba(model, data, q, v, tau);
+  aba(model_multi, data_multi, q_multi, v_multi, tau_multi, Convention::WORLD);
+  aba(model, data, q, v, tau, Convention::WORLD);
 
   BOOST_CHECK_IS_APPROX(data.ddq, data_multi.ddq, double);
 
   // Mass matrix
-  crba(model_multi, data_multi, q_multi);
+  crba(model_multi, data_multi, q_multi, Convention::WORLD);
   data_multi.M.triangularView<Eigen::StrictlyLower>() =
     data_multi.M.transpose().triangularView<Eigen::StrictlyLower>();
 
-  crba(model, data, q);
+  crba(model, data, q, Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
 

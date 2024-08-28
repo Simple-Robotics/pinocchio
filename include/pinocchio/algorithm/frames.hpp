@@ -66,25 +66,6 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q);
 
   /**
-   * @brief      Updates the position of each frame contained in the model.
-   *             This function is now deprecated and has been renamed updateFramePlacements.
-   *
-   * @tparam JointCollection Collection of Joint types.
-   *
-   * @param[in]  model  The kinematic model.
-   * @param      data   Data associated to model.
-   *
-   * @warning    One of the algorithms forwardKinematics should have been called first.
-   */
-  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  PINOCCHIO_DEPRECATED inline void framesForwardKinematics(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data)
-  {
-    updateFramePlacements(model, data);
-  }
-
-  /**
    * @brief      Returns the spatial velocity of the Frame expressed in the desired reference frame.
    *             You must first call pinocchio::forwardKinematics to update placement and velocity
    * values in data structure.
@@ -163,7 +144,7 @@ namespace pinocchio
   /**
    * @brief      Returns the spatial acceleration of the Frame expressed in the desired reference
    * frame. You must first call pinocchio::forwardKinematics to update placement, velocity and
-   * acceleration values in data structure.
+   * acceleration values in the data structure.
    *
    * @param[in]  model       The kinematic model
    * @param[in]  data        Data associated to model
@@ -172,7 +153,13 @@ namespace pinocchio
    *
    * @return The spatial acceleration of the Frame expressed in the desired reference frame.
    *
-   * @warning    Second order forwardKinematics should have been called first
+   * @warning    Second order @ref forwardKinematics should have been called first
+   *
+   * @remark     In the context of a frame placement constraint \f$J(q) a + \dot{J}(q, v) v = 0\f$,
+   *             one way to compute the second term \f$\dot{J}(q, v) v\f$ is to call second-order
+   * @ref forwardKinematics with a zero acceleration, then read the remaining \f$\dot{J}(q, v) v\f$
+   * by calling this function. This is significantly more efficient than applying the matrix
+   * \f$\dot{J}(q, v)\f$ (from @ref getFrameJacobianTimeVariation) to the velocity vector \f$v\f$.
    */
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -225,7 +212,14 @@ namespace pinocchio
    *
    * @return The classical acceleration of the Frame expressed in the desired reference frame.
    *
-   * @warning    Second order forwardKinematics should have been called first
+   * @warning    Second order @ref forwardKinematics should have been called first
+   *
+   * @remark     In the context of a frame placement constraint \f$J(q) a + \dot{J}(q, v) v = 0\f$,
+   *             one way to compute the second term \f$\dot{J}(q, v) v\f$ is to call second-order
+   * @ref forwardKinematics with a zero acceleration, then read the remaining \f$\dot{J}(q, v) v\f$
+   * by calling this function. This is significantly more efficient than applying the matrix
+   * \f$\dot{J}(q, v)\f$ (from @ref getFrameJacobianTimeVariation) to the velocity vector \f$v\f$.
+   *
    */
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -493,29 +487,6 @@ namespace pinocchio
   {
     computeFrameJacobian(
       model, data, q.derived(), frameId, LOCAL, PINOCCHIO_EIGEN_CONST_CAST(Matrix6xLike, J));
-  }
-
-  ///
-  /// \brief This function is now deprecated and has been renamed computeFrameJacobian. This
-  /// signature will be removed in future release of Pinocchio.
-  ///
-  /// \copydoc pinocchio::computeFrameJacobian
-  ///
-  template<
-    typename Scalar,
-    int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    typename ConfigVectorType,
-    typename Matrix6xLike>
-  PINOCCHIO_DEPRECATED inline void frameJacobian(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<ConfigVectorType> & q,
-    const FrameIndex frameId,
-    const Eigen::MatrixBase<Matrix6xLike> & J)
-  {
-    computeFrameJacobian(model, data, q, frameId, PINOCCHIO_EIGEN_CONST_CAST(Matrix6xLike, J));
   }
 
   ///

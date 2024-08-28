@@ -376,7 +376,6 @@ namespace pinocchio
 
     return false;
   }
-
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_admm_solver_hxx__

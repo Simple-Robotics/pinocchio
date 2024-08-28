@@ -4,6 +4,9 @@
 
 #include "pinocchio/autodiff/casadi.hpp"
 
+#include "pinocchio/multibody/model.hpp"
+#include "pinocchio/multibody/data.hpp"
+
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/frames.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
@@ -13,7 +16,7 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/energy.hpp"
 
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -287,7 +290,7 @@ BOOST_AUTO_TEST_CASE(test_crba)
   ADModel ad_model = model.cast<ADScalar>();
   ADData ad_data(ad_model);
 
-  pinocchio::crba(model, data, q);
+  pinocchio::crba(model, data, q, pinocchio::Convention::WORLD);
   data.M.triangularView<Eigen::StrictlyLower>() =
     data.M.transpose().triangularView<Eigen::StrictlyLower>();
   pinocchio::rnea(model, data, q, v, a);
@@ -314,7 +317,7 @@ BOOST_AUTO_TEST_CASE(test_crba)
   casadi::Function eval_rnea(
     "eval_rnea", casadi::SXVector{cs_q, cs_v, cs_a}, casadi::SXVector{cs_tau});
   // CRBA
-  crba(ad_model, ad_data, q_ad);
+  crba(ad_model, ad_data, q_ad, pinocchio::Convention::WORLD);
   ad_data.M.triangularView<Eigen::StrictlyLower>() =
     ad_data.M.transpose().triangularView<Eigen::StrictlyLower>();
   casadi::SX M_ad(model.nv, model.nv);
@@ -380,7 +383,7 @@ BOOST_AUTO_TEST_CASE(test_aba)
   ADModel ad_model = model.cast<ADScalar>();
   ADData ad_data(ad_model);
 
-  pinocchio::aba(model, data, q, v, tau);
+  pinocchio::aba(model, data, q, v, tau, pinocchio::Convention::WORLD);
 
   casadi::SX cs_q = casadi::SX::sym("q", model.nq);
   ConfigVectorAD q_ad(model.nq);
@@ -396,7 +399,7 @@ BOOST_AUTO_TEST_CASE(test_aba)
     Eigen::Map<TangentVectorAD>(static_cast<std::vector<ADScalar>>(cs_tau).data(), model.nv, 1);
 
   // ABA
-  aba(ad_model, ad_data, q_ad, v_ad, tau_ad);
+  pinocchio::aba(ad_model, ad_data, q_ad, v_ad, tau_ad, pinocchio::Convention::WORLD);
   casadi::SX cs_ddq(model.nv, 1);
   for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
     cs_ddq(k) = ad_data.ddq[k];
@@ -576,7 +579,7 @@ BOOST_AUTO_TEST_CASE(test_kinetic_energy)
   const static double eps = 1e-8;
 
   auto fd_grad_lambda =
-    [&](const Model::ConfigVectorType q0_, const Model::ConfigVectorType & q1_) {
+    [&model, &KE_eval](const Model::ConfigVectorType q0_, const Model::ConfigVectorType & q1_) {
       auto nv = model.nv;
       // finite differencing
       Model::TangentVectorType dq0(nv), dq1(nv);
@@ -632,10 +635,12 @@ BOOST_AUTO_TEST_CASE(test_kinetic_energy)
   std::cout << '\n';
 
   auto fd_hess_ambda =
-    [&](const Model::ConfigVectorType & q0_, const Model::ConfigVectorType & q1_) {
+    [&model, &gKE_eval](const Model::ConfigVectorType & q0_, const Model::ConfigVectorType & q1_) {
       auto nv = model.nv;
       // finite differencing
       Model::TangentVectorType dq0(nv), dq1(nv);
+      dq0.setZero();
+      dq1.setZero();
       Eigen::MatrixXd jac_fd(2 * nv, 2 * nv);
       for (int i = 0; i < nv; i++)
       {

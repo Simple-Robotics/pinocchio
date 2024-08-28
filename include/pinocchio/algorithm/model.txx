@@ -10,7 +10,7 @@
 namespace pinocchio
 {
 
-  extern template PINOCCHIO_DLLAPI void
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   appendModel<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Model &,
@@ -18,14 +18,14 @@ namespace pinocchio
     const SE3Tpl<context::Scalar, context::Options> &,
     context::Model &);
 
-  extern template PINOCCHIO_DLLAPI context::Model
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Model
   appendModel<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Model &,
     const FrameIndex,
     const SE3Tpl<context::Scalar, context::Options> &);
 
-  extern template PINOCCHIO_DLLAPI void
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   appendModel<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     const context::Model &,
@@ -36,7 +36,7 @@ namespace pinocchio
     context::Model &,
     GeometryModel &);
 
-  extern template PINOCCHIO_DLLAPI void buildReducedModel<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void buildReducedModel<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -46,7 +46,8 @@ namespace pinocchio
     const Eigen::MatrixBase<context::VectorXs> &,
     context::Model &);
 
-  extern template PINOCCHIO_DLLAPI context::Model buildReducedModel<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::Model
+  buildReducedModel<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -55,7 +56,7 @@ namespace pinocchio
     const std::vector<JointIndex> &,
     const Eigen::MatrixBase<context::VectorXs> &);
 
-  extern template PINOCCHIO_DLLAPI void buildReducedModel<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void buildReducedModel<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -67,7 +68,7 @@ namespace pinocchio
     context::Model &,
     GeometryModel &);
 
-  extern template PINOCCHIO_DLLAPI void buildReducedModel<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void buildReducedModel<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -80,7 +81,7 @@ namespace pinocchio
     context::Model &,
     std::vector<GeometryModel, Eigen::aligned_allocator<GeometryModel>> &);
 
-  extern template PINOCCHIO_DLLAPI JointIndex
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI JointIndex
   findCommonAncestor<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &, JointIndex, JointIndex, size_t &, size_t &);
 
