@@ -266,28 +266,22 @@ namespace pinocchio
       }
 
       // Constraint part
-      //        Eigen::DenseIndex current_row = total_constraints_dim - 1;
-      //        for(size_t ee_id = 0; ee_id < num_ee; ++ee_id)
-      //        {
-      //          const RigidConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
-      //
-      //          const Eigen::DenseIndex constraint_dim = cmodel.size();
-      //          if(cmodel.colwise_sparsity[j])
-      //          {
-      //            for(Eigen::DenseIndex k = 0; k < constraint_dim; ++k)
-      //            {
-      //              U(current_row - k,jj) -= U.row(current_row -
-      //              k).segment(jj+1,NVT).dot(DUt_partial); U(current_row - k,jj) *= Dinv[jj];
-      //            }
-      //          }
-      //
-      //          current_row -= constraint_dim;
-      //        }
-      for (Eigen::DenseIndex current_row = total_constraints_dim - 1; current_row >= 0;
-           --current_row)
+      Eigen::DenseIndex current_row = total_constraints_dim - 1;
+      for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
-        U(current_row, jj) -= U.row(current_row).segment(jj + 1, NVT).dot(DUt_partial);
-        U(current_row, jj) *= Dinv[jj];
+        const RigidConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
+
+        const Eigen::DenseIndex constraint_dim = cmodel.size();
+        if (cmodel.colwise_sparsity[j])
+        {
+          for (Eigen::DenseIndex k = 0; k < constraint_dim; ++k)
+          {
+            U(current_row - k, jj) -= U.row(current_row - k).segment(jj + 1, NVT).dot(DUt_partial);
+            U(current_row - k, jj) *= Dinv[jj];
+          }
+        }
+
+        current_row -= constraint_dim;
       }
     }
 
