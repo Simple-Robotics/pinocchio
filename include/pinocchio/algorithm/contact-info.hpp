@@ -944,7 +944,6 @@ namespace pinocchio
       }
       assert(current1_id == current2_id && "current1_id should be equal to current2_id");
 
-      if (type == CONTACT_3D)
       {
         JointIndex current_id = current1_id;
         while (current_id > 0)
