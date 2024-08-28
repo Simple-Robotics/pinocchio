@@ -1,9 +1,10 @@
 ci:
   autoupdate_branch: devel
   autofix_prs: false
+  autoupdate_schedule: quarterly
 repos:
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v18.1.6
+    rev: v18.1.8
     hooks:
       - id: clang-format
         types_or: []
@@ -26,10 +27,10 @@ repos:
               doc/doxygen-awesome.*
           )$
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.9
+    rev: v0.6.2
     hooks:
+      - id: ruff
       - id: ruff-format
-        exclude: doc/
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
     hooks:
@@ -39,11 +40,9 @@ repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
-      - id: remove-tabs
-        args: [--whitespaces-count, '2']  # defaults to: 4
       - id: forbid-tabs
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
     hooks:
       - id: yamlfmt
-        args: [--mapping=2, --offset=2, --sequence=4, --implicit_start]
+        args: [--mapping=2, --offset=2, --sequence=4, --implicit_start, --preserve-quotes]
