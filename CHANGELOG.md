@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2024-07-04
+
+### Fixed
+
+- Fix `appendModel` when joints after the base are in parallel ([#2295](https://github.com/stack-of-tasks/pinocchio/pull/2295))
+- Fix `appendModel` build when called with template arguments different than the ones from `context` ([#2284](https://github.com/stack-of-tasks/pinocchio/pull/2284))
+- Fix `TransformRevoleTpl::rotation` and `TransformHelicalTpl::rotation` build ([#2284](https://github.com/stack-of-tasks/pinocchio/pull/2284))
+- Fix compilation issue for Boost 1.85 ([#2255](https://github.com/stack-of-tasks/pinocchio/pull/2255))
+- Fix python bindings of `contactInverseDynamics` ([#2263](https://github.com/stack-of-tasks/pinocchio/pull/2263))
+- Deactivate `BUILD_WITH_LIBPYTHON` when building with PyPy ([#2274](https://github.com/stack-of-tasks/pinocchio/pull/2274))
+- Fix Python bindings cross building with `hpp-fcl` ([#2288](https://github.com/stack-of-tasks/pinocchio/pull/2288))
+- Fix build issue on Windows when a deprecated header is included ([#2292](https://github.com/stack-of-tasks/pinocchio/pull/2292))
+- Fix build issue on Windows when building in Debug mode ([#2292](https://github.com/stack-of-tasks/pinocchio/pull/2292))
+- Fix visualization of meshes in meshcat ([#2294](https://github.com/stack-of-tasks/pinocchio/pull/2294))
+- Fix Anymal simulation test ([#2299](https://github.com/stack-of-tasks/pinocchio/pull/2299))
+- Fix contact derivatives and impulse dynamics tests ([#2300](https://github.com/stack-of-tasks/pinocchio/pull/2300))
+
+### Added
+
+- Python unittest for `contactInverseDynamics` function ([#2263](https://github.com/stack-of-tasks/pinocchio/pull/2263))
+- Added helper functions to return operation count of CasADi functions. ([#2275](https://github.com/stack-of-tasks/pinocchio/pull/2275))
+- C++ and Python unittest for `dIntegrateTransport` to check vector transport and its inverse ([#2273](https://github.com/stack-of-tasks/pinocchio/pull/2273))
+- Add kinetic and potential energy regressors ([#2282](https://github.com/stack-of-tasks/pinocchio/pull/2282))
+
+### Removed
+
+- Remove header `list.hpp` include for bindings of model and rnea ([#2263](https://github.com/stack-of-tasks/pinocchio/pull/2263))
+
 ## [3.0.0] - 2024-05-27
 
 ### Added
@@ -41,6 +69,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Support of SDF format by [@proyan](https://github.com/proyan)
 - Support of MuJoCo format by [@MegMll](https://github.com/MegMll) and [@jorisv](https://github.com/jorisv)
+
+### Extra Algorithms
+- Added reachable workspace computation and vizualisation in collaboration with [@askuric](https://github.com/askuric) based on [pycapacity](https://gitlab.inria.fr/auctus-team/people/antunskuric/pycapacity) by [@MegMll](https://github.com/MegMll) and [@jorisv](https://github.com/jorisv)
 
 #### Packaging
 
@@ -959,7 +990,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/stack-of-tasks/pinocchio/compare/v2.7.1...v3.0.0
 [2.7.1]: https://github.com/stack-of-tasks/pinocchio/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/stack-of-tasks/pinocchio/compare/v2.6.21...v2.7.0

@@ -280,36 +280,23 @@ if(BUILD_PYTHON_INTERFACE)
 
   message(STATUS "Python compiler: ${_python_implementation_value}")
   if(_python_implementation_value MATCHES "PyPy")
-    set(BUILD_PYTHON_INTERFACE_WITH_PYPY TRUE)
+    set(BUILD_WITH_LIBPYTHON OFF)
+    message(
+      STATUS
+        "PyPy detected, therefore libpython is not available and BUILD_WITH_LIBPYTHON set to OFF.")
   endif()
-
-else(BUILD_PYTHON_INTERFACE)
+else()
   message(
     STATUS
       "Pinocchio won't be compiled with its Python bindings. If you want to enable this feature, please set the option BUILD_PYTHON_INTERFACE to ON."
   )
-endif(BUILD_PYTHON_INTERFACE)
+endif()
 
 if(BUILD_WITH_HPP_FCL_SUPPORT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_HPP_FCL")
   list(APPEND LIBRARIES_DEPENDENCIES "hpp-fcl")
   add_project_dependency(hpp-fcl 2.1.2 REQUIRED PKG_CONFIG_REQUIRES "hpp-fcl >= 2.1.2")
-  # Check whether hpp-fcl python bindings are available.
-  set(BUILD_WITH_HPP_FCL_PYTHON_BINDINGS FALSE)
-  if(BUILD_PYTHON_INTERFACE)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "import hppfcl"
-      RESULT_VARIABLE _hpp_fcl_python_bindings_not_found
-      OUTPUT_QUIET ERROR_QUIET)
-    if(_hpp_fcl_python_bindings_not_found EQUAL 0)
-      set(BUILD_WITH_HPP_FCL_PYTHON_BINDINGS TRUE)
-      message(STATUS "Found hpp-fcl Python bindings.")
-    else()
-      message(STATUS "hpp-fcl Python bindings NOT found.")
-    endif()
-    unset(_hpp_fcl_python_bindings_not_found)
-  endif(BUILD_PYTHON_INTERFACE)
-endif(BUILD_WITH_HPP_FCL_SUPPORT)
+endif()
 
 if(BUILD_WITH_ACCELERATE_SUPPORT)
   if(NOT ${Eigen3_VERSION} VERSION_GREATER_EQUAL "3.4.90")

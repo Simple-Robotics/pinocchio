@@ -348,7 +348,7 @@ namespace pinocchio
       geomModel);
     for (JointIndex jid = 1; jid < modelB.joints.size(); ++jid)
     {
-      SE3 pMi = (jid == 1 ? frame.placement * aMb : id);
+      SE3 pMi = (modelB.parents[jid] == 0 ? frame.placement * aMb : id);
       ArgsType args(modelB, geomModelB, frame.parentJoint, pMi, model, geomModel);
       AppendJointOfModelAlgo::run(modelB.joints[jid], args);
     }
@@ -380,8 +380,8 @@ namespace pinocchio
       for (JointIndex joint_idA = 1; joint_idA < modelA.joints.size(); ++joint_idA)
       {
         const JointIndex joint_id = model.getJointId(modelA.names[joint_idA]);
-        const JointModel & joint_model = model.joints[joint_id];
-        const JointModel & joint_modelA = modelA.joints[joint_idA];
+        const typename Model::JointModel & joint_model = model.joints[joint_id];
+        const typename Model::JointModel & joint_modelA = modelA.joints[joint_idA];
 
         joint_model.jointConfigSelector(config_vector) =
           joint_modelA.jointConfigSelector(config_vectorA);
@@ -409,8 +409,8 @@ namespace pinocchio
       for (JointIndex joint_idB = 1; joint_idB < modelB.joints.size(); ++joint_idB)
       {
         const JointIndex joint_id = model.getJointId(modelB.names[joint_idB]);
-        const JointModel & joint_model = model.joints[joint_id];
-        const JointModel & joint_modelB = modelB.joints[joint_idB];
+        const typename Model::JointModel & joint_model = model.joints[joint_id];
+        const typename Model::JointModel & joint_modelB = modelB.joints[joint_idB];
 
         joint_model.jointConfigSelector(config_vector) =
           joint_modelB.jointConfigSelector(config_vectorB);
