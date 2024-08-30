@@ -454,6 +454,7 @@ namespace pinocchio
       RigidConstraintData & cdata = contact_data[k];
       const IndexVector & loop_span_indexes = cmodel.loop_span_indexes;
       //      const BooleanVector & joint1_indexes = cmodel.colwise_joint1_sparsity;
+      const BooleanVector & joint1_indexes = cmodel.colwise_joint1_sparsity;
       const BooleanVector & joint2_indexes = cmodel.colwise_joint2_sparsity;
 
       switch (cmodel.type)
@@ -650,12 +651,12 @@ namespace pinocchio
             const Force J_col_cross_contact_force_in_WORLD = J_col.cross(contact_force_in_WORLD);
             for (Eigen::DenseIndex j = colRef2; j >= 0; j = data.parents_fromRow[(size_t)j])
             {
-              if (joint2_indexes[col_id])
+              if (!joint1_indexes[col_id] && joint2_indexes[col_id])
               {
                 data.dtau_dq(j, col_id) -=
                   data.J.col(j).dot(J_col_cross_contact_force_in_WORLD.toVector());
               }
-              else
+              else if(joint1_indexes[col_id] && !joint2_indexes[col_id])
               {
                 data.dtau_dq(j, col_id) +=
                   data.J.col(j).dot(J_col_cross_contact_force_in_WORLD.toVector());
