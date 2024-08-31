@@ -21,3 +21,5 @@ dependencies:
   - pycppad
   - matplotlib
   - mpfr
+  - qhull
+  - libsdformat

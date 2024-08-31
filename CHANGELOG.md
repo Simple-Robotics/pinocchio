@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.2.0] - 2024-08-27
+
+### Fixed
+- Append pinocchio optional libraries into pkg-config file ([#2322](https://github.com/stack-of-tasks/pinocchio/pull/2322))
+- Fixed support of DAE meshes with MeshCat ([#2331](https://github.com/stack-of-tasks/pinocchio/pull/2331))
+- Fixed pointer casts in urdf parser ([#2339](https://github.com/stack-of-tasks/pinocchio/pull/2339))
+- Remove CMake CMP0167 warnings ([#2347](https://github.com/stack-of-tasks/pinocchio/pull/2347))
+- Fixed urdfdom in ROS packaging ([#2341](https://github.com/stack-of-tasks/pinocchio/pull/2341))
+- Fixed overview-urdf cpp example ([#2384](https://github.com/stack-of-tasks/pinocchio/pull/2384))
+- Fixed mjcf model without a base link parsing ([#2386](https://github.com/stack-of-tasks/pinocchio/pull/2386))
+- Fixed talos-simulation.py, simulation-contact-dynamics.py and simulation-closed-kinematic-chains.py examples ([#2392](https://github.com/stack-of-tasks/pinocchio/pull/2392))
+
+### Added
+- Add getMotionAxis method to helical, prismatic, revolute and ubounded revolute joint ([#2315](https://github.com/stack-of-tasks/pinocchio/pull/2315))
+- Add initial compatiblity with coal (coal needs `-DCOAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL=ON`) ([#2323](https://github.com/stack-of-tasks/pinocchio/pull/2323))
+- Add compatibility with jrl-cmakemodules workspace ([#2333](https://github.com/stack-of-tasks/pinocchio/pull/2333))
+- Add ``collision_color`` parameter to `MeshcatVisualizer.loadViewerModel` ([#2350](https://github.com/stack-of-tasks/pinocchio/pull/2350))
+- Add ``BuildFromMJCF`` function to RobotWrapper ([#2363](https://github.com/stack-of-tasks/pinocchio/pull/2363))
+- Add more CasADi examples ([#2388](https://github.com/stack-of-tasks/pinocchio/pull/2388))
+
+### Removed
+- Remove deprecated headers related to joint constraints ([#2382](https://github.com/stack-of-tasks/pinocchio/pull/2382))
+
+### Changed
+- Use eigenpy to expose `GeometryObject::meshMaterial` variant ([#2315](https://github.com/stack-of-tasks/pinocchio/pull/2315))
+- GepettoViewer is no more the default viewer for RobotWrapper ([#2331](https://github.com/stack-of-tasks/pinocchio/pull/2331))
+- Modernize python code base with ruff ([#2367](https://github.com/stack-of-tasks/pinocchio/pull/2367))
+- Restructure CppAD and CasADi examples ([#2388](https://github.com/stack-of-tasks/pinocchio/pull/2388))
+- Enhance and fix CppAD benchmarks outputs ([#2393](https://github.com/stack-of-tasks/pinocchio/pull/2393))
+
 ## [3.1.0] - 2024-07-04
 
 ### Fixed
@@ -22,6 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix visualization of meshes in meshcat ([#2294](https://github.com/stack-of-tasks/pinocchio/pull/2294))
 - Fix Anymal simulation test ([#2299](https://github.com/stack-of-tasks/pinocchio/pull/2299))
 - Fix contact derivatives and impulse dynamics tests ([#2300](https://github.com/stack-of-tasks/pinocchio/pull/2300))
+- Fix CMake compatibility with old console_bridge version ([#2312](https://github.com/stack-of-tasks/pinocchio/pull/2312))
 
 ### Added
 
@@ -990,7 +1021,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/stack-of-tasks/pinocchio/compare/v2.7.1...v3.0.0
 [2.7.1]: https://github.com/stack-of-tasks/pinocchio/compare/v2.7.0...v2.7.1

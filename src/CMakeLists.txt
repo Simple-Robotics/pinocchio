@@ -38,7 +38,10 @@ modernize_target_link_libraries(
   LIBRARIES ${Boost_SERIALIZATION_LIBRARY}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
-target_include_directories(${PROJECT_NAME}_headers INTERFACE $<INSTALL_INTERFACE:include>)
+target_include_directories(
+  ${PROJECT_NAME}_headers
+  INTERFACE $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 cxx_flags_by_compiler_frontend(
   MSVC "/bigobj"
@@ -85,8 +88,11 @@ function(PINOCCHIO_TARGET target_name)
 
   # On CMake 3.16 we can't call target_sources or set_target_properties with LINKER_LANGUAGE,
   # INSTALL_RPATH and VERSION on an INTERFACE target.
-  if(NOT ARGS_INTERFACE)
+  if(NOT ARGS_INTERFACE OR CMAKE_VERSION GREATER 3.16)
     target_sources(${LIB_NAME} PRIVATE ${ARGS_SOURCES})
+    target_sources(
+      ${LIB_NAME} PRIVATE ${${PROJECT_NAME}_CORE_PUBLIC_HEADERS}) # For IDE to get includes part of
+                                                                  # the project automatically.
     set_target_properties(
       ${LIB_NAME}
       PROPERTIES LINKER_LANGUAGE CXX
@@ -102,7 +108,10 @@ function(PINOCCHIO_TARGET target_name)
       PRIVATE PINOCCHIO_CONTEXT_FILE="${PINOCCHIO_CONTEXT_FILE_VALUE}")
   endif()
 
-  target_include_directories(${LIB_NAME} ${LIBRARY_PUBLIC_SCOPE} $<INSTALL_INTERFACE:include>)
+  target_include_directories(
+    ${LIB_NAME} ${LIBRARY_PUBLIC_SCOPE} $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
   if(BUILD_WITH_COMMIT_VERSION)
     tag_library_version(${LIB_NAME})
@@ -316,6 +325,7 @@ endif()
 
 # Define main target (default, parsers, extra).
 add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 if(ENABLE_TEMPLATE_INSTANTIATION)
   target_link_libraries(${PROJECT_NAME} INTERFACE ${PROJECT_NAME}_default)
 endif()

@@ -1,8 +1,10 @@
-import pinocchio as pin
-import numpy as np
-import hppfcl as fcl
+import time
 
+import hppfcl as fcl
+import numpy as np
+import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
+
 # Perform the simulation of a four-bar linkages mechanism
 
 height = 0.1
@@ -158,10 +160,9 @@ T_sim = 100000
 t = 0
 mu_sim = 1e-10
 constraint_model.corrector.Kp[:] = 10
-constraint_model.corrector.Kd = 2.0 * np.sqrt(constraint_model.corrector.Kp)
+constraint_model.corrector.Kd[:] = 2.0 * np.sqrt(constraint_model.corrector.Kp)
 pin.initConstraintDynamics(model, data, [constraint_model])
 prox_settings = pin.ProximalSettings(1e-8, mu_sim, 10)
-import time
 
 while t <= T_sim:
     a = pin.constraintDynamics(

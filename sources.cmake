@@ -153,8 +153,6 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/tensor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/triangular-matrix.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/tridiagonal-matrix.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/constraint-base.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/constraint-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/data.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/fcl.hpp
@@ -236,7 +234,6 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/geometry.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/inertia.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/joints-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/joints-data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/joints.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/joints-model.hpp
@@ -338,6 +335,7 @@ set(${PROJECT_NAME}_PARSERS_SOURCES
     ${PROJECT_SOURCE_DIR}/src/parsers/mjcf/mjcf-graph-geom.cpp)
 
 set(${PROJECT_NAME}_PARSERS_PUBLIC_HEADERS
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/meshloader-fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/srdf.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/srdf.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/utils.hpp

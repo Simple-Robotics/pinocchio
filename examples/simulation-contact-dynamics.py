@@ -3,15 +3,10 @@ import pinocchio as pin
 import math
 import numpy as np
 import sys
-import os
 from os.path import dirname, join, abspath
 import time
 
 from pinocchio.visualize import MeshcatVisualizer
-
-# Load the URDF model.
-# Conversion with str seems to be necessary when executing this file with ipython
-pinocchio_model_dir = join(dirname(dirname(str(abspath(__file__)))), "models")
 
 # Load the URDF model.
 # Conversion with str seems to be necessary when executing this file with ipython

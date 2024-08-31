@@ -5,7 +5,6 @@
 import pinocchio as pin
 import numpy as np
 import sys
-import os
 from os.path import dirname, join, abspath
 
 from pinocchio.visualize import MeshcatVisualizer
@@ -22,13 +21,6 @@ urdf_model_path = join(join(model_path, "romeo_description/urdf"), urdf_filename
 model, collision_model, visual_model = pin.buildModelsFromUrdf(
     urdf_model_path, mesh_dir, pin.JointModelFreeFlyer()
 )
-
-# Currently, MeshCat is not able to retrieve the scaling from DAE files. Set it manually.
-for geom in visual_model.geometryObjects:
-    s = geom.meshScale
-    s *= 0.01
-    geom.meshScale = s
-
 
 # Start a new MeshCat server and client.
 # Note: the server can also be started separately using the "meshcat-server" command in a terminal:

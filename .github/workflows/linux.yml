@@ -28,11 +28,11 @@ concurrency:
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
+        container: ['ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:24.04']
 
     env:
       CCACHE_BASEDIR: ${GITHUB_WORKSPACE}
@@ -41,6 +41,9 @@ jobs:
       CCACHE_COMPRESSLEVEL: 5
 
     steps:
+      - name: Setup Container
+        run: |
+          apt update && DEBIAN_FRONTEND="noninteractive" apt install -y sudo lsb-release gnupg2 cmake git python3
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -51,8 +54,8 @@ jobs:
         with:
           path: .ccache
           save-always: true
-          key: ccache-linux-${{ matrix.os }}-${{ github.sha }}
-          restore-keys: ccache-linux-${{ matrix.os }}-
+          key: ccache-linux-${{ matrix.container }}-${{ github.sha }}
+          restore-keys: ccache-linux-${{ matrix.container }}-
 
     # extract branch name
       - name: Get branch name (merge)
@@ -72,11 +75,11 @@ jobs:
 
       - name: Register robotpkg
         run: |
-          sudo sh -c "echo \"deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg\" >> /etc/apt/sources.list "
-          sudo apt-key adv --fetch-keys http://robotpkg.openrobots.org/packages/debian/robotpkg.key
+          sh -c "echo \"deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg\" >> /etc/apt/sources.list "
+          apt-key adv --fetch-keys http://robotpkg.openrobots.org/packages/debian/robotpkg.key
       - name: Set and install dependencies
         run: |
-          sudo rm -rf /usr/local/share/boost/1.69.0
+          rm -rf /usr/local/share/boost/1.69.0
           export PYTHON3_VERSION=$(python3 -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
           export APT_DEPENDENCIES="doxygen \
                                    ccache \
@@ -98,14 +101,17 @@ jobs:
                                    robotpkg-py${PYTHON3_VERSION}-hpp-fcl \
                                    robotpkg-py${PYTHON3_VERSION}-casadi"
           echo $APT_DEPENDENCIES
-          sudo apt-get update -qq
-          sudo apt-get install -qq ${APT_DEPENDENCIES}
+
+          apt-get update -qq
+          DEBIAN_FRONTEND="noninteractive" apt-get install -qq ${APT_DEPENDENCIES}
       - name: Free disk space
         run: |
-          sudo apt clean
+          apt clean
           df -h
       - name: Run cmake
         run: |
+          # Add cloned repo to safe.directory, since it was not cloned by the container
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git submodule update --init
           export PATH=$PATH:/opt/openrobots/bin
           export PYTHON3_DOT_VERSION=$(python3 -c "import sys; print(str(sys.version_info.major)+'.'+str(sys.version_info.minor))")
@@ -139,12 +145,15 @@ jobs:
           mkdir build
           cd build
           export CMAKE_PREFIX_PATH=/usr/local
+          # Test CMake module packaging
           cmake .. \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DPYTHON_EXECUTABLE=$(which python3)
           make -j2
           ./run_rnea
           ./load_urdf
+
+          # Test pkg-config packaging
           cd ../../pkgconfig
           mkdir build
           cd build
@@ -153,6 +162,9 @@ jobs:
             -DPYTHON_EXECUTABLE=$(which python3)
           make -j2
           ./run_rnea
+          ./load_urdf
+
+          # Test FetchContent packaging
           cd ../../external
           export PINOCCHIO_GIT_REPOSITORY="file://"$GITHUB_WORKSPACE
           #export PINOCCHIO_GIT_REPOSITORY=$(git remote get-url origin)
@@ -166,6 +178,8 @@ jobs:
           make -j2
           ./run_rnea
           ./load_urdf
+
+          # Test CMake module packaging and pinocchio_header target
           cd ../../pinocchio_header
           mkdir build
           cd build
@@ -180,3 +194,18 @@ jobs:
         run: |
           cd build
           sudo make uninstall
+
+  check:
+    if: always()
+    name: check-linux-apt
+
+    needs:
+      - build
+
+    runs-on: Ubuntu-latest
+
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}

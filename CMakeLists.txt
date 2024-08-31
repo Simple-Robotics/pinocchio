@@ -15,6 +15,9 @@ set(PROJECT_USE_CMAKE_EXPORT TRUE)
 set(PROJECT_USE_KEYWORD_LINK_LIBRARIES TRUE)
 set(PROJECT_COMPATIBILITY_VERSION AnyNewerVersion)
 set(PINOCCHIO_PROJECT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+# To enable jrl-cmakemodules compatibility with workspace we must define the two following lines
+set(PROJECT_AUTO_RUN_FINALIZE FALSE)
+set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # Disable -Werror on Unix for now.
 set(CXX_DISABLE_WERROR True)
@@ -58,21 +61,27 @@ endif()
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
 
+# Use BoostConfig module distributed by boost library instead of using FindBoost module distributed
+# by CMake
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 include("${JRL_CMAKE_MODULES}/base.cmake")
 
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
+include("${JRL_CMAKE_MODULES}/python.cmake")
 include("${JRL_CMAKE_MODULES}/boost.cmake")
 include("${JRL_CMAKE_MODULES}/ide.cmake")
 include("${JRL_CMAKE_MODULES}/apple.cmake")
 if(APPLE) # Use the handmade approach
   if(${CMAKE_VERSION} VERSION_LESS "3.18.0") # Need to find the right version
-    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH ${JRL_CMAKE_MODULES}/find-external/OpenMP ${CMAKE_MODULE_PATH})
   endif()
 elseif(UNIX)
   if(${CMAKE_VERSION} VERSION_EQUAL "3.20.0")
-    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH ${JRL_CMAKE_MODULES}/find-external/OpenMP ${CMAKE_MODULE_PATH})
   endif()
 endif()
 include(CMakeDependentOption)
@@ -181,7 +190,7 @@ set(PINOCCHIO_MODEL_DIR "${PROJECT_SOURCE_DIR}/models")
 # ----------------------------------------------------
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${JRL_CMAKE_MODULES}/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 add_project_dependency(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
 
 if(BUILD_WITH_URDF_SUPPORT)
@@ -189,7 +198,6 @@ if(BUILD_WITH_URDF_SUPPORT)
   add_project_dependency(urdfdom REQUIRED PKG_CONFIG_REQUIRES "urdfdom >= 0.2.0")
   set(urdfdom_VERSION ${urdfdom_headers_VERSION})
   list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_URDFDOM")
-  list(APPEND LIBRARIES_DEPENDENCIES "urdfdom_world")
 
   if(${urdfdom_VERSION} VERSION_GREATER "0.4.2")
     check_minimal_cxx_standard(11 ENFORCE)
@@ -197,8 +205,8 @@ if(BUILD_WITH_URDF_SUPPORT)
       STATUS
         "Since urdfdom >= 1.0.0, the default C++ standard is C++11. The project is then compiled with C++11 standard."
     )
-  endif(${urdfdom_VERSION} VERSION_GREATER "0.4.2")
-endif(BUILD_WITH_URDF_SUPPORT)
+  endif()
+endif()
 
 if(BUILD_WITH_SDF_SUPPORT)
   include(${CMAKE_CURRENT_LIST_DIR}/cmake/sdformat.cmake)
@@ -207,25 +215,34 @@ if(BUILD_WITH_SDF_SUPPORT)
     check_minimal_cxx_standard(11 REQUIRED)
     include_directories(${SDFormat_INCLUDE_DIRS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDFormat_CXX_FLAGS}")
-  endif(SDFormat_FOUND)
-endif(BUILD_WITH_SDF_SUPPORT)
+    list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_SDFORMAT")
+  endif()
+endif()
 
 set(BUILD_WITH_PARSERS_SUPPORT BUILD_WITH_URDF_SUPPORT OR BUILD_WITH_SDF_SUPPORT)
+
+if(BUILD_WITH_PARSERS_SUPPORT)
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_parsers)
+endif()
 
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   # Check first CppADCodeGen
   if(BUILD_WITH_CODEGEN_SUPPORT)
+    # No need to add cppadcg to pkg-config (no lib and header in the same directory than cppad)
     add_project_dependency(cppadcg 2.4.1 REQUIRED)
+    list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_cppadcg)
   endif(BUILD_WITH_CODEGEN_SUPPORT)
 
   add_project_dependency(
     cppad 20180000.0 REQUIRED
     PKG_CONFIG_REQUIRES "cppad >= 20220624.0"
     FIND_EXTERNAL "CppAD")
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_cppad)
 endif(BUILD_WITH_AUTODIFF_SUPPORT)
 
 if(BUILD_WITH_CASADI_SUPPORT)
   add_project_dependency(casadi 3.4.5 REQUIRED PKG_CONFIG_REQUIRES "casadi >= 3.4.5")
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_casadi)
 endif(BUILD_WITH_CASADI_SUPPORT)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
@@ -233,6 +250,7 @@ if(BUILD_WITH_OPENMP_SUPPORT)
 endif()
 
 if(BUILD_WITH_EXTRA_SUPPORT)
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_extra qhullcpp qhull_r)
   add_project_dependency(Qhull COMPONENTS qhullcpp qhull_r REQUIRED)
   message(STATUS "Found Qhull.")
 endif()
@@ -244,7 +262,7 @@ export_boost_default_options()
 add_project_dependency(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 if(Boost_VERSION_STRING VERSION_LESS 1.81)
-  if(BUILD_WITH_URDF_SUPPORT AND ${urdfdom_VERSION} VERSION_GREATER "0.4.2")
+  if(BUILD_WITH_URDF_SUPPORT AND "${urdfdom_VERSION}" VERSION_GREATER "0.4.2")
     check_minimal_cxx_standard(11 ENFORCE)
     message(
       STATUS
@@ -263,6 +281,7 @@ if(BUILD_PYTHON_INTERFACE)
   )
 
   set(PYTHON_COMPONENTS Interpreter Development NumPy)
+  findpython(REQUIRED)
   add_project_dependency(eigenpy 2.7.10 REQUIRED)
 
   if(BUILD_WITH_URDF_SUPPORT)
@@ -294,7 +313,7 @@ endif()
 
 if(BUILD_WITH_HPP_FCL_SUPPORT)
   list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_HPP_FCL")
-  list(APPEND LIBRARIES_DEPENDENCIES "hpp-fcl")
+  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_collision)
   add_project_dependency(hpp-fcl 2.1.2 REQUIRED PKG_CONFIG_REQUIRES "hpp-fcl >= 2.1.2")
 endif()
 
@@ -478,6 +497,7 @@ if(BUILD_WITH_EXTRA_SUPPORT)
   export_variable(PINOCCHIO_USE_EXTRA ON)
   set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_EXTRA \"\")")
 endif()
+export_variable(pinocchio_VERSION ${pinocchio_VERSION})
 
 # Setup pkg-configs flags and libs
 pkg_config_append_libs("${LIBRARIES_DEPENDENCIES}")
@@ -501,3 +521,5 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.ds
      "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
         DESTINATION share/${PROJECT_NAME}/hook)
+
+setup_project_finalize()
