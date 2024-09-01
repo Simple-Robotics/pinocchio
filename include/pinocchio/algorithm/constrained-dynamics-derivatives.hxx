@@ -505,43 +505,35 @@ namespace pinocchio
           const Motion v2_in_c1 = cdata.c1Mc2.act(cdata.contact2_velocity);
           const Motion a2_in_c1 = cdata.oMc1.actInv(data.oa[cmodel.joint2_id]);
 
-          Eigen::DenseIndex k = Eigen::DenseIndex(cmodel.colwise_span_indexes.size()) - 1;
-          Eigen::DenseIndex col_id(0);
-          while (cmodel.reference_frame == LOCAL && cmodel.colwise_span_indexes.size() > 0)
+          if(cmodel.reference_frame == LOCAL)
           {
-            if (k >= 0)
+            Eigen::DenseIndex col_id(0);
+            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size()); k++)
             {
               col_id = cmodel.colwise_span_indexes[size_t(k)];
-              k--;
+
+              const MotionRef<typename RowsBlock::ColXpr> dvc_dv_col(contact_dac_da.col(col_id));
+              const MotionRef<typename RigidConstraintData::Matrix6x::ColXpr> da2_da_col(
+                cdata.da2_da.col(col_id));
+              const MotionRef<typename RigidConstraintData::Matrix6x::ColXpr> dv2_dq_col(
+                cdata.dv2_dq.col(col_id));
+
+              // dv/dq
+              const Motion v2_in_c1_cross_dvc_dv_col = v2_in_c1.cross(dvc_dv_col);
+              contact_dvc_dq.col(col_id) -= v2_in_c1_cross_dvc_dv_col.toVector();
+
+              // da/dv
+              contact_dac_dv.col(col_id) -= v2_in_c1_cross_dvc_dv_col.toVector();
+              contact_dac_dv.col(col_id) += cdata.contact_velocity_error.cross(da2_da_col).toVector();
+
+              // da/dq
+              const MotionRef<typename RowsBlock::ColXpr> dvc_dq_col(contact_dvc_dq.col(col_id));
+
+              contact_dac_dq.col(col_id) -= a2_in_c1.cross(dvc_dv_col).toVector();
+              contact_dac_dq.col(col_id) -= v2_in_c1.cross(dvc_dq_col).toVector();
+              contact_dac_dq.col(col_id) +=
+                cdata.contact_velocity_error.cross(v2_in_c1_cross_dvc_dv_col + dv2_dq_col).toVector();
             }
-            else
-            {
-              col_id = data.parents_fromRow[size_t(col_id)];
-              if (col_id < 0)
-                break;
-            }
-
-            const MotionRef<typename RowsBlock::ColXpr> dvc_dv_col(contact_dac_da.col(col_id));
-            const MotionRef<typename RigidConstraintData::Matrix6x::ColXpr> da2_da_col(
-              cdata.da2_da.col(col_id));
-            const MotionRef<typename RigidConstraintData::Matrix6x::ColXpr> dv2_dq_col(
-              cdata.dv2_dq.col(col_id));
-
-            // dv/dq
-            const Motion v2_in_c1_cross_dvc_dv_col = v2_in_c1.cross(dvc_dv_col);
-            contact_dvc_dq.col(col_id) -= v2_in_c1_cross_dvc_dv_col.toVector();
-
-            // da/dv
-            contact_dac_dv.col(col_id) -= v2_in_c1_cross_dvc_dv_col.toVector();
-            contact_dac_dv.col(col_id) += cdata.contact_velocity_error.cross(da2_da_col).toVector();
-
-            // da/dq
-            const MotionRef<typename RowsBlock::ColXpr> dvc_dq_col(contact_dvc_dq.col(col_id));
-
-            contact_dac_dq.col(col_id) -= a2_in_c1.cross(dvc_dv_col).toVector();
-            contact_dac_dq.col(col_id) -= v2_in_c1.cross(dvc_dq_col).toVector();
-            contact_dac_dq.col(col_id) +=
-              cdata.contact_velocity_error.cross(v2_in_c1_cross_dvc_dv_col + dv2_dq_col).toVector();
           }
 
           cdata.dvc_dq = contact_dvc_dq;
