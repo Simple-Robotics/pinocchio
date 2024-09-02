@@ -32,10 +32,6 @@ namespace pinocchio
     {
       return this->parents_fromRow;
     }
-    const IndexVector & getLastChild() const
-    {
-      return this->last_child;
-    }
     const IndexVector & getNvSubtree_fromRow() const
     {
       return this->nv_subtree_fromRow;

@@ -62,17 +62,6 @@ namespace pinocchio
     nv_subtree_fromRow.resize(total_dim);
     //      nv_subtree_fromRow.fill(0);
 
-    last_child.resize(model.njoints);
-    last_child.fill(-1);
-    for (long joint_id = model.njoints - 1; joint_id >= 0; --joint_id)
-    {
-      const JointIndex parent = model.parents[(size_t)joint_id];
-      if (last_child[joint_id] == -1)
-        last_child[joint_id] = joint_id;
-      last_child[(Eigen::DenseIndex)parent] =
-        std::max(last_child[joint_id], last_child[(Eigen::DenseIndex)parent]);
-    }
-
     // Fill nv_subtree_fromRow for model
     for (JointIndex joint_id = 1; joint_id < (JointIndex)(model.njoints); joint_id++)
     {
@@ -89,9 +78,9 @@ namespace pinocchio
       else
         parents_fromRow[idx_vj + num_total_constraints] = -1;
 
+      const Eigen::DenseIndex last_child = model.subtrees[joint_id].back();
       nv_subtree_fromRow[idx_vj + num_total_constraints] =
-        model.joints[(size_t)last_child[(Eigen::DenseIndex)joint_id]].idx_v()
-        + model.joints[(size_t)last_child[(Eigen::DenseIndex)joint_id]].nv() - idx_vj;
+        model.joints[size_t(last_child)].idx_v() + model.joints[size_t(last_child)].nv() - idx_vj;
 
       for (int row = 1; row < nvj; ++row)
       {
