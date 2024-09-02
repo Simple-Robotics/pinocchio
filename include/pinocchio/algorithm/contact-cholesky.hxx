@@ -78,9 +78,9 @@ namespace pinocchio
       else
         parents_fromRow[idx_vj + num_total_constraints] = -1;
 
-      const Eigen::DenseIndex last_child = model.subtrees[joint_id].back();
+      const JointIndex last_child = model.subtrees[joint_id].back();
       nv_subtree_fromRow[idx_vj + num_total_constraints] =
-        model.joints[size_t(last_child)].idx_v() + model.joints[size_t(last_child)].nv() - idx_vj;
+        model.joints[last_child].idx_v() + model.joints[last_child].nv() - idx_vj;
 
       for (int row = 1; row < nvj; ++row)
       {
