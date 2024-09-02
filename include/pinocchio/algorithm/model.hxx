@@ -317,15 +317,15 @@ namespace pinocchio
     std::vector<JointIndex> AJointsBeforeB;
     std::vector<JointIndex> AJointsAfterB;
     // All joints until the parent of frameInModelA come first
-    for (JointIndex jid = 1; jid <= frame.parent; ++jid)
+    for (JointIndex jid = 1; jid <= frame.parentJoint; ++jid)
     {
       AJointsBeforeB.push_back(jid);
     }
     // descendants of the parent of frameInModelA come also before model B
     // TODO(jcarpent): enhancement by taking into account the compactness of the joint ordering.
-    for (JointIndex jid = frame.parent + 1; jid < modelA.joints.size(); ++jid)
+    for (JointIndex jid = frame.parentJoint + 1; jid < modelA.joints.size(); ++jid)
     {
-      if (hasAncestor(modelA, jid, frame.parent))
+      if (hasAncestor(modelA, jid, frame.parentJoint))
       {
         AJointsBeforeB.push_back(jid);
       }
@@ -567,17 +567,18 @@ namespace pinocchio
             const Frame & joint_frame = reduced_model.frames[joint_frame_id];
             Frame reduced_frame = input_frame;
             reduced_frame.placement = joint_frame.placement * input_frame.placement;
-            reduced_frame.parent = joint_frame.parent;
-            reduced_frame.previousFrame =
-              reduced_model.getFrameId(input_model.frames[input_frame.previousFrame].name);
+            reduced_frame.parentJoint = joint_frame.parentJoint;
+            reduced_frame.parentFrame =
+              reduced_model.getFrameId(input_model.frames[input_frame.parentFrame].name);
             reduced_model.addFrame(reduced_frame, false);
           }
           else
           {
             Frame reduced_frame = input_frame;
-            reduced_frame.parent = reduced_model.getJointId(input_model.names[input_frame.parent]);
-            reduced_frame.previousFrame =
-              reduced_model.getFrameId(input_model.frames[input_frame.previousFrame].name);
+            reduced_frame.parentJoint =
+              reduced_model.getJointId(input_model.names[input_frame.parentJoint]);
+            reduced_frame.parentFrame =
+              reduced_model.getFrameId(input_model.frames[input_frame.parentFrame].name);
             reduced_model.addFrame(reduced_frame, false);
           }
         }
