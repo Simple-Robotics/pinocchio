@@ -131,6 +131,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/macros.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/unsupported.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/math/arithmetic-operators.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/casadi.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/comparison-operators.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/cppadcg.hpp
@@ -282,6 +283,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/file-io.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/helpers.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/openmp.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/reference.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/shared-ptr.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/static-if.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/string-generator.hpp
