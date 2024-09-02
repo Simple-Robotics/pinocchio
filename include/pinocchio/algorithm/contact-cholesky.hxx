@@ -78,7 +78,8 @@ namespace pinocchio
       else
         parents_fromRow[idx_vj + num_total_constraints] = -1;
 
-      const JointIndex last_child = model.subtrees[joint_id].back();
+      const JointIndex last_child =
+        model.subtrees[joint_id].size() > 0 ? model.subtrees[joint_id].back() : JointIndex(0);
       nv_subtree_fromRow[idx_vj + num_total_constraints] =
         model.joints[last_child].idx_v() + model.joints[last_child].nv() - idx_vj;
 
