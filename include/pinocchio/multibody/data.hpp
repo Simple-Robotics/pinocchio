@@ -312,9 +312,6 @@ namespace pinocchio
     /// \brief Spatial forces set, used in CRBA and CCRBA
     PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6x) Fcrb;
 
-    /// \brief Index of the last child (for CRBA)
-    std::vector<int> lastChild;
-
     /// \brief Dimension of the subtree motion space (for CRBA)
     std::vector<int> nvSubtree;
 
@@ -592,7 +589,7 @@ namespace pinocchio
     }
 
   private:
-    void computeLastChild(const Model & model);
+    void computeNvSubtree(const Model & model);
     void computeParents_fromRow(const Model & model);
     void computeSupports_fromRow(const Model & model);
   };

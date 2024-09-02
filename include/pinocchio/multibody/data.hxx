@@ -68,7 +68,6 @@ namespace pinocchio
   , dhg(Force::Zero())
   , Ig(Inertia::Zero())
   , Fcrb((std::size_t)model.njoints, Matrix6x::Zero(6, model.nv))
-  , lastChild((std::size_t)model.njoints, -1)
   , nvSubtree((std::size_t)model.njoints, -1)
   , start_idx_v_fromRow((std::size_t)model.nv, -1)
   , end_idx_v_fromRow((std::size_t)model.nv, -1)
@@ -173,7 +172,7 @@ namespace pinocchio
       Fcrb[i].resize(6, model.nv);
     }
 
-    computeLastChild(model);
+    computeNvSubtree(model);
 
     /* Init for Cholesky */
     computeParents_fromRow(model);
@@ -190,21 +189,16 @@ namespace pinocchio
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  inline void DataTpl<Scalar, Options, JointCollectionTpl>::computeLastChild(const Model & model)
+  inline void DataTpl<Scalar, Options, JointCollectionTpl>::computeNvSubtree(const Model & model)
   {
     typedef typename Model::Index Index;
 
-    std::fill(lastChild.begin(), lastChild.end(), -1);
-    for (int i = model.njoints - 1; i >= 0; --i)
+    for (JointIndex joint_id = 0; joint_id < JointIndex(model.njoints); ++joint_id)
     {
-      if (lastChild[(Index)i] == -1)
-        lastChild[(Index)i] = i;
-      const Index & parent = model.parents[(Index)i];
-      lastChild[parent] = std::max<int>(lastChild[(Index)i], lastChild[parent]);
-
-      nvSubtree[(Index)i] = model.joints[(Index)lastChild[(Index)i]].idx_v()
-                            + model.joints[(Index)lastChild[(Index)i]].nv()
-                            - model.joints[(Index)i].idx_v();
+      const Index last_child =
+        model.subtrees[joint_id].size() > 0 ? model.subtrees[joint_id].back() : 0;
+      nvSubtree[joint_id] = model.joints[last_child].idx_v() + model.joints[last_child].nv()
+                            - model.joints[joint_id].idx_v();
     }
   }
 
@@ -291,8 +285,7 @@ namespace pinocchio
       && data1.oYaba_contact == data2.oYaba_contact && data1.oL == data2.oL && data1.oK == data2.oK
       && data1.u == data2.u && data1.Ag == data2.Ag && data1.dAg == data2.dAg
       && data1.hg == data2.hg && data1.dhg == data2.dhg && data1.Ig == data2.Ig
-      && data1.Fcrb == data2.Fcrb && data1.lastChild == data2.lastChild
-      && data1.nvSubtree == data2.nvSubtree
+      && data1.Fcrb == data2.Fcrb && data1.nvSubtree == data2.nvSubtree
       && data1.start_idx_v_fromRow == data2.start_idx_v_fromRow
       && data1.end_idx_v_fromRow == data2.end_idx_v_fromRow && data1.U == data2.U
       && data1.D == data2.D && data1.Dinv == data2.Dinv

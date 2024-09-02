@@ -146,7 +146,6 @@ namespace pinocchio
                "C(q,v)v")
           .ADD_DATA_PROPERTY(g, "Vector of generalized gravity (dim model.nv).")
           .ADD_DATA_PROPERTY(Fcrb, "Spatial forces set, used in CRBA")
-          .ADD_DATA_PROPERTY(lastChild, "Index of the last child (for CRBA)")
           .ADD_DATA_PROPERTY(nvSubtree, "Dimension of the subtree motion space (for CRBA)")
           .ADD_DATA_PROPERTY(U, "Joint Inertia square root (upper triangle)")
           .ADD_DATA_PROPERTY(D, "Diagonal of UDUT inertia decomposition")

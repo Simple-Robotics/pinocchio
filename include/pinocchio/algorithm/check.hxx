@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2020 CNRS INRIA
+// Copyright (c) 2016-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_check_hxx__
@@ -141,7 +141,6 @@ namespace pinocchio
 
     CHECK_DATA((int)data.oMf.size() == model.nframes);
 
-    CHECK_DATA((int)data.lastChild.size() == model.njoints);
     CHECK_DATA((int)data.nvSubtree.size() == model.njoints);
     CHECK_DATA((int)data.parents_fromRow.size() == model.nv);
     CHECK_DATA((int)data.nvSubtree_fromRow.size() == model.nv);
@@ -158,8 +157,7 @@ namespace pinocchio
 
     for (JointIndex j = 1; int(j) < model.njoints; ++j)
     {
-      JointIndex c = (JointIndex)data.lastChild[j];
-      CHECK_DATA((int)c < model.njoints);
+      const JointIndex c = model.subtrees[j].back();
       int nv = model.joints[j].nv();
       for (JointIndex d = j + 1; d <= c; ++d) // explore all descendant
       {
