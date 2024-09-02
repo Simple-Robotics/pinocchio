@@ -482,7 +482,7 @@ namespace pinocchio
 
       const JointIndex & joint2_id = contact_model.joint2_id;
       if (joint2_id > 0)
-        assert(false), "Internal loops are not yet permitted in PV";
+        assert(false && "Internal loops are not yet permitted in PV");
       else
         vc2.setZero();
 
@@ -681,7 +681,7 @@ namespace pinocchio
 
       const JointIndex & joint2_id = contact_model.joint2_id;
       if (joint2_id > 0)
-        assert(false), "Internal loops are not yet permitted in constrainedABA";
+        assert(false && "Internal loops are not yet permitted in constrainedABA");
       else
         vc2.setZero();
 
