@@ -93,9 +93,9 @@ namespace pinocchio
     }
 
     Eigen::DenseIndex row_id = 0;
-    for (auto it = contact_models.cbegin(); it != contact_models.cend(); ++it)
+    for (const auto cmodel_wrapper : contact_models)
     {
-      const RigidConstraintModel & cmodel = it->get();
+      const RigidConstraintModel & cmodel = cmodel_wrapper.get();
       const JointIndex joint1_id = cmodel.joint1_id;
       const JointModel joint1 = model.joints[joint1_id];
       const JointIndex joint2_id = cmodel.joint2_id;
