@@ -66,7 +66,7 @@ namespace pinocchio
     typedef _Scalar Scalar;
     typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
 
-    BaumgarteCorrectorParametersTpl(int size = 6)
+    explicit BaumgarteCorrectorParametersTpl(int size = 6)
     : Kp(size)
     , Kd(size)
     {
