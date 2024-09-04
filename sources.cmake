@@ -28,14 +28,15 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-dynamics.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-dynamics.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-problem-data.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/coulomb-friction-cone.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraints.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fwd.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-dynamics.hpp

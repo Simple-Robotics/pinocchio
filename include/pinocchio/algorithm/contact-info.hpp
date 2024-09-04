@@ -13,6 +13,7 @@
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -49,57 +50,6 @@ namespace pinocchio
     {
       value = 6
     };
-  };
-
-  template<typename _Scalar>
-  struct BaumgarteCorrectorParametersTpl;
-
-  template<typename _Scalar>
-  struct traits<BaumgarteCorrectorParametersTpl<_Scalar>>
-  {
-    typedef _Scalar Scalar;
-  };
-
-  template<typename _Scalar>
-  struct BaumgarteCorrectorParametersTpl : NumericalBase<BaumgarteCorrectorParametersTpl<_Scalar>>
-  {
-    typedef _Scalar Scalar;
-    typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
-
-    explicit BaumgarteCorrectorParametersTpl(int size = 6)
-    : Kp(size)
-    , Kd(size)
-    {
-      Kp.setZero();
-      Kd.setZero();
-    }
-
-    bool operator==(const BaumgarteCorrectorParametersTpl & other) const
-    {
-      return Kp == other.Kp && Kd == other.Kd;
-    }
-
-    bool operator!=(const BaumgarteCorrectorParametersTpl & other) const
-    {
-      return !(*this == other);
-    }
-
-    // parameters
-    /// \brief Proportional corrector value.
-    Vector6Max Kp;
-
-    /// \brief Damping corrector value.
-    Vector6Max Kd;
-
-    template<typename NewScalar>
-    BaumgarteCorrectorParametersTpl<NewScalar> cast() const
-    {
-      typedef BaumgarteCorrectorParametersTpl<NewScalar> ReturnType;
-      ReturnType res;
-      res.Kp = Kp.template cast<NewScalar>();
-      res.Kd = Kd.template cast<NewScalar>();
-      return res;
-    }
   };
 
   // TODO Remove when API is stabilized
