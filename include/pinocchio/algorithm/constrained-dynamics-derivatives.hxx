@@ -505,12 +505,13 @@ namespace pinocchio
           const Motion v2_in_c1 = cdata.c1Mc2.act(cdata.contact2_velocity);
           const Motion a2_in_c1 = cdata.oMc1.actInv(data.oa[cmodel.joint2_id]);
 
-          if(cmodel.reference_frame == LOCAL)
+          if (cmodel.reference_frame == LOCAL)
           {
             Eigen::DenseIndex col_id(0);
-            for(Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size()); k++)
+            const auto & colwise_span_indexes = cmodel.getColwiseSpanIndexes(0);
+            for (Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(colwise_span_indexes.size()); k++)
             {
-              col_id = cmodel.colwise_span_indexes[size_t(k)];
+              col_id = colwise_span_indexes[size_t(k)];
 
               const MotionRef<typename RowsBlock::ColXpr> dvc_dv_col(contact_dac_da.col(col_id));
               const MotionRef<typename RigidConstraintData::Matrix6x::ColXpr> da2_da_col(
@@ -524,7 +525,8 @@ namespace pinocchio
 
               // da/dv
               contact_dac_dv.col(col_id) -= v2_in_c1_cross_dvc_dv_col.toVector();
-              contact_dac_dv.col(col_id) += cdata.contact_velocity_error.cross(da2_da_col).toVector();
+              contact_dac_dv.col(col_id) +=
+                cdata.contact_velocity_error.cross(da2_da_col).toVector();
 
               // da/dq
               const MotionRef<typename RowsBlock::ColXpr> dvc_dq_col(contact_dvc_dq.col(col_id));
@@ -532,7 +534,8 @@ namespace pinocchio
               contact_dac_dq.col(col_id) -= a2_in_c1.cross(dvc_dv_col).toVector();
               contact_dac_dq.col(col_id) -= v2_in_c1.cross(dvc_dq_col).toVector();
               contact_dac_dq.col(col_id) +=
-                cdata.contact_velocity_error.cross(v2_in_c1_cross_dvc_dv_col + dv2_dq_col).toVector();
+                cdata.contact_velocity_error.cross(v2_in_c1_cross_dvc_dv_col + dv2_dq_col)
+                  .toVector();
             }
           }
 
@@ -633,10 +636,10 @@ namespace pinocchio
           }
 
           // d./dq
-          for (Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size());
-               ++k)
+          const auto & colwise_span_indexes = cmodel.getColwiseSpanIndexes(0);
+          for (size_t k = 0; k < colwise_span_indexes.size(); ++k)
           {
-            const Eigen::DenseIndex col_id = cmodel.colwise_span_indexes[size_t(k)];
+            const Eigen::DenseIndex col_id = colwise_span_indexes[k];
 
             const MotionRef<typename Data::Matrix6x::ColXpr> J_col(data.J.col(col_id));
             const Force J_col_cross_contact_force_in_WORLD = J_col.cross(contact_force_in_WORLD);
@@ -647,7 +650,7 @@ namespace pinocchio
                 data.dtau_dq(j, col_id) -=
                   data.J.col(j).dot(J_col_cross_contact_force_in_WORLD.toVector());
               }
-              else if(joint1_indexes[col_id] && !joint2_indexes[col_id])
+              else if (joint1_indexes[col_id] && !joint2_indexes[col_id])
               {
                 data.dtau_dq(j, col_id) +=
                   data.J.col(j).dot(J_col_cross_contact_force_in_WORLD.toVector());
@@ -767,10 +770,10 @@ namespace pinocchio
           contact_dac_dq += cmodel.corrector.Kd.asDiagonal() * contact_dvc_dq;
           contact_dac_dv += cmodel.corrector.Kd.asDiagonal() * contact_dac_da;
           // d./dq
-          for (Eigen::DenseIndex k = 0; k < Eigen::DenseIndex(cmodel.colwise_span_indexes.size());
-               ++k)
+          const auto & colwise_span_indexes = cmodel.getColwiseSpanIndexes(0);
+          for (size_t k = 0; k < colwise_span_indexes.size(); ++k)
           {
-            const Eigen::DenseIndex row_id = cmodel.colwise_span_indexes[size_t(k)];
+            const Eigen::DenseIndex row_id = cmodel.colwise_span_indexes[k];
             // contact_dac_dq.col(row_id) += cmodel.corrector.Kd * contact_dvc_dq.col(row_id);
             contact_dac_dq.col(row_id).noalias() +=
               cmodel.corrector.Kp.asDiagonal() * Jlog * contact_dac_da.col(row_id);

@@ -66,25 +66,16 @@ namespace pinocchio
     /// \brief Name of the constraint
     std::string name;
 
-    /// \brief Sparsity pattern associated to the constraint;
-    BooleanVector colwise_sparsity;
-
-    /// \brief Indexes of the columns spanned by the constraints.
-    IndexVector colwise_span_indexes;
-
     template<typename OtherDerived>
     bool operator==(const ConstraintModelBase<OtherDerived> & other) const
     {
-      return name == other.name && colwise_sparsity == other.colwise_sparsity
-             && colwise_span_indexes == other.colwise_span_indexes;
+      return name == other.name;
     }
 
     template<typename OtherDerived>
     ConstraintModelBase & operator=(const ConstraintModelBase<OtherDerived> & other)
     {
       name = other.name;
-      colwise_sparsity = other.colwise_sparsity;
-      colwise_span_indexes = other.colwise_span_indexes;
 
       return *this;
     }
@@ -94,6 +85,18 @@ namespace pinocchio
       return derived().createData();
     }
 
+    /// \brief Returns the colwise sparsity associated with a given row
+    const BooleanVector & getColwiseSparsity(const Eigen::Index & row_id) const
+    {
+      return derived().getColwiseSparsity(row_id);
+    }
+
+    /// \brief Returns the vector of the active indexes associated with a given row
+    const IndexVector & getColwiseSpanIndexes(const Eigen::Index & row_id) const
+    {
+      return derived().getColwiseSpanIndexes(row_id);
+    }
+
     int size() const
     {
       return derived().size();
@@ -101,11 +104,8 @@ namespace pinocchio
 
   protected:
     template<int Options, template<typename, int> class JointCollectionTpl>
-    ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
-    : colwise_sparsity(model.nv)
+    explicit ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & /*model*/)
     {
-      static const bool default_sparsity_value = false;
-      colwise_sparsity.fill(default_sparsity_value);
     }
 
     /// \brief Default constructor
@@ -117,6 +117,7 @@ namespace pinocchio
     {
       return *this;
     }
+
     const ConstraintModelBase & base() const
     {
       return *this;

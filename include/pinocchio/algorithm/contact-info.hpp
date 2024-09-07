@@ -103,8 +103,6 @@ namespace pinocchio
     friend struct RigidConstraintModelTpl;
 
     using Base::base;
-    using Base::colwise_span_indexes;
-    using Base::colwise_sparsity;
 
     typedef RigidConstraintModelTpl ContactModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ContactData;
@@ -164,6 +162,12 @@ namespace pinocchio
     IndexVector joint2_span_indexes;
 
     IndexVector loop_span_indexes;
+
+    /// \brief Sparsity pattern associated to the constraint;
+    BooleanVector colwise_sparsity;
+
+    /// \brief Indexes of the columns spanned by the constraints.
+    IndexVector colwise_span_indexes;
 
     /// \brief Dimensions of the model
     int nv;
@@ -344,6 +348,20 @@ namespace pinocchio
       return ConstraintData(*this);
     }
 
+    /// \brief Returns the colwise sparsity associated with a given row
+    const BooleanVector & getColwiseSparsity(const Eigen::Index & row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
+      return colwise_sparsity;
+    }
+
+    /// \brief Returns the vector of the active indexes associated with a given row
+    const IndexVector & getColwiseSpanIndexes(const Eigen::Index & row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
+      return colwise_span_indexes;
+    }
+
     ///
     ///  \brief Comparison operator
     ///
@@ -364,6 +382,8 @@ namespace pinocchio
              && joint1_span_indexes == other.joint1_span_indexes
              && joint2_span_indexes == other.joint2_span_indexes && nv == other.nv
              && depth_joint1 == other.depth_joint1 && depth_joint2 == other.depth_joint2
+             && colwise_sparsity == other.colwise_sparsity
+             && colwise_span_indexes == other.colwise_span_indexes
              && loop_span_indexes == other.loop_span_indexes && compliance == other.compliance;
     }
 
@@ -925,7 +945,8 @@ namespace pinocchio
         joint1_span_indexes.rbegin(), joint1_span_indexes.rbegin() + 1, joint1_span_indexes.rend());
       std::rotate(
         joint2_span_indexes.rbegin(), joint2_span_indexes.rbegin() + 1, joint2_span_indexes.rend());
-      Base::colwise_span_indexes.reserve((size_t)model.nv);
+      colwise_span_indexes.reserve((size_t)model.nv);
+      colwise_sparsity.resize(model.nv);
       loop_span_indexes.reserve((size_t)model.nv);
       for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
       {

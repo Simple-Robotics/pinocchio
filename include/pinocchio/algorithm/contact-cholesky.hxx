@@ -264,14 +264,16 @@ namespace pinocchio
       for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
         const RigidConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
-
         const Eigen::DenseIndex constraint_dim = cmodel.size();
-        if (cmodel.colwise_sparsity[j])
+
+        for (Eigen::DenseIndex row_id = 0; row_id < constraint_dim; ++row_id)
         {
-          for (Eigen::DenseIndex k = 0; k < constraint_dim; ++k)
+          const auto & colwise_sparsity = cmodel.getColwiseSparsity(row_id);
+          if (colwise_sparsity[row_id])
           {
-            U(current_row - k, jj) -= U.row(current_row - k).segment(jj + 1, NVT).dot(DUt_partial);
-            U(current_row - k, jj) *= Dinv[jj];
+            U(current_row - row_id, jj) -=
+              U.row(current_row - row_id).segment(jj + 1, NVT).dot(DUt_partial);
+            U(current_row - row_id, jj) *= Dinv[jj];
           }
         }
 
