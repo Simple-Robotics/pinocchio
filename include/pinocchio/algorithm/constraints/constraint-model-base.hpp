@@ -94,6 +94,11 @@ namespace pinocchio
       return derived().createData();
     }
 
+    int size() const
+    {
+      return derived().size();
+    }
+
   protected:
     template<int Options, template<typename, int> class JointCollectionTpl>
     ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
