@@ -549,10 +549,10 @@ namespace pinocchio
           const Frame & input_frame = *frame_it;
           if (input_frame.name == joint_name)
             break;
-          const std::string & support_joint_name = input_model.names[input_frame.parent];
+          const std::string & support_joint_name = input_model.names[input_frame.parentJoint];
 
           std::vector<JointIndex>::const_iterator support_joint_it = std::find(
-            list_of_joints_to_lock.begin(), list_of_joints_to_lock.end(), input_frame.parent);
+            list_of_joints_to_lock.begin(), list_of_joints_to_lock.end(), input_frame.parentJoint);
 
           if (support_joint_it != list_of_joints_to_lock.end())
           {
