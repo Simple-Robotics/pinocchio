@@ -620,7 +620,7 @@ namespace pinocchio
 
     ///  \brief Evaluate the Jacobian associated to the constraint at the given state stored in data
     /// and cdata.  The results Jacobian is evaluated in the jacobian input/output matrix.
-    template<typename JacobianMatrix, template<typename, int> class JointCollectionTpl>
+    template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
     void jacobian(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,

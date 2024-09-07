@@ -51,7 +51,7 @@ namespace pinocchio
       derived().calc(model, data, cdata);
     }
 
-    template<typename JacobianMatrix, int Options, template<typename, int> class JointCollectionTpl>
+    template<int Options, template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
     void jacobian(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
