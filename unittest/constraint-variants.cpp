@@ -1,13 +1,12 @@
 //
-// Copyright (c) 2023 INRIA
+// Copyright (c) 2023-2024 INRIA
 //
 
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/constraints.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
-#include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
+
+#include "constraints/init_constraints.hpp"
 
 #include <iostream>
 
@@ -19,15 +18,14 @@ using namespace Eigen;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(contact_variants)
+BOOST_AUTO_TEST_CASE(constraint_variants)
 {
   Model model;
   buildModels::humanoidRandom(model, true);
 
   Data data(model);
 
-  const SE3 M(SE3::Random());
-  RigidConstraintModel rcm(CONTACT_3D, model, 0, M);
+  RigidConstraintModel rcm = init_constraint<RigidConstraintModel>(model);
   RigidConstraintData rcd(rcm);
 
   ConstraintModel::ConstraintModelVariant constraint_model_variant = rcm;
@@ -37,7 +35,7 @@ BOOST_AUTO_TEST_CASE(contact_variants)
   ConstraintData constraint_data = rcm.createData();
 }
 
-BOOST_AUTO_TEST_CASE(contact_visitors)
+BOOST_AUTO_TEST_CASE(constraint_visitors)
 {
   Model model;
   buildModels::humanoidRandom(model, true);
@@ -53,20 +51,36 @@ BOOST_AUTO_TEST_CASE(contact_visitors)
   ConstraintModel constraint_model(rcm);
 
   // Test create data visitor
-  ConstraintData constraint_data = createData(constraint_model);
-  constraint_data = rcd;
+  {
+    RigidConstraintData rcd(rcm);
+    ConstraintData constraint_data = visitors::createData(constraint_model);
+    constraint_data = rcd;
+    BOOST_CHECK(constraint_data == rcd);
+  }
 
   // Test calc visitor
-  calc(constraint_model, constraint_data, model, data);
-  rcm.calc(model, data, rcd);
-  BOOST_CHECK(rcd == constraint_data);
+  {
+    ConstraintData constraint_data1(rcm.createData());
+    visitors::calc(constraint_model, model, data, constraint_data1);
+    rcm.calc(model, data, rcd);
+    BOOST_CHECK(rcd == constraint_data1);
+    ConstraintData constraint_data2(rcm.createData());
+    constraint_model.calc(model, data, constraint_data2);
+    BOOST_CHECK(rcd == constraint_data2);
+  }
 
   // Test jacobian visitor
-  Data::MatrixXs jacobian_matrix = Data::Matrix6x::Zero(6, model.nv),
-                 jacobian_matrix_ref = Data::Matrix6x::Zero(6, model.nv);
-  jacobian(constraint_model, constraint_data, model, data, jacobian_matrix);
-  rcm.jacobian(model, data, rcd, jacobian_matrix_ref);
-  BOOST_CHECK(jacobian_matrix == jacobian_matrix_ref);
+  {
+    ConstraintData constraint_data(rcm.createData());
+    Data::MatrixXs jacobian_matrix1 = Data::Matrix6x::Zero(6, model.nv),
+                   jacobian_matrix2 = Data::Matrix6x::Zero(6, model.nv),
+                   jacobian_matrix_ref = Data::Matrix6x::Zero(6, model.nv);
+    rcm.jacobian(model, data, rcd, jacobian_matrix_ref);
+    visitors::jacobian(constraint_model, model, data, constraint_data, jacobian_matrix1);
+    BOOST_CHECK(jacobian_matrix1 == jacobian_matrix_ref);
+    constraint_model.jacobian(model, data, constraint_data, jacobian_matrix2);
+    BOOST_CHECK(jacobian_matrix2 == jacobian_matrix_ref);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
