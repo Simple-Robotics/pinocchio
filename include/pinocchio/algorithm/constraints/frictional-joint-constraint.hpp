@@ -1,0 +1,159 @@
+//
+// Copyright (c) 2024 INRIA
+//
+
+#ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hpp__
+#define __pinocchio_algorithm_constraints_frictional_joint_constraint_hpp__
+
+#include "pinocchio/math/fwd.hpp"
+
+#include "pinocchio/algorithm/constraints/fwd.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+
+namespace pinocchio
+{
+
+  template<typename NewScalar, typename Scalar, int Options>
+  struct CastType<NewScalar, FrictionalJointConstraintModelTpl<Scalar, Options>>
+  {
+    typedef FrictionalJointConstraintModelTpl<NewScalar, Options> type;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct traits<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct traits<FrictionalJointConstraintDataTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct FrictionalJointConstraintModelTpl
+  : ConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef ConstraintModelBase<FrictionalJointConstraintModelTpl> Base;
+    typedef std::vector<JointIndex> JointIndexVector;
+
+    using typename Base::BooleanVector;
+    using typename Base::EigenIndexVector;
+
+    typedef std::vector<BooleanVector> VectorOfBooleanVector;
+    typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
+
+    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+
+    template<template<typename, int> class JointCollectionTpl>
+    FrictionalJointConstraintModelTpl(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const JointIndexVector & active_joints)
+    {
+      init(model, active_joints);
+    }
+
+    ConstraintData createData() const
+    {
+      return ConstraintData(*this);
+    }
+
+    int size() const
+    {
+      return int(active_dofs.size());
+    }
+
+    template<template<typename, int> class JointCollectionTpl>
+    void calc(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(model);
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(cdata);
+    }
+
+    template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
+    void jacobian(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const;
+
+    /// \brief Returns the sparsity associated with a given row
+    const BooleanVector & getRowSparsityPattern(const Eigen::Index & row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
+      return row_sparsity_pattern[size_t(row_id)];
+    }
+
+    /// \brief Returns the vector of the active indexes associated with a given row
+    const EigenIndexVector & getRowActiveIndexes(const Eigen::Index & row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
+      return row_active_indexes[size_t(row_id)];
+    }
+
+    /// \brief Returns the vector of active rows
+    const EigenIndexVector & getActiveDofs() const
+    {
+      return active_dofs;
+    }
+
+  protected:
+    template<template<typename, int> class JointCollectionTpl>
+    void init(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const JointIndexVector & active_joints);
+
+    EigenIndexVector active_dofs;
+    VectorOfBooleanVector row_sparsity_pattern;
+    VectofOfEigenIndexVector row_active_indexes;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct FrictionalJointConstraintDataTpl
+  : ConstraintDataBase<FrictionalJointConstraintDataTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef ConstraintModelBase<FrictionalJointConstraintDataTpl> Base;
+    typedef std::vector<JointIndex> JointIndexVector;
+
+    typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
+
+    explicit FrictionalJointConstraintDataTpl(const ConstraintModel & constraint_model)
+    {
+    }
+
+    bool operator==(const FrictionalJointConstraintDataTpl & other) const
+    {
+      return true;
+    }
+  };
+} // namespace pinocchio
+
+#include "pinocchio/algorithm/constraints/frictional-joint-constraint.hxx"
+
+#endif // ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hpp__

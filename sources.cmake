@@ -36,6 +36,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraints.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fwd.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hxx

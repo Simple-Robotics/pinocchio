@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2023 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_fwd_hpp__
@@ -10,10 +10,19 @@
 
 namespace pinocchio
 {
+  // Constraints
   template<typename Scalar, int Options = 0>
   struct RigidConstraintModelTpl;
   template<typename Scalar, int Options = 0>
   struct RigidConstraintDataTpl;
+
+  template<typename Scalar, int Options = 0>
+  struct FrictionalJointConstraintModelTpl;
+  typedef FrictionalJointConstraintModelTpl<context::Scalar> FrictionalJointConstraintModel;
+
+  template<typename Scalar, int Options = 0>
+  struct FrictionalJointConstraintDataTpl;
+  typedef FrictionalJointConstraintDataTpl<context::Scalar> FrictionalJointConstraintData;
 
   template<typename _Scalar, int _Options>
   struct ConstraintCollectionTpl
@@ -27,8 +36,13 @@ namespace pinocchio
     typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
 
-    typedef boost::variant<RigidConstraintModel> ConstraintModelVariant;
-    typedef boost::variant<RigidConstraintData> ConstraintDataVariant;
+    typedef FrictionalJointConstraintModelTpl<Scalar, Options> FrictionalJointConstraintModel;
+    typedef FrictionalJointConstraintDataTpl<Scalar, Options> FrictionalJointConstraintData;
+
+    typedef boost::variant<RigidConstraintModel, FrictionalJointConstraintModel>
+      ConstraintModelVariant;
+    typedef boost::variant<RigidConstraintData, FrictionalJointConstraintData>
+      ConstraintDataVariant;
   };
 
   typedef ConstraintCollectionTpl<context::Scalar, context::Options> ConstraintCollection;
@@ -43,6 +57,7 @@ namespace pinocchio
   typedef ConstraintDataTpl<context::Scalar, context::Options, ConstraintCollectionTpl>
     ConstraintData;
 
+  // Convex sets
   template<typename Scalar>
   struct CoulombFrictionConeTpl;
   typedef CoulombFrictionConeTpl<context::Scalar> CoulombFrictionCone;
