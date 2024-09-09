@@ -39,7 +39,6 @@ namespace pinocchio
         ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
         ArgsTmp args)
       {
-        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
         InternalVisitorModelAndData<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(
           cdata, args);
         return boost::apply_visitor(visitor, cmodel);
@@ -54,7 +53,6 @@ namespace pinocchio
       static ReturnType
       run(const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata, ArgsTmp args)
       {
-        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
         InternalVisitorModel<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(args);
         return boost::apply_visitor(visitor, cdata);
       }

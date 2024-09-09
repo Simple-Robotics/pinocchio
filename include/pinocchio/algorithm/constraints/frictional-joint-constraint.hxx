@@ -78,12 +78,10 @@ namespace pinocchio
   template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
   void FrictionalJointConstraintModelTpl<Scalar, Options>::jacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    ConstraintData & cdata,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & /*data*/,
+    ConstraintData & /*cdata*/,
     const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const
   {
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
     JacobianMatrix & jacobian_matrix = _jacobian_matrix.const_cast_derived();
 
     const FrictionalJointConstraintModelTpl & cmodel = *this;
