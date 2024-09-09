@@ -112,8 +112,8 @@ namespace pinocchio
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
-    typedef typename Base::BooleanVector BooleanVector;
-    typedef typename Base::IndexVector IndexVector;
+    using typename Base::BooleanVector;
+    using typename Base::EigenIndexVector;
     typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
@@ -156,18 +156,18 @@ namespace pinocchio
     BooleanVector colwise_joint2_sparsity;
 
     /// \brief Jointwise span indexes associated with joint 1.
-    IndexVector joint1_span_indexes;
+    EigenIndexVector joint1_span_indexes;
 
     /// \brief Jointwise span indexes associated with joint 2.
-    IndexVector joint2_span_indexes;
+    EigenIndexVector joint2_span_indexes;
 
-    IndexVector loop_span_indexes;
+    EigenIndexVector loop_span_indexes;
 
     /// \brief Sparsity pattern associated to the constraint;
     BooleanVector colwise_sparsity;
 
     /// \brief Indexes of the columns spanned by the constraints.
-    IndexVector colwise_span_indexes;
+    EigenIndexVector colwise_span_indexes;
 
     /// \brief Dimensions of the model
     int nv;
@@ -349,14 +349,14 @@ namespace pinocchio
     }
 
     /// \brief Returns the colwise sparsity associated with a given row
-    const BooleanVector & getColwiseSparsity(const Eigen::Index & row_id) const
+    const BooleanVector & getRowSparsityPattern(const Eigen::Index & row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_sparsity;
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
-    const IndexVector & getColwiseSpanIndexes(const Eigen::Index & row_id) const
+    const EigenIndexVector & getRowActiveIndexes(const Eigen::Index & row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_span_indexes;

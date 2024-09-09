@@ -28,19 +28,19 @@ namespace pinocchio
     : public ContactCholeskyDecompositionTpl<Scalar, Options>
     {
       typedef ContactCholeskyDecompositionTpl<Scalar, Options> Base;
-      typedef typename Base::IndexVector IndexVector;
-      typedef typename Base::BooleanVector BooleanVector;
+      using typename Base::BooleanVector;
+      using typename Base::EigenIndexVector;
 
       ContactCholeskyDecompositionAccessorTpl(const Base & other)
       : Base(other)
       {
       }
 
-      const IndexVector & getParents_fromRow() const
+      const EigenIndexVector & getParents_fromRow() const
       {
         return this->parents_fromRow;
       }
-      const IndexVector & getNvSubtree_fromRow() const
+      const EigenIndexVector & getNvSubtree_fromRow() const
       {
         return this->nv_subtree_fromRow;
       }

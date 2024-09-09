@@ -76,8 +76,9 @@ namespace pinocchio
     typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
     PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-    typedef Eigen::Matrix<Eigen::DenseIndex, Eigen::Dynamic, 1, Options> IndexVector;
-    typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(IndexVector) VectorOfIndexVector;
+    typedef Eigen::Matrix<Eigen::DenseIndex, Eigen::Dynamic, 1, Options> EigenIndexVector;
+    typedef
+      typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(EigenIndexVector) VectorOfEigenIndexVector;
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
 
     ///@{
@@ -635,8 +636,8 @@ namespace pinocchio
     PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
   protected:
-    IndexVector parents_fromRow;
-    IndexVector nv_subtree_fromRow;
+    EigenIndexVector parents_fromRow;
+    EigenIndexVector nv_subtree_fromRow;
 
     Vector DUt; // temporary containing the results of D * U^t
 

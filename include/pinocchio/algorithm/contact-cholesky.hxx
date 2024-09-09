@@ -268,7 +268,7 @@ namespace pinocchio
 
         for (Eigen::DenseIndex row_id = 0; row_id < constraint_dim; ++row_id)
         {
-          const auto & colwise_sparsity = cmodel.getColwiseSparsity(row_id);
+          const auto & colwise_sparsity = cmodel.getRowSparsityPattern(row_id);
           if (colwise_sparsity[row_id])
           {
             U(current_row - row_id, jj) -=
@@ -640,7 +640,7 @@ namespace pinocchio
       PINOCCHIO_CHECK_INPUT_ARGUMENT(col < chol_dim && col >= 0);
       PINOCCHIO_CHECK_INPUT_ARGUMENT(vec.size() == chol_dim);
 
-      const typename ContactCholeskyDecomposition::IndexVector & nvt = chol.nv_subtree_fromRow;
+      const typename ContactCholeskyDecomposition::EigenIndexVector & nvt = chol.nv_subtree_fromRow;
       VectorLike & vec_ = PINOCCHIO_EIGEN_CONST_CAST(VectorLike, vec);
 
       const Eigen::DenseIndex last_col =

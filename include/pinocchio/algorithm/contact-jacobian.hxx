@@ -145,7 +145,7 @@ namespace pinocchio
       constraint_model.colwise_joint1_sparsity;
     const typename ConstraintModel::BooleanVector & colwise_joint2_sparsity =
       constraint_model.colwise_joint2_sparsity;
-    const typename ConstraintModel::IndexVector & colwise_span_indexes =
+    const typename ConstraintModel::EigenIndexVector & colwise_span_indexes =
       constraint_model.colwise_span_indexes;
 
     SE3 & oMc1 = constraint_data.oMc1;
