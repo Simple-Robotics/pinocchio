@@ -70,7 +70,27 @@ namespace pinocchio
 
     ConstraintData createData() const
     {
-      return ::pinocchio::createData<Scalar, Options, ConstraintCollectionTpl>(*this);
+      return ::pinocchio::visitors::createData<Scalar, Options, ConstraintCollectionTpl>(*this);
+    }
+
+    template<template<typename, int> class JointCollectionTpl>
+    void calc(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata) const
+    {
+      ::pinocchio::visitors::calc(*this, model, data, cdata);
+    }
+
+    template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
+    void jacobian(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<JacobianMatrix> & jacobian_matrix) const
+    {
+      ::pinocchio::visitors::jacobian(
+        *this, model, data, cdata, jacobian_matrix.const_cast_derived());
     }
   };
 
