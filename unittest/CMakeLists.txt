@@ -17,6 +17,8 @@ function(ADD_TEST_CFLAGS target)
   endforeach()
 endfunction()
 
+set(PINOCCHIO_UNIT_TEST_HEADERS ${PROJECT_SOURCE_DIR}/unittest/constraints/init_constraints.hpp)
+
 # Compute flags outside the macro to avoid recomputing it for each tests
 cxx_flags_by_compiler_frontend(MSVC _USE_MATH_DEFINES OUTPUT TEST_PRIVATE_DEFINITIONS)
 
@@ -49,7 +51,7 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
   set(PKGS ${unit_test_PACKAGES})
 
   get_cpp_test_name(${name} ${CMAKE_CURRENT_SOURCE_DIR} TEST_NAME)
-  add_unit_test(${TEST_NAME} ${name}.cpp)
+  add_unit_test(${TEST_NAME} ${name}.cpp ${PINOCCHIO_UNIT_TEST_HEADERS})
 
   set(MODULE_NAME "${NAME}Test")
   string(REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
@@ -162,6 +164,7 @@ add_pinocchio_unit_test(cholesky)
 add_pinocchio_unit_test(constrained-dynamics)
 add_pinocchio_unit_test(constraint-variants)
 add_pinocchio_unit_test(contact-models)
+add_pinocchio_unit_test(joint-frictional-constraint)
 add_pinocchio_unit_test(constraint-jacobian)
 add_pinocchio_unit_test(contact-dynamics)
 add_pinocchio_unit_test(contact-inverse-dynamics)
