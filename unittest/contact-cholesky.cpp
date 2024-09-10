@@ -10,9 +10,9 @@
 #include "pinocchio/math/eigenvalues.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
 #include "pinocchio/algorithm/crba.hpp"
-#include "pinocchio/algorithm/contact-cholesky.hxx"
+#include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
 
