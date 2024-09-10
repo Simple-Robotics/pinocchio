@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_cholesky_txx__
@@ -29,6 +29,7 @@ namespace pinocchio
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
+    context::RigidConstraintModel,
     typename context::RigidConstraintModelVector::allocator_type>(
     const context::Model &, const context::RigidConstraintModelVector &);
 
@@ -51,7 +52,9 @@ namespace pinocchio
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
+    context::RigidConstraintModel,
     typename context::RigidConstraintModelVector::allocator_type,
+    context::RigidConstraintData,
     typename context::RigidConstraintDataVector::allocator_type>(
     const context::Model &,
     context::Data &,

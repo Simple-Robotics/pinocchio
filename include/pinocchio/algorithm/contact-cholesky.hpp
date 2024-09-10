@@ -9,7 +9,7 @@
 #include "pinocchio/math/matrix-block.hpp"
 #include "pinocchio/math/triangular-matrix.hpp"
 
-#include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 #include <functional>
 
@@ -136,12 +136,18 @@ namespace pinocchio
     // TODO Remove when API is stabilized
     PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
     PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
-    template<typename S1, int O1, template<typename, int> class JointCollectionTpl, class Allocator>
+    template<
+      typename S1,
+      int O1,
+      template<typename, int>
+      class JointCollectionTpl,
+      class ConstraintModel,
+      class ConstraintAllocator>
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
-      const std::vector<RigidConstraintModelTpl<S1, O1>, Allocator> & contact_models)
+      const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
     {
-      typedef std::reference_wrapper<const RigidConstraintModelTpl<S1, O1>> WrappedType;
+      typedef std::reference_wrapper<const ConstraintModel> WrappedType;
       typedef std::vector<WrappedType> WrappedTypeVector;
 
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
@@ -178,12 +184,18 @@ namespace pinocchio
     /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact
     /// information
     ///
-    template<typename S1, int O1, template<typename, int> class JointCollectionTpl, class Allocator>
+    template<
+      typename S1,
+      int O1,
+      template<typename, int>
+      class JointCollectionTpl,
+      class ConstraintModel,
+      class ConstraintAllocator>
     void allocate(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
-      const std::vector<RigidConstraintModelTpl<S1, O1>, Allocator> & contact_models)
+      const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
     {
-      typedef std::reference_wrapper<const RigidConstraintModelTpl<S1, O1>> WrappedType;
+      typedef std::reference_wrapper<const ConstraintModel> WrappedType;
       typedef std::vector<WrappedType> WrappedTypeVector;
 
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
@@ -204,10 +216,11 @@ namespace pinocchio
       class JointCollectionTpl,
       template<typename T>
       class Holder,
-      class Allocator>
+      class ConstraintModel,
+      class ConstraintAllocator>
     void allocate(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
-      const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, Allocator> & contact_models);
+      const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & contact_models);
 
     ///
     /// \brief Returns the Inverse of the Operational Space Inertia Matrix resulting from the
@@ -336,13 +349,15 @@ namespace pinocchio
       int O1,
       template<typename, int>
       class JointCollectionTpl,
+      class ConstraintModel,
       class ConstraintModelAllocator,
+      class ConstraintData,
       class ConstraintDataAllocator>
     void compute(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       DataTpl<S1, O1, JointCollectionTpl> & data,
-      const std::vector<RigidConstraintModelTpl<S1, O1>, ConstraintModelAllocator> & contact_models,
-      std::vector<RigidConstraintDataTpl<S1, O1>, ConstraintDataAllocator> & contact_datas,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models,
+      std::vector<ConstraintData, ConstraintDataAllocator> & contact_datas,
       const S1 mu = S1(0.))
     {
       compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(), mu));
@@ -372,13 +387,14 @@ namespace pinocchio
       template<typename T>
       class Holder,
       class ConstraintModelAllocator,
-      class ConstraintDataAllocator>
+      class ConstraintModel,
+      class ConstraintDataAllocator,
+      class ConstraintData>
     void compute(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       DataTpl<S1, O1, JointCollectionTpl> & data,
-      const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, ConstraintModelAllocator> &
-        contact_models,
-      std::vector<Holder<RigidConstraintDataTpl<S1, O1>>, ConstraintDataAllocator> & contact_datas,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & contact_models,
+      std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & contact_datas,
       const S1 mu = S1(0.))
     {
       compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(), mu));
@@ -406,24 +422,25 @@ namespace pinocchio
       int O1,
       template<typename, int>
       class JointCollectionTpl,
+      class ConstraintModel,
       class ConstraintModelAllocator,
+      class ConstraintData,
       class ConstraintDataAllocator,
       typename VectorLike>
     void compute(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       DataTpl<S1, O1, JointCollectionTpl> & data,
-      const std::vector<RigidConstraintModelTpl<S1, O1>, ConstraintModelAllocator> & contact_models,
-      std::vector<RigidConstraintDataTpl<S1, O1>, ConstraintDataAllocator> & contact_datas,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models,
+      std::vector<ConstraintData, ConstraintDataAllocator> & contact_datas,
       const Eigen::MatrixBase<VectorLike> & mus)
     {
-      typedef std::reference_wrapper<const RigidConstraintModelTpl<S1, O1>>
-        WrappedConstraintModelType;
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
       typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
       WrappedConstraintModelVector wrapped_constraint_models(
         contact_models.cbegin(), contact_models.cend());
 
-      typedef std::reference_wrapper<RigidConstraintDataTpl<S1, O1>> WrappedConstraintDataType;
+      typedef std::reference_wrapper<ConstraintData> WrappedConstraintDataType;
       typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
 
       WrappedConstraintDataVector wrapped_constraint_datas(
@@ -455,15 +472,16 @@ namespace pinocchio
       class JointCollectionTpl,
       template<typename T>
       class Holder,
+      class ConstraintModel,
       class ConstraintModelAllocator,
+      class ConstraintData,
       class ConstraintDataAllocator,
       typename VectorLike>
     void compute(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       DataTpl<S1, O1, JointCollectionTpl> & data,
-      const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, ConstraintModelAllocator> &
-        contact_models,
-      std::vector<Holder<RigidConstraintDataTpl<S1, O1>>, ConstraintDataAllocator> & contact_datas,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & contact_models,
+      std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & contact_datas,
       const Eigen::MatrixBase<VectorLike> & mus);
 
     ///

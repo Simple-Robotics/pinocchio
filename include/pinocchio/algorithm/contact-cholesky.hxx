@@ -24,14 +24,18 @@ namespace pinocchio
     class JointCollectionTpl,
     template<typename T>
     class Holder,
-    class Allocator>
+    class ConstraintModel,
+    class ConstraintAllocator>
   void ContactCholeskyDecompositionTpl<Scalar, Options>::allocate(
     const ModelTpl<S1, O1, JointCollectionTpl> & model,
-    const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, Allocator> & contact_models)
+    const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & contact_models)
   {
     typedef ModelTpl<S1, O1, JointCollectionTpl> Model;
     typedef typename Model::JointModel JointModel;
-    typedef RigidConstraintModelTpl<S1, O1> RigidConstraintModel;
+
+    static_assert(
+      std::is_base_of<ConstraintModelBase<ConstraintModel>, ConstraintModel>::value,
+      "ConstraintModel is not a ConstraintModelBase");
 
     nv = model.nv;
     num_contacts = (Eigen::DenseIndex)contact_models.size();
@@ -39,7 +43,7 @@ namespace pinocchio
     Eigen::DenseIndex num_total_constraints = 0;
     for (auto it = contact_models.cbegin(); it != contact_models.cend(); ++it)
     {
-      const RigidConstraintModel & cmodel = it->get();
+      const ConstraintModel & cmodel = it->get();
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         cmodel.size() > 0, "The dimension of the constraint must be positive");
       num_total_constraints += cmodel.size();
@@ -95,19 +99,13 @@ namespace pinocchio
     Eigen::DenseIndex row_id = 0;
     for (const auto cmodel_wrapper : contact_models)
     {
-      const RigidConstraintModel & cmodel = cmodel_wrapper.get();
-      const JointIndex joint1_id = cmodel.joint1_id;
-      const JointModel joint1 = model.joints[joint1_id];
-      const JointIndex joint2_id = cmodel.joint2_id;
-      const JointModel joint2 = model.joints[joint2_id];
-
-      // Fill nv_subtree_fromRow for constraints
-      const Eigen::DenseIndex nv1 = joint1.idx_v() + joint1.nv();
-      const Eigen::DenseIndex nv2 = joint2.idx_v() + joint2.nv();
-      const Eigen::DenseIndex nv = std::max(nv1, nv2);
+      const ConstraintModel & cmodel = cmodel_wrapper.get();
       for (Eigen::DenseIndex k = 0; k < cmodel.size(); ++k, row_id++)
       {
-        nv_subtree_fromRow[row_id] = nv + (num_total_constraints - row_id);
+        const auto & row_active_indexes = cmodel.getRowActiveIndexes(k);
+        nv_subtree_fromRow[row_id] =
+          num_total_constraints - row_id + 1
+          + (row_active_indexes.size() > 0 ? row_active_indexes.back() : 0);
       }
     }
     assert(row_id == num_total_constraints);
@@ -174,19 +172,24 @@ namespace pinocchio
     class JointCollectionTpl,
     template<typename T>
     class Holder,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     typename VectorLike>
   void ContactCholeskyDecompositionTpl<Scalar, Options>::compute(
     const ModelTpl<S1, O1, JointCollectionTpl> & model,
     DataTpl<S1, O1, JointCollectionTpl> & data,
-    const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, ConstraintModelAllocator> &
-      contact_models,
-    std::vector<Holder<RigidConstraintDataTpl<S1, O1>>, ConstraintDataAllocator> & contact_datas,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & contact_models,
+    std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & contact_datas,
     const Eigen::MatrixBase<VectorLike> & mus)
   {
-    typedef RigidConstraintModelTpl<S1, O1> RigidConstraintModel;
-    typedef RigidConstraintDataTpl<S1, O1> RigidConstraintData;
+    static_assert(
+      std::is_base_of<ConstraintModelBase<ConstraintModel>, ConstraintModel>::value,
+      "ConstraintModel is not a ConstraintModelBase");
+    static_assert(
+      std::is_base_of<ConstraintDataBase<ConstraintData>, ConstraintData>::value,
+      "ConstraintData is not a ConstraintDataBase");
 
     assert(model.check(data) && "data is not consistent with model.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -210,8 +213,8 @@ namespace pinocchio
     // Update frame placements if needed
     for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
     {
-      const RigidConstraintModel & cmodel = contact_models[ee_id].get();
-      RigidConstraintData & cdata = contact_datas[ee_id].get();
+      const ConstraintModel & cmodel = contact_models[ee_id].get();
+      ConstraintData & cdata = contact_datas[ee_id].get();
 
       cmodel.calc(model, data, cdata);
     }
@@ -225,8 +228,8 @@ namespace pinocchio
     U.topRightCorner(total_constraints_dim, model.nv).setZero();
     for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
     {
-      const RigidConstraintModel & cmodel = contact_models[ee_id].get();
-      RigidConstraintData & cdata = contact_datas[ee_id].get();
+      const ConstraintModel & cmodel = contact_models[ee_id].get();
+      ConstraintData & cdata = contact_datas[ee_id].get();
 
       const Eigen::DenseIndex constraint_dim = cmodel.size();
       cmodel.jacobian(
@@ -263,7 +266,7 @@ namespace pinocchio
       Eigen::DenseIndex current_row = total_constraints_dim - 1;
       for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
-        const RigidConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
+        const ConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
         const Eigen::DenseIndex constraint_dim = cmodel.size();
 
         for (Eigen::DenseIndex row_id = 0; row_id < constraint_dim; ++row_id)
