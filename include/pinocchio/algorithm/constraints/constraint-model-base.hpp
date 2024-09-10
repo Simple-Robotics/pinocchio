@@ -86,13 +86,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the colwise sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::Index & row_id) const
+    const BooleanVector & getRowSparsityPattern(const Eigen::Index row_id) const
     {
       return derived().getRowSparsityPattern(row_id);
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
-    const EigenIndexVector & getRowActiveIndexes(const Eigen::Index & row_id) const
+    const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
     {
       return derived().getRowActiveIndexes(row_id);
     }

@@ -99,14 +99,14 @@ namespace pinocchio
       const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const;
 
     /// \brief Returns the sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::Index & row_id) const
+    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return row_sparsity_pattern[size_t(row_id)];
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
-    const EigenIndexVector & getRowActiveIndexes(const Eigen::Index & row_id) const
+    const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return row_active_indexes[size_t(row_id)];
@@ -143,11 +143,11 @@ namespace pinocchio
 
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
 
-    explicit FrictionalJointConstraintDataTpl(const ConstraintModel & constraint_model)
+    explicit FrictionalJointConstraintDataTpl(const ConstraintModel & /*constraint_model*/)
     {
     }
 
-    bool operator==(const FrictionalJointConstraintDataTpl & other) const
+    bool operator==(const FrictionalJointConstraintDataTpl & /*other*/) const
     {
       return true;
     }

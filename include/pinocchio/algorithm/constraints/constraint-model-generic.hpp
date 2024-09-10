@@ -50,6 +50,9 @@ namespace pinocchio
     typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
     typedef typename ConstraintCollection::ConstraintModelVariant ConstraintModelVariant;
 
+    using typename Base::EigenIndexVector;
+    //    using typename Base:BooleanVector;
+
     ConstraintModelTpl()
     : ConstraintModelVariant()
     {
