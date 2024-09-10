@@ -21,6 +21,7 @@
 
 namespace pinocchio
 {
+
   namespace cholesky
   {
     template<typename Scalar, int Options>
@@ -1555,6 +1556,57 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_updateDamping)
     BOOST_CHECK(contact_chol_decomposition.Dinv.isApprox(contact_chol_decomposition_ref.Dinv));
     BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
   }
+}
+
+BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
+{
+  using namespace Eigen;
+  using namespace pinocchio;
+  using namespace pinocchio::cholesky;
+
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  pinocchio::Data data_ref(model);
+
+  model.lowerPositionLimit.head<3>().fill(-1.);
+  model.upperPositionLimit.head<3>().fill(1.);
+  VectorXd q = randomConfiguration(model);
+
+  const std::string RF_name = "rleg6_joint";
+  const std::string LF_name = "lleg6_joint";
+
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
+
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) rigid_constraint_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) rigid_constraint_datas;
+
+  RigidConstraintModel ci_RF(CONTACT_6D, model, model.getJointId(RF_name), LOCAL);
+  constraint_models.push_back(ci_RF);
+  rigid_constraint_models.push_back(ci_RF);
+  constraint_datas.push_back(RigidConstraintData(ci_RF));
+  rigid_constraint_datas.push_back(RigidConstraintData(ci_RF));
+  RigidConstraintModel ci_LF(CONTACT_6D, model, model.getJointId(LF_name), LOCAL);
+  constraint_models.push_back(ci_LF);
+  rigid_constraint_models.push_back(ci_LF);
+  constraint_datas.push_back(RigidConstraintData(ci_LF));
+  rigid_constraint_datas.push_back(RigidConstraintData(ci_LF));
+
+  Data data(model);
+  crba(model, data, q, Convention::WORLD);
+
+  ContactCholeskyDecomposition contact_chol_decomposition, contact_chol_decomposition_ref;
+  contact_chol_decomposition.allocate(model, constraint_models);
+  contact_chol_decomposition_ref.allocate(model, rigid_constraint_models);
+
+  const double mu = 1e-10;
+  contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+  contact_chol_decomposition_ref.compute(
+    model, data, rigid_constraint_models, rigid_constraint_datas, mu);
+
+  BOOST_CHECK(contact_chol_decomposition.D.isApprox(contact_chol_decomposition_ref.D));
+  BOOST_CHECK(contact_chol_decomposition.Dinv.isApprox(contact_chol_decomposition_ref.Dinv));
+  BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
