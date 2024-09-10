@@ -50,8 +50,8 @@ namespace pinocchio
     typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
     typedef typename ConstraintCollection::ConstraintModelVariant ConstraintModelVariant;
 
+    using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
-    //    using typename Base:BooleanVector;
 
     ConstraintModelTpl()
     : ConstraintModelVariant()
@@ -94,6 +94,24 @@ namespace pinocchio
     {
       ::pinocchio::visitors::jacobian(
         *this, model, data, cdata, jacobian_matrix.const_cast_derived());
+    }
+
+    /// \brief Returns the vector of the active indexes associated with a given row
+    const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
+    {
+      return ::pinocchio::visitors::getRowActiveIndexes(*this, row_id);
+    }
+
+    /// \brief Returns the sparsity pattern associated with a given row
+    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      return ::pinocchio::visitors::getRowSparsityPattern(*this, row_id);
+    }
+
+    /// \brief Returns the size of the constraint
+    int size() const
+    {
+      return ::pinocchio::visitors::size(*this);
     }
   };
 
