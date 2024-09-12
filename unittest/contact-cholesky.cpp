@@ -22,6 +22,59 @@
 namespace pinocchio
 {
 
+  template<typename _Matrix>
+  struct UDUt
+  {
+    typedef _Matrix Matrix;
+    typedef typename Matrix::Scalar Scalar;
+    enum
+    {
+      Options = Matrix::Options
+    };
+    typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Matrix) PlainMatrix;
+    typedef typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(Matrix) RowMatrix;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
+
+    explicit UDUt(const Matrix & mat)
+    : U(mat.rows(), mat.cols())
+    , D(mat.rows())
+    {
+      assert(mat.rows() == mat.cols());
+      U.setZero();
+      U.diagonal().setOnes();
+      compute(mat);
+    }
+
+    PlainMatrix matrix() const
+    {
+      return U * D.asDiagonal() * U.transpose();
+    }
+
+    template<typename MatrixDerived>
+    void compute(const Eigen::MatrixBase<MatrixDerived> & mat)
+    {
+      assert(mat.rows() == mat.cols());
+      U.template triangularView<Eigen::Upper>() = mat.template triangularView<Eigen::Upper>();
+      for (Eigen::DenseIndex k = mat.rows() - 1; k >= 0; --k)
+      {
+        for (Eigen::DenseIndex i = k - 1; i >= 0; --i)
+        {
+          const Scalar a = U(i, k) / U(k, k);
+          for (Eigen::DenseIndex j = i; j >= 0; --j)
+          {
+            U(j, i) -= U(j, k) * a;
+          }
+          U(i, k) = a;
+        }
+      }
+      D = U.diagonal();
+      U.diagonal().setOnes();
+    }
+
+    RowMatrix U;
+    Vector D;
+  };
+
   namespace cholesky
   {
     template<typename Scalar, int Options>
@@ -60,6 +113,16 @@ namespace pinocchio
 } // namespace pinocchio
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
+
+BOOST_AUTO_TEST_CASE(UDUt_solver)
+{
+  const Eigen::DenseIndex size = 100;
+  Eigen::MatrixXd mat = Eigen::MatrixXd::Random(size, size);
+  mat = mat * mat.transpose();
+
+  pinocchio::UDUt<Eigen::MatrixXd> udut(mat);
+  BOOST_CHECK(udut.matrix().isApprox(mat));
+}
 
 BOOST_AUTO_TEST_CASE(contact_operator_equal)
 {
