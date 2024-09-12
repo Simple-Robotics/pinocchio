@@ -269,18 +269,16 @@ namespace pinocchio
         const ConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
         const Eigen::DenseIndex constraint_dim = cmodel.size();
 
-        for (Eigen::DenseIndex row_id = 0; row_id < constraint_dim; ++row_id)
+        for (Eigen::DenseIndex constraint_row_id = constraint_dim - 1; constraint_row_id >= 0;
+             --constraint_row_id, --current_row)
         {
-          const auto & colwise_sparsity = cmodel.getRowSparsityPattern(row_id);
-          if (colwise_sparsity[row_id])
+          const auto & colwise_sparsity = cmodel.getRowSparsityPattern(constraint_row_id);
+          if (colwise_sparsity[j])
           {
-            U(current_row - row_id, jj) -=
-              U.row(current_row - row_id).segment(jj + 1, NVT).dot(DUt_partial);
-            U(current_row - row_id, jj) *= Dinv[jj];
+            U(current_row, jj) -= U.row(current_row).segment(jj + 1, NVT).dot(DUt_partial);
+            U(current_row, jj) *= Dinv[jj];
           }
         }
-
-        current_row -= constraint_dim;
       }
     }
 
