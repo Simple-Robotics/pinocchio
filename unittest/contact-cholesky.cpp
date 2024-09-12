@@ -1621,11 +1621,66 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_updateDamping)
   }
 }
 
+BOOST_AUTO_TEST_CASE(contact_cholesky_joint_frictional_constraint)
+{
+  using namespace Eigen;
+  using namespace pinocchio;
+
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+
+  const Eigen::VectorXd q = neutral(model);
+
+  const std::string RF_name = "rleg6_joint";
+  const JointIndex RF_id = model.getJointId(RF_name);
+
+  const Model::IndexVector & RF_support = model.supports[RF_id];
+  const Model::IndexVector active_joint_ids(RF_support.begin() + 1, RF_support.end());
+
+  FrictionalJointConstraintModel constraint_model(model, active_joint_ids);
+  FrictionalJointConstraintData constraint_data(constraint_model);
+
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintModel) constraint_models;
+  constraint_models.push_back(constraint_model);
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintData) constraint_datas;
+  constraint_datas.push_back(constraint_data);
+
+  // Build Cholesky decomposition
+  Data data(model);
+  crba(model, data, q, Convention::WORLD);
+
+  ContactCholeskyDecomposition contact_chol_decomposition;
+  contact_chol_decomposition.allocate(model, constraint_models);
+
+  // Compute decompositions
+  const double mu = 1e-10;
+  contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+
+  const int constraint_dim = constraint_model.size();
+  const int total_dim = model.nv + constraint_dim;
+  Data::MatrixXs H(total_dim, total_dim);
+  H.setZero();
+  H.topLeftCorner(constraint_dim, constraint_dim).diagonal().fill(-mu);
+  H.bottomRightCorner(model.nv, model.nv) = data.M;
+  constraint_model.jacobian(
+    model, data, constraint_data, H.middleRows(0, constraint_dim).rightCols(model.nv));
+
+  H.triangularView<Eigen::StrictlyLower>() = H.triangularView<Eigen::StrictlyUpper>().transpose();
+
+  BOOST_CHECK(contact_chol_decomposition.matrix().isApprox(H));
+  BOOST_CHECK(contact_chol_decomposition.matrix().middleRows(6, 6).rightCols(model.nv).isApprox(
+    H.middleRows(6, 6).rightCols(model.nv)));
+
+  UDUt<Data::MatrixXs> udut(H);
+
+  BOOST_CHECK(udut.D.isApprox(contact_chol_decomposition.D));
+  BOOST_CHECK(udut.U.isApprox(contact_chol_decomposition.U));
+}
+
 BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
 {
   using namespace Eigen;
   using namespace pinocchio;
-  using namespace pinocchio::cholesky;
 
   pinocchio::Model model;
   pinocchio::buildModels::humanoidRandom(model, true);
