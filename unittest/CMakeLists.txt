@@ -293,6 +293,7 @@ add_pinocchio_unit_test(copy)
 add_pinocchio_unit_test(contact-cholesky)
 add_pinocchio_unit_test(classic-acceleration)
 add_pinocchio_unit_test(coulomb-friction-cone)
+add_pinocchio_unit_test(box-set)
 
 # Serialization
 make_directory("${CMAKE_CURRENT_BINARY_DIR}/serialization-data")

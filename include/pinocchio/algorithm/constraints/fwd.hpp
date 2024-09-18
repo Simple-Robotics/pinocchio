@@ -57,6 +57,11 @@ namespace pinocchio
   typedef ConstraintDataTpl<context::Scalar, context::Options, ConstraintCollectionTpl>
     ConstraintData;
 
+  // Sets
+  template<typename Scalar, int Options = 0>
+  struct BoxSetTpl;
+  typedef BoxSetTpl<context::Scalar> BoxSet;
+
   // Convex sets
   template<typename Scalar>
   struct CoulombFrictionConeTpl;
