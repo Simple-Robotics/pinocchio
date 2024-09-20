@@ -69,30 +69,13 @@ namespace pinocchio
     case (ADMMUpdateRule::LINEAR):
       admm_update_rule_container.linear_rule =
         ADMMLinearUpdateRule(ratio_primal_dual, linear_update_rule_factor);
-      rho = this->rho;
+      rho = this->rho; // use the rho value stored in the solver.
       break;
     }
-    //    const ADMMSpectralUpdateRule spectral_rule(ratio_primal_dual, L, m, rho_power_factor);
 
     Scalar complementarity,
       proximal_metric, // proximal metric between two successive iterates.
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
-
-    //    std::cout << std::setprecision(12);
-
-    //    if(!is_initialized)
-    //    {
-    //      rho = computeRho(L,m,rho_power);
-    //    }
-    //    else
-    //    {
-    //      rho = this->rho;
-    //    }
-    //    rho = computeRho(L,m,rho_power);
-
-    //    std::cout << "L: " << L << std::endl;
-    //    std::cout << "m: " << m << std::endl;
-    //    std::cout << "prox_value: " << prox_value << std::endl;
 
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
 
