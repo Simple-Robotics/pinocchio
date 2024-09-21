@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_pgs_solver_hxx__
@@ -57,7 +57,7 @@ namespace pinocchio
       for (size_t cone_id = 0; cone_id < nc; ++cone_id)
       {
         Vector3 velocity; // tmp variable
-        const Eigen::DenseIndex row_id = 3 * cone_id;
+        const Eigen::DenseIndex row_id = 3 * Eigen::DenseIndex(cone_id);
         const CoulombFrictionCone & cone = cones[cone_id];
 
         const auto G_block = G.template block<3, 3>(row_id, row_id, 3, 3);
