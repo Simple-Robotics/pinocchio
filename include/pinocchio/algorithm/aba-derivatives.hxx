@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2018-2021 CNRS INRIA
+// Copyright (c) 2018 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_aba_derivatives_hxx__
@@ -463,6 +464,8 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType1,
       typename TangentVectorType2,
+      typename SpatialForce,
+      typename SpatialForceAllocator,
       typename MatrixType1,
       typename MatrixType2,
       typename MatrixType3>
@@ -472,7 +475,7 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorType> & q,
       const Eigen::MatrixBase<TangentVectorType1> & v,
       const Eigen::MatrixBase<TangentVectorType2> & tau,
-      const container::aligned_vector<ForceTpl<Scalar, Options>> & fext,
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext,
       const Eigen::MatrixBase<MatrixType1> & aba_partial_dq,
       const Eigen::MatrixBase<MatrixType2> & aba_partial_dv,
       const Eigen::MatrixBase<MatrixType3> & aba_partial_dtau)
@@ -776,13 +779,15 @@ namespace pinocchio
       int Options,
       template<typename, int>
       class JointCollectionTpl,
+      typename SpatialForce,
+      typename SpatialForceAllocator,
       typename MatrixType1,
       typename MatrixType2,
       typename MatrixType3>
     void computeABADerivatives(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const container::aligned_vector<ForceTpl<Scalar, Options>> & fext,
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext,
       const Eigen::MatrixBase<MatrixType1> & aba_partial_dq,
       const Eigen::MatrixBase<MatrixType2> & aba_partial_dv,
       const Eigen::MatrixBase<MatrixType3> & aba_partial_dtau)
@@ -871,14 +876,16 @@ namespace pinocchio
       class JointCollectionTpl,
       typename ConfigVectorType,
       typename TangentVectorType1,
-      typename TangentVectorType2>
+      typename TangentVectorType2,
+      typename SpatialForce,
+      typename SpatialForceAllocator>
     void computeABADerivatives(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const Eigen::MatrixBase<ConfigVectorType> & q,
       const Eigen::MatrixBase<TangentVectorType1> & v,
       const Eigen::MatrixBase<TangentVectorType2> & tau,
-      const container::aligned_vector<ForceTpl<Scalar, Options>> & fext)
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext)
     {
       ::pinocchio::impl::computeABADerivatives(
         model, data, q, v, tau, fext, data.ddq_dq, data.ddq_dv, data.Minv);
@@ -892,11 +899,17 @@ namespace pinocchio
       ::pinocchio::impl::computeABADerivatives(model, data, data.ddq_dq, data.ddq_dv, data.Minv);
     }
 
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int>
+      class JointCollectionTpl,
+      typename SpatialForce,
+      typename SpatialForceAllocator>
     void computeABADerivatives(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const container::aligned_vector<ForceTpl<Scalar, Options>> & fext)
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext)
     {
       ::pinocchio::impl::computeABADerivatives(
         model, data, fext, data.ddq_dq, data.ddq_dv, data.Minv);
@@ -938,6 +951,8 @@ namespace pinocchio
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
+    typename SpatialForce,
+    typename SpatialForceAllocator,
     typename MatrixType1,
     typename MatrixType2,
     typename MatrixType3>
@@ -947,7 +962,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const container::aligned_vector<ForceTpl<Scalar, Options>> & fext,
+    const std::vector<SpatialForce, SpatialForceAllocator> & fext,
     const Eigen::MatrixBase<MatrixType1> & aba_partial_dq,
     const Eigen::MatrixBase<MatrixType2> & aba_partial_dv,
     const Eigen::MatrixBase<MatrixType3> & aba_partial_dtau)
@@ -987,14 +1002,16 @@ namespace pinocchio
     class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
-    typename TangentVectorType2>
+    typename TangentVectorType2,
+    typename SpatialForce,
+    typename SpatialForceAllocator>
   void computeABADerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const container::aligned_vector<ForceTpl<Scalar, Options>> & fext)
+    const std::vector<SpatialForce, SpatialForceAllocator> & fext)
   {
     impl::computeABADerivatives(
       model, data, make_const_ref(q), make_const_ref(v), make_const_ref(tau), fext);
@@ -1037,13 +1054,15 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    typename SpatialForce,
+    typename SpatialForceAllocator,
     typename MatrixType1,
     typename MatrixType2,
     typename MatrixType3>
   void computeABADerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const container::aligned_vector<ForceTpl<Scalar, Options>> & fext,
+    const std::vector<SpatialForce, SpatialForceAllocator> & fext,
     const Eigen::MatrixBase<MatrixType1> & aba_partial_dq,
     const Eigen::MatrixBase<MatrixType2> & aba_partial_dv,
     const Eigen::MatrixBase<MatrixType3> & aba_partial_dtau)
@@ -1053,11 +1072,17 @@ namespace pinocchio
       make_ref(aba_partial_dtau));
   }
 
-  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int>
+    class JointCollectionTpl,
+    typename SpatialForce,
+    typename SpatialForceAllocator>
   void computeABADerivatives(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const container::aligned_vector<ForceTpl<Scalar, Options>> & fext)
+    const std::vector<SpatialForce, SpatialForceAllocator> & fext)
   {
     impl::computeABADerivatives(
       model, data, fext, make_ref(data.ddq_dq), make_ref(data.ddq_dv), make_ref(data.Minv));
