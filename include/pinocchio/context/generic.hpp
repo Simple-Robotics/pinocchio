@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_context_generic_hpp__
@@ -28,6 +28,8 @@ namespace pinocchio
   template<typename _Scalar, int _Options = 0>
   class ForceTpl;
   template<typename _Scalar, int _Options>
+  struct InertiaTpl;
+  template<typename _Scalar, int _Options>
   struct RigidConstraintModelTpl;
   template<typename _Scalar, int _Options>
   struct RigidConstraintDataTpl;
@@ -55,6 +57,9 @@ namespace pinocchio
 
     typedef ModelTpl<Scalar, Options> Model;
     typedef DataTpl<Scalar, Options> Data;
+    typedef InertiaTpl<Scalar, Options> Inertia;
+    typedef MotionTpl<Scalar, Options> Motion;
+    typedef ForceTpl<Scalar, Options> Force;
 
     typedef CoulombFrictionConeTpl<Scalar> CoulombFrictionCone;
     typedef DualCoulombFrictionConeTpl<Scalar> DualCoulombFrictionCone;
@@ -70,9 +75,6 @@ namespace pinocchio
       RigidConstraintModelVector;
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
       RigidConstraintDataVector;
-
-    typedef MotionTpl<Scalar, Options> Motion;
-    typedef ForceTpl<Scalar, Options> Force;
 
   } // namespace context
 

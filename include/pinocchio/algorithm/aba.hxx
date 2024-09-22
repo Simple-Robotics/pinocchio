@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2016-2024 CNRS INRIA
+// Copyright (c) 2016-2018 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_aba_hxx__
@@ -301,7 +302,8 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType1,
       typename TangentVectorType2,
-      typename ForceDerived>
+      typename SpatialForce,
+      typename SpatialForceAllocator>
     const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
     abaWorldConvention(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -309,7 +311,7 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorType> & q,
       const Eigen::MatrixBase<TangentVectorType1> & v,
       const Eigen::MatrixBase<TangentVectorType2> & tau,
-      const container::aligned_vector<ForceDerived> & fext)
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext)
 
     {
       assert(model.check(data) && "data is not consistent with model.");
@@ -547,7 +549,8 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType1,
       typename TangentVectorType2,
-      typename ForceDerived>
+      typename SpatialForce,
+      typename SpatialForceAllocator>
     const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
     abaLocalConvention(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -555,7 +558,7 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorType> & q,
       const Eigen::MatrixBase<TangentVectorType1> & v,
       const Eigen::MatrixBase<TangentVectorType2> & tau,
-      const container::aligned_vector<ForceDerived> & fext)
+      const std::vector<SpatialForce, SpatialForceAllocator> & fext)
 
     {
       assert(model.check(data) && "data is not consistent with model.");
@@ -954,14 +957,15 @@ namespace pinocchio
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
-    typename ForceDerived>
+    typename SpatialForce,
+    typename SpatialForceAllocator>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & aba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const container::aligned_vector<ForceDerived> & fext,
+    const std::vector<SpatialForce, SpatialForceAllocator> & fext,
     const Convention convention)
   {
     switch (convention)

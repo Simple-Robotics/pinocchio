@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2021 CNRS INRIA
+// Copyright (c) 2015-2018 CNRS
+// Copyright (c) 2018-2024 INRIA
 //
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
@@ -66,7 +67,8 @@ namespace pinocchio
       bp::def(
         "aba",
         &aba<
-          Scalar, Options, JointCollectionDefaultTpl, VectorXs, VectorXs, VectorXs, context::Force>,
+          Scalar, Options, JointCollectionDefaultTpl, VectorXs, VectorXs, VectorXs, context::Force,
+          Eigen::aligned_allocator<context::Force>>,
         (bp::arg("model"), bp::arg("data"), bp::arg("q"), bp::arg("v"), bp::arg("tau"),
          bp::arg("fext"), bp::arg("convention") = pinocchio::Convention::LOCAL),
         "Compute ABA with external forces, store the result in data.ddq and return it.\n"

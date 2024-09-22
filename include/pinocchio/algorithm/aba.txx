@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_aba_txx__
@@ -28,13 +28,14 @@ namespace pinocchio
     Eigen::Ref<const context::VectorXs>,
     Eigen::Ref<const context::VectorXs>,
     Eigen::Ref<const context::VectorXs>,
-    ForceTpl<context::Scalar, context::Options>>(
+    context::Force,
+    Eigen::aligned_allocator<context::Force>>(
     const context::Model &,
     context::Data &,
     const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
     const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
     const Eigen::MatrixBase<Eigen::Ref<const context::VectorXs>> &,
-    const container::aligned_vector<ForceTpl<context::Scalar, context::Options>> &,
+    const std::vector<context::Force, Eigen::aligned_allocator<context::Force>> &,
     const Convention);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI const context::RowMatrixXs &
