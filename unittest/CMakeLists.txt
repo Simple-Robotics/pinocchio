@@ -295,6 +295,9 @@ add_pinocchio_unit_test(classic-acceleration)
 add_pinocchio_unit_test(coulomb-friction-cone)
 add_pinocchio_unit_test(box-set)
 
+# Solvers
+add_pinocchio_unit_test(pgs-solver)
+
 # Serialization
 make_directory("${CMAKE_CURRENT_BINARY_DIR}/serialization-data")
 add_pinocchio_unit_test(serialization COLLISION_OPTIONAL)
