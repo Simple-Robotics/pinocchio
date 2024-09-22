@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian_operations)
     std::vector<RigidConstraintData> constraints_datas{cd_RF_LOCAL, cd_LF_LOCAL};
     std::vector<RigidConstraintData> constraints_datas_ref{cd_RF_LOCAL, cd_LF_LOCAL};
 
-    const Eigen::DenseIndex m = Eigen::DenseIndex(getTotalConstraintSize(constraints_models));
+    const Eigen::DenseIndex m = getTotalConstraintSize(constraints_models);
 
     Eigen::VectorXd res(model.nv);
     const Eigen::VectorXd rhs = Eigen::VectorXd::Random(m);

@@ -135,9 +135,9 @@ namespace pinocchio
       contact_models.size(), contact_data.size(), "contact models and data size are not the same");
 
     MatrixType & delassus = delassus_.const_cast_derived();
-    const size_t constraint_total_size = getTotalConstraintSize(contact_models);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.rows(), (Eigen::DenseIndex)constraint_total_size);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.cols(), (Eigen::DenseIndex)constraint_total_size);
+    const Eigen::DenseIndex constraint_total_size = getTotalConstraintSize(contact_models);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.rows(), constraint_total_size);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.cols(), constraint_total_size);
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -488,9 +488,9 @@ namespace pinocchio
       contact_models.size(), contact_data.size(), "contact models and data size are not the same");
 
     MatrixType & delassus = delassus_.const_cast_derived();
-    const size_t constraint_total_size = getTotalConstraintSize(contact_models);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.rows(), (Eigen::DenseIndex)constraint_total_size);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.cols(), (Eigen::DenseIndex)constraint_total_size);
+    const Eigen::DenseIndex constraint_total_size = getTotalConstraintSize(contact_models);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.rows(), constraint_total_size);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus_.cols(), constraint_total_size);
 
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
 

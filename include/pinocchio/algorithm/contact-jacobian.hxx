@@ -60,8 +60,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
 
-    const Eigen::DenseIndex constraint_size =
-      Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), constraint_size);
 
     for (auto & force : joint_forces)
@@ -101,8 +100,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.size(), size_t(model.njoints));
 
     MotionMatrix & constraint_motions = constraint_motions_.const_cast_derived();
-    const Eigen::DenseIndex constraint_size =
-      Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions.rows(), constraint_size);
 
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
@@ -271,8 +269,7 @@ namespace pinocchio
     typedef RigidConstraintModelTpl<Scalar, Options> ContraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ContraintData;
 
-    const Eigen::DenseIndex constraint_size =
-      Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
 
@@ -387,8 +384,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ResultMatrixType> & res_)
   {
 
-    const Eigen::DenseIndex constraint_size =
-      Eigen::DenseIndex(getTotalConstraintSize(constraint_models));
+    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
     ResultMatrixType & res = res_.const_cast_derived();
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(rhs.rows(), constraint_size);

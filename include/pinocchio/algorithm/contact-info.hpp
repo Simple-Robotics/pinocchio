@@ -968,15 +968,15 @@ namespace pinocchio
   /// \brief Computes the sum of the sizes of the constraints contained in the input
   /// `contact_models` vector.
   template<typename Scalar, int Options, template<typename T> class Holder, class Allocator>
-  size_t getTotalConstraintSize(
+  Eigen::DenseIndex getTotalConstraintSize(
     const std::vector<Holder<const RigidConstraintModelTpl<Scalar, Options>>, Allocator> &
       contact_models)
   {
-    size_t total_size = 0;
+    Eigen::DenseIndex total_size = 0;
     for (size_t i = 0; i < contact_models.size(); ++i)
     {
       const RigidConstraintModel & contact_model = contact_models[i];
-      total_size += size_t(contact_model.size());
+      total_size += contact_model.size();
     }
 
     return total_size;
@@ -986,7 +986,7 @@ namespace pinocchio
   /// \brief Computes the sum of the sizes of the constraints contained in the input
   /// `contact_models` vector.
   template<typename Scalar, int Options, class Allocator>
-  size_t getTotalConstraintSize(
+  Eigen::DenseIndex getTotalConstraintSize(
     const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models)
   {
     typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar, Options>>
