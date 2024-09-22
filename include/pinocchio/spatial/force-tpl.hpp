@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2019 CNRS INRIA
+// Copyright (c) 2015-2018 CNRS
+// Copyright (c) 2018-2024 INRIA
 // Copyright (c) 2015-2016 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -32,6 +33,15 @@ namespace pinocchio
     typedef ForceRef<Vector6> ForceRefType;
   }; // traits ForceTpl
 
+  ///
+  /// \brief This class represents a SpatialForce composed of a linear component representing a 3d
+  /// force vector and an angular component corresponding to a 3d torque vector. Internally, the
+  /// data are stored in a compact 6d vector.
+  ///
+  /// \tparam _Scalar Scalar type of the ForceTpl
+  /// \tparam _Options Eigen Options related to the internal 6d vector storing the data. In most
+  /// cases, you don't have to worry about this templated quantities.
+  ///
   template<typename _Scalar, int _Options>
   class ForceTpl : public ForceDense<ForceTpl<_Scalar, _Options>>
   {
@@ -49,68 +59,114 @@ namespace pinocchio
     using Base::angular;
     using Base::linear;
 
-    // Constructors
+    /// \brief Default constructor
     ForceTpl()
     {
     }
 
-    template<typename V1, typename V2>
-    ForceTpl(const Eigen::MatrixBase<V1> & v, const Eigen::MatrixBase<V2> & w)
+    ///
+    /// \brief Constructor from a force vector and a torque vector, both considered as 3d vectors.
+    ///
+    /// \tparam ForceVectorLike type of the force vector.
+    /// \tparam TorqueVectorLike type of the torque vector.
+    ///
+    /// \param[in] force force vector associated with the linear component of the spatial force.
+    /// \param[in] torque torque vector associated with the angular component of the spatial force.
+    ///
+    template<typename ForceVectorLike, typename TorqueVectorLike>
+    ForceTpl(
+      const Eigen::MatrixBase<ForceVectorLike> & force,
+      const Eigen::MatrixBase<TorqueVectorLike> & torque)
     {
-      EIGEN_STATIC_ASSERT_VECTOR_ONLY(V1);
-      EIGEN_STATIC_ASSERT_VECTOR_ONLY(V2);
-      linear() = v;
-      angular() = w;
+      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(ForceVectorLike, 3);
+      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TorqueVectorLike, 3);
+      linear() = force;
+      angular() = torque;
     }
 
-    template<typename V6>
-    explicit ForceTpl(const Eigen::MatrixBase<V6> & v)
-    : m_data(v)
+    ///
+    /// \brief Constructor from a 6d vector representing a spatial force.
+    ///
+    /// \tparam Vector6Like type of the vector
+    ///
+    /// \param[in] f 6d vector whose values represent the data associated with a spatial vector.
+    ///
+    template<typename Vector6Like>
+    explicit ForceTpl(const Eigen::MatrixBase<Vector6Like> & f)
+    : m_data(f)
     {
-      EIGEN_STATIC_ASSERT_VECTOR_ONLY(V6);
+      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector6Like, 6);
     }
 
-    ForceTpl(const ForceTpl & clone) // Copy constructor
-    : m_data(clone.toVector())
+    ///
+    /// \brief Copy constructor
+    ///
+    /// \param[in] other to copy into *this.
+    ///
+    ForceTpl(const ForceTpl & other)
+    : m_data(other.toVector())
     {
     }
 
+    ///
+    /// \brief Copy constructor with a cast
+    ///
+    ///
+    /// \param[in] other to copy into *this after a cast.
+    ///
     template<typename S2, int O2>
     explicit ForceTpl(const ForceTpl<S2, O2> & other)
     {
       *this = other.template cast<Scalar>();
     }
 
-    template<typename F2>
-    explicit ForceTpl(const ForceBase<F2> & clone)
+    ///
+    /// \brief Copy constructor from a the base class.
+    ///
+    /// \param[in] other to copy into *this.
+    ///
+    template<typename ForceDerived>
+    explicit ForceTpl(const ForceBase<ForceDerived> & other)
     {
-      *this = clone;
+      *this = other.derived();
     }
 
-    ForceTpl & operator=(const ForceTpl & clone) // Copy assignment operator
+    ///
+    /// \brief Copy constructor from a spatial dense force.
+    ///
+    /// \param[in] other to copy into *this.
+    ///
+    template<typename M2>
+    explicit ForceTpl(const ForceDense<M2> & other)
     {
-      m_data = clone.toVector();
+      linear() = other.linear();
+      angular() = other.angular();
+    }
+
+    ///
+    /// \brief Copy operator
+    ///
+    /// \param[in] other to copy into *this.
+    ///
+    ForceTpl & operator=(const ForceTpl & other) // Copy assignment operator
+    {
+      m_data = other.toVector();
       return *this;
     }
 
-    template<int O2>
-    explicit ForceTpl(const ForceTpl<Scalar, O2> & clone)
-    : m_data(clone.toVector())
-    {
-    }
-
-    template<typename M2>
-    explicit ForceTpl(const ForceDense<M2> & clone)
-    {
-      linear() = clone.linear();
-      angular() = clone.angular();
-    }
-
-    // initializers
+    ///
+    /// \brief Returns a spatial force set to zero.
+    ///
     static ForceTpl Zero()
     {
       return ForceTpl(Vector6::Zero());
     }
+
+    ///
+    /// \brief Returns a spatial force set to random.
+    ///
+    /// \remark This static constructor calls the random function of Eigen.
+    ///
     static ForceTpl Random()
     {
       return ForceTpl(Vector6::Random());
@@ -156,12 +212,13 @@ namespace pinocchio
       linear_impl() = v;
     }
 
+    /// \returns *this as a ForceRef vector
     ForceRef<Vector6> ref()
     {
       return ForceRef<Vector6>(m_data);
     }
 
-    /// \returns An expression of *this with the Scalar type casted to NewScalar.
+    /// \returns a cast version of *this.
     template<typename NewScalar>
     ForceTpl<NewScalar, Options> cast() const
     {
