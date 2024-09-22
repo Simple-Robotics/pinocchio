@@ -333,6 +333,13 @@ namespace pinocchio
     return !(data1 == data2);
   }
 
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  typename ModelTpl<Scalar, Options, JointCollectionTpl>::Data
+  ModelTpl<Scalar, Options, JointCollectionTpl>::createData() const
+  {
+    return Data(*this);
+  }
+
 } // namespace pinocchio
 
 /// @endcond

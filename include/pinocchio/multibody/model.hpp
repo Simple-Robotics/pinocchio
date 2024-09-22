@@ -490,6 +490,11 @@ namespace pinocchio
     ///
     bool check(const Data & data) const;
 
+    ///
+    /// \brief Create a Data structure associated with the current model
+    ///
+    Data createData() const;
+
     /// Returns a vector of the children joints of the kinematic tree.
     /// \remark: a child joint is a node without any child joint.
     std::vector<JointIndex> getChildJoints() const;

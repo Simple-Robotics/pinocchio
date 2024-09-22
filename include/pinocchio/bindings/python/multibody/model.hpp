@@ -209,7 +209,7 @@ namespace pinocchio
             "parent joint.")
 
           .def(
-            "createData", &ModelPythonVisitor::createData, bp::arg("self"),
+            "createData", &Model::createData, bp::arg("self"),
             "Create a Data object for the given model.")
 
           .def(
@@ -279,11 +279,6 @@ namespace pinocchio
         return model.addJoint(
           parent_id, jmodel, joint_placement, joint_name, max_effort, max_velocity, min_config,
           max_config, friction, damping);
-      }
-
-      static Data createData(const Model & model)
-      {
-        return Data(model);
       }
 
       ///
