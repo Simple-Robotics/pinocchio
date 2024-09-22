@@ -11,6 +11,10 @@
 namespace pinocchio
 {
 
+  template<typename Scalar>
+  struct PGSContactSolverTpl;
+  typedef PGSContactSolverTpl<context::Scalar> PGSContactSolver;
+
   /// \brief Projected Gauss Siedel solver
   template<typename _Scalar>
   struct PGSContactSolverTpl : ContactSolverBaseTpl<_Scalar>
