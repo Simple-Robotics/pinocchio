@@ -27,7 +27,6 @@ namespace pinocchio
     typedef CoulombFrictionConeTpl<Scalar> CoulombFrictionCone;
     typedef Eigen::Matrix<Scalar, 2, 1> Vector2;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
-    // typedef Eigen::Matrix<Scalar,6,1> Vector6;
 
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       over_relax < Scalar(2) && over_relax > Scalar(0), "over_relax should lie in ]0,2[.")
