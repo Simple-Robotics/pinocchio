@@ -234,15 +234,16 @@ namespace pinocchio
       {
         VectorXs & dy = rhs;
         dy = y_ - y_previous;
-        proximal_metric = dy.template lpNorm<Eigen::Infinity>();
+        proximal_metric = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
         dual_feasibility_vector.noalias() = (tau * rho) * dy;
       }
 
       {
         VectorXs & dx = rhs;
         dx = x_ - x_previous;
+        proximal_metric = math::max(
+          dx.template lpNorm<Eigen::Infinity>(), proximal_metric); // check relative progress on x
         dual_feasibility_vector.noalias() += mu_prox * dx;
-        proximal_metric = math::max(dx.template lpNorm<Eigen::Infinity>(), proximal_metric);
       }
 
       //      delassus.applyOnTheRight(x_,dual_feasibility_vector);
