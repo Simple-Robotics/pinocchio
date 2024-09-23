@@ -242,7 +242,7 @@ namespace pinocchio
         VectorXs & dx = rhs;
         dx = x_ - x_previous;
         dual_feasibility_vector.noalias() += mu_prox * dx;
-        proximal_metric = std::max(dx.template lpNorm<Eigen::Infinity>(), proximal_metric);
+        proximal_metric = math::max(dx.template lpNorm<Eigen::Infinity>(), proximal_metric);
       }
 
       //      delassus.applyOnTheRight(x_,dual_feasibility_vector);
