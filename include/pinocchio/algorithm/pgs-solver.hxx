@@ -87,7 +87,7 @@ namespace pinocchio
           f_tangent *= mu_fz / f_tangent_norm;
 
         // Account for the f_tangent updated value
-        velocity.noalias() = G_block.template leftCols<2>() * (f_tangent - f_tangent_previous);
+        velocity.noalias() += G_block.template leftCols<2>() * (f_tangent - f_tangent_previous);
 
         // Compute problem feasibility
         Scalar contact_complementarity = cone.computeContactComplementarity(velocity, x_segment);
