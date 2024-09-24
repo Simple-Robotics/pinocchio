@@ -126,11 +126,12 @@ namespace pinocchio
     /// \param[in] v a dual vector.
     ///
     template<typename Vector3Like>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like)
-      computeNormalCorrection(const Eigen::MatrixBase<Vector3Like> & v) const
+    typename Eigen::Matrix<Scalar, 3, 1>
+    computeNormalCorrection(const Eigen::MatrixBase<Vector3Like> & v) const
     {
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(v.size() == 3);
+      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
 
       Vector3Plain res;
       res.template head<2>().setZero();
@@ -170,7 +171,7 @@ namespace pinocchio
     Scalar computeContactComplementarity(
       const Eigen::MatrixBase<Vector3Like1> & v, const Eigen::MatrixBase<Vector3Like2> & f) const
     {
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) Vector3Plain;
+      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
       return math::fabs(f.dot(Vector3Plain(v + computeNormalCorrection(v))));
     }
 
