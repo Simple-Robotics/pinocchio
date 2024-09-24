@@ -194,6 +194,11 @@ namespace pinocchio
       return 3;
     }
 
+    int size() const
+    {
+      return dim();
+    }
+
     /// \var Friction coefficient
     Scalar mu;
   }; // CoulombFrictionConeTpl
