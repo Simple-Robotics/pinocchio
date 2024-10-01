@@ -7,23 +7,44 @@
 
 #include <limits>
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
+#include "pinocchio/algorithm/constraints/box-set.hpp"
 
 namespace pinocchio
 {
 
-  template<typename _ConstraintSet>
+  template<typename _Scalar>
+  struct PGSConstraintProjectionStepBase
+  {
+    typedef _Scalar Scalar;
+
+    explicit PGSConstraintProjectionStepBase(const Scalar over_relax_value)
+    : over_relax_value(over_relax_value)
+    {
+    }
+
+    const Scalar over_relax_value;
+    Scalar complementarity;
+    Scalar dual_feasibility;
+    Scalar primal_feasibility;
+  }; // PGSConstraintProjectionBase
+
+  template<typename ConstraintSet>
   struct PGSConstraintProjectionStep
   {
-    typedef _ConstraintSet ConstraintSet;
-    typedef typename ConstraintSet::Scalar Scalar;
+  };
+
+  template<typename _Scalar>
+  struct PGSConstraintProjectionStep<CoulombFrictionConeTpl<_Scalar>>
+  : PGSConstraintProjectionStepBase<_Scalar>
+  {
+    typedef _Scalar Scalar;
+    typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
+    typedef PGSConstraintProjectionStepBase<Scalar> Base;
 
     PGSConstraintProjectionStep(const Scalar over_relax_value, const ConstraintSet & set)
-    : over_relax_value(over_relax_value)
+    : Base(over_relax_value)
     , set(set)
-    , complementarity(Scalar(-1))
-    , dual_feasibility(Scalar(-1))
-    , primal_feasibility(Scalar(0))
     {
     }
 
@@ -36,12 +57,13 @@ namespace pinocchio
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
-      const Eigen::MatrixBase<BlockType> & G_block,
+      const Eigen::EigenBase<BlockType> & G_block_,
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
       const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
     {
       typedef Eigen::Matrix<Scalar, 2, 1> Vector2;
 
+      auto & G_block = G_block_.derived();
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
@@ -77,7 +99,8 @@ namespace pinocchio
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
       const Eigen::MatrixBase<DualVectorType> & dual_vector)
     {
-      // TODO(jcarpent): change primal_feasibility and dual_feasibility
+      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
+      // The name should be inverted.
       this->primal_feasibility =
         Scalar(0); // always zero as the dual variable belongs to the friction cone.
       this->complementarity = this->set.computeContactComplementarity(primal_vector, dual_vector);
@@ -91,29 +114,116 @@ namespace pinocchio
       this->dual_feasibility = reprojection_residual.norm();
     }
 
-    const Scalar over_relax_value;
     const ConstraintSet & set;
-    Scalar complementarity;
-    Scalar dual_feasibility;
-    Scalar primal_feasibility;
 
-  }; // PGSConstraintProjectionStep
+  }; // PGSConstraintProjectionStep<CoulombFrictionConeTpl<_Scalar>>
+
+  template<typename _Scalar>
+  struct PGSConstraintProjectionStep<BoxSetTpl<_Scalar>> : PGSConstraintProjectionStepBase<_Scalar>
+  {
+    typedef _Scalar Scalar;
+    typedef BoxSetTpl<Scalar> ConstraintSet;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> Vector;
+    typedef PGSConstraintProjectionStepBase<Scalar> Base;
+
+    PGSConstraintProjectionStep(const Scalar over_relax_value, const ConstraintSet & set)
+    : Base(over_relax_value)
+    , set(set)
+    {
+    }
+
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::EigenBase<BlockType> & G_block_,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+      auto & G_block = G_block_.derived();
+      auto & primal_vector = primal_vector_.const_cast_derived();
+      auto & dual_vector = dual_vector_.const_cast_derived();
+
+      assert(
+        primal_vector.size() == dual_vector.size()
+        && "The two primal/dual vectors should be of the same size.");
+      assert(
+        primal_vector.size() == set.size()
+        && "The the primal vector should be of the same size than the box set.");
+      assert(
+        dual_vector.size() == set.size()
+        && "The the dual vector should be of the same size than the box set.");
+
+      const Eigen::DenseIndex size = set.size();
+      const auto & lb = set.lb();
+      const auto & ub = set.ub();
+
+      for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
+      {
+        Scalar & value = dual_vector.coeffRef(row_id);
+        const Scalar value_previous = value;
+        value -=
+          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * primal_vector[row_id];
+        value = math::max(lb[row_id], math::min(ub[row_id], value));
+        primal_vector.noalias() += G_block.col(row_id) * Scalar(value - value_previous);
+      }
+    }
+
+    /// \brief Compute the feasibility conditions associated with the optimization problem
+    template<typename PrimalVectorType, typename DualVectorType>
+    void computeFeasibility(
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector)
+    {
+      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
+      // The name should be inverted.
+      this->primal_feasibility =
+        Scalar(0); // always zero as the dual variable belongs to the constraint set.
+      this->complementarity = math::fabs(
+        primal_vector.dot(dual_vector)); // TODO(jcarpent): change for an individual treatment
+      //      assert(this->complementarity >= Scalar(0) && "The complementarity should be
+      //      positive");
+
+      const Eigen::DenseIndex size = set.size();
+      Scalar dual_feasibility = Scalar(0);
+
+      const auto & lb = set.lb();
+      const auto & ub = set.ub();
+      for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
+      {
+        // check whether the dual variable is reaching the lower or upper bound limits
+        if (lb[row_id] == dual_vector[row_id] || ub[row_id] == dual_vector[row_id])
+        {
+          dual_feasibility = math::max(dual_feasibility, math::fabs(primal_vector[row_id]));
+        }
+      }
+      this->dual_feasibility = dual_feasibility;
+    }
+
+    const ConstraintSet & set;
+
+  }; // PGSConstraintProjectionStep<BoxSetTpl<_Scalar>>
 
   template<typename _Scalar>
   template<
     typename MatrixLike,
     typename VectorLike,
-    typename ConstraintAllocator,
+    typename ConstraintSet,
+    typename ConstraintSetAllocator,
     typename VectorLikeOut>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
+    const std::vector<ConstraintSet, ConstraintSetAllocator> & cones,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
     const Scalar over_relax)
 
   {
-    typedef CoulombFrictionConeTpl<Scalar> CoulombFrictionCone;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
 
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -137,7 +247,12 @@ namespace pinocchio
     x = x_sol;
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
-    const Eigen::DenseIndex constraint_set_size_max = 3;
+    Eigen::DenseIndex constraint_set_size_max = 0;
+    for (const auto & set : cones)
+    {
+      constraint_set_size_max = std::max(constraint_set_size_max, Eigen::DenseIndex(set.size()));
+    }
+
     VectorX velocity_storage(constraint_set_size_max); // tmp variable
     for (; it < this->max_it; ++it)
     {
@@ -147,7 +262,7 @@ namespace pinocchio
       primal_feasibility = Scalar(0);
       for (size_t cone_id = 0; cone_id < nc; ++cone_id)
       {
-        const CoulombFrictionCone & cone = cones[cone_id];
+        const ConstraintSet & cone = cones[cone_id];
         const int constraint_set_size = cone.size();
         const Eigen::DenseIndex row_id = constraint_set_size * Eigen::DenseIndex(cone_id);
 
@@ -160,7 +275,7 @@ namespace pinocchio
         velocity.noalias() =
           G.middleRows(row_id, constraint_set_size) * x + g.segment(row_id, constraint_set_size);
 
-        PGSConstraintProjectionStep<CoulombFrictionCone> step(over_relax, cone);
+        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, cone);
         step.project(G_block, velocity, force);
         step.computeFeasibility(velocity, force);
 
