@@ -41,7 +41,7 @@ struct TestBoxTpl
     }
 
     const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
-    primal_solution = dual_solution = Eigen::VectorXd::Zero(constraint_size);
+    primal_solution = dual_solution = dual_solution_sparse = Eigen::VectorXd::Zero(constraint_size);
   }
 
   void operator()(
@@ -78,6 +78,18 @@ struct TestBoxTpl
     pgs_solver.setRelativePrecision(1e-14);
     has_converged = pgs_solver.solve(G, g, constraint_sets, dual_solution);
 
+    // Check with sparse view too
+    {
+      PGSContactSolver pgs_solver_sparse(int(delassus_matrix_plain.rows()));
+      const Eigen::SparseMatrix<double> G_sparse = delassus_matrix_plain.matrix().sparseView();
+      pgs_solver_sparse.setAbsolutePrecision(1e-10);
+      pgs_solver_sparse.setRelativePrecision(1e-14);
+      bool has_converged_sparse =
+        pgs_solver_sparse.solve(G_sparse, g, constraint_sets, dual_solution_sparse);
+      BOOST_CHECK(has_converged_sparse);
+      BOOST_CHECK(pgs_solver_sparse.getSolution().isApprox(pgs_solver.getSolution()));
+    }
+
     //    std::cout << "x_sol: " << x_sol.transpose() << std::endl;
 
     primal_solution = G * dual_solution + g;
@@ -108,7 +120,7 @@ struct TestBoxTpl
   std::vector<ConstraintSet> constraint_sets;
   Eigen::VectorXd v_next;
 
-  Eigen::VectorXd primal_solution, dual_solution;
+  Eigen::VectorXd primal_solution, dual_solution, dual_solution_sparse;
   Eigen::Vector3d f_tot;
   bool has_converged;
 };
