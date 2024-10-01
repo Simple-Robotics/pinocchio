@@ -21,7 +21,7 @@ namespace pinocchio
     };
   };
 
-  ///  \brief 3d Coulomb friction cone.
+  ///  \brief Box set defined by a lower and an upper bounds [lb;ub].
   template<typename _Scalar, int _Options>
   struct BoxSetTpl : SetBase<BoxSetTpl<_Scalar, _Options>>
   {
@@ -105,7 +105,16 @@ namespace pinocchio
     {
       return m_lb;
     }
+    Vector & lb()
+    {
+      return m_lb;
+    }
+
     const Vector & ub() const
+    {
+      return m_ub;
+    }
+    Vector & ub()
     {
       return m_ub;
     }
