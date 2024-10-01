@@ -35,18 +35,18 @@ namespace pinocchio
     /// \brief Constructor from a given size
     ///
     explicit BoxSetTpl(const Eigen::DenseIndex size)
-    : lb(Vector::Constant(size, -std::numeric_limits<Scalar>::infinity()))
-    , ub(Vector::Constant(size, +std::numeric_limits<Scalar>::infinity()))
+    : m_lb(Vector::Constant(size, -std::numeric_limits<Scalar>::infinity()))
+    , m_ub(Vector::Constant(size, +std::numeric_limits<Scalar>::infinity()))
     {
     }
 
     template<typename V1, typename V2>
     BoxSetTpl(const Eigen::MatrixBase<V1> & lb, const Eigen::MatrixBase<V2> & ub)
-    : lb(lb)
-    , ub(ub)
+    : m_lb(lb)
+    , m_ub(ub)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        (lb.array() <= ub.array()).all(), "Some components of lb are greater than ub");
+        (m_lb.array() <= m_ub.array()).all(), "Some components of lb are greater than ub");
     }
 
     /// \brief Copy constructor.
@@ -58,7 +58,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const BoxSetTpl & other) const
     {
-      return lb == other.lb && ub == other.ub;
+      return m_lb == other.m_lb && m_ub == other.m_ub;
     }
 
     /// \brief Difference  operator
@@ -87,31 +87,31 @@ namespace pinocchio
       project(const Eigen::MatrixBase<VectorLike> & x) const
     {
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike) VectorPlain;
-      return VectorPlain(x.array().max(lb.array()).min(ub.array()));
+      return VectorPlain(x.array().max(m_lb.array()).min(m_ub.array()));
     }
 
     /// \brief Returns the dimension of the box.
     int dim() const
     {
-      return lb.size();
+      return m_lb.size();
     }
 
     int size() const
     {
-      return lb.size();
+      return m_lb.size();
     }
 
-    const Vector & getLowerBound() const
+    const Vector & lb() const
     {
-      return lb;
+      return m_lb;
     }
-    const Vector & getUpperBound() const
+    const Vector & ub() const
     {
-      return ub;
+      return m_ub;
     }
 
   protected:
-    Vector lb, ub;
+    Vector m_lb, m_ub;
   }; // BoxSetTpl
 
 } // namespace pinocchio
