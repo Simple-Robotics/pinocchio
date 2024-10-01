@@ -967,16 +967,15 @@ namespace pinocchio
   ///
   /// \brief Computes the sum of the sizes of the constraints contained in the input
   /// `contact_models` vector.
-  template<typename Scalar, int Options, template<typename T> class Holder, class Allocator>
+  template<template<typename T> class Holder, class ConstraintModel, class ConstraintModelAllocator>
   Eigen::DenseIndex getTotalConstraintSize(
-    const std::vector<Holder<const RigidConstraintModelTpl<Scalar, Options>>, Allocator> &
-      contact_models)
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models)
   {
     Eigen::DenseIndex total_size = 0;
-    for (size_t i = 0; i < contact_models.size(); ++i)
+    for (const auto & wrapper : constraint_models)
     {
-      const RigidConstraintModel & contact_model = contact_models[i];
-      total_size += contact_model.size();
+      const ConstraintModel & constraint_model = wrapper;
+      total_size += constraint_model.size();
     }
 
     return total_size;
@@ -985,12 +984,11 @@ namespace pinocchio
   ///
   /// \brief Computes the sum of the sizes of the constraints contained in the input
   /// `contact_models` vector.
-  template<typename Scalar, int Options, class Allocator>
+  template<class ConstraintModel, class ConstraintModelAllocator>
   Eigen::DenseIndex getTotalConstraintSize(
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models)
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models)
   {
-    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar, Options>>
-      WrappedConstraintModelType;
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
