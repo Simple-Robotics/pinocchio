@@ -96,6 +96,11 @@ namespace pinocchio
       return lb.size();
     }
 
+    int size() const
+    {
+      return lb.size();
+    }
+
     const Vector & getLowerBound() const
     {
       return lb;
