@@ -36,6 +36,8 @@ namespace pinocchio
 
   template<typename _Scalar>
   struct CoulombFrictionConeTpl;
+  template<typename _Scalar, int _Options>
+  struct BoxSetTpl;
   template<typename _Scalar>
   struct DualCoulombFrictionConeTpl;
 
@@ -63,6 +65,7 @@ namespace pinocchio
 
     typedef CoulombFrictionConeTpl<Scalar> CoulombFrictionCone;
     typedef DualCoulombFrictionConeTpl<Scalar> DualCoulombFrictionCone;
+    typedef BoxSetTpl<Scalar, Options> BoxSet;
 
     typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;

@@ -145,6 +145,7 @@ namespace pinocchio
 
       typedef CoulombFrictionConeTpl<context::Scalar> CoulombFrictionCone;
       typedef DualCoulombFrictionConeTpl<context::Scalar> DualCoulombFrictionCone;
+      typedef BoxSetTpl<context::Scalar> BoxSet;
 
       typedef DelassusOperatorDenseTpl<Scalar, Options> DelassusOperatorDense;
       typedef DelassusOperatorSparseTpl<Scalar, Options> DelassusOperatorSparse;
