@@ -5,7 +5,7 @@
 #ifndef __pinocchio_algorithm_contact_jacobian_hpp__
 #define __pinocchio_algorithm_contact_jacobian_hpp__
 
-#include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
 
 namespace pinocchio
 {
@@ -25,15 +25,15 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void evalConstraints(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas);
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas);
 
   ///
   /// \brief Maps the constraint forces expressed in the constraint space to joint forces expressed
@@ -53,17 +53,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     typename ForceMatrix,
     class ForceAllocator>
   void mapConstraintForcesToJointForces(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
     std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces);
 
@@ -85,17 +85,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     class MotionAllocator,
     typename MotionMatrix>
   void mapJointMotionsToConstraintMotions(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
     const Eigen::MatrixBase<MotionMatrix> & constraint_motions);
 
@@ -117,13 +117,15 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    typename ConstraintModelDerived,
+    typename ConstraintDataDerived,
     typename Matrix6Like>
   PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
   void getConstraintJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const RigidConstraintModelTpl<Scalar, Options> & constraint_model,
-    RigidConstraintDataTpl<Scalar, Options> & constraint_data,
+    const ConstraintModelBase<ConstraintModelDerived> & constraint_model,
+    ConstraintDataBase<ConstraintDataDerived> & constraint_data,
     const Eigen::MatrixBase<Matrix6Like> & J);
 
   ///
@@ -147,16 +149,15 @@ namespace pinocchio
     template<typename T>
     class Holder,
     typename DynamicMatrixLike,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void getConstraintsJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<
-      Holder<const RigidConstraintModelTpl<Scalar, Options>>,
-      ConstraintDataAllocator> & constraint_model,
-    std::vector<Holder<RigidConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
-      constraint_data,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_model,
+    std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & constraint_data,
     const Eigen::MatrixBase<DynamicMatrixLike> & J);
 
   ///
@@ -178,14 +179,15 @@ namespace pinocchio
     template<typename, int>
     class JointCollectionTpl,
     typename DynamicMatrixLike,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void getConstraintsJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_model,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & constraint_data,
+    const std::vector<ConstraintModel, ConstraintDataAllocator> & constraint_model,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_data,
     const Eigen::MatrixBase<DynamicMatrixLike> & J);
 
   ///
@@ -206,17 +208,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     typename RhsMatrixType,
     typename ResultMatrixType>
   void evalConstraintJacobianTransposeProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<RhsMatrixType> & rhs,
     const Eigen::MatrixBase<ResultMatrixType> & res);
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #include "pinocchio/spatial/fwd.hpp"
@@ -14,11 +14,13 @@ namespace pinocchio
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
+    context::RigidConstraintModel,
+    context::RigidConstraintData,
     context::MatrixXs>(
     const context::Model &,
     const context::Data &,
-    const context::RigidConstraintModel &,
-    context::RigidConstraintData &,
+    const ConstraintModelBase<context::RigidConstraintModel> &,
+    ConstraintDataBase<context::RigidConstraintData> &,
     const Eigen::MatrixBase<context::MatrixXs> &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void getConstraintsJacobian<
@@ -26,7 +28,9 @@ namespace pinocchio
     context::Options,
     JointCollectionDefaultTpl,
     context::MatrixXs,
+    context::RigidConstraintModel,
     typename context::RigidConstraintModelVector::allocator_type,
+    context::RigidConstraintData,
     typename context::RigidConstraintDataVector::allocator_type>(
     const context::Model &,
     const context::Data &,

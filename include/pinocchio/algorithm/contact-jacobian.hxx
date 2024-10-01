@@ -16,23 +16,23 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void evalConstraints(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas)
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
     const size_t num_ee = constraint_models.size();
 
     for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
     {
-      const RigidConstraintModel & cmodel = constraint_models[ee_id];
-      RigidConstraintData & cdata = constraint_datas[ee_id];
+      const ConstraintModel & cmodel = constraint_models[ee_id];
+      ConstraintData & cdata = constraint_datas[ee_id];
 
       cmodel.calc(model, data, cdata);
     }
@@ -43,17 +43,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     typename ForceMatrix,
     class ForceAllocator>
   void mapConstraintForcesToJointForces(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
     std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces)
   {
@@ -68,8 +68,8 @@ namespace pinocchio
 
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const RigidConstraintModel & cmodel = constraint_models[ee_id];
-      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      const ConstraintModel & cmodel = constraint_models[ee_id];
+      const ConstraintData & cdata = constraint_datas[ee_id];
 
       const auto constraint_force =
         constraint_forces.template segment<3>(Eigen::DenseIndex(ee_id * 3));
@@ -82,17 +82,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     class MotionAllocator,
     typename MotionMatrix>
   void mapJointMotionsToConstraintMotions(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
     const Eigen::MatrixBase<MotionMatrix> & constraint_motions_)
   {
@@ -105,8 +105,8 @@ namespace pinocchio
 
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const RigidConstraintModel & cmodel = constraint_models[ee_id];
-      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      const ConstraintModel & cmodel = constraint_models[ee_id];
+      const ConstraintData & cdata = constraint_datas[ee_id];
 
       auto constraint_motion = constraint_motions.template segment<3>(Eigen::DenseIndex(ee_id * 3));
       cmodel.mapJointMotionsToConstraintMotion(
@@ -119,131 +119,26 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
-    typename Matrix6or3Like>
+    typename ConstraintModel,
+    typename ConstraintData,
+    typename JacobianMatrixLike>
   void getConstraintJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const RigidConstraintModelTpl<Scalar, Options> & constraint_model,
-    RigidConstraintDataTpl<Scalar, Options> & constraint_data,
-    const Eigen::MatrixBase<Matrix6or3Like> & J_)
+    const ConstraintModelBase<ConstraintModel> & constraint_model_,
+    ConstraintDataBase<ConstraintData> & constraint_data_,
+    const Eigen::MatrixBase<JacobianMatrixLike> & J_)
   {
+    JacobianMatrixLike & J = J_.const_cast_derived();
+    const auto & constraint_model = constraint_model_.derived();
+    auto & constraint_data = constraint_data_.derived();
+
     assert(model.check(data) && "data is not consistent with model.");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_model.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
 
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef typename Model::Motion Motion;
-    typedef typename Model::SE3 SE3;
-    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-    Matrix6or3Like & J = J_.const_cast_derived();
-
-    typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
-    const typename ConstraintModel::BooleanVector & colwise_joint1_sparsity =
-      constraint_model.colwise_joint1_sparsity;
-    const typename ConstraintModel::BooleanVector & colwise_joint2_sparsity =
-      constraint_model.colwise_joint2_sparsity;
-    const typename ConstraintModel::EigenIndexVector & colwise_span_indexes =
-      constraint_model.colwise_span_indexes;
-
-    SE3 & oMc1 = constraint_data.oMc1;
-    oMc1 = data.oMi[constraint_model.joint1_id] * constraint_model.joint1_placement;
-    SE3 & oMc2 = constraint_data.oMc2;
-    oMc2 = data.oMi[constraint_model.joint2_id] * constraint_model.joint2_placement;
-    SE3 & c1Mc2 = constraint_data.c1Mc2;
-    c1Mc2 = oMc1.actInv(oMc2);
-
-    for (size_t k = 0; k < colwise_span_indexes.size(); ++k)
-    {
-      const Eigen::DenseIndex col_id = colwise_span_indexes[k];
-
-      const int sign = colwise_joint1_sparsity[col_id] != colwise_joint2_sparsity[col_id]
-                         ? colwise_joint1_sparsity[col_id] ? +1 : -1
-                         : 0; // specific case for CONTACT_3D
-
-      typedef typename Data::Matrix6x::ConstColXpr ColXprIn;
-      const ColXprIn Jcol_in = data.J.col(col_id);
-      const MotionRef<const ColXprIn> Jcol_motion_in(Jcol_in);
-
-      typedef typename Matrix6or3Like::ColXpr ColXprOut;
-      ColXprOut Jcol_out = J.col(col_id);
-
-      switch (constraint_model.type)
-      {
-      case CONTACT_3D: {
-        switch (constraint_model.reference_frame)
-        {
-        case WORLD: {
-          Jcol_out.noalias() = Jcol_motion_in.linear() * Scalar(sign);
-          break;
-        }
-        case LOCAL: {
-          if (sign == 0)
-          {
-            const Motion Jcol_local1(oMc1.actInv(Jcol_motion_in)); // TODO: simplify computations
-            const Motion Jcol_local2(oMc2.actInv(Jcol_motion_in)); // TODO: simplify computations
-            Jcol_out.noalias() = Jcol_local1.linear() - c1Mc2.rotation() * Jcol_local2.linear();
-          }
-          else if (sign == 1)
-          {
-            const Motion Jcol_local(oMc1.actInv(Jcol_motion_in));
-            Jcol_out.noalias() = Jcol_local.linear();
-          }
-          else // sign == -1
-          {
-            const Motion Jcol_local(oMc2.actInv(Jcol_motion_in)); // TODO: simplify computations
-            Jcol_out.noalias() =
-              -c1Mc2.rotation() * Jcol_local.linear(); // TODO: simplify computations
-          }
-          break;
-        }
-        case LOCAL_WORLD_ALIGNED: {
-          if (sign == 0)
-          {
-            Jcol_out.noalias() =
-              (oMc2.translation() - oMc1.translation()).cross(Jcol_motion_in.angular());
-          }
-          else
-          {
-            if (sign == 1)
-              Jcol_out.noalias() =
-                Jcol_motion_in.linear() - oMc1.translation().cross(Jcol_motion_in.angular());
-            else
-              Jcol_out.noalias() =
-                -Jcol_motion_in.linear() + oMc2.translation().cross(Jcol_motion_in.angular());
-          }
-          break;
-        }
-        }
-        break;
-      }
-      case CONTACT_6D: {
-        MotionRef<ColXprOut> Jcol_motion_out(Jcol_out);
-        switch (constraint_model.reference_frame)
-        {
-        case WORLD: {
-          Jcol_motion_out = Scalar(sign) * Jcol_motion_in;
-          break;
-        }
-        case LOCAL: {
-          Jcol_motion_out = Scalar(sign) * oMc1.actInv(Jcol_motion_in);
-          break;
-        }
-        case LOCAL_WORLD_ALIGNED: {
-          Motion Jcol_local_world_aligned(Jcol_motion_in);
-          Jcol_local_world_aligned.linear() -=
-            oMc1.translation().cross(Jcol_local_world_aligned.angular());
-          Jcol_motion_out = Scalar(sign) * Jcol_local_world_aligned;
-          break;
-        }
-        }
-        break;
-      }
-
-      default:
-        break;
-      }
-    }
+    constraint_model.calc(model, data, constraint_data);
+    constraint_model.jacobian(model, data, constraint_data, J);
   }
 
   template<
@@ -254,20 +149,19 @@ namespace pinocchio
     template<typename T>
     class Holder,
     typename DynamicMatrixLike,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void getConstraintsJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<
-      Holder<const RigidConstraintModelTpl<Scalar, Options>>,
-      ConstraintModelAllocator> & constraint_models,
-    std::vector<Holder<RigidConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
+    std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<DynamicMatrixLike> & J_)
   {
-    typedef RigidConstraintModelTpl<Scalar, Options> ContraintModel;
-    typedef RigidConstraintDataTpl<Scalar, Options> ContraintData;
+    typedef ConstraintModel ContraintModel;
+    typedef ConstraintData ContraintData;
 
     const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_size);
@@ -292,26 +186,24 @@ namespace pinocchio
     template<typename, int>
     class JointCollectionTpl,
     typename DynamicMatrixLike,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator>
   void getConstraintsJacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<DynamicMatrixLike> & J_)
   {
-    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar, Options>>
-      WrappedConstraintModelType;
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar, Options>>
-      WrappedConstraintDataType;
+    typedef std::reference_wrapper<ConstraintData> WrappedConstraintDataType;
     typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
 
     WrappedConstraintDataVector wrapped_constraint_datas(
@@ -369,17 +261,17 @@ namespace pinocchio
     int Options,
     template<typename, int>
     class JointCollectionTpl,
+    class ConstraintModel,
     class ConstraintModelAllocator,
+    class ConstraintData,
     class ConstraintDataAllocator,
     typename RhsMatrixType,
     typename ResultMatrixType>
   void evalConstraintJacobianTransposeProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      constraint_models,
-    const std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      constraint_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<RhsMatrixType> & rhs,
     const Eigen::MatrixBase<ResultMatrixType> & res_)
   {
@@ -401,8 +293,8 @@ namespace pinocchio
 
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const RigidConstraintModel & cmodel = constraint_models[ee_id];
-      const RigidConstraintData & cdata = constraint_datas[ee_id];
+      const ConstraintModel & cmodel = constraint_models[ee_id];
+      const ConstraintData & cdata = constraint_datas[ee_id];
 
       const auto constraint_force = rhs.template middleRows<3>(Eigen::DenseIndex(ee_id * 3));
       cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
