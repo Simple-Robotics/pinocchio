@@ -140,8 +140,8 @@ namespace pinocchio
       Data data(model);
 
       // // Get limits
-      VectorXs dq_max = model.velocityLimit;
-      VectorXs dq_min = -model.velocityLimit;
+      VectorXs dq_max = model.upperVelocityLimit;
+      VectorXs dq_min = model.lowerVelocityLimit;
 
       double time_pin = 1; // pinocchio unit time in s used in integrate and difference
       double time_percent = time_horizon / time_pin;

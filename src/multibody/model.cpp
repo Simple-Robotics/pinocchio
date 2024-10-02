@@ -23,6 +23,11 @@ namespace pinocchio
     const context::VectorXs &,
     const context::VectorXs &,
     const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
     const context::VectorXs &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex
@@ -33,6 +38,17 @@ namespace pinocchio
     const std::string &,
     const context::VectorXs &,
     const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &,
+    const context::VectorXs &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex
+  ModelTpl<context::Scalar, context::Options, JointCollectionDefaultTpl>::addJoint(
+    const JointIndex,
+    const JointModel &,
+    const SE3 &,
+    const std::string &,
     const context::VectorXs &,
     const context::VectorXs &,
     const context::VectorXs &,

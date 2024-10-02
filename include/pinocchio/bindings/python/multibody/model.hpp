@@ -108,10 +108,16 @@ namespace pinocchio
             "rotorInertia", &Model::rotorInertia, "Vector of rotor inertia parameters.")
           .def_readwrite(
             "rotorGearRatio", &Model::rotorGearRatio, "Vector of rotor gear ratio parameters.")
-          .def_readwrite("friction", &Model::friction, "Vector of joint friction parameters.")
+          .def_readwrite("friction", &Model::upperDryFrictionLimit, "Deprecated member. Vector of joint friction parameters.")
+          .def_readwrite("upperDryFrictionLimit", &Model::upperDryFrictionLimit, "Vector of maximum joint friction.")
+          .def_readwrite("lowerDryFrictionLimit", &Model::lowerDryFrictionLimit, "Vector of minimum joint friction.")
           .def_readwrite("damping", &Model::damping, "Vector of joint damping parameters.")
-          .def_readwrite("effortLimit", &Model::effortLimit, "Joint max effort.")
-          .def_readwrite("velocityLimit", &Model::velocityLimit, "Joint max velocity.")
+          .def_readwrite("effortLimit", &Model::upperEffortLimit, "Deprecated member. Joint max effort.")
+          .def_readwrite("upperEffortLimit", &Model::upperEffortLimit, "Joint max effort.")
+          .def_readwrite("lowerEffortLimit", &Model::lowerEffortLimit, "Joint min effort.")
+          .def_readwrite("velocityLimit", &Model::upperVelocityLimit, "Deprecated member. Joint max velocity.")
+          .def_readwrite("lowerVelocityLimit", &Model::lowerVelocityLimit, "Joint min velocity.")
+          .def_readwrite("upperVelocityLimit", &Model::upperVelocityLimit, "Joint max velocity.")
           .def_readwrite(
             "lowerPositionLimit", &Model::lowerPositionLimit, "Limit for joint lower position.")
           .def_readwrite(
@@ -151,8 +157,8 @@ namespace pinocchio
           .def(
             "addJoint", &ModelPythonVisitor::addJoint2,
             bp::args(
-              "self", "parent_id", "joint_model", "joint_placement", "joint_name", "max_effort",
-              "max_velocity", "min_config", "max_config", "friction", "damping"),
+              "self", "parent_id", "joint_model", "joint_placement", "joint_name", "min_effort", "max_effort", "min_velocity",
+              "max_velocity", "min_config", "max_config", "min_friction", "max_friction", "damping"),
             "Adds a joint to the kinematic tree with given bounds. The joint is defined by its "
             "placement relative to its parent joint and its name.\n"
             "This signature also takes as input effort, velocity limits as well as the bounds on "
@@ -269,16 +275,19 @@ namespace pinocchio
         const JointModel & jmodel,
         const SE3 & joint_placement,
         const std::string & joint_name,
+        const VectorXs & min_effort,
         const VectorXs & max_effort,
+        const VectorXs & min_velocity,
         const VectorXs & max_velocity,
         const VectorXs & min_config,
         const VectorXs & max_config,
-        const VectorXs & friction,
+        const VectorXs & min_friction,
+        const VectorXs & max_friction,
         const VectorXs & damping)
       {
         return model.addJoint(
-          parent_id, jmodel, joint_placement, joint_name, max_effort, max_velocity, min_config,
-          max_config, friction, damping);
+          parent_id, jmodel, joint_placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+          max_config, min_friction, max_friction, damping);
       }
 
       ///

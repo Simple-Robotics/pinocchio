@@ -1139,8 +1139,8 @@ BOOST_AUTO_TEST_CASE(compare_to_urdf)
   BOOST_CHECK(model_urdf.armature.size() == model_m.armature.size());
 
   BOOST_CHECK(model_urdf.armature == model_m.armature);
-  BOOST_CHECK(model_urdf.friction.size() == model_m.friction.size());
-  BOOST_CHECK(model_urdf.friction == model_m.friction);
+  BOOST_CHECK(model_urdf.upperDryFrictionLimit.size() == model_m.upperDryFrictionLimit.size());
+  BOOST_CHECK(model_urdf.upperDryFrictionLimit == model_m.upperDryFrictionLimit);
 
   BOOST_CHECK(model_urdf.damping.size() == model_m.damping.size());
 
@@ -1154,8 +1154,8 @@ BOOST_AUTO_TEST_CASE(compare_to_urdf)
 
   BOOST_CHECK(model_urdf.rotorGearRatio == model_m.rotorGearRatio);
 
-  BOOST_CHECK(model_urdf.effortLimit.size() == model_m.effortLimit.size());
-  BOOST_CHECK(model_urdf.effortLimit == model_m.effortLimit);
+  BOOST_CHECK(model_urdf.upperEffortLimit.size() == model_m.upperEffortLimit.size());
+  BOOST_CHECK(model_urdf.upperEffortLimit == model_m.upperEffortLimit);
   // Cannot test velocity limit since it does not exist in mjcf
 
   BOOST_CHECK(model_urdf.lowerPositionLimit.size() == model_m.lowerPositionLimit.size());
