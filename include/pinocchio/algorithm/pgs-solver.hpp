@@ -31,8 +31,8 @@ namespace pinocchio
     }
 
     ///
-    /// \brief Solve the constrained conic problem composed of problem data (G,g,cones) and starting
-    /// from the initial guess.
+    /// \brief Solve the constrained problem composed of problem data (G,g,constraint_sets) and
+    /// starting from the initial guess.
     ///
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
@@ -50,7 +50,7 @@ namespace pinocchio
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<ConstraintSet, ConstraintSetAllocator> & sets,
+      const std::vector<ConstraintSet, ConstraintSetAllocator> & constraint_sets,
       const Eigen::DenseBase<VectorLikeOut> & x,
       const Scalar over_relax = Scalar(1));
 

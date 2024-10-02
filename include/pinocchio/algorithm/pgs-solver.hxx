@@ -227,7 +227,7 @@ namespace pinocchio
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<ConstraintSet, ConstraintSetAllocator> & cones,
+    const std::vector<ConstraintSet, ConstraintSetAllocator> & constraint_sets,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
     const Scalar over_relax)
 
@@ -241,7 +241,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.cols(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(x_sol.size(), this->getProblemSize());
 
-    const size_t nc = cones.size(); // num constraints
+    const size_t nc = constraint_sets.size(); // num constraints
 
     int it = 0;
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
@@ -256,7 +256,7 @@ namespace pinocchio
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
     Eigen::DenseIndex constraint_set_size_max = 0;
-    for (const auto & set : cones)
+    for (const auto & set : constraint_sets)
     {
       constraint_set_size_max = std::max(constraint_set_size_max, Eigen::DenseIndex(set.size()));
     }
@@ -268,11 +268,11 @@ namespace pinocchio
       complementarity = Scalar(0);
       dual_feasibility = Scalar(0);
       primal_feasibility = Scalar(0);
-      for (size_t cone_id = 0; cone_id < nc; ++cone_id)
+      for (size_t set_id = 0; set_id < nc; ++set_id)
       {
-        const ConstraintSet & cone = cones[cone_id];
-        const int constraint_set_size = cone.size();
-        const Eigen::DenseIndex row_id = constraint_set_size * Eigen::DenseIndex(cone_id);
+        const ConstraintSet & set = constraint_sets[set_id];
+        const int constraint_set_size = set.size();
+        const Eigen::DenseIndex row_id = constraint_set_size * Eigen::DenseIndex(set_id);
 
         const auto G_block = G.block(row_id, row_id, constraint_set_size, constraint_set_size);
         auto force = x.segment(row_id, constraint_set_size);
@@ -283,7 +283,7 @@ namespace pinocchio
         velocity.noalias() =
           G.middleRows(row_id, constraint_set_size) * x + g.segment(row_id, constraint_set_size);
 
-        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, cone);
+        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, set);
         step.project(G_block, velocity, force);
         step.computeFeasibility(velocity, force);
 

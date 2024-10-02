@@ -40,12 +40,14 @@ namespace pinocchio
         .def(ContactSolverBasePythonVisitor<Solver>())
         .def(
           "solve", solve_wrapper<context::MatrixXs>,
-          (bp::args("self", "G", "g", "cones", "x"), (bp::arg("over_relax") = context::Scalar(1))),
+          (bp::args("self", "G", "g", "constraint_sets", "x"),
+           (bp::arg("over_relax") = context::Scalar(1))),
           "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
           "from the initial guess.")
         .def(
           "solve", solve_wrapper<context::SparseMatrix>,
-          (bp::args("self", "G", "g", "cones", "x"), (bp::arg("over_relax") = context::Scalar(1))),
+          (bp::args("self", "G", "g", "constraint_sets", "x"),
+           (bp::arg("over_relax") = context::Scalar(1))),
           "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
           "from the initial guess.");
 
