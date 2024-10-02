@@ -29,6 +29,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-dynamics.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-problem-data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/bilateral-point-constraint.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/bilateral-weld-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/coulomb-friction-cone.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-base.hpp
@@ -36,6 +38,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraints.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-patch-constraint.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-point-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hxx
