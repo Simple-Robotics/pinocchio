@@ -7,7 +7,7 @@
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
 
@@ -72,7 +72,6 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian_operations)
 
       BOOST_CHECK(res.isApprox(res_ref));
     }
-
 
     // Alternative way to compute the Jacobians
     {
