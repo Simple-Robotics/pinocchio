@@ -474,6 +474,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/proximal.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/algorithms.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/coulomb-friction-cone.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/context.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/pybind11-all.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/pybind11.hpp
