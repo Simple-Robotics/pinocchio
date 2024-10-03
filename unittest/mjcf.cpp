@@ -1091,6 +1091,108 @@ BOOST_AUTO_TEST_CASE(build_model_no_root_joint)
   BOOST_CHECK_EQUAL(model_m.nq, 29);
 }
 
+BOOST_AUTO_TEST_CASE(slide_joint_limits)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="model_PX">
+                <worldbody>
+                    <body name="link0">
+                        <body name="link1" pos="0 0 0">
+                            <joint name="joint1" type="slide" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                        </body>
+                    </body>
+                </worldbody>
+            </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
+  min_dry_friction << -11.6;
+  Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
+  max_dry_friction << 11.6;
+  Eigen::VectorXd min_effort(model_m.lowerEffortLimit);
+  min_effort << 1.5;
+  Eigen::VectorXd max_effort(model_m.upperEffortLimit);
+  max_effort << 4.8;
+
+  BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
+  BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
+  BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
+  BOOST_CHECK(max_effort == model_m.upperEffortLimit);
+}
+
+BOOST_AUTO_TEST_CASE(hinge_joint_limits)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="model_PX">
+                <worldbody>
+                    <body name="link0">
+                        <body name="link1" pos="0 0 0">
+                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                        </body>
+                    </body>
+                </worldbody>
+            </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
+  min_dry_friction << -11.6;
+  Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
+  max_dry_friction << 11.6;
+  Eigen::VectorXd min_effort(model_m.lowerEffortLimit);
+  min_effort << 1.5;
+  Eigen::VectorXd max_effort(model_m.upperEffortLimit);
+  max_effort << 4.8;
+
+  BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
+  BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
+  BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
+  BOOST_CHECK(max_effort == model_m.upperEffortLimit);
+}
+
+BOOST_AUTO_TEST_CASE(hinge_and_slide_joints_limits)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="model_PX">
+                <worldbody>
+                    <body name="link0">
+                        <body name="link1" pos="0 0 0">
+                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                            <body name="link2" pos="0 0 0">
+                              <joint name="joint2" type="slide" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="-6.87 -4.8" frictionloss="0.17"/>
+                            </body>
+                        </body>
+                    </body>
+                </worldbody>
+            </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
+  min_dry_friction << -11.6, -0.17;
+  Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
+  max_dry_friction << 11.6, 0.17;
+  Eigen::VectorXd min_effort(model_m.lowerEffortLimit);
+  min_effort << 1.5, -6.87;
+  Eigen::VectorXd max_effort(model_m.upperEffortLimit);
+  max_effort << 4.8, -4.8;
+
+  BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
+  BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
+  BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
+  BOOST_CHECK(max_effort == model_m.upperEffortLimit);
+}
+
 #ifdef PINOCCHIO_WITH_URDFDOM
 /// @brief Test all the data of the humanoid model (Need to find the urdf yet)
 /// @param
