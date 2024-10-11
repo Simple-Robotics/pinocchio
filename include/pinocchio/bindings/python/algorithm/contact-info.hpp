@@ -65,6 +65,7 @@ namespace pinocchio
         typename RigidConstraintModel::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
 
       typedef ModelTpl<Scalar, RigidConstraintModel::Options, JointCollectionDefaultTpl> Model;
+      typedef DataTpl<Scalar, RigidConstraintModel::Options, JointCollectionDefaultTpl> Data;
 
     public:
       template<class PyClass>
@@ -126,7 +127,11 @@ namespace pinocchio
           .def(
             "createData", &RigidConstraintModelPythonVisitor::createData,
             "Create a Data object for the given model.")
-          .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>());
+          .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>())
+          .def(
+            "calc", (void(Self::*)(const Model &, const Data &, ContactData &) const) & Self::calc,
+            bp::args("self", "model", "data", "constraint_data"))
+          .def("jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"));
       }
 
       static void expose()
@@ -145,6 +150,14 @@ namespace pinocchio
       static ContactData createData(const Self & self)
       {
         return ContactData(self);
+      }
+
+      static context::MatrixXs jacobian(
+        const Self & self, const Model & model, const Data & data, ContactData & constraint_data)
+      {
+        context::MatrixXs res(self.size(), model.nv);
+        self.jacobian(model, data, constraint_data, res);
+        return res;
       }
     };
 
