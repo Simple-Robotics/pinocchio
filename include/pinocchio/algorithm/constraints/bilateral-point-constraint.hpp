@@ -10,6 +10,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
+#include "pinocchio/algorithm/constraints/unbounded-set.hpp"
 #include "pinocchio/algorithm/constraints/point-constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/point-constraint-data-base.hpp"
 
@@ -26,14 +27,15 @@ namespace pinocchio
   struct traits<BilateralPointConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
-    typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
 
     enum
     {
       Options = _Options
     };
+
     typedef BilateralPointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -46,6 +48,7 @@ namespace pinocchio
     };
     typedef BilateralPointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
   };
 
   ///
@@ -69,6 +72,7 @@ namespace pinocchio
 
     typedef BilateralPointConstraintModelTpl ConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
@@ -213,6 +217,14 @@ namespace pinocchio
     {
       return !(*this == other);
     }
+
+    const ConstraintSet & set() const
+    {
+      return m_set;
+    }
+
+  protected:
+    ConstraintSet m_set = ConstraintSet(3);
 
   }; // struct BilateralPointConstraintModelTpl<_Scalar,_Options>
 
