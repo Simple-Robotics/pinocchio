@@ -23,9 +23,19 @@ namespace pinocchio
     typedef DualCoulombFrictionConeTpl<Scalar> DualCone;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
 
+    ///
     /// \brief Default constructor
     ///
-    /// \param[in] mu Friction coefficient
+    CoulombFrictionConeTpl()
+    : mu(+std::numeric_limits<Scalar>::infinity())
+    {
+    }
+
+    ///
+    /// \brief Constructor from a friction coefficient mu
+    ///
+    /// \param[in] mu Friction coefficient.
+    ///
     explicit CoulombFrictionConeTpl(const Scalar mu)
     : mu(mu)
     {
@@ -210,9 +220,19 @@ namespace pinocchio
     typedef _Scalar Scalar;
     typedef CoulombFrictionConeTpl<Scalar> DualCone;
 
+    ///
     /// \brief Default constructor
     ///
-    /// \param[in] mu Friction coefficient
+    DualCoulombFrictionConeTpl()
+    : mu(+std::numeric_limits<Scalar>::infinity())
+    {
+    }
+
+    ///
+    /// \brief Constructor from a friction coefficient mu
+    ///
+    /// \param[in] mu Friction coefficient.
+    ///
     explicit DualCoulombFrictionConeTpl(const Scalar mu)
     : mu(mu)
     {

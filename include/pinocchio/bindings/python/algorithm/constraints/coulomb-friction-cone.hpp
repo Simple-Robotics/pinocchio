@@ -26,7 +26,9 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<const Scalar &>(bp::args("self", "mu"), "Default constructor"))
+        cl.def(bp::init<>(bp::arg("self"), "Default constructor"))
+          .def(bp::init<const Scalar &>(
+            bp::args("self", "mu"), "Constructor from a given friction coefficient"))
           .def(bp::init<const Self &>(bp::args("self", "other"), "Copy constructor"))
 
           .def_readwrite("mu", &Self::mu, "Friction coefficient.")
@@ -85,7 +87,9 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<const Scalar &>(bp::args("self", "mu"), "Default constructor"))
+        cl.def(bp::init<>(bp::arg("self"), "Default constructor"))
+          .def(bp::init<const Scalar &>(
+            bp::args("self", "mu"), "Constructor from a given friction coefficient"))
           .def(bp::init<const Self &>(bp::args("self", "other"), "Copy constructor"))
 
           .def_readwrite("mu", &Self::mu, "Friction coefficient.")
