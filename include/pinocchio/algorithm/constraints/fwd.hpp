@@ -24,6 +24,13 @@ namespace pinocchio
   struct FrictionalJointConstraintDataTpl;
   typedef FrictionalJointConstraintDataTpl<context::Scalar> FrictionalJointConstraintData;
 
+  template<typename Scalar, int Options = 0>
+  struct BilateralPointConstraintModelTpl;
+  typedef BilateralPointConstraintModelTpl<context::Scalar> BilateralPointConstraintModel;
+  template<typename Scalar, int Options = 0>
+  struct BilateralPointConstraintDataTpl;
+  typedef BilateralPointConstraintDataTpl<context::Scalar> BilateralPointConstraintData;
+
   template<typename _Scalar, int _Options>
   struct ConstraintCollectionTpl
   {
