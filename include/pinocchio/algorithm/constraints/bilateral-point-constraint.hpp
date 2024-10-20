@@ -5,10 +5,6 @@
 #ifndef __pinocchio_algorithm_constraints_bilateral_point_constraint_hpp__
 #define __pinocchio_algorithm_constraints_bilateral_point_constraint_hpp__
 
-#include <algorithm>
-
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/unbounded-set.hpp"
 #include "pinocchio/algorithm/constraints/point-constraint-model-base.hpp"
