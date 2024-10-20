@@ -295,6 +295,7 @@ add_pinocchio_unit_test(contact-cholesky)
 add_pinocchio_unit_test(classic-acceleration)
 add_pinocchio_unit_test(coulomb-friction-cone)
 add_pinocchio_unit_test(box-set)
+add_pinocchio_unit_test(unbounded-set)
 
 # Solvers
 add_pinocchio_unit_test(pgs-solver)
