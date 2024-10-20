@@ -69,6 +69,10 @@ namespace pinocchio
   struct BoxSetTpl;
   typedef BoxSetTpl<context::Scalar> BoxSet;
 
+  template<typename Scalar, int Options = 0>
+  struct UnboundedSetTpl;
+  typedef UnboundedSetTpl<context::Scalar> UnboundedSet;
+
   // Convex sets
   template<typename Scalar>
   struct CoulombFrictionConeTpl;
