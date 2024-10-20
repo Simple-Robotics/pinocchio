@@ -25,7 +25,7 @@ namespace pinocchio
       return static_cast<const Derived &>(*this);
     }
 
-    int dim() const
+    Eigen::DenseIndex dim() const
     {
       return derived().dim();
     }

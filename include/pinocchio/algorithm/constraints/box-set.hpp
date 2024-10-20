@@ -91,12 +91,12 @@ namespace pinocchio
     }
 
     /// \brief Returns the dimension of the box.
-    int dim() const
+    Eigen::DenseIndex dim() const
     {
       return m_lb.size();
     }
 
-    int size() const
+    Eigen::DenseIndex size() const
     {
       return m_lb.size();
     }
