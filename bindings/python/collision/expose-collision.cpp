@@ -50,20 +50,12 @@ namespace pinocchio
       bp::def(
         "computeCollision",
         static_cast<bool (*)(
-          const GeometryModel &, GeometryData &, const PairIndex, fcl::CollisionRequest &, bool)>(
+          const GeometryModel &, GeometryData &, const PairIndex, fcl::CollisionRequest &)>(
           computeCollision),
-        (bp::args("geometry_model", "geometry_data", "pair_index", "collision_request"),
-         bp::arg("compute_patch_info") = true),
+        (bp::args("geometry_model", "geometry_data", "pair_index", "collision_request")),
         "Check if the collision objects of a collision pair for a given Geometry Model and Data "
         "are in collision.\n"
         "The collision pair is given by the two index of the collision objects.");
-
-      bp::def(
-        "computeContactPatch",
-        static_cast<void (*)(const GeometryModel &, GeometryData &, const PairIndex)>(
-          computeContactPatch),
-        bp::args("geometry_model", "geometry_data", "pair_index"),
-        "Compute the contact patch info associated with the collision pair given by pair_id.");
 
       bp::def(
         "computeCollision",
@@ -87,6 +79,21 @@ namespace pinocchio
          bp::arg("q"), bp::arg("stop_at_first_collision") = false),
         "Update the geometry for a given configuration and "
         "determine if all collision pairs are effectively in collision or not.");
+
+      bp::def(
+        "computeContactPatch",
+        static_cast<void (*)(const GeometryModel &, GeometryData &, const PairIndex)>(
+          computeContactPatch),
+        bp::args("geometry_model", "geometry_data", "pair_index"),
+        "Compute the contact patch info associated with the collision pair given by pair_id. Note "
+        "that an actual computation will only occur if the collision pair is indeed in collision "
+        "(i.e. only if geom_data.collisionResult[pair_id].isCollision() is true).");
+
+      bp::def(
+        "computeContactPatches",
+        static_cast<void (*)(const GeometryModel &, GeometryData &)>(computeContactPatches),
+        bp::args("geometry_model", "geometry_data"),
+        "Calls computeContactPatch for every collision pair.");
 
       bp::def(
         "computeDistance", &computeDistance,

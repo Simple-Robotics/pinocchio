@@ -24,8 +24,6 @@ namespace pinocchio
   /// \param[out] geom_data the corresponding geometry data, where computations are done.
   /// \param[in] pair_id The collsion pair index in the GeometryModel.
   /// \param[in] collision_request The collision request associated to the collision pair.
-  /// \param[in] compute_patch_info whether we need to also compute the contact patch info
-  /// associated with the collision pair.
   ///
   /// \return Return true is the collision objects are colliding.
   /// \note The complete collision result is also available in geom_data.collisionResults[pair_id]
@@ -34,19 +32,7 @@ namespace pinocchio
     const GeometryModel & geom_model,
     GeometryData & geom_data,
     const PairIndex pair_id,
-    fcl::CollisionRequest & collision_request,
-    bool compute_patch_info = true);
-  ///
-  /// \brief Compute the contact patch info associated with the collision pair given by pair_id
-  ///
-  /// \param[in] geom_model the geometry model (const)
-  /// \param[out] geom_data the corresponding geometry data, where computations are done.
-  /// \param[in] pair_id The collsion pair index in the GeometryModel.
-  ///
-  /// \note The complete contact patch result is available in geom_data.contactPatchResults[pair_id]
-  ///
-  void computeContactPatch(
-    const GeometryModel & geom_model, GeometryData & geom_data, const PairIndex pair_id);
+    fcl::CollisionRequest & collision_request);
 
   ///
   /// \brief Compute the collision status between a *SINGLE* collision pair.
@@ -112,6 +98,30 @@ namespace pinocchio
     GeometryData & geom_data,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const bool stopAtFirstCollision = false);
+
+  ///
+  /// \brief Compute the contact patch info associated with the collision pair given by pair_id.
+  /// Note that an actual computation will only occur if the collision pair is indeed in collision
+  /// (i.e. only if geom_data.collisionResult[pair_id].isCollision() is true).
+  ///
+  /// \param[in] geom_model the geometry model (const)
+  /// \param[out] geom_data the corresponding geometry data, where computations are done.
+  /// \param[in] pair_id The collsion pair index in the GeometryModel.
+  ///
+  /// \note The complete contact patch result is available in geom_data.contactPatchResults[pair_id]
+  ///
+  void computeContactPatch(
+    const GeometryModel & geom_model, GeometryData & geom_data, const PairIndex pair_id);
+
+  ///
+  /// \brief Calls computeContactPatch for every collision pair.
+  ///
+  /// \param[in] geom_model the geometry model (const)
+  /// \param[out] geom_data the corresponding geometry data, where computations are done.
+  ///
+  /// \note This function must be called after computeCollisions.
+  ///
+  void computeContactPatches(const GeometryModel & geom_model, GeometryData & geom_data);
 
   ///
   /// Compute the radius of the geometry volumes attached to every joints.
