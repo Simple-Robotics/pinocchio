@@ -76,8 +76,7 @@ namespace pinocchio
     // clamp the rho
     rho = math::max(1e-8, rho);
 
-    Scalar complementarity,
-      proximal_metric, // proximal metric between two successive iterates.
+    Scalar complementarity, dx_norm, dy_norm, dz_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
 
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
@@ -170,10 +169,12 @@ namespace pinocchio
 
     bool abs_prec_reached = false, rel_prec_reached = false;
 
-    Scalar xyz_previous_norm_inf = math::max(
-      z_.template lpNorm<Eigen::Infinity>(), math::max(
-                                               x_.template lpNorm<Eigen::Infinity>(), //
-                                               y_.template lpNorm<Eigen::Infinity>()));
+    Scalar x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
+    Scalar y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+    Scalar z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+    Scalar x_previous_norm_inf = x_norm_inf;
+    Scalar y_previous_norm_inf = y_norm_inf;
+    Scalar z_previous_norm_inf = z_norm_inf;
     int it = 1;
 //    Scalar res = 0;
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -238,25 +239,23 @@ namespace pinocchio
       //      dual_feasibility_vector.noalias() += g + s_ - prox_value * x_ - z_;
 
       {
-        VectorXs & dy = rhs;
-        dy = y_ - y_previous;
-        proximal_metric = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
-        dual_feasibility_vector.noalias() = (tau * rho) * dy;
+        VectorXs & dx = rhs;
+        dx = x_ - x_previous;
+        dx_norm = dx.template lpNorm<Eigen::Infinity>(); // check relative progress on x
+        dual_feasibility_vector.noalias() += mu_prox * dx;
       }
 
       {
-        VectorXs & dx = rhs;
-        dx = x_ - x_previous;
-        proximal_metric = math::max(
-          dx.template lpNorm<Eigen::Infinity>(), proximal_metric); // check relative progress on x
-        dual_feasibility_vector.noalias() += mu_prox * dx;
+        VectorXs & dy = rhs;
+        dy = y_ - y_previous;
+        dy_norm = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
+        dual_feasibility_vector.noalias() = (tau * rho) * dy;
       }
 
       {
         VectorXs & dz = rhs;
         dz = z_ - z_previous;
-        proximal_metric = math::max(
-          dz.template lpNorm<Eigen::Infinity>(), proximal_metric); // check relative progress on z
+        dz_norm = dz.template lpNorm<Eigen::Infinity>(); // check relative progress on z
       }
 
       //      delassus.applyOnTheRight(x_,dual_feasibility_vector);
@@ -302,13 +301,16 @@ namespace pinocchio
       else
         abs_prec_reached = false;
 
-      const Scalar xyz_norm_inf = math::max(
-        z_.template lpNorm<Eigen::Infinity>(), math::max(
-                                                 x_.template lpNorm<Eigen::Infinity>(), //
-                                                 y_.template lpNorm<Eigen::Infinity>()));
-      if (check_expression_if_real<Scalar, false>(
-            proximal_metric
-            <= this->relative_precision * math::max(xyz_norm_inf, xyz_previous_norm_inf)))
+      x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
+      y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+      z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+      if (
+        check_expression_if_real<Scalar, false>(
+          dx_norm <= this->relative_precision * math::max(x_norm_inf, x_previous_norm_inf))
+        && check_expression_if_real<Scalar, false>(
+          dy_norm <= this->relative_precision * math::max(y_norm_inf, y_previous_norm_inf))
+        && check_expression_if_real<Scalar, false>(
+          dz_norm <= this->relative_precision * math::max(z_norm_inf, z_previous_norm_inf)))
         rel_prec_reached = true;
       else
         rel_prec_reached = false;
@@ -344,7 +346,9 @@ namespace pinocchio
         cholesky_update_count++;
       }
 
-      xyz_previous_norm_inf = xyz_norm_inf;
+      x_previous_norm_inf = x_norm_inf;
+      y_previous_norm_inf = y_norm_inf;
+      z_previous_norm_inf = z_norm_inf;
       //      std::cout << "rho_power: " << rho_power << std::endl;
       //      std::cout << "rho: " << rho << std::endl;
       //      std::cout << "---" << std::endl;
@@ -354,7 +358,13 @@ namespace pinocchio
 
     this->absolute_residual =
       math::max(primal_feasibility, math::max(complementarity, dual_feasibility));
-    this->relative_residual = proximal_metric;
+    //
+    this->relative_residual = math::max(
+      dx_norm / math::max(x_norm_inf, x_previous_norm_inf),
+      dy_norm / math::max(y_norm_inf, y_previous_norm_inf));
+    this->relative_residual =
+      math::max(this->relative_residual, dz_norm / math::max(z_norm_inf, z_previous_norm_inf));
+    //
     this->it = it;
     //    std::cout << "max linalg res: " << res << std::endl;
     //    y_sol.const_cast_derived() = y_;
