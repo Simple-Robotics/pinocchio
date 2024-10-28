@@ -73,6 +73,9 @@ namespace pinocchio
       break;
     }
 
+    // clamp the rho
+    rho = math::max(1e-8, rho);
+
     Scalar complementarity,
       proximal_metric, // proximal metric between two successive iterates.
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
@@ -315,6 +318,9 @@ namespace pinocchio
         ;
         break;
       }
+
+      // clamp rho
+      rho = math::max(1e-8, rho);
 
       // Account for potential update of rho
       if (update_delassus_factorization)
