@@ -59,9 +59,10 @@ namespace pinocchio
       DelassusDerived & delassus,
       const context::VectorXs & g,
       const context::CoulombFrictionConeVector & cones,
-      Eigen::Ref<context::VectorXs> x)
+      Eigen::Ref<context::VectorXs> x,
+      bool solve_ncp = true)
     {
-      return solver.solve(delassus, g, cones, x);
+      return solver.solve(delassus, g, cones, x, solve_ncp);
     }
 #endif
 

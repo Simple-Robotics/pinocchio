@@ -434,11 +434,12 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
-      const Eigen::DenseBase<VectorLikeOut> & x)
+      const Eigen::DenseBase<VectorLikeOut> & x,
+      bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), cones, x.const_cast_derived(),
-        VectorXs::Zero(problem_size));
+        delassus.derived(), g.derived(), cones, VectorXs::Zero(problem_size),
+        x.const_cast_derived(), boost::none, solve_ncp);
     }
 
     /// \returns the primal solution of the problem
