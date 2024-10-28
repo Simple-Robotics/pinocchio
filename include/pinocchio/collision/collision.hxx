@@ -19,18 +19,32 @@ namespace pinocchio
     const GeometryModel & geom_model, GeometryData & geom_data, const PairIndex pair_id)
   {
     const CollisionPair & pair = geom_model.collisionPairs[pair_id];
-    fcl::Transform3f oM1(toFclTransform3f(geom_data.oMg[pair.first])),
-      oM2(toFclTransform3f(geom_data.oMg[pair.second]));
-
     fcl::CollisionResult & collision_result = geom_data.collisionResults[pair_id];
     const fcl::ContactPatchRequest & patch_request = geom_data.contactPatchRequests[pair_id];
     fcl::ContactPatchResult & patch_result = geom_data.contactPatchResults[pair_id];
-    patch_result.clear();
-    if (patch_request.max_num_patch > 0)
+    patch_result.clear(); // if a collision did not occur, we still want to clear the patch result
+    if (collision_result.isCollision() && patch_request.max_num_patch > 0)
     {
+      fcl::Transform3f oM1(toFclTransform3f(geom_data.oMg[pair.first]));
+      fcl::Transform3f oM2(toFclTransform3f(geom_data.oMg[pair.second]));
       GeometryData::ComputeContactPatch & contact_patch_functor =
         geom_data.contact_patch_functors[pair_id];
       contact_patch_functor(oM1, oM2, collision_result, patch_request, patch_result);
+    }
+  }
+
+  inline void computeContactPatches(const GeometryModel & geom_model, GeometryData & geom_data)
+  {
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+      geom_model.collisionPairs.size() == geom_data.contactPatchResults.size());
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+      geom_model.collisionPairs.size() == geom_data.contactPatchRequests.size());
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+      geom_model.collisionPairs.size() == geom_data.contact_patch_functors.size());
+
+    for (std::size_t pair_id = 0; pair_id < geom_model.collisionPairs.size(); ++pair_id)
+    {
+      computeContactPatch(geom_model, geom_data, pair_id);
     }
   }
 
@@ -38,8 +52,7 @@ namespace pinocchio
     const GeometryModel & geom_model,
     GeometryData & geom_data,
     const PairIndex pair_id,
-    fcl::CollisionRequest & collision_request,
-    bool compute_patch_info)
+    fcl::CollisionRequest & collision_request)
   {
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       geom_model.collisionPairs.size() == geom_data.collisionResults.size());
@@ -63,9 +76,6 @@ namespace pinocchio
     {
       GeometryData::ComputeCollision & calc_collision = geom_data.collision_functors[pair_id];
       calc_collision(oM1, oM2, collision_request, collision_result);
-
-      if (compute_patch_info && collision_result.isCollision())
-        computeContactPatch(geom_model, geom_data, pair_id);
     }
     catch (std::invalid_argument & e)
     {
