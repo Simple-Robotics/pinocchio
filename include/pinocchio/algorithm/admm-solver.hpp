@@ -408,6 +408,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
+      bool solve_ncp = true,
       bool compute_largest_eigen_values = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false);
@@ -433,11 +434,12 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
-      const Eigen::DenseBase<VectorLikeOut> & x)
+      const Eigen::DenseBase<VectorLikeOut> & x,
+      bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), cones, x.const_cast_derived(),
-        VectorXs::Zero(problem_size));
+        delassus.derived(), g.derived(), cones, VectorXs::Zero(problem_size),
+        x.const_cast_derived(), boost::none, solve_ncp);
     }
 
     /// \returns the primal solution of the problem

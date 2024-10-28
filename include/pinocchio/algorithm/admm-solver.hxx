@@ -28,6 +28,7 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
+    bool solve_ncp,
     bool compute_largest_eigen_values,
     ADMMUpdateRule admm_update_rule,
     bool stat_record)
@@ -73,8 +74,10 @@ namespace pinocchio
       break;
     }
 
-    Scalar complementarity,
-      proximal_metric, // proximal metric between two successive iterates.
+    // clamp the rho
+    rho = math::max(1e-8, rho);
+
+    Scalar complementarity, dx_norm, dy_norm, dz_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
 
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
@@ -84,6 +87,11 @@ namespace pinocchio
     rhs = R + VectorXs::Constant(this->problem_size, prox_value);
     delassus.updateDamping(rhs);
     cholesky_update_count = 1;
+
+    // Initialize De Saxé shift to 0
+    // For the CCP, there is no shift
+    // For the NCP, the shift will be initialized using z
+    s_.setZero();
 
     // Initial update of the variables
     // Init x
@@ -114,8 +122,11 @@ namespace pinocchio
     {
       delassus.applyOnTheRight(y_, z_); // z = G * y
       z_.noalias() += -prox_value * y_ + g;
-      computeComplementarityShift(cones, z_, s_);
-      z_ += s_; // Add De Saxé shift
+      if (solve_ncp)
+      {
+        computeComplementarityShift(cones, z_, s_);
+        z_ += s_; // Add De Saxé shift
+      }
       computeDualConeProjection(cones, z_, z_);
     }
     else
@@ -143,8 +154,11 @@ namespace pinocchio
       x_.setZero();
       y_.setZero();
       z_ = g;
-      computeComplementarityShift(cones, z_, s_);
-      z_ += s_; // Add De Saxé shift
+      if (solve_ncp)
+      {
+        computeComplementarityShift(cones, z_, s_);
+        z_ += s_; // Add De Saxé shift
+      }
       computeDualConeProjection(cones, z_, z_);
     }
 
@@ -167,7 +181,12 @@ namespace pinocchio
 
     bool abs_prec_reached = false, rel_prec_reached = false;
 
-    Scalar y_previous_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+    Scalar x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
+    Scalar y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+    Scalar z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+    Scalar x_previous_norm_inf = x_norm_inf;
+    Scalar y_previous_norm_inf = y_norm_inf;
+    Scalar z_previous_norm_inf = z_norm_inf;
     int it = 1;
 //    Scalar res = 0;
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -184,8 +203,11 @@ namespace pinocchio
       z_previous = z_;
       complementarity = Scalar(0);
 
-      // s-update
-      computeComplementarityShift(cones, z_, s_);
+      if (solve_ncp)
+      {
+        // s-update
+        computeComplementarityShift(cones, z_, s_);
+      }
 
       //      std::cout << "s_: " << s_.transpose() << std::endl;
 
@@ -232,18 +254,23 @@ namespace pinocchio
       //      dual_feasibility_vector.noalias() += g + s_ - prox_value * x_ - z_;
 
       {
+        VectorXs & dx = rhs;
+        dx = x_ - x_previous;
+        dx_norm = dx.template lpNorm<Eigen::Infinity>(); // check relative progress on x
+        dual_feasibility_vector.noalias() += mu_prox * dx;
+      }
+
+      {
         VectorXs & dy = rhs;
         dy = y_ - y_previous;
-        proximal_metric = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
+        dy_norm = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
         dual_feasibility_vector.noalias() = (tau * rho) * dy;
       }
 
       {
-        VectorXs & dx = rhs;
-        dx = x_ - x_previous;
-        proximal_metric = math::max(
-          dx.template lpNorm<Eigen::Infinity>(), proximal_metric); // check relative progress on x
-        dual_feasibility_vector.noalias() += mu_prox * dx;
+        VectorXs & dz = rhs;
+        dz = z_ - z_previous;
+        dz_norm = dz.template lpNorm<Eigen::Infinity>(); // check relative progress on z
       }
 
       //      delassus.applyOnTheRight(x_,dual_feasibility_vector);
@@ -261,8 +288,11 @@ namespace pinocchio
         VectorXs tmp(rhs);
         delassus.applyOnTheRight(y_, rhs);
         rhs.noalias() += g - prox_value * y_;
-        computeComplementarityShift(cones, rhs, tmp);
-        rhs.noalias() += tmp;
+        if (solve_ncp)
+        {
+          computeComplementarityShift(cones, rhs, tmp);
+          rhs.noalias() += tmp;
+        }
 
         internal::computeDualConeProjection(cones, rhs, tmp);
         tmp -= rhs;
@@ -289,10 +319,16 @@ namespace pinocchio
       else
         abs_prec_reached = false;
 
-      const Scalar y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
-      if (check_expression_if_real<Scalar, false>(
-            proximal_metric
-            <= this->relative_precision * math::max(y_norm_inf, y_previous_norm_inf)))
+      x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
+      y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+      z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+      if (
+        check_expression_if_real<Scalar, false>(
+          dx_norm <= this->relative_precision * math::max(x_norm_inf, x_previous_norm_inf))
+        && check_expression_if_real<Scalar, false>(
+          dy_norm <= this->relative_precision * math::max(y_norm_inf, y_previous_norm_inf))
+        && check_expression_if_real<Scalar, false>(
+          dz_norm <= this->relative_precision * math::max(z_norm_inf, z_previous_norm_inf)))
         rel_prec_reached = true;
       else
         rel_prec_reached = false;
@@ -316,6 +352,9 @@ namespace pinocchio
         break;
       }
 
+      // clamp rho
+      rho = math::max(1e-8, rho);
+
       // Account for potential update of rho
       if (update_delassus_factorization)
       {
@@ -325,7 +364,9 @@ namespace pinocchio
         cholesky_update_count++;
       }
 
+      x_previous_norm_inf = x_norm_inf;
       y_previous_norm_inf = y_norm_inf;
+      z_previous_norm_inf = z_norm_inf;
       //      std::cout << "rho_power: " << rho_power << std::endl;
       //      std::cout << "rho: " << rho << std::endl;
       //      std::cout << "---" << std::endl;
@@ -335,7 +376,13 @@ namespace pinocchio
 
     this->absolute_residual =
       math::max(primal_feasibility, math::max(complementarity, dual_feasibility));
-    this->relative_residual = proximal_metric;
+    //
+    this->relative_residual = math::max(
+      dx_norm / math::max(x_norm_inf, x_previous_norm_inf),
+      dy_norm / math::max(y_norm_inf, y_previous_norm_inf));
+    this->relative_residual =
+      math::max(this->relative_residual, dz_norm / math::max(z_norm_inf, z_previous_norm_inf));
+    //
     this->it = it;
     //    std::cout << "max linalg res: " << res << std::endl;
     //    y_sol.const_cast_derived() = y_;
