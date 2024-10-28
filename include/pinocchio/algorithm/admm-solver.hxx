@@ -28,6 +28,7 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
+    bool solve_ncp,
     bool compute_largest_eigen_values,
     ADMMUpdateRule admm_update_rule,
     bool stat_record)
@@ -87,6 +88,11 @@ namespace pinocchio
     delassus.updateDamping(rhs);
     cholesky_update_count = 1;
 
+    // Initialize De Saxé shift to 0
+    // For the CCP, there is no shift
+    // For the NCP, the shift will be initialized using z
+    s_.setZero();
+
     // Initial update of the variables
     // Init x
     if (primal_guess)
@@ -116,8 +122,11 @@ namespace pinocchio
     {
       delassus.applyOnTheRight(y_, z_); // z = G * y
       z_.noalias() += -prox_value * y_ + g;
-      computeComplementarityShift(cones, z_, s_);
-      z_ += s_; // Add De Saxé shift
+      if (solve_ncp)
+      {
+        computeComplementarityShift(cones, z_, s_);
+        z_ += s_; // Add De Saxé shift
+      }
       computeDualConeProjection(cones, z_, z_);
     }
     else
@@ -145,8 +154,11 @@ namespace pinocchio
       x_.setZero();
       y_.setZero();
       z_ = g;
-      computeComplementarityShift(cones, z_, s_);
-      z_ += s_; // Add De Saxé shift
+      if (solve_ncp)
+      {
+        computeComplementarityShift(cones, z_, s_);
+        z_ += s_; // Add De Saxé shift
+      }
       computeDualConeProjection(cones, z_, z_);
     }
 
@@ -191,8 +203,11 @@ namespace pinocchio
       z_previous = z_;
       complementarity = Scalar(0);
 
-      // s-update
-      computeComplementarityShift(cones, z_, s_);
+      if (solve_ncp)
+      {
+        // s-update
+        computeComplementarityShift(cones, z_, s_);
+      }
 
       //      std::cout << "s_: " << s_.transpose() << std::endl;
 
@@ -273,8 +288,11 @@ namespace pinocchio
         VectorXs tmp(rhs);
         delassus.applyOnTheRight(y_, rhs);
         rhs.noalias() += g - prox_value * y_;
-        computeComplementarityShift(cones, rhs, tmp);
-        rhs.noalias() += tmp;
+        if (solve_ncp)
+        {
+          computeComplementarityShift(cones, rhs, tmp);
+          rhs.noalias() += tmp;
+        }
 
         internal::computeDualConeProjection(cones, rhs, tmp);
         tmp -= rhs;

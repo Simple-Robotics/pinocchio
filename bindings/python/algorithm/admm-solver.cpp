@@ -43,13 +43,14 @@ namespace pinocchio
       const context::VectorXs & R,
       const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
       const boost::optional<ConstRefVectorXs> dual_solution = boost::none,
+      bool solve_ncp = true,
       bool compute_largest_eigen_values = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false)
     {
       return solver.solve(
-        delassus, g, cones, R, primal_solution, dual_solution, compute_largest_eigen_values,
-        admm_update_rule, stat_record);
+        delassus, g, cones, R, primal_solution, dual_solution, solve_ncp,
+        compute_largest_eigen_values, admm_update_rule, stat_record);
     }
 
     template<typename DelassusDerived>

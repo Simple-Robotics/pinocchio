@@ -408,6 +408,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
+      bool solve_ncp = true,
       bool compute_largest_eigen_values = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false);
