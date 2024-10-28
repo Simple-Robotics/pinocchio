@@ -70,7 +70,8 @@ namespace pinocchio
       assert(mu >= 0 && "mu must be positive");
       assert(prec >= 0 && "prec should be positive");
       EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
-      return f.template head<2>().norm() <= mu * f[2] + prec;
+      const Vector3 f_normalized = f.normalized();
+      return f_normalized.template head<2>().norm() <= mu * f_normalized[2] + prec;
     }
 
     /// \brief Project a vector x onto the cone.
@@ -219,6 +220,7 @@ namespace pinocchio
   {
     typedef _Scalar Scalar;
     typedef CoulombFrictionConeTpl<Scalar> DualCone;
+    typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
 
     ///
     /// \brief Default constructor
@@ -266,7 +268,8 @@ namespace pinocchio
     {
       assert(mu >= 0 && "mu must be positive");
       EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
-      return mu * v.template head<2>().norm() <= v[2] + prec;
+      const Vector3 v_normalized = v.normalized();
+      return mu * v_normalized.template head<2>().norm() <= v_normalized[2] + prec;
     }
 
     /// \brief Project a vector x onto the cone
