@@ -471,6 +471,8 @@ namespace pinocchio
         complementarity = math::max(complementarity, step.complementarity);
         dual_feasibility = math::max(dual_feasibility, step.dual_feasibility);
         primal_feasibility = math::max(primal_feasibility, step.primal_feasibility);
+
+        // Update row id for the next constraint
         row_id += constraint_set_size;
       }
 
