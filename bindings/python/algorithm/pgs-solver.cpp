@@ -60,7 +60,13 @@ namespace pinocchio
             (bp::args("self", "G", "g", "constraint_sets", "x"),
              (bp::arg("over_relax") = context::Scalar(1))),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
-            "from the initial guess.");
+            "from the initial guess.")
+          .def(
+            "getPrimalSolution", &Solver::getPrimalSolution, bp::arg("self"),
+            "Returns the primal solution of the problem.", bp::return_internal_reference<>())
+          .def(
+            "getDualSolution", &Solver::getDualSolution, bp::arg("self"),
+            "Returns the dual solution of the problem.", bp::return_internal_reference<>());
       }
 
       bp::class_<Solver> & class_;
