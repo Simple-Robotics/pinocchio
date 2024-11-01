@@ -103,8 +103,8 @@ void check_A1_and_A2(
 
   BOOST_CHECK(A1_local.isApprox(A1_local_ref));
 
-  const RigidConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrame());
-  const RigidConstraintModel::Matrix36 A2_local_ref =
+  const BilateralPointConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrame());
+  const BilateralPointConstraintModel::Matrix36 A2_local_ref =
     cdata.c1Mc2.rotation() * cmodel.joint2_placement.toActionMatrixInverse().topRows<3>();
 
   BOOST_CHECK(A2_local.isApprox(A2_local_ref));
