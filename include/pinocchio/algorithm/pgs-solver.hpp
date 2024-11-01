@@ -36,7 +36,7 @@ namespace pinocchio
     ///
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
-    /// \param[in] sets Vector of constraint sets.
+    /// \param[in] constraint_models Vector of constraint models.
     /// \param[in,out] x Initial guess and output solution of the problem
     /// \param[in] over_relax Over relaxation value
     ///
@@ -44,13 +44,13 @@ namespace pinocchio
     template<
       typename MatrixLike,
       typename VectorLike,
-      typename ConstraintSet,
-      typename ConstraintSetAllocator,
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
       typename VectorLikeOut>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<ConstraintSet, ConstraintSetAllocator> & constraint_sets,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeOut> & x,
       const Scalar over_relax = Scalar(1));
 

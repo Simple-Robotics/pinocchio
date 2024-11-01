@@ -33,6 +33,72 @@ namespace pinocchio
   {
   };
 
+  template<typename Scalar, typename BlockType, typename VelocityType, typename ForceType>
+  struct PGSConstraintProjectionStepVisitor
+  : visitors::ConstraintUnaryVisitorBase<
+      PGSConstraintProjectionStepVisitor<Scalar, BlockType, VelocityType, ForceType>>
+  , PGSConstraintProjectionStepBase<Scalar>
+  {
+    typedef boost::fusion::
+      vector<const BlockType &, VelocityType &, ForceType &, Scalar &, Scalar &, Scalar &>
+        ArgsType;
+    typedef PGSConstraintProjectionStepBase<Scalar> Base;
+
+    explicit PGSConstraintProjectionStepVisitor(const Scalar over_relax_value)
+    : Base(over_relax_value)
+    {
+    }
+
+    template<typename ConstraintModel>
+    static void algo(
+      const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+      const Scalar over_relax_value,
+      const Eigen::MatrixBase<BlockType> & G_block,
+      VelocityType & velocity,
+      ForceType & force,
+      Scalar & complementarity,
+      Scalar & primal_feasibility,
+      Scalar & dual_feasibility)
+    {
+      typedef typename ConstraintModel::ConstraintSet ConstraintSet;
+
+      PGSConstraintProjectionStep<ConstraintSet> step(
+        over_relax_value,
+        cmodel.derived().set()); // TODO(jcarpent): change cmodel.derived().set() -> cmodel.set()
+      step.project(G_block, velocity.const_cast_derived(), force.const_cast_derived());
+      step.computeFeasibility(velocity, force);
+
+      complementarity = step.complementarity;
+      dual_feasibility = step.dual_feasibility;
+      primal_feasibility = step.primal_feasibility;
+    }
+
+    template<typename ConstraintModel>
+    void run(
+      const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+      const Eigen::MatrixBase<BlockType> & G_block,
+      VelocityType & velocity,
+      ForceType & force)
+    {
+      algo(
+        cmodel, this->over_relax_value, G_block, velocity, force, this->complementarity,
+        this->primal_feasibility, this->dual_feasibility);
+    }
+
+    template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
+    void run(
+      const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const Eigen::MatrixBase<BlockType> & G_block,
+      VelocityType & velocity,
+      ForceType & force)
+    {
+      ArgsType args(
+        G_block, velocity, force, this->complementarity, this->primal_feasibility,
+        this->dual_feasibility);
+      this->run(cmodel.derived(), args);
+    }
+  }; // struct PGSConstraintProjectionStepVisitor
+
   template<typename _Scalar>
   struct PGSConstraintProjectionStep<CoulombFrictionConeTpl<_Scalar>>
   : PGSConstraintProjectionStepBase<_Scalar>
@@ -221,13 +287,13 @@ namespace pinocchio
   template<
     typename MatrixLike,
     typename VectorLike,
-    typename ConstraintSet,
-    typename ConstraintSetAllocator,
+    typename ConstraintModel,
+    typename ConstraintModelAllocator,
     typename VectorLikeOut>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<ConstraintSet, ConstraintSetAllocator> & constraint_sets,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
     const Scalar over_relax)
 
@@ -241,7 +307,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.cols(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(x_sol.size(), this->getProblemSize());
 
-    const size_t nc = constraint_sets.size(); // num constraints
+    const size_t nc = constraint_models.size(); // num constraints
 
     int it = 0;
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
@@ -256,9 +322,9 @@ namespace pinocchio
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
     Eigen::DenseIndex constraint_set_size_max = 0;
-    for (const auto & set : constraint_sets)
+    for (const auto & cmodel : constraint_models)
     {
-      constraint_set_size_max = std::max(constraint_set_size_max, Eigen::DenseIndex(set.size()));
+      constraint_set_size_max = std::max(constraint_set_size_max, Eigen::DenseIndex(cmodel.size()));
     }
 
     VectorX velocity_storage(constraint_set_size_max); // tmp variable
@@ -268,13 +334,13 @@ namespace pinocchio
       complementarity = Scalar(0);
       dual_feasibility = Scalar(0);
       primal_feasibility = Scalar(0);
-      for (size_t set_id = 0; set_id < nc; ++set_id)
+      Eigen::DenseIndex row_id = 0;
+      for (size_t constraint_id = 0; constraint_id < nc; ++constraint_id)
       {
-        const ConstraintSet & set = constraint_sets[set_id];
-        const int constraint_set_size = set.size();
-        const Eigen::DenseIndex row_id = constraint_set_size * Eigen::DenseIndex(set_id);
+        const ConstraintModel & cmodel = constraint_models[constraint_id];
+        const int constraint_set_size = cmodel.size();
 
-        const auto G_block = G.block(row_id, row_id, constraint_set_size, constraint_set_size);
+        auto G_block = G.block(row_id, row_id, constraint_set_size, constraint_set_size);
         auto force = x.segment(row_id, constraint_set_size);
 
         auto velocity = velocity_storage.head(constraint_set_size);
@@ -283,14 +349,20 @@ namespace pinocchio
         velocity.noalias() =
           G.middleRows(row_id, constraint_set_size) * x + g.segment(row_id, constraint_set_size);
 
-        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, set);
-        step.project(G_block, velocity, force);
-        step.computeFeasibility(velocity, force);
+        typedef PGSConstraintProjectionStepVisitor<
+          Scalar, decltype(G_block), decltype(velocity), decltype(force)>
+          Step;
+        Step step(over_relax);
+        step.run(cmodel, G_block, velocity, force);
+        //        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, set);
+        //        step.project(G_block, velocity, force);
+        //        step.computeFeasibility(velocity, force);
 
         // Update problem feasibility
         complementarity = math::max(complementarity, step.complementarity);
         dual_feasibility = math::max(dual_feasibility, step.dual_feasibility);
         primal_feasibility = math::max(primal_feasibility, step.primal_feasibility);
+        row_id += constraint_set_size;
       }
 
       // Checking stopping residual
