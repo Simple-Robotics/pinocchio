@@ -309,7 +309,7 @@ namespace pinocchio
 
     const size_t nc = constraint_models.size(); // num constraints
 
-    int it = 0;
+    int it = 1;
     PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -328,7 +328,7 @@ namespace pinocchio
     }
 
     VectorX velocity_storage(constraint_set_size_max); // tmp variable
-    for (; it < this->max_it; ++it)
+    for (; it <= this->max_it; ++it)
     {
       x_previous = x;
       complementarity = Scalar(0);
