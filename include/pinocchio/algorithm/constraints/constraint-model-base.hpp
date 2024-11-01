@@ -40,6 +40,12 @@ namespace pinocchio
       return derived().template cast<NewScalar>();
     }
 
+    template<typename OtherDerived>
+    void cast(ConstraintModelBase<OtherDerived> & other) const
+    {
+      other.name = name;
+    }
+
     /// \brief Evaluate the constraint values at the current state given by data and store the
     /// results in cdata.
     template<int Options, template<typename, int> class JointCollectionTpl>
