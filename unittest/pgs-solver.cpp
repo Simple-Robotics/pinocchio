@@ -76,7 +76,7 @@ struct TestBoxTpl
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-10);
     pgs_solver.setRelativePrecision(1e-14);
-    has_converged = pgs_solver.solve(G, g, constraint_sets, dual_solution);
+    has_converged = pgs_solver.solve(G, g, constraint_models, dual_solution);
 
     //    // Check with sparse view too
     //    {
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(box)
 
   const double dt = 1e-3;
 
-  typedef RigidConstraintModel ConstraintModel;
-  typedef CoulombFrictionCone ConstraintSet;
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef ConstraintModel::ConstraintSet ConstraintSet;
   typedef TestBoxTpl<ConstraintModel, ConstraintSet> TestBox;
   std::vector<ConstraintModel> constraint_models;
 
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(box)
     for (int i = 0; i < 4; ++i)
     {
       const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement1.translation());
-      ConstraintModel cm(CONTACT_3D, model, 1, local_placement);
+      ConstraintModel cm(model, 1, local_placement);
       constraint_models.push_back(cm);
       rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
     }
