@@ -338,7 +338,7 @@ namespace pinocchio
       for (size_t constraint_id = 0; constraint_id < nc; ++constraint_id)
       {
         const ConstraintModel & cmodel = constraint_models[constraint_id];
-        const int constraint_set_size = cmodel.size();
+        const Eigen::DenseIndex constraint_set_size = cmodel.size();
 
         auto G_block = G.block(row_id, row_id, constraint_set_size, constraint_set_size);
         auto force = x.segment(row_id, constraint_set_size);
