@@ -239,14 +239,6 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   Model model;
   model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
 
-  const int num_tests =
-#ifdef NDEBUG
-    100000
-#else
-    100
-#endif
-    ;
-
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
   const double box_mass = 10;
   const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
@@ -280,6 +272,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     BoxSet(Eigen::VectorXd::Constant(6, -1.), Eigen::VectorXd::Constant(6, +1.)));
 
   const auto & box_set = constraint_sets[0];
+  constraint_models[0].set() = box_set;
 
   const Eigen::VectorXd v_free = dt * aba(model, data, q0, v0, tau0, Convention::WORLD);
 
@@ -303,7 +296,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
   pgs_solver.setAbsolutePrecision(1e-10);
   pgs_solver.setRelativePrecision(1e-14);
-  const bool has_converged = pgs_solver.solve(G, g, constraint_sets, dual_solution);
+  const bool has_converged = pgs_solver.solve(G, g, constraint_models, dual_solution);
   BOOST_CHECK(has_converged);
 
   primal_solution = G * dual_solution + g;
