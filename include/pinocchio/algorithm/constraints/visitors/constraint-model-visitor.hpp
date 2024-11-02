@@ -352,7 +352,7 @@ namespace pinocchio
       }
     };
 
-    template<typename Scalar, int Options>
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
     int size(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
       typedef ConstraintModelSizeVisitor<Scalar, Options> Algo;
@@ -381,7 +381,7 @@ namespace pinocchio
       }
     };
 
-    template<typename Scalar, int Options>
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
     const std::vector<Eigen::DenseIndex> & getRowActiveIndexes(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const Eigen::DenseIndex row_id)
@@ -412,7 +412,7 @@ namespace pinocchio
       }
     };
 
-    template<typename Scalar, int Options>
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
     const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & getRowSparsityPattern(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const Eigen::DenseIndex row_id)

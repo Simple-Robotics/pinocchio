@@ -39,7 +39,7 @@ namespace pinocchio
   typedef FrictionalPointConstraintDataTpl<context::Scalar> FrictionalPointConstraintData;
 
   template<typename _Scalar, int _Options>
-  struct ConstraintCollectionTpl
+  struct ConstraintCollectionDefaultTpl
   {
     typedef _Scalar Scalar;
     enum
@@ -57,18 +57,19 @@ namespace pinocchio
       ConstraintModelVariant;
     typedef boost::variant<RigidConstraintData, FrictionalJointConstraintData>
       ConstraintDataVariant;
-  };
+  }; // struct ConstraintCollectionDefaultTpl
 
-  typedef ConstraintCollectionTpl<context::Scalar, context::Options> ConstraintCollection;
+  typedef ConstraintCollectionDefaultTpl<context::Scalar, context::Options>
+    ConstraintCollectionDefault;
 
   template<typename Scalar, int _Options, template<typename S, int O> class ConstraintCollectionTpl>
   struct ConstraintModelTpl;
-  typedef ConstraintModelTpl<context::Scalar, context::Options, ConstraintCollectionTpl>
+  typedef ConstraintModelTpl<context::Scalar, context::Options, ConstraintCollectionDefaultTpl>
     ConstraintModel;
 
   template<typename Scalar, int _Options, template<typename S, int O> class ConstraintCollectionTpl>
   struct ConstraintDataTpl;
-  typedef ConstraintDataTpl<context::Scalar, context::Options, ConstraintCollectionTpl>
+  typedef ConstraintDataTpl<context::Scalar, context::Options, ConstraintCollectionDefaultTpl>
     ConstraintData;
 
   // Sets
