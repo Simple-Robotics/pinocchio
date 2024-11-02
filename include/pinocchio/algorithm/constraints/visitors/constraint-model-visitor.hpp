@@ -6,8 +6,8 @@
 #define __pinocchio_algorithm_constraints_constraint_model_visitor_hpp__
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-// #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
-// #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/multibody/visitor/fusion.hpp"
 
 namespace pinocchio
