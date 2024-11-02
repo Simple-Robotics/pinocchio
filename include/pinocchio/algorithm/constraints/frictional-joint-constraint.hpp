@@ -28,7 +28,9 @@ namespace pinocchio
     {
       Options = _Options
     };
+    typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -40,6 +42,8 @@ namespace pinocchio
       Options = _Options
     };
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -61,6 +65,7 @@ namespace pinocchio
     typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
 
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
     template<template<typename, int> class JointCollectionTpl>
     FrictionalJointConstraintModelTpl(
@@ -68,6 +73,7 @@ namespace pinocchio
       const JointIndexVector & active_joints)
     {
       init(model, active_joints);
+      m_set = ConstraintSet(size());
     }
 
     ConstraintData createData() const
@@ -118,6 +124,16 @@ namespace pinocchio
       return active_dofs;
     }
 
+    const ConstraintSet & set() const
+    {
+      return m_set;
+    }
+
+    ConstraintSet & set()
+    {
+      return m_set;
+    }
+
   protected:
     template<template<typename, int> class JointCollectionTpl>
     void init(
@@ -127,6 +143,8 @@ namespace pinocchio
     EigenIndexVector active_dofs;
     VectorOfBooleanVector row_sparsity_pattern;
     VectofOfEigenIndexVector row_active_indexes;
+
+    ConstraintSet m_set;
   };
 
   template<typename _Scalar, int _Options>
