@@ -219,6 +219,11 @@ namespace pinocchio
       return m_set;
     }
 
+    ConstraintSet & set()
+    {
+      return m_set;
+    }
+
   protected:
     ConstraintSet m_set = ConstraintSet();
 
