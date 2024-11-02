@@ -32,6 +32,12 @@ namespace pinocchio
     };
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
 
+    /// \brief Default constructor
+    ///
+    BoxSetTpl()
+    {
+    }
+
     /// \brief Constructor from a given size
     ///
     explicit BoxSetTpl(const Eigen::DenseIndex size)
