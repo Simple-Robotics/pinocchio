@@ -47,15 +47,24 @@ namespace pinocchio
       Options = _Options
     };
 
-    typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
-    typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
+    typedef BilateralPointConstraintModelTpl<Scalar, Options> BilateralPointConstraintModel;
+    typedef BilateralPointConstraintDataTpl<Scalar, Options> BilateralPointConstraintData;
+
+    typedef FrictionalPointConstraintModelTpl<Scalar, Options> FrictionalPointConstraintModel;
+    typedef FrictionalPointConstraintDataTpl<Scalar, Options> FrictionalPointConstraintData;
 
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> FrictionalJointConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> FrictionalJointConstraintData;
 
-    typedef boost::variant<RigidConstraintModel, FrictionalJointConstraintModel>
+    typedef boost::variant<
+      BilateralPointConstraintModel,
+      FrictionalPointConstraintModel,
+      FrictionalJointConstraintModel>
       ConstraintModelVariant;
-    typedef boost::variant<RigidConstraintData, FrictionalJointConstraintData>
+    typedef boost::variant<
+      BilateralPointConstraintData,
+      FrictionalPointConstraintData,
+      FrictionalJointConstraintData>
       ConstraintDataVariant;
   }; // struct ConstraintCollectionDefaultTpl
 
