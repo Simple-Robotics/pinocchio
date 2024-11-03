@@ -32,6 +32,47 @@ namespace pinocchio
     }
 #endif
 
+    struct SolveMethodExposer
+    {
+      SolveMethodExposer(bp::class_<Solver> & class_)
+      : class_(class_)
+      {
+      }
+
+      template<class T>
+      void operator()(T)
+      {
+        run<typename T::type>();
+      }
+
+      template<typename ConstraintModel>
+      void run()
+      {
+        class_
+          .def(
+            "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
+            (bp::args("self", "G", "g", "constraint_sets", "x"),
+             (bp::arg("over_relax") = context::Scalar(1))),
+            "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
+            "from the initial guess.")
+          .def(
+            "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
+            (bp::args("self", "G", "g", "constraint_sets", "x"),
+             (bp::arg("over_relax") = context::Scalar(1))),
+            "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
+            "from the initial guess.");
+      }
+
+      bp::class_<Solver> & class_;
+    };
+
+    template<typename ConstraintModel>
+    static void expose_solve(bp::class_<Solver> & class_)
+    {
+      SolveMethodExposer expose(class_);
+      expose.template run<ConstraintModel>();
+    }
+
     void exposePGSContactSolver()
     {
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
@@ -40,19 +81,12 @@ namespace pinocchio
         bp::init<int>(bp::args("self", "problem_dim"), "Default constructor."));
       class_.def(ContactSolverBasePythonVisitor<Solver>());
 
-      class_
-        .def(
-          "solve", solve_wrapper<context::MatrixXs, context::FrictionalPointConstraintModel>,
-          (bp::args("self", "G", "g", "constraint_sets", "x"),
-           (bp::arg("over_relax") = context::Scalar(1))),
-          "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
-          "from the initial guess.")
-        .def(
-          "solve", solve_wrapper<context::SparseMatrix, context::FrictionalPointConstraintModel>,
-          (bp::args("self", "G", "g", "constraint_sets", "x"),
-           (bp::arg("over_relax") = context::Scalar(1))),
-          "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
-          "from the initial guess.");
+      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
+
+      SolveMethodExposer solve_exposer(class_);
+      boost::mpl::for_each<
+        ConstraintModelVariant::types, boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
+      expose_solve<context::ConstraintModel>(class_);
 
 #endif
     }
