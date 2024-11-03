@@ -154,13 +154,13 @@ BOOST_AUTO_TEST_CASE(box)
 
   const double friction_value = 0.4;
   {
-    const SE3 local_placement1(
+    const SE3 local_placement_box(
       SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
     SE3::Matrix3 rot = SE3::Matrix3::Identity();
     for (int i = 0; i < 4; ++i)
     {
-      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement1.translation());
-      ConstraintModel cm(model, 1, local_placement);
+      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
+      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
       cm.set() = CoulombFrictionCone(friction_value);
       constraint_models.push_back(cm);
       rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
