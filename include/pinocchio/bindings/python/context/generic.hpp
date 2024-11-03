@@ -141,23 +141,49 @@ namespace pinocchio
       typedef ContactCholeskyDecompositionTpl<Scalar, Options> ContactCholeskyDecomposition;
 
       typedef RigidConstraintModelTpl<Scalar, Options> RigidConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel)
+        RigidConstraintModelVector;
+
       typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
+        RigidConstraintDataVector;
+
+      typedef BilateralPointConstraintModelTpl<Scalar, Options> BilateralPointConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+        BilateralPointConstraintModelVector;
+      typedef BilateralPointConstraintDataTpl<Scalar, Options> BilateralPointConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintData)
+        BilateralPointConstraintDataVector;
+
+      typedef FrictionalPointConstraintModelTpl<Scalar, Options> FrictionalPointConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
+        FrictionalPointConstraintModelVector;
+      typedef FrictionalPointConstraintDataTpl<Scalar, Options> FrictionalPointConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintData)
+        FrictionalPointConstraintDataVector;
+
+      typedef FrictionalJointConstraintModelTpl<Scalar, Options> FrictionalJointConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintModel)
+        FrictionalJointConstraintModelVector;
+      typedef FrictionalJointConstraintDataTpl<Scalar, Options> FrictionalJointConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintData)
+        FrictionalJointConstraintDataVector;
+
+      typedef ConstraintModelTpl<Scalar, Options> ConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
+      typedef ConstraintDataTpl<Scalar, Options> ConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) ConstraintDataVector;
 
       typedef CoulombFrictionConeTpl<context::Scalar> CoulombFrictionCone;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(CoulombFrictionCone)
+        CoulombFrictionConeVector;
       typedef DualCoulombFrictionConeTpl<context::Scalar> DualCoulombFrictionCone;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(DualCoulombFrictionCone)
+        DualCoulombFrictionConeVector;
       typedef BoxSetTpl<context::Scalar> BoxSet;
 
       typedef DelassusOperatorDenseTpl<Scalar, Options> DelassusOperatorDense;
       typedef DelassusOperatorSparseTpl<Scalar, Options> DelassusOperatorSparse;
-
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(CoulombFrictionCone)
-        CoulombFrictionConeVector;
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(DualCoulombFrictionCone)
-        DualCoulombFrictionConeVector;
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel)
-        RigidConstraintModelVector;
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
-        RigidConstraintDataVector;
 
 // Pool
 #ifdef PINOCCHIO_PYTHON_INTERFACE_WITH_OPENMP
