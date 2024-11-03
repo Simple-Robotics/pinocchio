@@ -11,6 +11,8 @@
 #include "pinocchio/algorithm/constraints/frictional-point-constraint.hpp"
 #include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
 
+#include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
+
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
 

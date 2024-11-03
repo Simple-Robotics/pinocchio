@@ -38,35 +38,8 @@ namespace pinocchio
   struct FrictionalPointConstraintDataTpl;
   typedef FrictionalPointConstraintDataTpl<context::Scalar> FrictionalPointConstraintData;
 
-  template<typename _Scalar, int _Options>
-  struct ConstraintCollectionDefaultTpl
-  {
-    typedef _Scalar Scalar;
-    enum
-    {
-      Options = _Options
-    };
-
-    typedef BilateralPointConstraintModelTpl<Scalar, Options> BilateralPointConstraintModel;
-    typedef BilateralPointConstraintDataTpl<Scalar, Options> BilateralPointConstraintData;
-
-    typedef FrictionalPointConstraintModelTpl<Scalar, Options> FrictionalPointConstraintModel;
-    typedef FrictionalPointConstraintDataTpl<Scalar, Options> FrictionalPointConstraintData;
-
-    typedef FrictionalJointConstraintModelTpl<Scalar, Options> FrictionalJointConstraintModel;
-    typedef FrictionalJointConstraintDataTpl<Scalar, Options> FrictionalJointConstraintData;
-
-    typedef boost::variant<
-      BilateralPointConstraintModel,
-      FrictionalPointConstraintModel,
-      FrictionalJointConstraintModel>
-      ConstraintModelVariant;
-    typedef boost::variant<
-      BilateralPointConstraintData,
-      FrictionalPointConstraintData,
-      FrictionalJointConstraintData>
-      ConstraintDataVariant;
-  }; // struct ConstraintCollectionDefaultTpl
+  template<typename Scalar, int Options = 0>
+  struct ConstraintCollectionDefaultTpl;
 
   typedef ConstraintCollectionDefaultTpl<context::Scalar, context::Options>
     ConstraintCollectionDefault;
