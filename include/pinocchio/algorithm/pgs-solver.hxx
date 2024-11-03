@@ -251,6 +251,48 @@ namespace pinocchio
       }
     }
 
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::EigenBase<BlockType> & G_block_, // for Sparse matrices
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+      const auto & G_block = G_block_.derived();
+      auto & primal_vector = primal_vector_.const_cast_derived();
+      auto & dual_vector = dual_vector_.const_cast_derived();
+
+      assert(
+        primal_vector.size() == dual_vector.size()
+        && "The two primal/dual vectors should be of the same size.");
+      assert(
+        primal_vector.size() == set.size()
+        && "The the primal vector should be of the same size than the box set.");
+      assert(
+        dual_vector.size() == set.size()
+        && "The the dual vector should be of the same size than the box set.");
+
+      const Eigen::DenseIndex size = set.size();
+      const auto & lb = set.lb();
+      const auto & ub = set.ub();
+
+      for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
+      {
+        Scalar & value = dual_vector.coeffRef(row_id);
+        const Scalar value_previous = value;
+        value -=
+          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * primal_vector[row_id];
+        value = math::max(lb[row_id], math::min(ub[row_id], value));
+        primal_vector += G_block.col(row_id) * Scalar(value - value_previous);
+      }
+    }
+
     /// \brief Compute the feasibility conditions associated with the optimization problem
     template<typename PrimalVectorType, typename DualVectorType>
     void computeFeasibility(
