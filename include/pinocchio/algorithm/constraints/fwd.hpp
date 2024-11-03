@@ -62,12 +62,18 @@ namespace pinocchio
   typedef ConstraintCollectionDefaultTpl<context::Scalar, context::Options>
     ConstraintCollectionDefault;
 
-  template<typename Scalar, int _Options, template<typename S, int O> class ConstraintCollectionTpl>
+  template<
+    typename Scalar,
+    int _Options,
+    template<typename S, int O> class ConstraintCollectionTpl = ConstraintCollectionDefaultTpl>
   struct ConstraintModelTpl;
   typedef ConstraintModelTpl<context::Scalar, context::Options, ConstraintCollectionDefaultTpl>
     ConstraintModel;
 
-  template<typename Scalar, int _Options, template<typename S, int O> class ConstraintCollectionTpl>
+  template<
+    typename Scalar,
+    int _Options,
+    template<typename S, int O> class ConstraintCollectionTpl = ConstraintCollectionDefaultTpl>
   struct ConstraintDataTpl;
   typedef ConstraintDataTpl<context::Scalar, context::Options, ConstraintCollectionDefaultTpl>
     ConstraintData;
