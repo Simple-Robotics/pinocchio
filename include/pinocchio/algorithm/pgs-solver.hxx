@@ -8,6 +8,7 @@
 #include <limits>
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/constraints/box-set.hpp"
+#include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 
 namespace pinocchio
 {
@@ -53,7 +54,7 @@ namespace pinocchio
     static void algo(
       const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
       const Scalar over_relax_value,
-      const Eigen::MatrixBase<BlockType> & G_block,
+      const Eigen::EigenBase<BlockType> & G_block,
       VelocityType & velocity,
       ForceType & force,
       Scalar & complementarity,
@@ -76,7 +77,7 @@ namespace pinocchio
     template<typename ConstraintModel>
     void run(
       const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-      const Eigen::MatrixBase<BlockType> & G_block,
+      const Eigen::EigenBase<BlockType> & G_block,
       VelocityType & velocity,
       ForceType & force)
     {
@@ -88,7 +89,7 @@ namespace pinocchio
     template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
     void run(
       const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
-      const Eigen::MatrixBase<BlockType> & G_block,
+      const Eigen::EigenBase<BlockType> & G_block,
       VelocityType & velocity,
       ForceType & force)
     {
