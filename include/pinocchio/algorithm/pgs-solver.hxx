@@ -195,6 +195,71 @@ namespace pinocchio
 
   }; // PGSConstraintProjectionStep<CoulombFrictionConeTpl<_Scalar>>
 
+  template<typename _Scalar, int _Options>
+  struct PGSConstraintProjectionStep<UnboundedSetTpl<_Scalar, _Options>>
+  : PGSConstraintProjectionStepBase<_Scalar>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
+    typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
+    typedef PGSConstraintProjectionStepBase<Scalar> Base;
+
+    PGSConstraintProjectionStep(const Scalar over_relax_value, const ConstraintSet & set)
+    : Base(over_relax_value)
+    , set(set)
+    {
+    }
+
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::EigenBase<BlockType> & G_block_,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+
+      auto & G_block = G_block_.derived();
+      auto & primal_vector = primal_vector_.const_cast_derived();
+      auto & dual_vector = dual_vector_.const_cast_derived();
+
+      const Scalar min_D =
+        math::min(G_block.coeff(0, 0), math::min(G_block.coeff(1, 1), G_block.coeff(2, 2)));
+      const Vector3 f_previous = dual_vector;
+
+      assert(min_D > 0 && "min_D is zero");
+      dual_vector -= this->over_relax_value / min_D * primal_vector;
+
+      primal_vector.noalias() += G_block * (dual_vector - f_previous);
+    }
+
+    /// \brief Compute the feasibility conditions associated with the optimization problem
+    template<typename PrimalVectorType, typename DualVectorType>
+    void computeFeasibility(
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector)
+    {
+      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
+      // The name should be inverted.
+      this->primal_feasibility =
+        Scalar(0); // always zero as the dual variable belongs to the friction cone.
+      this->complementarity = primal_vector.dot(dual_vector);
+      this->dual_feasibility = primal_vector.template lpNorm<Eigen::Infinity>();
+    }
+
+    const ConstraintSet & set;
+
+  }; // PGSConstraintProjectionStep<UnboundedSetTpl<_Scalar,_Options>>
+
   template<typename _Scalar>
   struct PGSConstraintProjectionStep<BoxSetTpl<_Scalar>> : PGSConstraintProjectionStepBase<_Scalar>
   {
