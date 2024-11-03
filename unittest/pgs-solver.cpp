@@ -17,22 +17,17 @@ using namespace pinocchio;
 
 double mu = 1e-4;
 
-template<typename _ConstraintModel, typename _ConstraintSet>
+template<typename _ConstraintModel>
 struct TestBoxTpl
 {
   typedef _ConstraintModel ConstraintModel;
-  typedef _ConstraintSet ConstraintSet;
 
   typedef typename ConstraintModel::ConstraintData ConstraintData;
 
-  TestBoxTpl(
-    const Model & model,
-    const std::vector<ConstraintModel> & constraint_models,
-    const std::vector<ConstraintSet> & constraint_sets)
+  TestBoxTpl(const Model & model, const std::vector<ConstraintModel> & constraint_models)
   : model(model)
   , data(model)
   , constraint_models(constraint_models)
-  , constraint_sets(constraint_sets)
   , v_next(Eigen::VectorXd::Zero(model.nv))
   {
     for (const auto & cm : constraint_models)
@@ -107,7 +102,6 @@ struct TestBoxTpl
   Data data;
   std::vector<ConstraintModel> constraint_models;
   std::vector<ConstraintData> constraint_datas;
-  std::vector<ConstraintSet> constraint_sets;
   Eigen::VectorXd v_next;
 
   Eigen::VectorXd primal_solution, dual_solution, dual_solution_sparse;
@@ -155,10 +149,10 @@ BOOST_AUTO_TEST_CASE(box)
   const double dt = 1e-3;
 
   typedef FrictionalPointConstraintModel ConstraintModel;
-  typedef ConstraintModel::ConstraintSet ConstraintSet;
-  typedef TestBoxTpl<ConstraintModel, ConstraintSet> TestBox;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
   std::vector<ConstraintModel> constraint_models;
 
+  const double friction_value = 0.4;
   {
     const SE3 local_placement1(
       SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
@@ -167,24 +161,22 @@ BOOST_AUTO_TEST_CASE(box)
     {
       const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement1.translation());
       ConstraintModel cm(model, 1, local_placement);
+      cm.set() = CoulombFrictionCone(friction_value);
       constraint_models.push_back(cm);
       rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
     }
   }
 
-  // Create stack of friction cones
-  const double friction_value = 0.4;
-  std::vector<ConstraintSet> constraint_sets;
-  for (int k = 0; k < 4; ++k)
+  for (const auto & cm : constraint_models)
   {
-    constraint_sets.push_back(CoulombFrictionCone(friction_value));
+    BOOST_CHECK(cm.size() == 3);
   }
 
   // Test static motion with zero external force
   {
     const Force fext = Force::Zero();
 
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
@@ -203,7 +195,7 @@ BOOST_AUTO_TEST_CASE(box)
     fext.linear().head<2>().setRandom().normalize();
     fext.linear() *= scaling * f_sliding;
 
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
@@ -221,7 +213,7 @@ BOOST_AUTO_TEST_CASE(box)
     fext.linear().head<2>().setRandom().normalize();
     fext.linear() *= scaling * f_sliding;
 
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
@@ -257,7 +249,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   typedef FrictionalJointConstraintModel ConstraintModel;
   typedef ConstraintModel::ConstraintData ConstraintData;
   typedef BoxSet ConstraintSet;
-  typedef TestBoxTpl<ConstraintModel, ConstraintSet> TestBox;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
   std::vector<ConstraintModel> constraint_models;
   std::vector<ConstraintData> constraint_datas;
 
@@ -306,7 +298,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
 
   // Test static motion with zero external force
   {
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
@@ -317,7 +309,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
 
   for (int i = 0; i < 6; ++i)
   {
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0 + 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
 
     //    std::cout << "test.dual_solution: " << test.dual_solution.transpose() << std::endl;
@@ -331,7 +323,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   // Sign reversed
   for (int i = 0; i < 6; ++i)
   {
-    TestBox test(model, constraint_models, constraint_sets);
+    TestBox test(model, constraint_models);
     test(q0, v0, tau0 - 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
