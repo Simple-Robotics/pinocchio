@@ -226,6 +226,80 @@ BOOST_AUTO_TEST_CASE(box)
   }
 }
 
+BOOST_AUTO_TEST_CASE(bilateral_box)
+{
+  Model model;
+  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
+
+  const int num_tests =
+#ifdef NDEBUG
+    100000
+#else
+    100
+#endif
+    ;
+
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
+  const double box_mass = 10;
+  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+
+  model.appendBodyToJoint(1, box_inertia);
+
+  BOOST_CHECK(model.check(model.createData()));
+
+  Eigen::VectorXd q0 = neutral(model);
+  q0.const_cast_derived()[2] += box_dims[2] / 2;
+  const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
+
+  const double dt = 1e-3;
+
+  typedef BilateralPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
+
+  {
+    const SE3 local_placement_box(
+      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
+    SE3::Matrix3 rot = SE3::Matrix3::Identity();
+    for (int i = 0; i < 4; ++i)
+    {
+      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
+      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
+      constraint_models.push_back(cm);
+      rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
+    }
+  }
+
+  // Test static motion with zero external force
+  {
+    const Force fext = Force::Zero();
+
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, fext, dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(test.v_next.isZero(2e-10));
+  }
+
+  for (int k = 0; k < num_tests; ++k)
+  {
+    Force fext = Force::Zero();
+    fext.linear().setRandom();
+
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, fext, dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.primal_solution.isZero(1e-8));
+    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
+    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(f_tot_ref, 1e-6));
+    BOOST_CHECK(test.v_next.isZero(1e-8));
+  }
+}
+
 BOOST_AUTO_TEST_CASE(dry_friction_box)
 {
   Model model;
