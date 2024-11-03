@@ -40,10 +40,19 @@ namespace pinocchio
       PGSConstraintProjectionStepVisitor<Scalar, BlockType, VelocityType, ForceType>>
   , PGSConstraintProjectionStepBase<Scalar>
   {
-    typedef boost::fusion::
-      vector<const BlockType &, VelocityType &, ForceType &, Scalar &, Scalar &, Scalar &>
-        ArgsType;
+    typedef boost::fusion::vector<
+      const Scalar,
+      const BlockType &,
+      VelocityType &,
+      ForceType &,
+      Scalar &,
+      Scalar &,
+      Scalar &>
+      ArgsType;
     typedef PGSConstraintProjectionStepBase<Scalar> Base;
+    typedef visitors::ConstraintUnaryVisitorBase<
+      PGSConstraintProjectionStepVisitor<Scalar, BlockType, VelocityType, ForceType>>
+      VisitorBase;
 
     explicit PGSConstraintProjectionStepVisitor(const Scalar over_relax_value)
     : Base(over_relax_value)
@@ -74,6 +83,7 @@ namespace pinocchio
       primal_feasibility = step.primal_feasibility;
     }
 
+    using VisitorBase::run;
     template<typename ConstraintModel>
     void run(
       const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
@@ -94,8 +104,8 @@ namespace pinocchio
       ForceType & force)
     {
       ArgsType args(
-        G_block, velocity, force, this->complementarity, this->primal_feasibility,
-        this->dual_feasibility);
+        this->over_relax_value, G_block.derived(), velocity, force, this->complementarity,
+        this->primal_feasibility, this->dual_feasibility);
       this->run(cmodel.derived(), args);
     }
   }; // struct PGSConstraintProjectionStepVisitor
@@ -208,11 +218,11 @@ namespace pinocchio
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
-      const Eigen::EigenBase<BlockType> & G_block_,
+      const Eigen::MatrixBase<BlockType> & G_block_,
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
       const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
     {
-      auto & G_block = G_block_.derived();
+      const auto & G_block = G_block_.derived();
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
