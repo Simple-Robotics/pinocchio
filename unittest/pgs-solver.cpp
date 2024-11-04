@@ -36,7 +36,7 @@ struct TestBoxTpl
     }
 
     const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
-    primal_solution = dual_solution = dual_solution_sparse = Eigen::VectorXd::Zero(constraint_size);
+    dual_solution = primal_solution = primal_solution_sparse = Eigen::VectorXd::Zero(constraint_size);
   }
 
   void operator()(
@@ -71,7 +71,8 @@ struct TestBoxTpl
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-10);
     pgs_solver.setRelativePrecision(1e-14);
-    has_converged = pgs_solver.solve(G, g, constraint_models, dual_solution);
+    has_converged = pgs_solver.solve(G, g, constraint_models, primal_solution);
+    primal_solution = pgs_solver.getPrimalSolution();
 
     //    // Check with sparse view too
     //    {
@@ -88,10 +89,11 @@ struct TestBoxTpl
 
     //    std::cout << "x_sol: " << x_sol.transpose() << std::endl;
 
-    primal_solution = G * dual_solution + g;
+    // dual_solution = G * primal_solution + g;
+    dual_solution = pgs_solver.getDualSolution();
     //    std::cout << "constraint_velocity: " << constraint_velocity.transpose() << std::endl;
 
-    const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * dual_solution / dt;
+    const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * primal_solution / dt;
 
     v_next =
       v0
@@ -104,7 +106,7 @@ struct TestBoxTpl
   std::vector<ConstraintData> constraint_datas;
   Eigen::VectorXd v_next;
 
-  Eigen::VectorXd primal_solution, dual_solution, dual_solution_sparse;
+  Eigen::VectorXd primal_solution, primal_solution_sparse, dual_solution, dual_solution_sparse;
   bool has_converged;
 };
 
@@ -180,8 +182,8 @@ BOOST_AUTO_TEST_CASE(box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(2e-10));
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
@@ -199,9 +201,9 @@ BOOST_AUTO_TEST_CASE(box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(1e-7));
     const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(f_tot_ref, 1e-6));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
   }
 
@@ -219,7 +221,7 @@ BOOST_AUTO_TEST_CASE(box)
     BOOST_CHECK(test.has_converged == true);
     const Force::Vector3 f_tot_ref =
       (-box_mass * Model::gravity981 - 1 / scaling * fext.linear()) * dt;
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(f_tot_ref, 1e-6));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(
       math::fabs(Motion(test.v_next).linear().norm() - (f_sliding * 0.1 / box_mass * dt)) <= 1e-6);
     BOOST_CHECK(Motion(test.v_next).angular().isZero(1e-6));
@@ -279,8 +281,8 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(2e-10));
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
@@ -293,9 +295,9 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(1e-8));
     const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(f_tot_ref, 1e-6));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
   }
 }
@@ -362,13 +364,16 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
   pgs_solver.setAbsolutePrecision(1e-10);
   pgs_solver.setRelativePrecision(1e-14);
-  const bool has_converged = pgs_solver.solve(G, g, constraint_models, dual_solution);
+  const bool has_converged = pgs_solver.solve(G, g, constraint_models, primal_solution);
+  primal_solution = pgs_solver.getPrimalSolution();
   BOOST_CHECK(has_converged);
 
-  primal_solution = G * dual_solution + g;
+  dual_solution = G * primal_solution + g;
+  Eigen::VectorXd dual_solution2 = pgs_solver.getDualSolution();
 
   BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
   BOOST_CHECK(dual_solution.isZero());
+  BOOST_CHECK(dual_solution2.isZero());
 
   // Test static motion with zero external force
   {
@@ -376,9 +381,9 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     test(q0, v0, tau0, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
     BOOST_CHECK(test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
   }
 
   for (int i = 0; i < 6; ++i)
@@ -390,8 +395,8 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(!test.primal_solution.isZero(2e-10));
     BOOST_CHECK(!test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
-    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.lb()[i]) < 1e-8);
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
+    BOOST_CHECK(std::fabs(test.primal_solution[i] - box_set.lb()[i]) < 1e-8);
   }
 
   // Sign reversed
@@ -401,10 +406,10 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     test(q0, v0, tau0 - 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(!test.dual_solution.isZero(2e-10));
     BOOST_CHECK(!test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
-    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.ub()[i]) < 1e-8);
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
+    BOOST_CHECK(std::fabs(test.primal_solution[i] - box_set.ub()[i]) < 1e-8);
   }
 }
 

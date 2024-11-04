@@ -27,6 +27,7 @@ namespace pinocchio
     : Base(problem_size)
     , x(problem_size)
     , x_previous(problem_size)
+    , y(problem_size)
     {
     }
 
@@ -54,15 +55,22 @@ namespace pinocchio
       const Eigen::DenseBase<VectorLikeOut> & x,
       const Scalar over_relax = Scalar(1));
 
-    /// \returns the solution of the problem
-    const VectorXs & getSolution() const
+    /// \returns the primal solution of the problem
+    const VectorXs & getPrimalSolution() const
     {
       return x;
+    }
+    /// \returns the dual solution of the problem
+    const VectorXs & getDualSolution() const
+    {
+      return y;
     }
 
   protected:
     /// \brief Previous temporary value of the optimum.
     VectorXs x, x_previous;
+    /// \brief Value of the dual variable
+    VectorXs y;
 #ifdef PINOCCHIO_WITH_HPP_FCL
     using Base::timer;
 #endif // PINOCCHIO_WITH_HPP_FCL

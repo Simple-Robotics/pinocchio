@@ -176,7 +176,6 @@ namespace pinocchio
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
       const Eigen::MatrixBase<DualVectorType> & dual_vector)
     {
-      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
       // The name should be inverted.
       this->primal_feasibility =
         Scalar(0); // always zero as the dual variable belongs to the friction cone.
@@ -416,7 +415,6 @@ namespace pinocchio
     const Scalar over_relax)
 
   {
-    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
 
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       over_relax < Scalar(2) && over_relax > Scalar(0), "over_relax should lie in ]0,2[.")
@@ -439,13 +437,6 @@ namespace pinocchio
     x = x_sol;
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
-    Eigen::DenseIndex constraint_set_size_max = 0;
-    for (const auto & cmodel : constraint_models)
-    {
-      constraint_set_size_max = std::max(constraint_set_size_max, Eigen::DenseIndex(cmodel.size()));
-    }
-
-    VectorX velocity_storage(constraint_set_size_max); // tmp variable
     for (; it <= this->max_it; ++it)
     {
       x_previous = x;
@@ -461,7 +452,7 @@ namespace pinocchio
         auto G_block = G.block(row_id, row_id, constraint_set_size, constraint_set_size);
         auto force = x.segment(row_id, constraint_set_size);
 
-        auto velocity = velocity_storage.head(constraint_set_size);
+        auto velocity = y.segment(row_id, constraint_set_size);
 
         // Update primal variable
         velocity.noalias() =
@@ -480,6 +471,8 @@ namespace pinocchio
         complementarity = math::max(complementarity, step.complementarity);
         dual_feasibility = math::max(dual_feasibility, step.dual_feasibility);
         primal_feasibility = math::max(primal_feasibility, step.primal_feasibility);
+
+        // Update row id for the next constraint
         row_id += constraint_set_size;
       }
 
@@ -515,7 +508,6 @@ namespace pinocchio
     this->absolute_residual = math::max(complementarity, dual_feasibility);
     this->relative_residual = proximal_metric;
     this->it = it;
-    x_sol.const_cast_derived() = x;
 
     if (abs_prec_reached || rel_prec_reached)
       return true;
