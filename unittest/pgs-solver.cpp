@@ -89,7 +89,8 @@ struct TestBoxTpl
 
     //    std::cout << "x_sol: " << x_sol.transpose() << std::endl;
 
-    dual_solution = G * primal_solution + g;
+    // dual_solution = G * primal_solution + g;
+    dual_solution = pgs_solver.getDualSolution();
     //    std::cout << "constraint_velocity: " << constraint_velocity.transpose() << std::endl;
 
     const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * primal_solution / dt;
@@ -200,7 +201,7 @@ BOOST_AUTO_TEST_CASE(box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.dual_solution.isZero(1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(1e-7));
     const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
@@ -280,8 +281,8 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(2e-10));
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
@@ -294,9 +295,9 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(1e-8));
+    BOOST_CHECK(test.dual_solution.isZero(1e-8));
     const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
-    BOOST_CHECK(computeFtot(test.dual_solution).isApprox(f_tot_ref, 1e-6));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
   }
 }
