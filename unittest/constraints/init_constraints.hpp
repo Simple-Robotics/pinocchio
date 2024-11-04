@@ -27,6 +27,18 @@ namespace pinocchio
     }
   };
 
+  template<typename Scalar, int Options>
+  struct init_constraint_default<FrictionalPointConstraintModelTpl<Scalar, Options>>
+  {
+    typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
+
+    template<typename S, int O, template<typename, int> class JointCollectionTpl>
+    static ConstraintModel run(const ModelTpl<S, O, JointCollectionTpl> & model)
+    {
+      return FrictionalPointConstraintModelTpl(model, 0, SE3::Random());
+    }
+  };
+
   template<
     class ConstraintModel,
     typename S,
