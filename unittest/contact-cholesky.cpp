@@ -1696,19 +1696,21 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
   PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
   PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
 
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) rigid_constraint_models;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) rigid_constraint_datas;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) rigid_constraint_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintData) rigid_constraint_datas;
 
-  RigidConstraintModel ci_RF(CONTACT_6D, model, model.getJointId(RF_name), LOCAL);
+  BilateralPointConstraintModel ci_RF(
+    model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Identity());
   constraint_models.push_back(ci_RF);
   rigid_constraint_models.push_back(ci_RF);
-  constraint_datas.push_back(RigidConstraintData(ci_RF));
-  rigid_constraint_datas.push_back(RigidConstraintData(ci_RF));
-  RigidConstraintModel ci_LF(CONTACT_6D, model, model.getJointId(LF_name), LOCAL);
+  constraint_datas.push_back(BilateralPointConstraintData(ci_RF));
+  rigid_constraint_datas.push_back(BilateralPointConstraintData(ci_RF));
+  BilateralPointConstraintModel ci_LF(
+    model, 0, SE3::Identity(), model.getJointId(LF_name), SE3::Identity());
   constraint_models.push_back(ci_LF);
   rigid_constraint_models.push_back(ci_LF);
-  constraint_datas.push_back(RigidConstraintData(ci_LF));
-  rigid_constraint_datas.push_back(RigidConstraintData(ci_LF));
+  constraint_datas.push_back(BilateralPointConstraintData(ci_LF));
+  rigid_constraint_datas.push_back(BilateralPointConstraintData(ci_LF));
 
   Data data(model);
   crba(model, data, q, Convention::WORLD);
