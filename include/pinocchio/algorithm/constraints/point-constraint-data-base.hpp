@@ -80,6 +80,9 @@ namespace pinocchio
 
     explicit PointConstraintDataBase(const ConstraintModel & constraint_model)
     : constraint_force(Vector3::Zero())
+    , oMc1(SE3::Identity())
+    , oMc2(SE3::Identity())
+    , c1Mc2(SE3::Identity())
     , constraint_position_error(Vector3::Zero())
     , constraint_velocity_error(Vector3::Zero())
     , constraint_acceleration_error(Vector3::Zero())
