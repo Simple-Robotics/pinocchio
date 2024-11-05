@@ -164,7 +164,7 @@ namespace pinocchio
 
   template<typename _Scalar>
   struct PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-  ADMMContactSolverTpl : ContactSolverBaseTpl<_Scalar>
+    ADMMContactSolverTpl : ContactSolverBaseTpl<_Scalar>
   {
     typedef _Scalar Scalar;
     typedef ContactSolverBaseTpl<_Scalar> Base;
@@ -390,7 +390,8 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
     /// \param[in] cones Vector of conic constraints.
-    /// \param[in,out] x Initial guess and output solution of the problem
+    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
+    /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] mu_prox Proximal smoothing value associated to the algorithm.
     /// \param[in] R Proximal regularization value associated to the compliant contacts (corresponds
     /// to the lowest non-zero). \param[in] tau Over relaxation value
@@ -420,7 +421,7 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
     /// \param[in] cones Vector of conic constraints.
-    /// \param[in,out] x Initial guess and output solution of the problem
+    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] mu_prox Proximal smoothing value associated to the algorithm.
     /// \param[in] tau Over relaxation value
     ///
@@ -434,12 +435,12 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
-      const Eigen::DenseBase<VectorLikeOut> & x,
+      const Eigen::DenseBase<VectorLikeOut> & primal_guess,
       bool solve_ncp = true)
     {
       return solve(
         delassus.derived(), g.derived(), cones, VectorXs::Zero(problem_size),
-        x.const_cast_derived(), boost::none, solve_ncp);
+        primal_guess.const_cast_derived(), boost::none, solve_ncp);
     }
 
     /// \returns the primal solution of the problem

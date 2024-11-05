@@ -38,8 +38,8 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
     /// \param[in] constraint_models Vector of constraint models.
-    /// \param[in,out] x Initial guess and output solution of the problem
-    /// \param[in] over_relax Over relaxation value
+    /// \param[in] x Initial guess solution of the problem.
+    /// \param[in] over_relax Optional over relaxation value, default to 1.
     ///
     /// \returns True if the problem has converged.
     template<
@@ -47,12 +47,12 @@ namespace pinocchio
       typename VectorLike,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
-      typename VectorLikeOut>
+      typename VectorLikeInitialGuess>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const Eigen::DenseBase<VectorLikeOut> & x,
+      const Eigen::DenseBase<VectorLikeInitialGuess> & x,
       const Scalar over_relax = Scalar(1));
 
     /// \returns the primal solution of the problem
