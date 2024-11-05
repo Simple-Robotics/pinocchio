@@ -37,7 +37,6 @@ namespace pinocchio
   /// \param[in] c_ref The contact point velocity
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] cones list of friction cones.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
@@ -53,7 +52,6 @@ namespace pinocchio
     template<typename T> class Holder,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    class CoulombFrictionConelAllocator,
     typename VectorLikeR,
     typename VectorLikeImp>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
@@ -66,7 +64,6 @@ namespace pinocchio
       ConstraintModelAllocator> & contact_models,
     std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
       contact_datas,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -77,7 +74,7 @@ namespace pinocchio
     using Vector3 = Eigen::Matrix<Scalar, 3, 1, Options>;
 
     const Eigen::Index problem_size = R.size();
-    const std::size_t n_contacts = cones.size();
+    const std::size_t n_contacts = contact_models.size();
     // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_contacts);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
@@ -104,7 +101,9 @@ namespace pinocchio
       for (std::size_t cone_id = 0; cone_id < n_contacts; ++cone_id)
       {
         const auto row_id = (Eigen::Index)(3 * cone_id);
-        const CoulombFrictionCone & cone = cones[cone_id];
+
+        const FrictionalPointConstraintModelTpl<Scalar, Options> & cmodel = contact_models[cone_id];
+        const CoulombFrictionCone & cone = cmodel.set();
         Vector3 lambda_c_prev = data.lambda_c.template segment<3>(row_id);
         auto lambda_segment = data.lambda_c.template segment<3>(row_id);
         auto R_prox_segment = R_prox.template segment<3>(row_id);
@@ -165,7 +164,6 @@ namespace pinocchio
   /// \param[in] c_ref The contact point velocity
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] cones list of friction cones.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
@@ -180,7 +178,6 @@ namespace pinocchio
     typename VectorLikeC,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    class CoulombFrictionConelAllocator,
     typename VectorLikeR,
     typename VectorLikeImp>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
@@ -191,7 +188,6 @@ namespace pinocchio
     const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
       contact_models,
     std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -212,7 +208,7 @@ namespace pinocchio
       contact_datas.begin(), contact_datas.end());
 
     return computeContactForces(
-      model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, cones, R, settings,
+      model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, R, settings,
       lambda_guess);
   }
 
@@ -234,7 +230,6 @@ namespace pinocchio
   /// \param[in] dt The time step.
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] cones list of friction cones.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
@@ -252,7 +247,6 @@ namespace pinocchio
     template<typename T> class Holder,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    class CoulombFrictionConelAllocator,
     typename VectorLikeR,
     typename VectorLikeGamma,
     typename VectorLikeLam>
@@ -269,7 +263,6 @@ namespace pinocchio
       ConstraintModelAllocator> & contact_models,
     std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
       contact_datas,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -281,7 +274,7 @@ namespace pinocchio
     typedef FrictionalPointConstraintDataTpl<Scalar, Options> RigidConstraintData;
 
     const Eigen::Index problem_size = R.size();
-    const std::size_t n_contacts = cones.size();
+    const std::size_t n_contacts = contact_models.size();
     MatrixXs J = MatrixXs::Zero(problem_size, model.nv); // TODO: malloc
     getConstraintsJacobian(model, data, contact_models, contact_datas, J);
     VectorXs v_ref, c_ref, tau_c;
@@ -290,7 +283,7 @@ namespace pinocchio
     c_ref += constraint_correction;
     c_ref /= dt; // we work with a formulation on forces
     computeContactForces(
-      model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
+      model, data, c_ref, contact_models, contact_datas, R, settings, lambda_guess);
     container::aligned_vector<Force> fext((std::size_t)(model.njoints));
     for (std::size_t i = 0; i < (std::size_t)(model.njoints); i++)
     {
@@ -332,7 +325,6 @@ namespace pinocchio
   /// \param[in] dt The time step.
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] cones list of friction cones.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] settings The settings for the proximal algorithm.
@@ -349,7 +341,6 @@ namespace pinocchio
     typename TangentVectorType2,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    class CoulombFrictionConelAllocator,
     typename VectorLikeR,
     typename VectorLikeGamma,
     typename VectorLikeLam>
@@ -364,7 +355,6 @@ namespace pinocchio
     const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
       contact_models,
     std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -386,7 +376,7 @@ namespace pinocchio
       contact_datas.begin(), contact_datas.end());
 
     return contactInverseDynamics(
-      model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas, cones, R,
+      model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas, R,
       constraint_correction, settings, lambda_guess);
   }
 

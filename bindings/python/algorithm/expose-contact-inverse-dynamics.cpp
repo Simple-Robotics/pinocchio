@@ -28,14 +28,13 @@ namespace pinocchio
       const ConstRefVectorXs & c_ref,
       const context::FrictionalPointConstraintModelVector & contact_models,
       context::FrictionalPointConstraintDataVector & contact_datas,
-      const context::CoulombFrictionConeVector & cones,
       const ConstRefVectorXs & R,
       // const ConstRefVectorXs & constraint_correction,
       ProximalSettingsTpl<Scalar> & settings,
       const boost::optional<ConstRefVectorXs> & lambda_guess = boost::none)
     {
       return computeContactForces(
-        model, data, c_ref, contact_models, contact_datas, cones, R, settings, lambda_guess);
+        model, data, c_ref, contact_models, contact_datas, R, settings, lambda_guess);
       // return computeContactImpulses(model, data, c_ref, contact_models, contact_datas, cones, R,
       // constraint_correction, settings, lambda_guess);
     }
@@ -49,14 +48,13 @@ namespace pinocchio
       Scalar dt,
       const context::FrictionalPointConstraintModelVector & contact_models,
       context::FrictionalPointConstraintDataVector & contact_datas,
-      const context::CoulombFrictionConeVector & cones,
       ConstRefVectorXs & R,
       ConstRefVectorXs & constraint_correction,
       ProximalSettingsTpl<Scalar> & settings,
       const boost::optional<ConstRefVectorXs> & lambda_guess = boost::none)
     {
       return contactInverseDynamics(
-        model, data, q, v, a, dt, contact_models, contact_datas, cones, R, constraint_correction,
+        model, data, q, v, a, dt, contact_models, contact_datas, R, constraint_correction,
         settings, lambda_guess);
     }
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
@@ -66,7 +64,7 @@ namespace pinocchio
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       bp::def(
         "computeContactForces", computeContactForces_wrapper,
-        (bp::arg("model"), "data", "c_ref", "contact_models", "contact_datas", "cones", "R",
+        (bp::arg("model"), "data", "c_ref", "contact_models", "contact_datas", "R",
          bp::arg("settings"), bp::arg("lambda_guess") = boost::none),
         "Compute the inverse dynamics with frictional contacts, store the result in Data and "
         "return it.\n\n"
@@ -76,15 +74,13 @@ namespace pinocchio
         "\tc_ref: the reference velocity of contact points\n"
         "\tcontact_models: list of contact models\n"
         "\tcontact_datas: list of contact datas\n"
-        "\tcones: list of friction cones\n"
         "\tR: vector representing the diagonal of the compliance matrix\n"
-        // "\tconstraint_correction: vector representing the constraint correction\n"
         "\tsettings: the settings of the proximal algorithm\n"
         "\tlambda_guess: initial guess for contact forces\n");
 
       bp::def(
         "contactInverseDynamics", contactInverseDynamics_wrapper,
-        (bp::arg("model"), "data", "q", "v", "a", "dt", "contact_models", "contact_datas", "cones",
+        (bp::arg("model"), "data", "q", "v", "a", "dt", "contact_models", "contact_datas",
          "R", "constraint_correction", bp::arg("settings"), bp::arg("lambda_guess") = boost::none),
         "Compute the inverse dynamics with frictional contacts, store the result in Data and "
         "return it.\n\n"
@@ -97,7 +93,6 @@ namespace pinocchio
         "\tdt: the time step\n"
         "\tcontact_models: list of contact models\n"
         "\tcontact_datas: list of contact datas\n"
-        "\tcones: list of friction cones\n"
         "\tR: vector representing the diagonal of the compliance matrix\n"
         "\tconstraint_correction: vector representing the constraint correction\n"
         "\tsettings: the settings of the proximal algorithm\n"

@@ -104,19 +104,17 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
   typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
     FrictionalConstraintModelVector;
   typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintData) FrictionalConstraintDataVector;
-  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(CoulombFrictionCone) CoulombFrictionConeVector;
 
   FrictionalConstraintModelVector contact_models;
   FrictionalConstraintDataVector contact_datas;
-  CoulombFrictionConeVector cones;
   FrictionalPointConstraintModel ci_RF(model, model.getJointId(RF));
+  ci_RF.set().mu = 0.4;
   contact_models.push_back(ci_RF);
   contact_datas.push_back(FrictionalPointConstraintData(ci_RF));
-  cones.push_back(CoulombFrictionCone(0.4));
   FrictionalPointConstraintModel ci_LF(model, model.getJointId(LF));
+  ci_LF.set().mu = 0.4;
   contact_models.push_back(ci_LF);
   contact_datas.push_back(FrictionalPointConstraintData(ci_LF));
-  cones.push_back(CoulombFrictionCone(0.4));
 
   FrictionalConstraintDataVector contact_datas_ref(contact_datas);
 
@@ -135,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
   ProximalSettings prox_settings(1e-12, 1e-6, 1);
   initConstraintDynamics(model, data_ref, contact_models);
   contactInverseDynamics(
-    model, data_ref, q, v, a, dt, contact_models, contact_datas, cones, R, constraint_correction,
+    model, data_ref, q, v, a, dt, contact_models, contact_datas, R, constraint_correction,
     prox_settings, lambda_guess);
   //   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas_ref,
   //   prox_settings_cd); forwardKinematics(model, data_ref, q, v, v*0);
