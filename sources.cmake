@@ -67,7 +67,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/default-check.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus.hxx
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operartor-ref.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-ref.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-dense.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-rigid-body.hpp
