@@ -82,7 +82,7 @@ namespace pinocchio
       bp::def(
         "initConstraintDynamics",
         &initConstraintDynamics<
-          context::Scalar, context::Options, JointCollectionDefaultTpl,
+          context::Scalar, context::Options, RigidConstraintModel, JointCollectionDefaultTpl,
           typename RigidConstraintModelVector::allocator_type>,
         bp::args("model", "data", "contact_models"),
         "This function allows to allocate the memory before hand for contact dynamics algorithms.\n"

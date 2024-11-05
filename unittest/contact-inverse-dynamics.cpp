@@ -101,24 +101,24 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
   //  const Model::JointIndex LF_id = model.getJointId(LF);
 
   // Contact models and data
-  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel)
-    RigidConstraintModelVector;
-  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) RigidConstraintDataVector;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
+    FrictionalConstraintModelVector;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintData) FrictionalConstraintDataVector;
   typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(CoulombFrictionCone) CoulombFrictionConeVector;
 
-  RigidConstraintModelVector contact_models;
-  RigidConstraintDataVector contact_datas;
+  FrictionalConstraintModelVector contact_models;
+  FrictionalConstraintDataVector contact_datas;
   CoulombFrictionConeVector cones;
-  RigidConstraintModel ci_RF(CONTACT_3D, model, model.getJointId(RF), LOCAL);
+  FrictionalPointConstraintModel ci_RF(model, model.getJointId(RF));
   contact_models.push_back(ci_RF);
-  contact_datas.push_back(RigidConstraintData(ci_RF));
+  contact_datas.push_back(FrictionalPointConstraintData(ci_RF));
   cones.push_back(CoulombFrictionCone(0.4));
-  RigidConstraintModel ci_LF(CONTACT_3D, model, model.getJointId(LF), LOCAL);
+  FrictionalPointConstraintModel ci_LF(model, model.getJointId(LF));
   contact_models.push_back(ci_LF);
-  contact_datas.push_back(RigidConstraintData(ci_LF));
+  contact_datas.push_back(FrictionalPointConstraintData(ci_LF));
   cones.push_back(CoulombFrictionCone(0.4));
 
-  RigidConstraintDataVector contact_datas_ref(contact_datas);
+  FrictionalConstraintDataVector contact_datas_ref(contact_datas);
 
   Eigen::DenseIndex constraint_dim = 0;
   for (size_t k = 0; k < contact_models.size(); ++k)

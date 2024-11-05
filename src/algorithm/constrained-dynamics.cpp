@@ -14,6 +14,7 @@ namespace pinocchio
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void initConstraintDynamics<
     context::Scalar,
     context::Options,
+    RigidConstraintModel,
     JointCollectionDefaultTpl,
     typename context::RigidConstraintModelVector::allocator_type>(
     const context::Model &, context::Data &, const context::RigidConstraintModelVector &);

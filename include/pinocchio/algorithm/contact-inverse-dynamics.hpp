@@ -62,9 +62,9 @@ namespace pinocchio
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
     const std::vector<
-      Holder<const RigidConstraintModelTpl<Scalar, Options>>,
+      Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<Holder<RigidConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
+    std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
       contact_datas,
     const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
@@ -188,23 +188,23 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
+    const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
       contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
+    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
     const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
     const boost::optional<VectorLikeImp> & lambda_guess = boost::none)
   {
-    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar, Options>>
+    typedef std::reference_wrapper<const FrictionalPointConstraintModelTpl<Scalar, Options>>
       WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
       contact_models.cbegin(), contact_models.cend());
 
-    typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar, Options>>
+    typedef std::reference_wrapper<FrictionalPointConstraintDataTpl<Scalar, Options>>
       WrappedConstraintDataType;
     typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
 
@@ -265,9 +265,9 @@ namespace pinocchio
     const Eigen::MatrixBase<TangentVectorType2> & a,
     Scalar dt,
     const std::vector<
-      Holder<const RigidConstraintModelTpl<Scalar, Options>>,
+      Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<Holder<RigidConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
+    std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
       contact_datas,
     const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
@@ -278,7 +278,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> MatrixXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef ForceTpl<Scalar, Options> Force;
-    typedef RigidConstraintDataTpl<Scalar, Options> RigidConstraintData;
+    typedef FrictionalPointConstraintDataTpl<Scalar, Options> RigidConstraintData;
 
     const Eigen::Index problem_size = R.size();
     const std::size_t n_contacts = cones.size();
@@ -298,7 +298,7 @@ namespace pinocchio
     }
     for (std::size_t i = 0; i < n_contacts; i++)
     {
-      const RigidConstraintModel & cmodel = contact_models[i];
+      const FrictionalPointConstraintModel & cmodel = contact_models[i];
       const auto row_id = (Eigen::Index)(3 * i);
       auto lambda_segment = data.lambda_c.template segment<3>(row_id);
       typename RigidConstraintData::Matrix6 actInv_transpose1 =
@@ -361,9 +361,9 @@ namespace pinocchio
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & a,
     Scalar dt,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
+    const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
       contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
+    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
     const std::vector<CoulombFrictionConeTpl<Scalar>, CoulombFrictionConelAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
@@ -371,14 +371,14 @@ namespace pinocchio
     const boost::optional<VectorLikeLam> & lambda_guess = boost::none)
   {
 
-    typedef std::reference_wrapper<const RigidConstraintModelTpl<Scalar, Options>>
+    typedef std::reference_wrapper<const FrictionalPointConstraintModelTpl<Scalar, Options>>
       WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
       contact_models.cbegin(), contact_models.cend());
 
-    typedef std::reference_wrapper<RigidConstraintDataTpl<Scalar, Options>>
+    typedef std::reference_wrapper<FrictionalPointConstraintDataTpl<Scalar, Options>>
       WrappedConstraintDataType;
     typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
 
