@@ -135,6 +135,7 @@ namespace pinocchio
           (bp::args("self", "delassus", "g", "cones", "R"),
            bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
            bp::arg("compute_largest_eigen_values") = true,
+           bp::arg("solve_ncp") = true,
            bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
           "Solve the constrained conic problem, starting from the optional initial guess.")
         .def(
@@ -142,6 +143,7 @@ namespace pinocchio
           (bp::args("self", "delassus", "g", "cones", "R"),
            bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
            bp::arg("compute_largest_eigen_values") = true,
+           bp::arg("solve_ncp") = true,
            bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
           "Solve the constrained conic problem, starting from the optional initial guess.")
         .def(
@@ -149,6 +151,7 @@ namespace pinocchio
           (bp::args("self", "delassus", "g", "cones", "R"),
            bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
            bp::arg("compute_largest_eigen_values") = true,
+           bp::arg("solve_ncp") = true,
            bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
           "Solve the constrained conic problem, starting from the optional initial guess.")
 
@@ -231,6 +234,7 @@ namespace pinocchio
           (bp::args("self", "delassus", "g", "cones", "R"),
            bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
            bp::arg("compute_largest_eigen_values") = true,
+           bp::arg("solve_ncp") = true,
            bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
           "Solve the constrained conic problem, starting from the optional initial guess.");
       }
