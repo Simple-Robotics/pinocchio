@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2020 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 // Copyright (c) 2015 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -156,16 +156,38 @@ namespace pinocchio
     TangentVectorType rotorGearRatio;
 
     /// \brief Vector of joint friction parameters
-    TangentVectorType friction;
+    /// Deprecated in favor of lowerDryFrictionLimit and upperDryFrictionLimit
+    PINOCCHIO_DEPRECATED TangentVectorType & friction;
+
+    /// \brief Vector of joint friction parameters
+    /// Deprecated in favor of lowerDryFrictionLimit and upperDryFrictionLimit
+    TangentVectorType lowerDryFrictionLimit;
+
+    /// \brief Vector of joint friction parameters
+    /// Deprecated in favor of lowerDryFrictionLimit and upperDryFrictionLimit
+    TangentVectorType upperDryFrictionLimit;
 
     /// \brief Vector of joint damping parameters
     TangentVectorType damping;
 
     /// \brief Vector of maximal joint torques
-    TangentVectorType effortLimit;
+    /// Deprecated in favor of lowerEffortLimit and upperEffortLimit
+    PINOCCHIO_DEPRECATED TangentVectorType & effortLimit;
+
+    /// \brief Vector of minimal joint torques
+    TangentVectorType lowerEffortLimit;
+
+    /// \brief Vector of maximal joint torques
+    TangentVectorType upperEffortLimit;
 
     /// \brief Vector of maximal joint velocities
-    TangentVectorType velocityLimit;
+    PINOCCHIO_DEPRECATED TangentVectorType & velocityLimit;
+
+    /// \brief Vector of minimal joint velocities
+    TangentVectorType lowerVelocityLimit;
+
+    /// \brief Vector of maximal joint velocities
+    TangentVectorType upperVelocityLimit;
 
     /// \brief Lower joint configuration limit
     ConfigVectorType lowerPositionLimit;
@@ -217,6 +239,9 @@ namespace pinocchio
     , supports(1, IndexVector(1, 0))
     , subtrees(1)
     , gravity(gravity981, Vector3::Zero())
+    , effortLimit(upperEffortLimit)
+    , velocityLimit(upperVelocityLimit)
+    , friction(upperDryFrictionLimit)
     {
       names[0] = "universe"; // Should be "universe joint (trivial)"
       // FIXME Should the universe joint be a FIXED_JOINT even if it is
@@ -232,6 +257,9 @@ namespace pinocchio
     ///
     template<typename S2, int O2>
     explicit ModelTpl(const ModelTpl<S2, O2> & other)
+    : effortLimit(upperEffortLimit)
+    , velocityLimit(upperVelocityLimit)
+    , friction(upperDryFrictionLimit)
     {
       *this = other.template cast<Scalar>();
     }
@@ -246,6 +274,12 @@ namespace pinocchio
     /// \returns true if *this is equal to other.
     ///
     bool operator==(const ModelTpl & other) const;
+
+    ///
+    /// \brief Assignment operator.
+    ///
+    ///
+    ModelTpl& operator=(const ModelTpl & other);
 
     ///
     /// \returns true if *this is NOT equal to other.
@@ -283,6 +317,7 @@ namespace pinocchio
     ///
     /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
     /// std::string &)
+    /// Deprecated in favor of the constructor using min and max effort/velocity
     ///
     /// \param[in] max_effort Maximal joint torque.
     /// \param[in] max_velocity Maximal joint velocity.
@@ -298,6 +333,32 @@ namespace pinocchio
       const VectorXs & max_velocity,
       const VectorXs & min_config,
       const VectorXs & max_config);
+
+    ///
+    /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
+    /// std::string &,const VectorXs &,const VectorXs &,const VectorXs &,const VectorXs &)
+    /// Deprecated in favor of the constructor using min and max effort/velocity
+    ///
+    /// \param[in] min_effort Minimal joint torque.
+    /// \param[in] min_velocity Minimal joint velocity.
+    /// \param[in] min_friction Minimal joint friction parameters.
+    /// \param[in] max_friction Maximal joint friction parameters.
+    /// \param[in] damping Joint damping parameters.
+    ///
+    JointIndex addJoint(
+      const JointIndex parent,
+      const JointModel & joint_model,
+      const SE3 & joint_placement,
+      const std::string & joint_name,
+      const VectorXs & min_effort,
+      const VectorXs & max_effort,
+      const VectorXs & min_velocity,
+      const VectorXs & max_velocity,
+      const VectorXs & min_config,
+      const VectorXs & max_config,
+      const VectorXs & min_friction,
+      const VectorXs & max_friction,
+      const VectorXs & damping);
 
     ///
     /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const

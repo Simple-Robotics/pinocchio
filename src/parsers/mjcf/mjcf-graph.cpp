@@ -119,14 +119,18 @@ namespace pinocchio
         const double infty = std::numeric_limits<double>::infinity();
 
         RangeJoint ret;
+        ret.minEffort = Vector::Constant(Nv, -infty);
         ret.maxEffort = Vector::Constant(Nv, infty);
+        ret.minVel = Vector::Constant(Nv, -infty);
         ret.maxVel = Vector::Constant(Nv, infty);
         ret.maxConfig = Vector::Constant(Nq, 1.01);
         ret.minConfig = Vector::Constant(Nq, -1.01);
-        ret.friction = Vector::Constant(Nv, 0.);
+        ret.maxDryFriction = Vector::Constant(Nv, 0.);
+        ret.minDryFriction = Vector::Constant(Nv, 0.);
+        // ret.friction = Vector::Constant(Nv, 0.);
         ret.damping = Vector::Constant(Nv, 0.);
         ret.armature = armature;
-        ret.frictionLoss = frictionLoss;
+        // ret.frictionLoss = frictionLoss;
         ret.springStiffness = springStiffness;
         ret.springReference = springReference;
         return ret;
@@ -139,8 +143,12 @@ namespace pinocchio
         assert(range.minConfig.size() == Nq);
 
         RangeJoint ret(*this);
+        ret.minEffort.conservativeResize(minEffort.size() + Nv);
+        ret.minEffort.tail(Nv) = range.minEffort;
         ret.maxEffort.conservativeResize(maxEffort.size() + Nv);
         ret.maxEffort.tail(Nv) = range.maxEffort;
+        ret.minVel.conservativeResize(minVel.size() + Nv);
+        ret.minVel.tail(Nv) = range.minVel;
         ret.maxVel.conservativeResize(maxVel.size() + Nv);
         ret.maxVel.tail(Nv) = range.maxVel;
 
@@ -151,8 +159,12 @@ namespace pinocchio
 
         ret.damping.conservativeResize(damping.size() + Nv);
         ret.damping.tail(Nv) = range.damping;
-        ret.friction.conservativeResize(friction.size() + Nv);
-        ret.friction.tail(Nv) = range.friction;
+        ret.minDryFriction.conservativeResize(minDryFriction.size() + Nv);
+        ret.minDryFriction.tail(Nv) = range.minDryFriction;
+        ret.maxDryFriction.conservativeResize(maxDryFriction.size() + Nv);
+        ret.maxDryFriction.tail(Nv) = range.maxDryFriction;
+        // ret.friction.conservativeResize(friction.size() + Nv);
+        // ret.friction.tail(Nv) = range.friction;
 
         ret.springReference.conservativeResize(springReference.size() + 1);
         ret.springReference.tail(1) = range.springReference;
@@ -191,6 +203,7 @@ namespace pinocchio
         if (range_)
         {
           Eigen::Vector2d rangeT = internal::getVectorFromStream<2>(*range_);
+          range.minEffort[0] = rangeT(0);
           range.maxEffort[0] = rangeT(1);
         }
 
@@ -210,9 +223,10 @@ namespace pinocchio
 
         // friction loss
         value = el.get_optional<double>("<xmlattr>.frictionloss");
-        if (value)
-          range.frictionLoss = *value;
-
+        if (value){
+          range.maxDryFriction.array() = *value;
+          range.minDryFriction = - range.maxDryFriction;
+        }
         value = el.get_optional<double>("<xmlattr>.ref");
         if (value)
         {
@@ -839,8 +853,8 @@ namespace pinocchio
 
         urdfVisitor.addJointAndBody(
           jType, joint.axis, parentFrameId, jointInParent, joint.jointName, inert, bodyInJoint,
-          currentBody.bodyName, range.maxEffort, range.maxVel, range.minConfig, range.maxConfig,
-          range.friction, range.damping);
+          currentBody.bodyName, range.minEffort, range.maxEffort, range.minVel, range.maxVel, range.minConfig, range.maxConfig,
+          range.minDryFriction, range.maxDryFriction, range.damping);
 
         // Add armature info
         JointIndex j_id = urdfVisitor.getJointId(joint.jointName);
@@ -947,9 +961,9 @@ namespace pinocchio
           JointIndex joint_id;
 
           joint_id = urdfVisitor.model.addJoint(
-            frame.parentJoint, jointM, frame.placement * firstJointPlacement, jointName,
-            rangeCompo.maxEffort, rangeCompo.maxVel, rangeCompo.minConfig, rangeCompo.maxConfig,
-            rangeCompo.friction, rangeCompo.damping);
+            frame.parentJoint, jointM, frame.placement * firstJointPlacement, jointName, rangeCompo.minEffort,
+            rangeCompo.maxEffort, rangeCompo.minVel, rangeCompo.maxVel, rangeCompo.minConfig, rangeCompo.maxConfig,
+            rangeCompo.minDryFriction, rangeCompo.maxDryFriction, rangeCompo.damping);
           FrameIndex jointFrameId = urdfVisitor.model.addJointFrame(joint_id, (int)parentFrameId);
           urdfVisitor.appendBodyToJoint(jointFrameId, inert, bodyInJoint, nameOfBody);
 

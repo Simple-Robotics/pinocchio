@@ -62,11 +62,14 @@ namespace pinocchio
     const JointModel & joint_model,
     const SE3 & joint_placement,
     const std::string & joint_name,
+    const VectorXs & min_effort,
     const VectorXs & max_effort,
+    const VectorXs & min_velocity,
     const VectorXs & max_velocity,
     const VectorXs & min_config,
     const VectorXs & max_config,
-    const VectorXs & joint_friction,
+    const VectorXs & min_joint_friction,
+    const VectorXs & max_joint_friction,
     const VectorXs & joint_damping)
   {
     assert(
@@ -76,18 +79,31 @@ namespace pinocchio
     assert(joint_model.nq() >= joint_model.nv());
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      min_effort.size(), joint_model.nv(), "The joint minimal effort vector is not of right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      min_joint_friction.size(), joint_model.nv(), "The joint minimal dry friction vector is not of right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      min_velocity.size(), joint_model.nv(),
+      "The joint minimal velocity vector is not of right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
       max_effort.size(), joint_model.nv(), "The joint maximum effort vector is not of right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      max_joint_friction.size(), joint_model.nv(), "The joint maximum dry friction vector is not of right size");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       max_velocity.size(), joint_model.nv(),
       "The joint maximum velocity vector is not of right size");
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        (min_effort.array() <= max_effort.array()).all(), "Some components of min_effort are greater than max_effort");
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        (min_joint_friction.array() <= max_joint_friction.array()).all(), "Some components of min_dry_friction are greater than max_dry_friction");
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        (min_velocity.array() <= max_velocity.array()).all(), "Some components of min_velocity are greater than max_velocity");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       min_config.size(), joint_model.nq(),
       "The joint lower configuration bound is not of right size");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       max_config.size(), joint_model.nq(),
       "The joint upper configuration bound is not of right size");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      joint_friction.size(), joint_model.nv(), "The joint friction vector is not of right size");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       joint_damping.size(), joint_model.nv(), "The joint damping vector is not of right size");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -123,10 +139,14 @@ namespace pinocchio
 
     if (joint_nq > 0 && joint_nv > 0)
     {
-      effortLimit.conservativeResize(nv);
-      jmodel.jointVelocitySelector(effortLimit) = max_effort;
-      velocityLimit.conservativeResize(nv);
-      jmodel.jointVelocitySelector(velocityLimit) = max_velocity;
+      upperEffortLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(upperEffortLimit) = max_effort;
+      lowerEffortLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(lowerEffortLimit) = min_effort;
+      upperVelocityLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(upperVelocityLimit) = max_velocity;
+      lowerVelocityLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(lowerVelocityLimit) = max_velocity;
       lowerPositionLimit.conservativeResize(nq);
       jmodel.jointConfigSelector(lowerPositionLimit) = min_config;
       upperPositionLimit.conservativeResize(nq);
@@ -138,8 +158,10 @@ namespace pinocchio
       jmodel.jointVelocitySelector(rotorInertia).setZero();
       rotorGearRatio.conservativeResize(nv);
       jmodel.jointVelocitySelector(rotorGearRatio).setOnes();
-      friction.conservativeResize(nv);
-      jmodel.jointVelocitySelector(friction) = joint_friction;
+      upperDryFrictionLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(upperDryFrictionLimit) = max_joint_friction;
+      lowerDryFrictionLimit.conservativeResize(nv);
+      jmodel.jointVelocitySelector(lowerDryFrictionLimit) = min_joint_friction;
       damping.conservativeResize(nv);
       jmodel.jointVelocitySelector(damping) = joint_damping;
     }
@@ -154,6 +176,26 @@ namespace pinocchio
     supports[joint_id].push_back(joint_id);
 
     return joint_id;
+  }
+
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex
+  ModelTpl<Scalar, Options, JointCollectionTpl>::addJoint(
+    const JointIndex parent,
+    const JointModel & joint_model,
+    const SE3 & joint_placement,
+    const std::string & joint_name,
+    const VectorXs & max_effort,
+    const VectorXs & max_velocity,
+    const VectorXs & min_config,
+    const VectorXs & max_config,
+    const VectorXs & friction,
+    const VectorXs & damping)
+  {
+
+    return addJoint(
+      parent, joint_model, joint_placement, joint_name, -max_effort, max_effort, -max_velocity, max_velocity, min_config,
+      max_config, -friction, friction, damping);
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -248,12 +290,15 @@ namespace pinocchio
 
     // Eigen Vectors
     res.armature = armature.template cast<NewScalar>();
-    res.friction = friction.template cast<NewScalar>();
     res.damping = damping.template cast<NewScalar>();
     res.rotorInertia = rotorInertia.template cast<NewScalar>();
     res.rotorGearRatio = rotorGearRatio.template cast<NewScalar>();
-    res.effortLimit = effortLimit.template cast<NewScalar>();
-    res.velocityLimit = velocityLimit.template cast<NewScalar>();
+    res.upperEffortLimit = upperEffortLimit.template cast<NewScalar>();
+    res.lowerEffortLimit = lowerEffortLimit.template cast<NewScalar>();
+    res.upperDryFrictionLimit = upperDryFrictionLimit.template cast<NewScalar>();
+    res.lowerDryFrictionLimit = lowerDryFrictionLimit.template cast<NewScalar>();
+    res.lowerVelocityLimit = lowerVelocityLimit.template cast<NewScalar>();
+    res.upperVelocityLimit = upperVelocityLimit.template cast<NewScalar>();
     res.lowerPositionLimit = lowerPositionLimit.template cast<NewScalar>();
     res.upperPositionLimit = upperPositionLimit.template cast<NewScalar>();
 
@@ -287,6 +332,45 @@ namespace pinocchio
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  ModelTpl<Scalar, Options, JointCollectionTpl>& ModelTpl<Scalar, Options, JointCollectionTpl>::operator=(const ModelTpl & other)
+  {
+    this->nq = other.nq;
+    this->nv = other.nv;
+    this->njoints = other.njoints;
+    this->nbodies = other.nbodies;
+    this->nframes = other.nframes;
+    this->inertias = other.inertias;
+    this->jointPlacements = other.jointPlacements;
+    this->joints = other.joints;
+    this->idx_qs = other.idx_qs;
+    this->nqs = other.nqs;
+    this->idx_vs = other.idx_vs;
+    this->nvs = other.nvs;
+    this->parents = other.parents;
+    this->children = other.children;
+    this->names = other.names;
+    this->referenceConfigurations = other.referenceConfigurations;
+    this->armature = other.armature;
+    this->rotorInertia = other.rotorInertia;
+    this->rotorGearRatio = other.rotorGearRatio;
+    this->lowerDryFrictionLimit = other.lowerDryFrictionLimit;
+    this->upperDryFrictionLimit = other.upperDryFrictionLimit;
+    this->damping = other.damping;
+    this->lowerEffortLimit = other.lowerEffortLimit;
+    this->upperEffortLimit = other.upperEffortLimit;
+    this->lowerVelocityLimit = other.lowerVelocityLimit;
+    this->upperVelocityLimit = other.upperVelocityLimit;
+    this->lowerPositionLimit = other.lowerPositionLimit;
+    this->upperPositionLimit = other.upperPositionLimit;
+    this->frames = other.frames;
+    this->supports = other.supports;
+    this->subtrees = other.subtrees;
+    this->gravity = other.gravity;
+    this->name = other.name;
+    return *this;
+  }
+
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   bool ModelTpl<Scalar, Options, JointCollectionTpl>::operator==(const ModelTpl & other) const
   {
     bool res = other.nq == nq && other.nv == nv && other.njoints == njoints
@@ -316,12 +400,6 @@ namespace pinocchio
     if (!res)
       return res;
 
-    if (other.friction.size() != friction.size())
-      return false;
-    res &= other.friction == friction;
-    if (!res)
-      return res;
-
     if (other.damping.size() != damping.size())
       return false;
     res &= other.damping == damping;
@@ -340,15 +418,39 @@ namespace pinocchio
     if (!res)
       return res;
 
-    if (other.effortLimit.size() != effortLimit.size())
+    if (other.lowerEffortLimit.size() != lowerEffortLimit.size())
       return false;
-    res &= other.effortLimit == effortLimit;
+    res &= other.lowerEffortLimit == lowerEffortLimit;
     if (!res)
       return res;
 
-    if (other.velocityLimit.size() != velocityLimit.size())
+    if (other.upperEffortLimit.size() != upperEffortLimit.size())
       return false;
-    res &= other.velocityLimit == velocityLimit;
+    res &= other.upperEffortLimit == upperEffortLimit;
+    if (!res)
+      return res;
+
+    if (other.lowerDryFrictionLimit.size() != lowerDryFrictionLimit.size())
+      return false;
+    res &= other.lowerDryFrictionLimit == lowerDryFrictionLimit;
+    if (!res)
+      return res;
+
+    if (other.upperDryFrictionLimit.size() != upperDryFrictionLimit.size())
+      return false;
+    res &= other.upperDryFrictionLimit == upperDryFrictionLimit;
+    if (!res)
+      return res;
+
+    if (other.lowerVelocityLimit.size() != lowerVelocityLimit.size())
+      return false;
+    res &= other.lowerVelocityLimit == lowerVelocityLimit;
+    if (!res)
+      return res;
+
+    if (other.upperVelocityLimit.size() != upperVelocityLimit.size())
+      return false;
+    res &= other.upperVelocityLimit == upperVelocityLimit;
     if (!res)
       return res;
 

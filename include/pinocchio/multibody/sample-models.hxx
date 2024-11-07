@@ -116,8 +116,10 @@ namespace pinocchio
 
         model.lowerPositionLimit.template segment<6>(idx_q).fill(qmin);
         model.upperPositionLimit.template segment<6>(idx_q).fill(qmax);
-        model.velocityLimit.template segment<6>(idx_v).fill(vmax);
-        model.effortLimit.template segment<6>(idx_v).fill(taumax);
+        model.lowerVelocityLimit.template segment<6>(idx_v).fill(vmax);
+        model.upperVelocityLimit.template segment<6>(idx_v).fill(vmax);
+        model.lowerEffortLimit.template segment<6>(idx_v).fill(taumax);
+        model.upperEffortLimit.template segment<6>(idx_v).fill(taumax);
       }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL

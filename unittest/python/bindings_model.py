@@ -48,8 +48,8 @@ class TestModel(TestCase):
         self.assertEqual(model.nq, 2)
         self.assertEqual(model.nv, 2)
 
-        self.assertEqual(float(model.effortLimit[1]), MAX_EFF)
-        self.assertEqual(float(model.velocityLimit[1]), MAX_VEL)
+        self.assertEqual(float(model.upperEffortLimit[1]), MAX_EFF)
+        self.assertEqual(float(model.upperVelocityLimit[1]), MAX_VEL)
         self.assertEqual(float(model.lowerPositionLimit[1]), MIN_POS)
         self.assertEqual(float(model.upperPositionLimit[1]), MAX_POS)
 

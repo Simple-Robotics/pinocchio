@@ -83,6 +83,25 @@ namespace pinocchio
           const VectorConstRef & friction,
           const VectorConstRef & damping) = 0;
 
+        virtual void addJointAndBody(
+          JointType type,
+          const Vector3 & axis,
+          const FrameIndex & parentFrameId,
+          const SE3 & placement,
+          const std::string & joint_name,
+          const Inertia & Y,
+          const SE3 & frame_placement,
+          const std::string & body_name,
+          const VectorConstRef & min_effort,
+          const VectorConstRef & max_effort,
+          const VectorConstRef & min_velocity,
+          const VectorConstRef & max_velocity,
+          const VectorConstRef & min_config,
+          const VectorConstRef & max_config,
+          const VectorConstRef & min_dry_friction,
+          const VectorConstRef & max_dry_friction,
+          const VectorConstRef & damping) = 0;
+
         virtual void addFixedJointAndBody(
           const FrameIndex & parentFrameId,
           const SE3 & joint_placement,
@@ -196,52 +215,75 @@ namespace pinocchio
           const VectorConstRef & friction,
           const VectorConstRef & damping)
         {
+          addJointAndBody(
+            type, axis, parentFrameId, placement, joint_name, Y, frame_placement, body_name, -max_effort,
+            max_effort, -max_velocity, max_velocity, min_config, max_config, -friction, friction, damping);
+        }
+
+        void addJointAndBody(
+          JointType type,
+          const Vector3 & axis,
+          const FrameIndex & parentFrameId,
+          const SE3 & placement,
+          const std::string & joint_name,
+          const Inertia & Y,
+          const SE3 & frame_placement,
+          const std::string & body_name,
+          const VectorConstRef & min_effort,
+          const VectorConstRef & max_effort,
+          const VectorConstRef & min_velocity,
+          const VectorConstRef & max_velocity,
+          const VectorConstRef & min_config,
+          const VectorConstRef & max_config,
+          const VectorConstRef & min_dry_friction,
+          const VectorConstRef & max_dryfriction,
+          const VectorConstRef & damping)
+        {
           JointIndex joint_id;
           const Frame & frame = model.frames[parentFrameId];
-
           switch (type)
           {
           case Base::FLOATING:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelFreeFlyer(),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           case Base::REVOLUTE:
             joint_id = addJoint<
               typename JointCollection::JointModelRX, typename JointCollection::JointModelRY,
               typename JointCollection::JointModelRZ,
               typename JointCollection::JointModelRevoluteUnaligned>(
-              axis, frame, placement, joint_name, max_effort, max_velocity, min_config, max_config,
-              friction, damping);
+              axis, frame, placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           case Base::CONTINUOUS:
             joint_id = addJoint<
               typename JointCollection::JointModelRUBX, typename JointCollection::JointModelRUBY,
               typename JointCollection::JointModelRUBZ,
               typename JointCollection::JointModelRevoluteUnboundedUnaligned>(
-              axis, frame, placement, joint_name, max_effort, max_velocity, min_config, max_config,
-              friction, damping);
+              axis, frame, placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           case Base::PRISMATIC:
             joint_id = addJoint<
               typename JointCollection::JointModelPX, typename JointCollection::JointModelPY,
               typename JointCollection::JointModelPZ,
               typename JointCollection::JointModelPrismaticUnaligned>(
-              axis, frame, placement, joint_name, max_effort, max_velocity, min_config, max_config,
-              friction, damping);
+              axis, frame, placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           case Base::PLANAR:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelPlanar(),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           case Base::SPHERICAL:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelSpherical(),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config,
+              max_config, min_dry_friction, max_dryfriction, damping);
             break;
           default:
             PINOCCHIO_CHECK_INPUT_ARGUMENT(false, "The joint type is not correct.");
@@ -367,31 +409,50 @@ namespace pinocchio
           const VectorConstRef & friction,
           const VectorConstRef & damping)
         {
+          addJoint(axis, frame, placement, joint_name, -max_effort, max_effort, -max_velocity, max_velocity, min_config, max_config, -friction, friction, damping);
+        }
+
+        template<typename TypeX, typename TypeY, typename TypeZ, typename TypeUnaligned>
+        JointIndex addJoint(
+          const Vector3 & axis,
+          const Frame & frame,
+          const SE3 & placement,
+          const std::string & joint_name,
+          const VectorConstRef & min_effort,
+          const VectorConstRef & max_effort,
+          const VectorConstRef & min_velocity,
+          const VectorConstRef & max_velocity,
+          const VectorConstRef & min_config,
+          const VectorConstRef & max_config,
+          const VectorConstRef & min_dry_friction,
+          const VectorConstRef & max_dry_friction,
+          const VectorConstRef & damping)
+        {
           CartesianAxis axisType = extractCartesianAxis(axis);
           switch (axisType)
           {
           case AXIS_X:
             return model.addJoint(
-              frame.parentJoint, TypeX(), frame.placement * placement, joint_name, max_effort,
-              max_velocity, min_config, max_config, friction, damping);
+              frame.parentJoint, TypeX(), frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
 
           case AXIS_Y:
             return model.addJoint(
-              frame.parentJoint, TypeY(), frame.placement * placement, joint_name, max_effort,
-              max_velocity, min_config, max_config, friction, damping);
+              frame.parentJoint, TypeY(), frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
 
           case AXIS_Z:
             return model.addJoint(
-              frame.parentJoint, TypeZ(), frame.placement * placement, joint_name, max_effort,
-              max_velocity, min_config, max_config, friction, damping);
+              frame.parentJoint, TypeZ(), frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
 
           case AXIS_UNALIGNED:
             return model.addJoint(
               frame.parentJoint, TypeUnaligned(axis.normalized()), frame.placement * placement,
-              joint_name, max_effort, max_velocity, min_config, max_config, friction, damping);
+              joint_name, min_effort, max_effort, min_velocity, max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           default:
             PINOCCHIO_CHECK_INPUT_ARGUMENT(false, "The axis type of the joint is of wrong type.");

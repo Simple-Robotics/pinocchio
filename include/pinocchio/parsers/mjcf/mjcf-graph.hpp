@@ -114,8 +114,12 @@ namespace pinocchio
       /// @brief All joint limits
       struct PINOCCHIO_PARSERS_DLLAPI RangeJoint
       {
+        // Min effort
+        Eigen::VectorXd minEffort;
         // Max effort
         Eigen::VectorXd maxEffort;
+        // Min velocity
+        Eigen::VectorXd minVel;
         // Max velocity
         Eigen::VectorXd maxVel;
         // Max position
@@ -128,28 +132,36 @@ namespace pinocchio
         //  joint position or angle in which the joint spring (if any) achieves equilibrium
         Eigen::VectorXd springReference;
 
+        // Min friction applied in this joint
+        Eigen::VectorXd minDryFriction;
+        // Max friction applied in this joint
+        Eigen::VectorXd maxDryFriction;
         // friction applied in this joint
-        Eigen::VectorXd friction;
+        // Eigen::VectorXd friction;
         // Damping applied by this joint.
         Eigen::VectorXd damping;
 
         // Armature inertia created by this joint
         double armature = 0.;
         // Dry friction.
-        double frictionLoss = 0.;
+        // double frictionLoss = 0.;
 
         RangeJoint() = default;
         explicit RangeJoint(double v)
         {
           const double infty = std::numeric_limits<double>::infinity();
+          minVel = Eigen::VectorXd::Constant(1, -infty);
           maxVel = Eigen::VectorXd::Constant(1, infty);
+          minEffort = Eigen::VectorXd::Constant(1, -infty);
           maxEffort = Eigen::VectorXd::Constant(1, infty);
           minConfig = Eigen::VectorXd::Constant(1, -infty);
           maxConfig = Eigen::VectorXd::Constant(1, infty);
           springStiffness = Eigen::VectorXd::Constant(1, v);
           springReference = Eigen::VectorXd::Constant(1, v);
           ;
-          friction = Eigen::VectorXd::Constant(1, 0.);
+          minDryFriction = Eigen::VectorXd::Constant(1, 0.);
+          maxDryFriction = Eigen::VectorXd::Constant(1, 0.);
+          // friction = Eigen::VectorXd::Constant(1, 0.);
           damping = Eigen::VectorXd::Constant(1, 0.);
         }
 

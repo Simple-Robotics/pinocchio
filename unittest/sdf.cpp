@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(compare_model_with_urdf)
   BOOST_CHECK(model_urdf.armature.size() == model_sdf.armature.size());
 
   BOOST_CHECK(model_urdf.armature == model_sdf.armature);
-  BOOST_CHECK(model_urdf.friction.size() == model_sdf.friction.size());
-  BOOST_CHECK(model_urdf.friction == model_sdf.friction);
+  BOOST_CHECK(model_urdf.upperDryFrictionLimit.size() == model_sdf.upperDryFrictionLimit.size());
+  BOOST_CHECK(model_urdf.upperDryFrictionLimit == model_sdf.friupperDryFrictionLimitction);
 
   BOOST_CHECK(model_urdf.damping.size() == model_sdf.damping.size());
 
@@ -135,12 +135,12 @@ BOOST_AUTO_TEST_CASE(compare_model_with_urdf)
 
   BOOST_CHECK(model_urdf.rotorGearRatio == model_sdf.rotorGearRatio);
 
-  BOOST_CHECK(model_urdf.effortLimit.size() == model_sdf.effortLimit.size());
-  BOOST_CHECK(model_urdf.effortLimit == model_sdf.effortLimit);
+  BOOST_CHECK(model_urdf.upperEffortLimit.size() == model_sdf.upperEffortLimit.size());
+  BOOST_CHECK(model_urdf.upperEffortLimit == model_sdf.upperEffortLimit);
 
-  BOOST_CHECK(model_urdf.velocityLimit.size() == model_sdf.velocityLimit.size());
+  BOOST_CHECK(model_urdf.upperVelocityLimit.size() == model_sdf.upperVelocityLimit.size());
 
-  BOOST_CHECK(model_urdf.velocityLimit == model_sdf.velocityLimit);
+  BOOST_CHECK(model_urdf.upperVelocityLimit == model_sdf.upperVelocityLimit);
   BOOST_CHECK(model_urdf.lowerPositionLimit.size() == model_sdf.lowerPositionLimit.size());
   BOOST_CHECK(model_urdf.lowerPositionLimit == model_sdf.lowerPositionLimit);
 

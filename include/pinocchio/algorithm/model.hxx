@@ -175,11 +175,14 @@ namespace pinocchio
 
         JointIndex joint_id_out = model.addJoint(
           parent_id, jmodel_in, pMi * modelAB.jointPlacements[joint_id_in],
-          modelAB.names[joint_id_in], jmodel_in.jointVelocitySelector(modelAB.effortLimit),
-          jmodel_in.jointVelocitySelector(modelAB.velocityLimit),
+          modelAB.names[joint_id_in], jmodel_in.jointVelocitySelector(modelAB.lowerEffortLimit),
+          jmodel_in.jointVelocitySelector(modelAB.upperEffortLimit),
+          jmodel_in.jointVelocitySelector(modelAB.lowerVelocityLimit),
+          jmodel_in.jointVelocitySelector(modelAB.upperVelocityLimit),
           jmodel_in.jointConfigSelector(modelAB.lowerPositionLimit),
           jmodel_in.jointConfigSelector(modelAB.upperPositionLimit),
-          jmodel_in.jointVelocitySelector(modelAB.friction),
+          jmodel_in.jointVelocitySelector(modelAB.lowerDryFrictionLimit),
+          jmodel_in.jointVelocitySelector(modelAB.upperDryFrictionLimit),
           jmodel_in.jointVelocitySelector(modelAB.damping));
         assert(joint_id_out < model.joints.size());
 
@@ -606,11 +609,14 @@ namespace pinocchio
         JointIndex reduced_joint_id = reduced_model.addJoint(
           reduced_parent_joint_index, joint_input_model,
           parent_frame_placement * input_model.jointPlacements[joint_id], joint_name,
-          joint_input_model.jointVelocitySelector(input_model.effortLimit),
-          joint_input_model.jointVelocitySelector(input_model.velocityLimit),
+          joint_input_model.jointVelocitySelector(input_model.lowerEffortLimit),
+          joint_input_model.jointVelocitySelector(input_model.upperEffortLimit),
+          joint_input_model.jointVelocitySelector(input_model.lowerVelocityLimit),
+          joint_input_model.jointVelocitySelector(input_model.upperVelocityLimit),
           joint_input_model.jointConfigSelector(input_model.lowerPositionLimit),
           joint_input_model.jointConfigSelector(input_model.upperPositionLimit),
-          joint_input_model.jointVelocitySelector(input_model.friction),
+          joint_input_model.jointVelocitySelector(input_model.lowerDryFrictionLimit),
+          joint_input_model.jointVelocitySelector(input_model.upperDryFrictionLimit),
           joint_input_model.jointVelocitySelector(input_model.damping));
         // Append inertia
         reduced_model.appendBodyToJoint(
