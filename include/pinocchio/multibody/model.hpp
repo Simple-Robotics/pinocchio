@@ -160,11 +160,9 @@ namespace pinocchio
     PINOCCHIO_DEPRECATED TangentVectorType & friction;
 
     /// \brief Vector of joint friction parameters
-    /// Deprecated in favor of lowerDryFrictionLimit and upperDryFrictionLimit
     TangentVectorType lowerDryFrictionLimit;
 
     /// \brief Vector of joint friction parameters
-    /// Deprecated in favor of lowerDryFrictionLimit and upperDryFrictionLimit
     TangentVectorType upperDryFrictionLimit;
 
     /// \brief Vector of joint damping parameters
