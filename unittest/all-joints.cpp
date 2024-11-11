@@ -201,7 +201,9 @@ struct TestJointModelTransform : TestJointModel<TestJointModelTransform>
     typedef typename JointModel::JointDataDerived JointData;
     JointData jdata = jmodel.createData();
     Eigen::Matrix<typename JointModel::Scalar, 3, 1> v = jdata.M_accessor().translation();
+    BOOST_CHECK(v == v);
     Eigen::Matrix<typename JointModel::Scalar, 3, 3> R = jdata.M_accessor().rotation();
+    BOOST_CHECK(R == R);
   }
 };
 

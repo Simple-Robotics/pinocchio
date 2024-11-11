@@ -170,24 +170,25 @@ namespace pinocchio
     /// \brief Vector of joint damping parameters
     TangentVectorType damping;
 
-    /// \brief Vector of maximal joint torques
-    /// Deprecated in favor of lowerEffortLimit and upperEffortLimit
-    PINOCCHIO_DEPRECATED TangentVectorType & effortLimit;
-
     /// \brief Vector of minimal joint torques
     TangentVectorType lowerEffortLimit;
 
     /// \brief Vector of maximal joint torques
     TangentVectorType upperEffortLimit;
 
-    /// \brief Vector of maximal joint velocities
-    PINOCCHIO_DEPRECATED TangentVectorType & velocityLimit;
+    /// \brief Vector of maximal joint torques
+    /// Deprecated in favor of lowerEffortLimit and upperEffortLimit
+    PINOCCHIO_DEPRECATED TangentVectorType & effortLimit;
 
     /// \brief Vector of minimal joint velocities
     TangentVectorType lowerVelocityLimit;
 
     /// \brief Vector of maximal joint velocities
     TangentVectorType upperVelocityLimit;
+
+    /// \brief Vector of maximal joint velocities
+    /// Deprecated in favor of lowerVelocityLimit and upperVelocityLimit
+    PINOCCHIO_DEPRECATED TangentVectorType & velocityLimit;
 
     /// \brief Lower joint configuration limit
     ConfigVectorType lowerPositionLimit;
@@ -236,12 +237,12 @@ namespace pinocchio
     , parents(1, 0)
     , children(1)
     , names(1)
+    , friction(upperDryFrictionLimit)
+    , effortLimit(upperEffortLimit)
+    , velocityLimit(upperVelocityLimit)
     , supports(1, IndexVector(1, 0))
     , subtrees(1)
     , gravity(gravity981, Vector3::Zero())
-    , effortLimit(upperEffortLimit)
-    , velocityLimit(upperVelocityLimit)
-    , friction(upperDryFrictionLimit)
     {
       names[0] = "universe"; // Should be "universe joint (trivial)"
       // FIXME Should the universe joint be a FIXED_JOINT even if it is
@@ -279,7 +280,7 @@ namespace pinocchio
     /// \brief Assignment operator.
     ///
     ///
-    ModelTpl& operator=(const ModelTpl & other);
+    ModelTpl & operator=(const ModelTpl & other);
 
     ///
     /// \returns true if *this is NOT equal to other.
