@@ -66,6 +66,26 @@ namespace pinocchio
       }
 
     private:
+      template<typename T>
+      struct NoRun
+      {
+        static T run()
+        {
+          // Hacky way to not have to return something real. The system should throw before.
+          const typename std::remove_reference<T>::type * null_ptr = NULL;
+          return *null_ptr;
+        }
+      };
+
+      template<>
+      struct NoRun<void>
+      {
+        static void run()
+        {
+          return;
+        }
+      };
+
       template<
         typename Scalar,
         int Options,
@@ -103,19 +123,16 @@ namespace pinocchio
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
-          // Hacky way to not have to return something real. The system should throw before.
-          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
-          return *null_ptr;
-        };
+          return NoRun<ReturnType>::run();
+        }
 
         template<typename S, int O>
         ReturnType operator()(const FictiousConstraintDataTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
-          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
-          return *null_ptr;
-        };
+          return NoRun<ReturnType>::run();
+        }
 
         ArgsTmp args;
       };

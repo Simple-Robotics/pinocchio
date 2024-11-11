@@ -42,12 +42,13 @@ namespace pinocchio
       template<class T>
       void operator()(T)
       {
-        run<typename T::type>();
+        run(static_cast<typename T::type *>(nullptr));
       }
 
       template<typename ConstraintModel>
-      void run()
+      void run(ConstraintModelBase<ConstraintModel> * ptr = 0)
       {
+        PINOCCHIO_UNUSED_VARIABLE(ptr);
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
@@ -69,6 +70,12 @@ namespace pinocchio
             "Returns the dual solution of the problem.", bp::return_internal_reference<>());
       }
 
+      template<typename S, int O>
+      void run(FictiousConstraintModelTpl<S, O> * ptr = 0)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(ptr);
+      }
+
       bp::class_<Solver> & class_;
     };
 
@@ -76,7 +83,7 @@ namespace pinocchio
     static void expose_solve(bp::class_<Solver> & class_)
     {
       SolveMethodExposer expose(class_);
-      expose.template run<ConstraintModel>();
+      expose.run(static_cast<ConstraintModel *>(nullptr));
     }
 
     void exposePGSContactSolver()
