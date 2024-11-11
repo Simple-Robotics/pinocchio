@@ -98,19 +98,21 @@ namespace pinocchio
             bf::append(boost::ref(cdata.derived()), args));
         }
 
-        ReturnType operator()(const FictiousConstraintModel &) const
+        template<typename S, int O>
+        ReturnType operator()(const FictiousConstraintModelTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
-            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
           // Hacky way to not have to return something real. The system should throw before.
           const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
           return *null_ptr;
         };
 
-        ReturnType operator()(const FictiousConstraintData &) const
+        template<typename S, int O>
+        ReturnType operator()(const FictiousConstraintDataTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
-            std::invalid_argument, "The constraint data is of type FictiousConstraintData.");
+            std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
           const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
           return *null_ptr;
         };
@@ -143,18 +145,20 @@ namespace pinocchio
             cdata.derived());
         }
 
-        ReturnType operator()(const FictiousConstraintModel &) const
+        template<typename S, int O>
+        ReturnType operator()(const FictiousConstraintModelTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
-            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
           const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
           return *null_ptr;
         };
 
-        ReturnType operator()(const FictiousConstraintData &) const
+        template<typename S, int O>
+        ReturnType operator()(const FictiousConstraintDataTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
-            std::invalid_argument, "The constraint data is of type FictiousConstraintData.");
+            std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
           const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
           return *null_ptr;
         };
@@ -190,10 +194,11 @@ namespace pinocchio
               args));
         }
 
-        ReturnType operator()(const FictiousConstraintModel &) const
+        template<typename S, int O>
+        ReturnType operator()(const FictiousConstraintModelTpl<S, O> &) const
         {
           PINOCCHIO_THROW_PRETTY(
-            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
           return ReturnType();
         };
 

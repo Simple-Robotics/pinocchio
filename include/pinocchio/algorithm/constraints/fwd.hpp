@@ -16,8 +16,10 @@ namespace pinocchio
   template<typename Scalar, int Options = 0>
   struct RigidConstraintDataTpl;
 
-  struct FictiousConstraintModel;
-  struct FictiousConstraintData;
+  template<typename Scalar, int Options = 0>
+  struct FictiousConstraintModelTpl;
+  template<typename Scalar, int Options = 0>
+  struct FictiousConstraintDataTpl;
 
   template<typename Scalar, int Options = 0>
   struct FrictionalJointConstraintModelTpl;

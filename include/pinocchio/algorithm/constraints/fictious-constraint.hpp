@@ -10,27 +10,75 @@
 namespace pinocchio
 {
 
-  template<typename NewScalar>
-  struct CastType<NewScalar, FictiousConstraintModel>
+  template<typename NewScalar, typename Scalar, int Options>
+  struct CastType<NewScalar, FictiousConstraintModelTpl<Scalar, Options>>
   {
-    typedef FictiousConstraintModel type;
+    typedef FictiousConstraintModelTpl<NewScalar, Options> type;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct traits<FictiousConstraintModelTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef FictiousConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef FictiousConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef void ConstraintSet;
+  };
+
+  template<typename _Scalar, int _Options>
+  struct traits<FictiousConstraintDataTpl<_Scalar, _Options>>
+  {
+    typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef FictiousConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef FictiousConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef void ConstraintSet;
   };
 
   /// \brief Fictious constraint model used for variant definition
-  struct FictiousConstraintModel
+  template<typename Scalar, int Options>
+  struct FictiousConstraintModelTpl
+  : ConstraintModelBase<FictiousConstraintModelTpl<Scalar, Options>>
   {
-    FictiousConstraintModel()
+    FictiousConstraintModelTpl()
     {
     }
+
+    bool operator==(const FictiousConstraintModelTpl &) const
+    {
+      return true;
+    }
+
+    inline FictiousConstraintDataTpl<Scalar, Options> createData() const;
   };
 
   /// \brief Fictious constraint data used for variant definition
-  struct FictiousConstraintData
+  template<typename Scalar, int Options>
+  struct FictiousConstraintDataTpl : ConstraintDataBase<FictiousConstraintDataTpl<Scalar, Options>>
   {
-    FictiousConstraintData()
+    FictiousConstraintDataTpl()
     {
     }
+
+    bool operator==(const FictiousConstraintDataTpl &) const
+    {
+      return true;
+    }
   };
+
+  template<typename Scalar, int Options>
+  inline FictiousConstraintDataTpl<Scalar, Options>
+  FictiousConstraintModelTpl<Scalar, Options>::createData() const
+  {
+    return FictiousConstraintDataTpl<Scalar, Options>();
+  }
 
 } // namespace pinocchio
 

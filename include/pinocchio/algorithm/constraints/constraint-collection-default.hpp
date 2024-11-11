@@ -18,6 +18,9 @@ namespace pinocchio
       Options = _Options
     };
 
+    typedef FictiousConstraintModelTpl<Scalar, Options> FictiousConstraintModel;
+    typedef FictiousConstraintDataTpl<Scalar, Options> FictiousConstraintData;
+
     typedef BilateralPointConstraintModelTpl<Scalar, Options> BilateralPointConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> BilateralPointConstraintData;
 
