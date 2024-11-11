@@ -16,6 +16,9 @@ namespace pinocchio
   template<typename Scalar, int Options = 0>
   struct RigidConstraintDataTpl;
 
+  struct FictiousConstraintModel;
+  struct FictiousConstraintData;
+
   template<typename Scalar, int Options = 0>
   struct FrictionalJointConstraintModelTpl;
   typedef FrictionalJointConstraintModelTpl<context::Scalar> FrictionalJointConstraintModel;

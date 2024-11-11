@@ -34,6 +34,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/coulomb-friction-cone.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraints.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fictious-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-collection-default.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-generic.hpp
