@@ -98,6 +98,23 @@ namespace pinocchio
             bf::append(boost::ref(cdata.derived()), args));
         }
 
+        ReturnType operator()(const FictiousConstraintModel &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+          // Hacky way to not have to return something real. The system should throw before.
+          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
+          return *null_ptr;
+        };
+
+        ReturnType operator()(const FictiousConstraintData &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint data is of type FictiousConstraintData.");
+          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
+          return *null_ptr;
+        };
+
         ArgsTmp args;
       };
 
@@ -125,6 +142,22 @@ namespace pinocchio
           return ConstraintModelVisitorDerived::template algo<ConstraintDataDerived>(
             cdata.derived());
         }
+
+        ReturnType operator()(const FictiousConstraintModel &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
+          return *null_ptr;
+        };
+
+        ReturnType operator()(const FictiousConstraintData &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint data is of type FictiousConstraintData.");
+          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
+          return *null_ptr;
+        };
       };
 
       template<
@@ -156,6 +189,13 @@ namespace pinocchio
                   cdata)),
               args));
         }
+
+        ReturnType operator()(const FictiousConstraintModel &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type FictiousConstraintModel.");
+          return ReturnType();
+        };
 
         ConstraintData & cdata;
         ArgsTmp args;
