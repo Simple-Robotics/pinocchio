@@ -185,7 +185,7 @@ namespace pinocchio
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
           return internal::NoRun<ReturnType>::run();
-        };
+        }
 
         template<typename S, int O>
         ReturnType operator()(const FictiousConstraintDataTpl<S, O> &) const
@@ -193,7 +193,7 @@ namespace pinocchio
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
           return internal::NoRun<ReturnType>::run();
-        };
+        }
       };
 
       template<
@@ -232,7 +232,7 @@ namespace pinocchio
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
           return ReturnType();
-        };
+        }
 
         ConstraintData & cdata;
         ArgsTmp args;
