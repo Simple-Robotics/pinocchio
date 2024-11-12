@@ -1,9 +1,11 @@
 //
-// Copyright (c) 2016-2020 CNRS INRIA
+// Copyright (c) 2016-2024 CNRS INRIA
 //
 
 #ifndef __pinocchio_multibody_joint_basic_visitors_hxx__
 #define __pinocchio_multibody_joint_basic_visitors_hxx__
+
+#include <boost/mpl/contains.hpp>
 
 #include "pinocchio/multibody/joint/joint-basic-visitors.hpp"
 #include "pinocchio/multibody/visitor.hpp"
@@ -39,6 +41,36 @@ namespace pinocchio
   createData(const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel)
   {
     return CreateJointData<Scalar, Options, JointCollectionTpl>::run(jmodel);
+  }
+
+  /**
+   * @brief      JointCheckTypeVisitor fusion visitor
+   */
+  template<typename JointModelSequence>
+  struct JointCheckTypeVisitor
+  : fusion::JointUnaryVisitorBase<JointCheckTypeVisitor<JointModelSequence>, bool>
+  {
+    typedef fusion::NoArg ArgsType;
+
+    template<typename JointModel>
+    static bool algo(const pinocchio::JointModelBase<JointModel> &)
+    {
+      typedef typename boost::mpl::contains<JointModelSequence, JointModel>::type result;
+      return result::value;
+    }
+  };
+
+  template<
+    typename JointModelSequence,
+    typename Scalar,
+    int Options,
+    template<typename S, int O>
+    class JointCollectionTpl>
+  inline bool check_joint_type_withiin_sequence(
+    const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel)
+  {
+    typedef JointCheckTypeVisitor<JointModelSequence> Algo;
+    return Algo::run(jmodel);
   }
 
   /**
