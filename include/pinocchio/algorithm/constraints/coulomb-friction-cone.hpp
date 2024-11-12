@@ -69,7 +69,8 @@ namespace pinocchio
     {
       assert(mu >= 0 && "mu must be positive");
       assert(prec >= 0 && "prec should be positive");
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(f.size() == 3 && "The input vector is of wrong size.");
       const Vector3 f_normalized = f.normalized();
       return f_normalized.template head<2>().norm() <= mu * f_normalized[2] + prec;
     }
@@ -83,12 +84,14 @@ namespace pinocchio
       project(const Eigen::MatrixBase<Vector3Like> & x) const
     {
       assert(mu >= 0 && "mu must be positive");
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(x.size() == 3 && "The input vector is of wrong size.");
+      typedef Eigen::Matrix<Scalar, 2, 1> Vector2Plain;
+      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
       const Scalar & z = x[2];
       const Scalar mu_z = mu * z;
 
-      const Eigen::Matrix<Scalar, 2, 1> t = x.template head<2>();
+      const Vector2Plain t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
       if (mu * t_norm <= -z)
@@ -120,7 +123,8 @@ namespace pinocchio
       const Eigen::MatrixBase<Vector3Like> & x, const Eigen::MatrixBase<Vector3Like> & R) const
     {
       assert(mu >= 0 && "mu must be positive");
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(x.size() == 3 && "The input vector is of wrong size.");
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
       assert(R(2) > 0 && "R(2) must be strictly positive");
       Scalar weighted_mu = mu * math::sqrt(R(0) / R(2));
@@ -159,7 +163,8 @@ namespace pinocchio
     typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like)
       computeRadialProjection(const Eigen::MatrixBase<Vector3Like> & f) const
     {
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(f.size() == 3 && "The input vector is of wrong size.");
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
 
       Vector3Plain res;
@@ -267,7 +272,8 @@ namespace pinocchio
     bool isInside(const Eigen::MatrixBase<Vector3Like> & v, const Scalar prec = Scalar(0)) const
     {
       assert(mu >= 0 && "mu must be positive");
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(v.size() == 3 && "The input vector is of wrong size.");
       const Vector3 v_normalized = v.normalized();
       return mu * v_normalized.template head<2>().norm() <= v_normalized[2] + prec;
     }
@@ -278,7 +284,8 @@ namespace pinocchio
       project(const Eigen::MatrixBase<Vector3Like> & x) const
     {
       assert(mu >= 0 && "mu must be positive");
-      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
+      assert(x.size() == 3 && "The input vector is of wrong size.");
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
       const Scalar & z = x[2];
 
