@@ -263,6 +263,19 @@ namespace pinocchio
       *this = other.template cast<Scalar>();
     }
 
+    ///
+    /// \brief Copy constructor by casting
+    ///
+    /// \param[in] other model to copy to *this
+    ///
+    ModelTpl(const ModelTpl & other)
+    : effortLimit(upperEffortLimit)
+    , velocityLimit(upperVelocityLimit)
+    , friction(upperDryFrictionLimit)
+    {
+      *this = other;
+    }
+
     /// \returns A new copy of *this with the Scalar type casted to NewScalar.
     template<typename NewScalar>
     typename CastType<NewScalar, ModelTpl>::type cast() const;
