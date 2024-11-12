@@ -76,6 +76,11 @@ namespace pinocchio
         PINOCCHIO_UNUSED_VARIABLE(ptr);
       }
 
+      void run(boost::blank * ptr = 0)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(ptr);
+      }
+
       bp::class_<Solver> & class_;
     };
 
