@@ -366,13 +366,9 @@ namespace pinocchio
       // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
       // The name should be inverted.
       this->primal_feasibility =
-        Scalar(0); // always zero as the dual variable belongs to the constraint set.
+        Scalar(0); // always zero as the primal variable belongs to the constraint set.
       this->dual_feasibility =
         Scalar(0); // always zero as the dual variable belongs to the constraint set.
-      this->complementarity = math::fabs(
-        primal_vector.dot(dual_vector)); // TODO(jcarpent): change for an individual treatment
-      //      assert(this->complementarity >= Scalar(0) && "The complementarity should be
-      //      positive");
 
       const Eigen::DenseIndex size = set.size();
       Scalar complementarity = Scalar(0);
@@ -381,17 +377,12 @@ namespace pinocchio
       const auto & ub = set.ub();
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
-        // check whether the dual variable is reaching the lower or upper bound limits
-        if (lb[row_id] == dual_vector[row_id] || ub[row_id] == dual_vector[row_id])
-        {
           const Scalar primal_positive_part = math::max(Scalar(0), primal_vector[row_id]);
           const Scalar primal_negative_part = primal_vector[row_id] - primal_positive_part;
 
-          const Scalar row_complementarity =
-            primal_positive_part * (dual_vector[row_id] - lb[row_id])
-            + primal_negative_part * (ub[row_id] - dual_vector[row_id]); // should be positive
-          complementarity = math::max(complementarity, math::fabs(row_complementarity));
-        }
+          Scalar row_complementarity = primal_positive_part * (dual_vector[row_id] - lb[row_id]);
+          row_complementarity = math::max(row_complementarity, primal_negative_part * (ub[row_id] - dual_vector[row_id])); 
+          complementarity = math::max(complementarity, row_complementarity);
       }
       this->complementarity = complementarity;
     }
