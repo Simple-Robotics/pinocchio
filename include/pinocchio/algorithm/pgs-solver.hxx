@@ -378,7 +378,7 @@ namespace pinocchio
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
           const Scalar primal_positive_part = math::max(Scalar(0), primal_vector[row_id]);
-          const Scalar primal_negative_part = primal_vector[row_id] - primal_positive_part;
+          const Scalar primal_negative_part = primal_positive_part - primal_vector[row_id] ;
 
           Scalar row_complementarity = primal_positive_part * (dual_vector[row_id] - lb[row_id]);
           row_complementarity = math::max(row_complementarity, primal_negative_part * (ub[row_id] - dual_vector[row_id])); 
