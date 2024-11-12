@@ -19,6 +19,29 @@ namespace pinocchio
     namespace bf = boost::fusion;
     using fusion::NoArg;
 
+    namespace internal
+    {
+      template<typename T>
+      struct NoRun
+      {
+        static T run()
+        {
+          // Hacky way to not have to return something real. The system should throw before.
+          const typename std::remove_reference<T>::type * null_ptr = NULL;
+          return *null_ptr;
+        }
+      };
+
+      template<>
+      struct NoRun<void>
+      {
+        static void run()
+        {
+          return;
+        }
+      };
+    } // namespace internal
+
     ///
     /// \brief Base structure for \b Unary visitation of a ConstraintModel.
     ///        This structure provides runners to call the right visitor according to the number of
@@ -66,26 +89,6 @@ namespace pinocchio
       }
 
     private:
-      template<typename T>
-      struct NoRun
-      {
-        static T run()
-        {
-          // Hacky way to not have to return something real. The system should throw before.
-          const typename std::remove_reference<T>::type * null_ptr = NULL;
-          return *null_ptr;
-        }
-      };
-
-      template<>
-      struct NoRun<void>
-      {
-        static void run()
-        {
-          return;
-        }
-      };
-
       template<
         typename Scalar,
         int Options,
@@ -123,7 +126,7 @@ namespace pinocchio
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
-          return NoRun<ReturnType>::run();
+          return internal::NoRun<ReturnType>::run();
         }
 
         template<typename S, int O>
@@ -131,7 +134,7 @@ namespace pinocchio
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
-          return NoRun<ReturnType>::run();
+          return internal::NoRun<ReturnType>::run();
         }
 
         ArgsTmp args;
@@ -167,8 +170,7 @@ namespace pinocchio
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint model is of type FictiousConstraintModelTpl.");
-          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
-          return *null_ptr;
+          return internal::NoRun<ReturnType>::run();
         };
 
         template<typename S, int O>
@@ -176,8 +178,7 @@ namespace pinocchio
         {
           PINOCCHIO_THROW_PRETTY(
             std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
-          const typename std::remove_reference<ReturnType>::type * null_ptr = NULL;
-          return *null_ptr;
+          return internal::NoRun<ReturnType>::run();
         };
       };
 
