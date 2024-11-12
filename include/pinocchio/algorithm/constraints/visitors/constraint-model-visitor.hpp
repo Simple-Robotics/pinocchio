@@ -121,6 +121,13 @@ namespace pinocchio
             bf::append(boost::ref(cdata.derived()), args));
         }
 
+        ReturnType operator()(const boost::blank &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type boost::blank.");
+          return internal::NoRun<ReturnType>::run();
+        }
+
         template<typename S, int O>
         ReturnType operator()(const FictiousConstraintModelTpl<S, O> &) const
         {
@@ -163,6 +170,13 @@ namespace pinocchio
         {
           return ConstraintModelVisitorDerived::template algo<ConstraintDataDerived>(
             cdata.derived());
+        }
+
+        ReturnType operator()(const boost::blank &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type boost::blank.");
+          return internal::NoRun<ReturnType>::run();
         }
 
         template<typename S, int O>

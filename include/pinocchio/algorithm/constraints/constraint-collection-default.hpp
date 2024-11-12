@@ -31,14 +31,16 @@ namespace pinocchio
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> FrictionalJointConstraintData;
 
     typedef boost::variant<
-      FictiousConstraintModel,
+      boost::blank,
+      //      FictiousConstraintModel,
       BilateralPointConstraintModel,
       FrictionalPointConstraintModel,
       FrictionalJointConstraintModel>
       ConstraintModelVariant;
 
     typedef boost::variant<
-      FictiousConstraintData,
+      boost::blank,
+      //      FictiousConstraintData,
       BilateralPointConstraintData,
       FrictionalPointConstraintData,
       FrictionalJointConstraintData>
