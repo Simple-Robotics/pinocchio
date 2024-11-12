@@ -234,6 +234,13 @@ namespace pinocchio
           return ReturnType();
         }
 
+        ReturnType operator()(const boost::blank &) const
+        {
+          PINOCCHIO_THROW_PRETTY(
+            std::invalid_argument, "The constraint model is of type boost::blank.");
+          return internal::NoRun<ReturnType>::run();
+        }
+
         ConstraintData & cdata;
         ArgsTmp args;
       };
@@ -338,7 +345,8 @@ namespace pinocchio
       template<typename S, int O>
       class ConstraintCollectionTpl>
     struct ConstraintModelCreateDataVisitor
-    : boost::static_visitor<
+    : visitors::ConstraintUnaryVisitorBase<
+        ConstraintModelCreateDataVisitor<Scalar, Options, ConstraintCollectionTpl>,
         typename ConstraintCollectionTpl<Scalar, Options>::ConstraintDataVariant>
     {
       typedef visitors::NoArg ArgsType;
@@ -347,15 +355,10 @@ namespace pinocchio
       typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
 
       template<typename ConstraintModel>
-      ConstraintDataVariant
-      operator()(const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel) const
+      static ConstraintDataVariant
+      algo(const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel)
       {
         return cmodel.createData();
-      }
-
-      static ConstraintDataVariant run(const ConstraintModelVariant & cmodel)
-      {
-        return boost::apply_visitor(ConstraintModelCreateDataVisitor(), cmodel);
       }
     };
 
