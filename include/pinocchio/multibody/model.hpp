@@ -256,9 +256,9 @@ namespace pinocchio
     ///
     template<typename S2, int O2>
     explicit ModelTpl(const ModelTpl<S2, O2> & other)
-    : effortLimit(upperEffortLimit)
+    : friction(upperDryFrictionLimit)
+    , effortLimit(upperEffortLimit)
     , velocityLimit(upperVelocityLimit)
-    , friction(upperDryFrictionLimit)
     {
       *this = other.template cast<Scalar>();
     }
@@ -269,9 +269,9 @@ namespace pinocchio
     /// \param[in] other model to copy to *this
     ///
     ModelTpl(const ModelTpl & other)
-    : effortLimit(upperEffortLimit)
+    : friction(upperDryFrictionLimit)
+    , effortLimit(upperEffortLimit)
     , velocityLimit(upperVelocityLimit)
-    , friction(upperDryFrictionLimit)
     {
       *this = other;
     }
