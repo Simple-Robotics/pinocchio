@@ -82,4 +82,31 @@ namespace pinocchio
 
 } // namespace pinocchio
 
+namespace boost
+{
+  template<typename Scalar, int Options>
+  struct has_nothrow_constructor<::pinocchio::FictiousConstraintModelTpl<Scalar, Options>>
+  : public integral_constant<bool, true>
+  {
+  };
+
+  template<typename Scalar, int Options>
+  struct has_nothrow_copy<::pinocchio::FictiousConstraintModelTpl<Scalar, Options>>
+  : public integral_constant<bool, true>
+  {
+  };
+
+  template<typename Scalar, int Options>
+  struct has_nothrow_constructor<::pinocchio::FictiousConstraintDataTpl<Scalar, Options>>
+  : public integral_constant<bool, true>
+  {
+  };
+
+  template<typename Scalar, int Options>
+  struct has_nothrow_copy<::pinocchio::FictiousConstraintDataTpl<Scalar, Options>>
+  : public integral_constant<bool, true>
+  {
+  };
+} // namespace boost
+
 #endif // ifndef __pinocchio_algorithm_constraints_fictious_constraint_hpp__
