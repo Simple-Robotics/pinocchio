@@ -456,7 +456,8 @@ namespace pinocchio
 
         // Update primal variable
         velocity.noalias() =
-          G.middleRows(row_id, constraint_set_size) * x + g.segment(row_id, constraint_set_size);
+          G.middleRows(row_id, constraint_set_size) * x;
+        velocity += g.segment(row_id, constraint_set_size);
 
         typedef PGSConstraintProjectionStepVisitor<
           Scalar, decltype(G_block), decltype(velocity), decltype(force)>
