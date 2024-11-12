@@ -237,8 +237,8 @@ namespace pinocchio
 
       assert(min_D > 0 && "min_D is zero");
       dual_vector -= this->over_relax_value / min_D * primal_vector;
-
-      primal_vector.noalias() += G_block * (dual_vector - f_previous);
+      const Vector3 d_dual_vector = dual_vector - f_previous;
+      primal_vector.noalias() += G_block * d_dual_vector;
     }
 
     /// \brief Compute the feasibility conditions associated with the optimization problem
