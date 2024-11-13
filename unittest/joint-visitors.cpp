@@ -25,8 +25,8 @@ BOOST_AUTO_TEST_CASE(test_check_joint_type)
 
   typedef boost::mpl::vector<JointModelRX, JointModelRY, JointModelRZ> JointModelSequence;
 
-  BOOST_CHECK(check_joint_type_withiin_sequence<JointModelSequence>(jmodel_rx) == true);
-  BOOST_CHECK(check_joint_type_withiin_sequence<JointModelSequence>(jmodel_px) == false);
+  BOOST_CHECK(check_joint_type_within_sequence<JointModelSequence>(jmodel_rx) == true);
+  BOOST_CHECK(check_joint_type_within_sequence<JointModelSequence>(jmodel_px) == false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -66,7 +66,7 @@ namespace pinocchio
     int Options,
     template<typename S, int O>
     class JointCollectionTpl>
-  inline bool check_joint_type_withiin_sequence(
+  inline bool check_joint_type_within_sequence(
     const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel)
   {
     typedef JointCheckTypeVisitor<JointModelSequence> Algo;
