@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 INRIA
+// Copyright (c) 2019-2024 INRIA
 //
 
 #ifndef __pinocchio_multibody_data_serialization_hpp__
@@ -32,6 +32,10 @@ namespace boost
       const unsigned int /*version*/)
     {
       PINOCCHIO_MAKE_DATA_NVP(ar, data, joints);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, q_in);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, v_in);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, a_in);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, tau_in);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, a);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, oa);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, oa_drift);

@@ -114,6 +114,18 @@ namespace pinocchio
     /// model, encapsulated in JointDataAccessor.
     JointDataVector joints;
 
+    /// \brief Input configuration vector
+    ConfigVectorType q_in;
+
+    /// \brief Input velocity vector
+    TangentVectorType v_in;
+
+    /// \brief Input acceleration vector
+    TangentVectorType a_in;
+
+    /// \brief Input torque vector
+    TangentVectorType tau_in;
+
     /// \brief Vector of joint accelerations expressed in the local frame of the joint.
     PINOCCHIO_ALIGNED_STD_VECTOR(Motion) a;
 

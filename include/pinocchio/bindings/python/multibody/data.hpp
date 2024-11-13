@@ -100,6 +100,10 @@ namespace pinocchio
           .ADD_DATA_PROPERTY(
             joints,
             "Vector of JointData associated to each JointModel stored in the related model.")
+          .ADD_DATA_PROPERTY(q_in, "Input joint configuration vector.")
+          .ADD_DATA_PROPERTY(v_in, "Input joint velocity vector.")
+          .ADD_DATA_PROPERTY(a_in, "Input joint acceleration vector.")
+          .ADD_DATA_PROPERTY(tau_in, "Input joint torque vector.")
           .ADD_DATA_PROPERTY(
             a, "Vector of joint accelerations expressed in the local frame of the joint.")
           .ADD_DATA_PROPERTY(
