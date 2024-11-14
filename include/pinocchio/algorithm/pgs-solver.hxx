@@ -34,24 +34,24 @@ namespace pinocchio
   {
   };
 
-  template<typename Scalar, typename BlockType, typename VelocityType, typename ForceType>
+  template<typename Scalar, typename BlockType, typename ForceType, typename VelocityType>
   struct PGSConstraintProjectionStepVisitor
   : visitors::ConstraintUnaryVisitorBase<
-      PGSConstraintProjectionStepVisitor<Scalar, BlockType, VelocityType, ForceType>>
+      PGSConstraintProjectionStepVisitor<Scalar, BlockType, ForceType, VelocityType>>
   , PGSConstraintProjectionStepBase<Scalar>
   {
     typedef boost::fusion::vector<
       const Scalar,
       const BlockType &,
-      VelocityType &,
       ForceType &,
+      VelocityType &,
       Scalar &,
       Scalar &,
       Scalar &>
       ArgsType;
     typedef PGSConstraintProjectionStepBase<Scalar> Base;
     typedef visitors::ConstraintUnaryVisitorBase<
-      PGSConstraintProjectionStepVisitor<Scalar, BlockType, VelocityType, ForceType>>
+      PGSConstraintProjectionStepVisitor<Scalar, BlockType, ForceType, VelocityType>>
       VisitorBase;
 
     explicit PGSConstraintProjectionStepVisitor(const Scalar over_relax_value)
@@ -64,8 +64,8 @@ namespace pinocchio
       const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
       const Scalar over_relax_value,
       const Eigen::EigenBase<BlockType> & G_block,
-      VelocityType & velocity,
       ForceType & force,
+      VelocityType & velocity,
       Scalar & complementarity,
       Scalar & primal_feasibility,
       Scalar & dual_feasibility)
@@ -75,8 +75,8 @@ namespace pinocchio
       PGSConstraintProjectionStep<ConstraintSet> step(
         over_relax_value,
         cmodel.derived().set()); // TODO(jcarpent): change cmodel.derived().set() -> cmodel.set()
-      step.project(G_block, velocity.const_cast_derived(), force.const_cast_derived());
-      step.computeFeasibility(velocity, force);
+      step.project(G_block, force.const_cast_derived(), velocity.const_cast_derived());
+      step.computeFeasibility(force, velocity);
 
       complementarity = step.complementarity;
       dual_feasibility = step.dual_feasibility;
@@ -88,11 +88,11 @@ namespace pinocchio
     void run(
       const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
       const Eigen::EigenBase<BlockType> & G_block,
-      VelocityType & velocity,
-      ForceType & force)
+      ForceType & force,
+      VelocityType & velocity)
     {
       algo(
-        cmodel, this->over_relax_value, G_block, velocity, force, this->complementarity,
+        cmodel, this->over_relax_value, G_block, force, velocity, this->complementarity,
         this->primal_feasibility, this->dual_feasibility);
     }
 
@@ -100,11 +100,11 @@ namespace pinocchio
     void run(
       const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const Eigen::EigenBase<BlockType> & G_block,
-      VelocityType & velocity,
-      ForceType & force)
+      ForceType & force,
+      VelocityType & velocity)
     {
       ArgsType args(
-        this->over_relax_value, G_block.derived(), velocity, force, this->complementarity,
+        this->over_relax_value, G_block.derived(), force, velocity, this->complementarity,
         this->primal_feasibility, this->dual_feasibility);
       this->run(cmodel.derived(), args);
     }
@@ -130,7 +130,7 @@ namespace pinocchio
     ///
     /// \param[in] G_block block asscociated with the current
     /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
-    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
@@ -145,21 +145,21 @@ namespace pinocchio
       auto & dual_vector = dual_vector_.const_cast_derived();
 
       // Normal update
-      Scalar & fz = dual_vector.coeffRef(2);
+      Scalar & fz = primal_vector.coeffRef(2);
       const Scalar fz_previous = fz;
-      fz -= Scalar(this->over_relax_value / G_block.coeff(2, 2)) * primal_vector[2];
+      fz -= Scalar(this->over_relax_value / G_block.coeff(2, 2)) * dual_vector[2];
       fz = math::max(Scalar(0), fz);
 
       // Account for the fz updated value
-      primal_vector += G_block.col(2) * (fz - fz_previous);
+      dual_vector += G_block.col(2) * (fz - fz_previous);
 
       // Tangential update
       const Scalar min_D_tangent = math::min(G_block.coeff(0, 0), G_block.coeff(1, 1));
-      auto f_tangent = dual_vector.template head<2>();
+      auto f_tangent = primal_vector.template head<2>();
       const Vector2 f_tangent_previous = f_tangent;
 
       assert(min_D_tangent > 0 && "min_D_tangent is zero");
-      f_tangent -= this->over_relax_value / min_D_tangent * primal_vector.template head<2>();
+      f_tangent -= this->over_relax_value / min_D_tangent * dual_vector.template head<2>();
       const Scalar f_tangent_norm = f_tangent.norm();
 
       const Scalar mu_fz = this->set.mu * fz;
@@ -167,7 +167,7 @@ namespace pinocchio
         f_tangent *= mu_fz / f_tangent_norm;
 
       // Account for the f_tangent updated value
-      primal_vector.noalias() += G_block.template leftCols<2>() * (f_tangent - f_tangent_previous);
+      dual_vector.noalias() += G_block.template leftCols<2>() * (f_tangent - f_tangent_previous);
     }
 
     /// \brief Compute the feasibility conditions associated with the optimization problem
@@ -178,15 +178,15 @@ namespace pinocchio
     {
       // The name should be inverted.
       this->primal_feasibility =
-        Scalar(0); // always zero as the dual variable belongs to the friction cone.
-      this->complementarity = this->set.computeContactComplementarity(primal_vector, dual_vector);
-      assert(this->complementarity >= Scalar(0) && "The complementarity should be positive");
+        Scalar(0); // always zero as the primal variable belongs to the friction cone.
 
       typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
-      const Vector3 primal_vector_corrected =
-        primal_vector + this->set.computeNormalCorrection(primal_vector);
+      const Vector3 dual_vector_corrected =
+        dual_vector + this->set.computeNormalCorrection(dual_vector);
+      this->complementarity = this->set.computeConicComplementarity(dual_vector_corrected, primal_vector);
+      assert(this->complementarity >= Scalar(0) && "The complementarity should be positive");
       const Vector3 reprojection_residual =
-        this->set.dual().project(primal_vector_corrected) - primal_vector_corrected;
+        this->set.dual().project(dual_vector_corrected) - dual_vector_corrected;
       this->dual_feasibility = reprojection_residual.norm();
     }
 
@@ -218,7 +218,7 @@ namespace pinocchio
     ///
     /// \param[in] G_block block asscociated with the current
     /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
-    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
@@ -233,12 +233,12 @@ namespace pinocchio
 
       const Scalar min_D =
         math::min(G_block.coeff(0, 0), math::min(G_block.coeff(1, 1), G_block.coeff(2, 2)));
-      const Vector3 f_previous = dual_vector;
+      const Vector3 f_previous = primal_vector;
 
       assert(min_D > 0 && "min_D is zero");
-      dual_vector -= this->over_relax_value / min_D * primal_vector;
-      const Vector3 d_dual_vector = dual_vector - f_previous;
-      primal_vector.noalias() += G_block * d_dual_vector;
+      primal_vector -= this->over_relax_value / min_D * dual_vector;
+      const Vector3 d_primal_vector = primal_vector - f_previous;
+      dual_vector.noalias() += G_block * d_primal_vector;
     }
 
     /// \brief Compute the feasibility conditions associated with the optimization problem
@@ -247,12 +247,11 @@ namespace pinocchio
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
       const Eigen::MatrixBase<DualVectorType> & dual_vector)
     {
-      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
       // The name should be inverted.
       this->primal_feasibility =
-        Scalar(0); // always zero as the dual variable belongs to the friction cone.
+        Scalar(0); // always zero as the primal variable belongs to the friction cone.
       this->complementarity = primal_vector.dot(dual_vector);
-      this->dual_feasibility = primal_vector.template lpNorm<Eigen::Infinity>();
+      this->dual_feasibility = dual_vector.template lpNorm<Eigen::Infinity>();
     }
 
     const ConstraintSet & set;
@@ -278,7 +277,7 @@ namespace pinocchio
     ///
     /// \param[in] G_block block asscociated with the current
     /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
-    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
@@ -306,12 +305,12 @@ namespace pinocchio
 
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
-        Scalar & value = dual_vector.coeffRef(row_id);
+        Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
         value -=
-          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * primal_vector[row_id];
+          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
         value = math::max(lb[row_id], math::min(ub[row_id], value));
-        primal_vector.noalias() += G_block.col(row_id) * Scalar(value - value_previous);
+        dual_vector.noalias() += G_block.col(row_id) * Scalar(value - value_previous);
       }
     }
 
@@ -320,7 +319,7 @@ namespace pinocchio
     ///
     /// \param[in] G_block block asscociated with the current
     /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
-    /// \param[in,out] dual_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
@@ -348,12 +347,12 @@ namespace pinocchio
 
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
-        Scalar & value = dual_vector.coeffRef(row_id);
+        Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
         value -=
-          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * primal_vector[row_id];
+          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
         value = math::max(lb[row_id], math::min(ub[row_id], value));
-        primal_vector += G_block.col(row_id) * Scalar(value - value_previous);
+        dual_vector += G_block.col(row_id) * Scalar(value - value_previous);
       }
     }
 
@@ -363,8 +362,6 @@ namespace pinocchio
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
       const Eigen::MatrixBase<DualVectorType> & dual_vector)
     {
-      // TODO(jcarpent): change primal_feasibility and dual_feasibility name.
-      // The name should be inverted.
       this->primal_feasibility =
         Scalar(0); // always zero as the primal variable belongs to the constraint set.
       this->dual_feasibility =
@@ -377,11 +374,11 @@ namespace pinocchio
       const auto & ub = set.ub();
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
-          const Scalar primal_positive_part = math::max(Scalar(0), primal_vector[row_id]);
-          const Scalar primal_negative_part = primal_positive_part - primal_vector[row_id] ;
+          const Scalar dual_positive_part = math::max(Scalar(0), dual_vector[row_id]);
+          const Scalar dual_negative_part = dual_positive_part - dual_vector[row_id] ;
 
-          Scalar row_complementarity = primal_positive_part * (dual_vector[row_id] - lb[row_id]);
-          row_complementarity = math::max(row_complementarity, primal_negative_part * (ub[row_id] - dual_vector[row_id])); 
+          Scalar row_complementarity = dual_positive_part * (primal_vector[row_id] - lb[row_id]);
+          row_complementarity = math::max(row_complementarity, dual_negative_part * (ub[row_id] - primal_vector[row_id])); 
           complementarity = math::max(complementarity, row_complementarity);
       }
       this->complementarity = complementarity;
@@ -451,10 +448,10 @@ namespace pinocchio
         velocity += g.segment(row_id, constraint_set_size);
 
         typedef PGSConstraintProjectionStepVisitor<
-          Scalar, decltype(G_block), decltype(velocity), decltype(force)>
+          Scalar, decltype(G_block), decltype(force), decltype(velocity)>
           Step;
         Step step(over_relax);
-        step.run(cmodel, G_block, velocity, force);
+        step.run(cmodel, G_block, force, velocity);
         //        PGSConstraintProjectionStep<ConstraintSet> step(over_relax, set);
         //        step.project(G_block, velocity, force);
         //        step.computeFeasibility(velocity, force);

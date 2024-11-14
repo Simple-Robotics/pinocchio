@@ -71,6 +71,7 @@ struct TestBoxTpl
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-10);
     pgs_solver.setRelativePrecision(1e-14);
+    pgs_solver.setMaxIterations(1000);
     has_converged = pgs_solver.solve(G, g, constraint_models, primal_solution);
     primal_solution = pgs_solver.getPrimalSolution();
 
