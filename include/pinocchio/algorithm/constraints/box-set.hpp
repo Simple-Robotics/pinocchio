@@ -139,6 +139,12 @@ namespace pinocchio
       return m_ub;
     }
 
+    /// \brief Check whether lb <= ub for all components
+    bool isValid() const
+    {
+      (m_lb.array() <= m_ub.array).all();
+    }
+
   protected:
     Vector m_lb, m_ub;
   }; // BoxSetTpl
