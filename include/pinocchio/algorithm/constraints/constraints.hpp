@@ -10,7 +10,7 @@
 #include "pinocchio/algorithm/constraints/frictional-joint-constraint.hpp"
 #include "pinocchio/algorithm/constraints/frictional-point-constraint.hpp"
 #include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
-#include "pinocchio/algorithm/constraints/fictious-constraint.hpp"
+// #include "pinocchio/algorithm/constraints/fictious-constraint.hpp"
 
 #include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
 
