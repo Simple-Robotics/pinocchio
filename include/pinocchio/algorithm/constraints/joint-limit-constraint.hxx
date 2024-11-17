@@ -77,13 +77,13 @@ namespace pinocchio
       {
         const int q_index = idx_q + k;
         const int v_index = idx_v + k;
-        if (lb[q_index] != -std::numeric_limits<Scalar>::infinity())
+        if (lb[q_index] != -std::numeric_limits<Scalar>::max())
         {
           is_lower_bound_constraint_active[q_index] = true;
           active_lower_bound_constraints.push_back(q_index);
           active_lower_bound_constraints_tangent.push_back(v_index);
         }
-        if (ub[q_index] != +std::numeric_limits<Scalar>::infinity())
+        if (ub[q_index] != +std::numeric_limits<Scalar>::max())
         {
           is_upper_bound_constraint_active[q_index] = true;
           active_upper_bound_constraints.push_back(q_index);
@@ -180,10 +180,10 @@ namespace pinocchio
     set_ub.setZero();
 
     set_lb.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
-      .fill(-std::numeric_limits<Scalar>::infinity());
+      .fill(-std::numeric_limits<Scalar>::max());
 
     set_ub.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
-      .fill(+std::numeric_limits<Scalar>::infinity());
+      .fill(+std::numeric_limits<Scalar>::max());
 
     // Fill row_sparsity_pattern from row_active_indexes content
     row_sparsity_pattern.resize(total_size, BooleanVector::Zero(model.nv));

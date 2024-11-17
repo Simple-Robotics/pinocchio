@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
       for (int k = 0; k < nq; ++k)
       {
         const int index_q = idx_q + k;
-        if (model.lowerPositionLimit[index_q] != -std::numeric_limits<double>::infinity())
+        if (model.lowerPositionLimit[index_q] != -std::numeric_limits<double>::max())
           total_size++;
-        if (model.upperPositionLimit[index_q] != +std::numeric_limits<double>::infinity())
+        if (model.upperPositionLimit[index_q] != +std::numeric_limits<double>::max())
           total_size++;
       }
     }
