@@ -106,8 +106,8 @@ namespace pinocchio
       Eigen::Index row_id = 0;
       for (const auto active_configuration_index : active_configuration_components)
       {
-        active_lower_bound_limit[row_id] = model.lowerPositionLimit[active_configuration_index];
-        active_upper_bound_limit[row_id] = model.upperPositionLimit[active_configuration_index];
+        active_lower_bound_limit[row_id] = lb[active_configuration_index];
+        active_upper_bound_limit[row_id] = ub[active_configuration_index];
         row_id++;
       }
 

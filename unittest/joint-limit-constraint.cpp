@@ -30,6 +30,26 @@ BOOST_AUTO_TEST_CASE(constraint_empty_constructor)
   JointLimitConstraintModel constraint(model, empty_active_joint_ids);
 }
 
+BOOST_AUTO_TEST_CASE(constraint_constructor_with_infinite_bounds)
+{
+  pinocchio::Model model;
+  pinocchio::buildModels::manipulator(model);
+
+  model.lowerPositionLimit.fill(-std::numeric_limits<double>::max());
+  model.upperPositionLimit.fill(+std::numeric_limits<double>::max());
+
+  const Data data(model);
+
+  const std::string ee_name = "wrist2_joint";
+  const JointIndex ee_id = model.getJointId(ee_name);
+
+  const Model::IndexVector & ee_support = model.supports[ee_id];
+  const Model::IndexVector active_joint_ids(ee_support.begin() + 1, ee_support.end());
+  JointLimitConstraintModel constraint(model, active_joint_ids);
+
+  BOOST_CHECK(constraint.size() == 0);
+}
+
 BOOST_AUTO_TEST_CASE(constraint_constructor)
 {
   pinocchio::Model model;
