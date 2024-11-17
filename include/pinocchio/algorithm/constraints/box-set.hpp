@@ -73,6 +73,20 @@ namespace pinocchio
       return !(*this == other);
     }
 
+    /// \brief Resize by calling the resize method of Eigen.
+    void resize(Eigen::DenseIndex new_size)
+    {
+      m_lb.resize(new_size);
+      m_ub.resize(new_size);
+    }
+
+    /// \brief Resize by calling the conservativeResize method of Eigen.
+    void conservativeResize(Eigen::DenseIndex new_size)
+    {
+      m_lb.conservativeResize(new_size);
+      m_ub.conservativeResize(new_size);
+    }
+
     /// \brief Check whether a vector x lies within the box.
     ///
     /// \param[in] f vector to check (assimilated to a  force vector).
