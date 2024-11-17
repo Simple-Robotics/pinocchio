@@ -179,11 +179,12 @@ namespace pinocchio
     auto & set_ub = m_set.ub();
     set_ub.setZero();
 
-    set_lb.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
-      .fill(-std::numeric_limits<Scalar>::max());
-
-    set_ub.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
+    // Compare to the reference document, we need to reverse the box bounds, as -force \in BoxSet
+    set_ub.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
       .fill(+std::numeric_limits<Scalar>::max());
+
+    set_lb.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
+      .fill(-std::numeric_limits<Scalar>::max());
 
     // Fill row_sparsity_pattern from row_active_indexes content
     row_sparsity_pattern.resize(total_size, BooleanVector::Zero(model.nv));
