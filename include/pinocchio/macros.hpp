@@ -11,6 +11,10 @@
 // See https://docs.microsoft.com/fr-fr/cpp/build/reference/zc-cplusplus?view=vs-2019 for further
 // information.
 
+#if (__cplusplus >= 202302L)
+  #define PINOCCHIO_WITH_CXX23_SUPPORT
+#endif
+
 #if (__cplusplus >= 202002L)
   #define PINOCCHIO_WITH_CXX20_SUPPORT
 #endif
