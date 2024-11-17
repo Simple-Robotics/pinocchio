@@ -71,6 +71,11 @@ namespace pinocchio
 
 /// \brief Helper to declare that a parameter is unused
 #define PINOCCHIO_UNUSED_VARIABLE(var) (void)(var)
+#ifndef NDEBUG
+  #define PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(var)
+#else
+  #define PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(var) PINOCCHIO_UNUSED_VARIABLE(var)
+#endif
 
 /// Ensure that a matrix (or vector) is of correct size (compile-time and run-time assertion)
 #define PINOCCHIO_ASSERT_MATRIX_SPECIFIC_SIZE(type, M, nrows, ncols)                               \
@@ -187,7 +192,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
   #define PINOCCHIO_THROW_PRETTY_IF(condition, exception, message)
 #endif
 
-
 #define _PINOCCHIO_EXPAND(x) x
 #define _PINOCCHIO_GET_OVERRIDE_FOR_CHECK_INPUT_ARGUMENT(_1, _2, MACRO_NAME, ...) MACRO_NAME
 
@@ -215,7 +219,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
     std::ostringstream oss;                                                                        \
     oss << "wrong argument size: expected " << expected_size << ", got " << size << std::endl;     \
     oss << "hint: " << message << std::endl;                                                       \
-    PINOCCHIO_THROW(std::invalid_argument, oss.str());                                      \
+    PINOCCHIO_THROW(std::invalid_argument, oss.str());                                             \
   }
 
 #define _PINOCCHIO_CHECK_ARGUMENT_SIZE_2(size, expected_size)                                      \
