@@ -7,6 +7,8 @@
 
 #include "pinocchio/math/fwd.hpp"
 
+#include <boost/mpl/vector.hpp>
+
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
