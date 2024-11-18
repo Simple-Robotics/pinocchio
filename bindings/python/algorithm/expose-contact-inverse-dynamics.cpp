@@ -54,8 +54,8 @@ namespace pinocchio
       const boost::optional<ConstRefVectorXs> & lambda_guess = boost::none)
     {
       return contactInverseDynamics(
-        model, data, q, v, a, dt, contact_models, contact_datas, R, constraint_correction,
-        settings, lambda_guess);
+        model, data, q, v, a, dt, contact_models, contact_datas, R, constraint_correction, settings,
+        lambda_guess);
     }
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
 
@@ -80,8 +80,8 @@ namespace pinocchio
 
       bp::def(
         "contactInverseDynamics", contactInverseDynamics_wrapper,
-        (bp::arg("model"), "data", "q", "v", "a", "dt", "contact_models", "contact_datas",
-         "R", "constraint_correction", bp::arg("settings"), bp::arg("lambda_guess") = boost::none),
+        (bp::arg("model"), "data", "q", "v", "a", "dt", "contact_models", "contact_datas", "R",
+         "constraint_correction", bp::arg("settings"), bp::arg("lambda_guess") = boost::none),
         "Compute the inverse dynamics with frictional contacts, store the result in Data and "
         "return it.\n\n"
         "Parameters:\n"

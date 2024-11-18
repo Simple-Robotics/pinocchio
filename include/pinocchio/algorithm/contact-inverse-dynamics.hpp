@@ -62,8 +62,9 @@ namespace pinocchio
     const std::vector<
       Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
-      contact_datas,
+    std::vector<
+      Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>,
+      ConstraintDataAllocator> & contact_datas,
     const Eigen::MatrixBase<VectorLikeR> & R,
     // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -185,9 +186,11 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
-    const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      contact_models,
-    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
+    const std::vector<
+      FrictionalPointConstraintModelTpl<Scalar, Options>,
+      ConstraintModelAllocator> & contact_models,
+    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
+      contact_datas,
     const Eigen::MatrixBase<VectorLikeR> & R,
     // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -261,8 +264,9 @@ namespace pinocchio
     const std::vector<
       Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>, ConstraintDataAllocator> &
-      contact_datas,
+    std::vector<
+      Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>,
+      ConstraintDataAllocator> & contact_datas,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,
@@ -352,9 +356,11 @@ namespace pinocchio
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & a,
     Scalar dt,
-    const std::vector<FrictionalPointConstraintModelTpl<Scalar, Options>, ConstraintModelAllocator> &
-      contact_models,
-    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> & contact_datas,
+    const std::vector<
+      FrictionalPointConstraintModelTpl<Scalar, Options>,
+      ConstraintModelAllocator> & contact_models,
+    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
+      contact_datas,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     ProximalSettingsTpl<Scalar> & settings,

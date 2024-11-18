@@ -53,9 +53,8 @@ namespace pinocchio
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<
-      Holder<const ConstraintModel>,
-      ConstraintModelAllocator> & constraint_models,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
       // const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeOut> & x,
       const Scalar over_relax = Scalar(1));

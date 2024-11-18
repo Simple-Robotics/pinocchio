@@ -103,7 +103,8 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
   // Contact models and data
   typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
     FrictionalConstraintModelVector;
-  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintData) FrictionalConstraintDataVector;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintData)
+    FrictionalConstraintDataVector;
 
   FrictionalConstraintModelVector contact_models;
   FrictionalConstraintDataVector contact_datas;

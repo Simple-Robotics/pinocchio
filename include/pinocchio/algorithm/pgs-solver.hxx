@@ -401,9 +401,7 @@ namespace pinocchio
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<
-      Holder<const ConstraintModel>,
-      ConstraintModelAllocator> & constraint_models,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
     const Scalar over_relax)
 
@@ -518,13 +516,12 @@ namespace pinocchio
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
     const Scalar over_relax)
 
   {
-    typedef std::reference_wrapper<const ConstraintModel>
-      WrappedConstraintModelType;
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
