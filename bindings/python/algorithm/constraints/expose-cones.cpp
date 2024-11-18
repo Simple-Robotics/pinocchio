@@ -7,6 +7,7 @@
 #include "pinocchio/bindings/python/fwd.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/box-set.hpp"
+#include "pinocchio/bindings/python/algorithm/constraints/bilateral-point-constraint.hpp"
 // #include "pinocchio/bindings/python/serialization/serialization.hpp"
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
@@ -33,6 +34,8 @@ namespace pinocchio
       // #endif
 
       BoxSetPythonVisitor<context::BoxSet>::expose();
+
+      BilateralPointConstraintModelPythonVisitor<context::BilateralPointConstraintModel>::expose();
 #endif
     }
 
