@@ -75,7 +75,7 @@ namespace pinocchio
       PGSConstraintProjectionStep<ConstraintSet> step(
         over_relax_value,
         cmodel.derived().set()); // TODO(jcarpent): change cmodel.derived().set() -> cmodel.set()
-      step.project(G_block, force.const_cast_derived(), velocity.const_cast_derived());
+      step.project(G_block.derived(), force.const_cast_derived(), velocity.const_cast_derived());
       step.computeFeasibility(force, velocity);
 
       complementarity = step.complementarity;
@@ -92,7 +92,7 @@ namespace pinocchio
       VelocityType & velocity)
     {
       algo(
-        cmodel, this->over_relax_value, G_block, force, velocity, this->complementarity,
+        cmodel, this->over_relax_value, G_block.derived(), force, velocity, this->complementarity,
         this->primal_feasibility, this->dual_feasibility);
     }
 
@@ -183,7 +183,8 @@ namespace pinocchio
       typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
       const Vector3 dual_vector_corrected =
         dual_vector + this->set.computeNormalCorrection(dual_vector);
-      this->complementarity = this->set.computeConicComplementarity(dual_vector_corrected, primal_vector);
+      this->complementarity =
+        this->set.computeConicComplementarity(dual_vector_corrected, primal_vector);
       assert(this->complementarity >= Scalar(0) && "The complementarity should be positive");
       const Vector3 reprojection_residual =
         this->set.dual().project(dual_vector_corrected) - dual_vector_corrected;
@@ -374,12 +375,13 @@ namespace pinocchio
       const auto & ub = set.ub();
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
-          const Scalar dual_positive_part = math::max(Scalar(0), dual_vector[row_id]);
-          const Scalar dual_negative_part = dual_positive_part - dual_vector[row_id] ;
+        const Scalar dual_positive_part = math::max(Scalar(0), dual_vector[row_id]);
+        const Scalar dual_negative_part = dual_positive_part - dual_vector[row_id];
 
-          Scalar row_complementarity = dual_positive_part * (primal_vector[row_id] - lb[row_id]);
-          row_complementarity = math::max(row_complementarity, dual_negative_part * (ub[row_id] - primal_vector[row_id])); 
-          complementarity = math::max(complementarity, row_complementarity);
+        Scalar row_complementarity = dual_positive_part * (primal_vector[row_id] - lb[row_id]);
+        row_complementarity =
+          math::max(row_complementarity, dual_negative_part * (ub[row_id] - primal_vector[row_id]));
+        complementarity = math::max(complementarity, row_complementarity);
       }
       this->complementarity = complementarity;
     }
@@ -443,8 +445,7 @@ namespace pinocchio
         auto velocity = y.segment(row_id, constraint_set_size);
 
         // Update primal variable
-        velocity.noalias() =
-          G.middleRows(row_id, constraint_set_size) * x;
+        velocity.noalias() = G.middleRows(row_id, constraint_set_size) * x;
         velocity += g.segment(row_id, constraint_set_size);
 
         typedef PGSConstraintProjectionStepVisitor<
