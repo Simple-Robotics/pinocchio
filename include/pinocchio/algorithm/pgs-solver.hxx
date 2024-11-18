@@ -232,13 +232,12 @@ namespace pinocchio
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
-      const Scalar min_D =
-        math::min(G_block.coeff(0, 0), math::min(G_block.coeff(1, 1), G_block.coeff(2, 2)));
       const Vector3 f_previous = primal_vector;
 
-      assert(min_D > 0 && "min_D is zero");
-      primal_vector -= this->over_relax_value / min_D * dual_vector;
-      const Vector3 d_primal_vector = primal_vector - f_previous;
+      Vector3 d_primal_vector = - this->over_relax_value * dual_vector;
+      Vector3 Gdiag(G_block.coeff(0, 0), G_block.coeff(1, 1), G_block.coeff(2, 2));
+      d_primal_vector.array() /= Gdiag.array();
+      primal_vector += d_primal_vector;
       dual_vector.noalias() += G_block * d_primal_vector;
     }
 
