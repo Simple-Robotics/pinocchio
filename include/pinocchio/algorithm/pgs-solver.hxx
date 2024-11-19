@@ -92,8 +92,8 @@ namespace pinocchio
       VelocityType & velocity)
     {
       algo(
-        cmodel, this->over_relax_value, G_block.derived(), force, velocity, this->complementarity,
-        this->primal_feasibility, this->dual_feasibility);
+        cmodel.derived(), this->over_relax_value, G_block.derived(), force, velocity,
+        this->complementarity, this->primal_feasibility, this->dual_feasibility);
     }
 
     template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
