@@ -88,6 +88,11 @@ namespace pinocchio
       return m_size;
     }
 
+    Eigen::DenseIndex size() const
+    {
+      return m_size;
+    }
+
   protected:
     Eigen::DenseIndex m_size;
   }; // UnboundedSetTpl

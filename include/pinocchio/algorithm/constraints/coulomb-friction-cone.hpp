@@ -286,7 +286,7 @@ namespace pinocchio
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
+      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
       const Scalar & z = x[2];
 
       const Eigen::Matrix<Scalar, 2, 1> t = x.template head<2>();
