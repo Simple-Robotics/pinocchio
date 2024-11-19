@@ -527,7 +527,7 @@ namespace pinocchio
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    solve(G, g, wrapped_constraint_models, x_sol, over_relax);
+    return solve(G, g, wrapped_constraint_models, x_sol, over_relax);
   }
 } // namespace pinocchio
 
