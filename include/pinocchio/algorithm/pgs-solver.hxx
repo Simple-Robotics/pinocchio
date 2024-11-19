@@ -232,13 +232,12 @@ namespace pinocchio
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
-      const Vector3 f_previous = primal_vector;
-
-      Vector3 d_primal_vector = -this->over_relax_value * dual_vector;
-      Vector3 Gdiag(G_block.coeff(0, 0), G_block.coeff(1, 1), G_block.coeff(2, 2));
-      d_primal_vector.array() /= Gdiag.array();
-      primal_vector += d_primal_vector;
-      dual_vector.noalias() += G_block * d_primal_vector;
+      for (std::size_t i = 0; i < 3; ++i)
+      {
+        Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
+        primal_vector(i) += d_primal_value;
+        dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized
+      }
     }
 
     /// \brief Compute the feasibility conditions associated with the optimization problem
@@ -308,7 +307,10 @@ namespace pinocchio
         value -=
           Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
         value = math::max(lb[row_id], math::min(ub[row_id], value));
-        dual_vector.noalias() += G_block.col(row_id) * Scalar(value - value_previous);
+        dual_vector.noalias() +=
+          G_block.col(row_id)
+          * Scalar(value - value_previous); // TODO optimize: we only need dual_vector[row_id] for
+                                            // the update and not the full dual vector
       }
     }
 
