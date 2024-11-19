@@ -302,6 +302,7 @@ add_pinocchio_unit_test(unbounded-set)
 
 # Solvers
 add_pinocchio_unit_test(pgs-solver)
+add_pinocchio_unit_test(admm-solver)
 
 # Serialization
 make_directory("${CMAKE_CURRENT_BINARY_DIR}/serialization-data")
