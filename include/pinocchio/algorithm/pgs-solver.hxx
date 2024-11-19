@@ -234,7 +234,7 @@ namespace pinocchio
 
       const Vector3 f_previous = primal_vector;
 
-      Vector3 d_primal_vector = - this->over_relax_value * dual_vector;
+      Vector3 d_primal_vector = -this->over_relax_value * dual_vector;
       Vector3 Gdiag(G_block.coeff(0, 0), G_block.coeff(1, 1), G_block.coeff(2, 2));
       d_primal_vector.array() /= Gdiag.array();
       primal_vector += d_primal_vector;
@@ -247,9 +247,7 @@ namespace pinocchio
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
       const Eigen::MatrixBase<DualVectorType> & dual_vector)
     {
-      // The name should be inverted.
-      this->primal_feasibility =
-        Scalar(0); // always zero as the primal variable belongs to the friction cone.
+      this->primal_feasibility = Scalar(0);
       this->complementarity = primal_vector.dot(dual_vector);
       this->dual_feasibility = dual_vector.template lpNorm<Eigen::Infinity>();
     }
