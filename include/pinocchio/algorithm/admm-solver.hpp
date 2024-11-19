@@ -17,6 +17,10 @@
 
 namespace pinocchio
 {
+  template<typename Scalar>
+  struct ADMMContactSolverTpl;
+  typedef ADMMContactSolverTpl<context::Scalar> ADMMContactSolver;
+
   template<typename _Scalar>
   struct ADMMSpectralUpdateRuleTpl
   {
@@ -400,12 +404,13 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
+      typename ConstraintSet,
       typename ConstraintAllocator,
       typename VectorLikeR>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
+      const std::vector<ConstraintSet, ConstraintAllocator> & cones,
       const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
@@ -429,12 +434,13 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
+      typename ConstraintSet,
       typename ConstraintAllocator,
       typename VectorLikeOut>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
+      const std::vector<ConstraintSet, ConstraintAllocator> & cones,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
       bool solve_ncp = true)
     {

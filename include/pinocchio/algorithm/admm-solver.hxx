@@ -19,12 +19,13 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
+    typename ConstraintSet,
     typename ConstraintAllocator,
     typename VectorLikeR>
   bool ADMMContactSolverTpl<_Scalar>::solve(
     DelassusOperatorBase<DelassusDerived> & _delassus,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<CoulombFrictionConeTpl<Scalar>, ConstraintAllocator> & cones,
+    const std::vector<ConstraintSet, ConstraintAllocator> & cones,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
@@ -49,6 +50,7 @@ namespace pinocchio
     //    PINOCCHIO_CHECK_INPUT_ARGUMENT(math::max(R.maxCoeff(),mu_prox) >= 0,"mu_prox and mu_R
     //    cannot be both equal to zero.");
 
+    // Setup ADMM update rules
     Scalar L, m, rho;
     ADMMUpdateRuleContainer admm_update_rule_container;
     switch (admm_update_rule)
