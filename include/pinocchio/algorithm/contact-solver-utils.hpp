@@ -38,6 +38,29 @@ namespace pinocchio
       }
     }
 
+    struct DualProjectionVisitor
+    {
+      template<typename VelocityVectorLike, typename ResultVectorLike>
+      static void algo(
+        const CoulombFrictionConeTpl<double> & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ResultVectorLike> & result)
+      {
+        result.const_cast_derived() = set.dual().project(velocity);
+        //        assert(set.dual().isInside(result, Scalar(1e-12)));
+      }
+
+      template<typename ConstraintSet, typename VelocityVectorLike, typename ResultVectorLike>
+      static void algo(
+        const ConstraintSet & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ResultVectorLike> & result)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(set);
+        result.const_cast_derived() = velocity;
+      }
+    };
+
     /// \brief Project a vector x on the dual of the cones contained in the vector of cones.
     template<
       typename ConstraintSet,
@@ -55,11 +78,58 @@ namespace pinocchio
       for (const auto & set : sets)
       {
         const auto size = set.size();
-        x_proj.segment(index, size) = set.dual().project(x.segment(index, size));
-        //        assert(cone.dual().isInside(x_proj.template segment<3>(index), Scalar(1e-12)));
+        DualProjectionVisitor::algo(set, x.segment(index, size), x_proj.segment(index, size));
         index += size;
       }
     }
+
+    struct ComplementarityVisitor
+    {
+      template<typename Scalar, typename VelocityVectorLike, typename ForceVectorLike>
+      static Scalar algo(
+        const CoulombFrictionConeTpl<Scalar> & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ForceVectorLike> & force)
+      {
+        return set.computeConicComplementarity(velocity, force);
+      }
+
+      template<typename Scalar, typename VelocityVectorLike, typename ForceVectorLike>
+      static Scalar algo(
+        const UnboundedSetTpl<Scalar> & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ForceVectorLike> & force)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(set);
+        PINOCCHIO_UNUSED_VARIABLE(velocity);
+        PINOCCHIO_UNUSED_VARIABLE(force);
+        return Scalar(0);
+      }
+
+      template<typename Scalar, typename VelocityVectorLike, typename ForceVectorLike>
+      static Scalar algo(
+        const BoxSetTpl<Scalar> & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ForceVectorLike> & force)
+      {
+        Scalar complementarity = Scalar(0);
+
+        const auto & lb = set.lb();
+        const auto & ub = set.ub();
+        for (Eigen::DenseIndex row_id = 0; row_id < set.size(); ++row_id)
+        {
+          const Scalar velocity_positive_part = math::max(Scalar(0), velocity[row_id]);
+          const Scalar velocity_negative_part = velocity_positive_part - velocity[row_id];
+
+          Scalar row_complementarity = velocity_positive_part * (force[row_id] - lb[row_id]);
+          row_complementarity =
+            math::max(row_complementarity, velocity_negative_part * (ub[row_id] - force[row_id]));
+          complementarity = math::max(complementarity, row_complementarity);
+        }
+
+        return complementarity;
+      }
+    };
 
     template<
       typename ConstraintSet,
@@ -78,14 +148,37 @@ namespace pinocchio
       for (const auto & set : sets)
       {
         const auto size = set.size();
-        const Scalar cone_complementarity = set.computeConicComplementarity(
-          velocities.segment(index, size), forces.segment(index, size));
-        complementarity = math::max(complementarity, cone_complementarity);
+        const Scalar set_complementarity = ComplementarityVisitor::algo(
+          set, velocities.segment(index, size), forces.segment(index, size));
+        complementarity = math::max(complementarity, set_complementarity);
         index += size;
       }
 
       return complementarity;
     }
+
+    struct DeSaxeCorrectionVisitor
+    {
+      template<typename VelocityVectorLike, typename ResultVectorLike>
+      static void algo(
+        const CoulombFrictionConeTpl<double> & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ResultVectorLike> & result)
+      {
+        result.const_cast_derived() = set.computeNormalCorrection(velocity);
+      }
+
+      template<typename ConstraintSet, typename VelocityVectorLike, typename ResultVectorLike>
+      static void algo(
+        const ConstraintSet & set,
+        const Eigen::MatrixBase<VelocityVectorLike> & velocity,
+        const Eigen::MatrixBase<ResultVectorLike> & result)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(set);
+        PINOCCHIO_UNUSED_VARIABLE(velocity);
+        result.const_cast_derived().setZero();
+      }
+    };
 
     template<
       typename ConstraintSet,
@@ -103,7 +196,8 @@ namespace pinocchio
       for (const auto & set : sets)
       {
         const auto size = set.size();
-        shift.segment(index, size) = set.computeNormalCorrection(velocities.segment(index, size));
+        DeSaxeCorrectionVisitor::algo(
+          set, velocities.segment(index, size), shift.segment(index, size));
         index += size;
       }
     }
