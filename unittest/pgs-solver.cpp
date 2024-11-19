@@ -9,6 +9,7 @@
 #include "pinocchio/algorithm/pgs-solver.hpp"
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/crba.hpp"
+#include "pinocchio/parsers/sample-models.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -16,6 +17,14 @@
 using namespace pinocchio;
 
 double mu = 1e-4;
+
+#define EIGEN_VECTOR_IS_APPROX(Va, Vb, precision)                                                  \
+  BOOST_CHECK_MESSAGE(                                                                             \
+    ((Va) - (Vb)).isZero(precision),                                                               \
+    "check " #Va ".isApprox(" #Vb ") failed at precision "                                         \
+      << precision << ". (" #Va " - " #Vb ").norm() = " << ((Va) - (Vb)).norm() << " [\n"          \
+      << (Va).transpose() << "\n!=\n"                                                              \
+      << (Vb).transpose() << "\n]")
 
 template<typename _ConstraintModel>
 struct TestBoxTpl
@@ -303,6 +312,56 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
     const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(bilateral_humanoid)
+{
+  Model model;
+  buildModels::humanoid(model);
+
+  Eigen::VectorXd q0 = neutral(model);
+  const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
+
+  const double dt = 1e-3;
+
+  typedef BilateralPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
+
+  Data data(model);
+  pinocchio::forwardKinematics(model, data, q0);
+  const JointIndex joint1_id = 0;
+  const GeomIndex joint2_id = 14;
+  assert((int)joint2_id < model.njoints);
+  assert(model.nvs[joint2_id] == 1); // make sure its a bilaterable joint
+  const SE3 Mc = data.oMi[joint2_id];
+  const SE3 joint1_placement = Mc;
+  const SE3 joint2_placement = SE3::Identity();
+
+  ConstraintModel cm(model, joint1_id, joint1_placement, joint2_id, joint2_placement);
+  constraint_models.push_back(cm);
+
+  // Test static motion with zero external force -> locked joint should not move
+  {
+    const Force fext = Force::Zero();
+
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, fext, dt);
+    Eigen::VectorXd q_next = integrate(model, q0, test.v_next * dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    Eigen::VectorXd v_wrist_expected = Eigen::VectorXd::Zero(model.nvs[joint2_id]);
+    EIGEN_VECTOR_IS_APPROX(
+      test.v_next.segment(model.idx_vs[joint2_id], model.nvs[joint2_id]), //
+      v_wrist_expected,                                                   //
+      1e-6);
+    pinocchio::forwardKinematics(model, data, q_next);
+    EIGEN_VECTOR_IS_APPROX(
+      Mc.translation(),
+      data.oMi[joint2_id].translation(), //
+      1e-6);
   }
 }
 
