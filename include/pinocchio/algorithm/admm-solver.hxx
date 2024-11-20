@@ -142,13 +142,14 @@ namespace pinocchio
     Scalar complementarity_zero_initial_guess_max_violation = 0;
     // Search for the max violation of the constraint g_N >= 0, i.e. the smallest value of g_N over
     // all contact points.
-    for (Eigen::DenseIndex i = 0; i < static_cast<Eigen::DenseIndex>(constraint_models.size()); ++i)
-    { // TODO(jcarpent): adjust for other type of constraints
-      if (g(3 * i + 2) < complementarity_zero_initial_guess_max_violation)
-      {
-        complementarity_zero_initial_guess_max_violation = g(3 * i + 2);
-      }
-    }
+    //    for (Eigen::DenseIndex i = 0; i <
+    //    static_cast<Eigen::DenseIndex>(constraint_models.size()); ++i) { // TODO(jcarpent): adjust
+    //    for other type of constraints
+    //      if (g(3 * i + 2) < complementarity_zero_initial_guess_max_violation)
+    //      {
+    //        complementarity_zero_initial_guess_max_violation = g(3 * i + 2);
+    //      }
+    //    }
 
     if (-complementarity_zero_initial_guess_max_violation < complementarity)
     { // If true, this means that the zero value initial guess leads a better feasibility in the
