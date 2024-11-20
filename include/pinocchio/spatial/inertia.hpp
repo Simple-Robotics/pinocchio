@@ -1224,7 +1224,7 @@ namespace pinocchio
       const Scalar exp_2d1 = exp(2 * d1);
       const Scalar exp_2d2 = exp(2 * d2);
       const Scalar exp_2d3 = exp(2 * d3);
-      const Scalar exp_d1 = exp(d1);
+      //      const Scalar exp_d1 = exp(d1);
       const Scalar exp_d2 = exp(d2);
       const Scalar exp_d3 = exp(d3);
 
