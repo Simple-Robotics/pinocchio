@@ -194,23 +194,24 @@ namespace pinocchio
         bp::def(
           "computeDualConeProjection",
           computeDualConeProjection_wrapper<ConstraintModel, ConstraintModelAllocator>,
-          bp::args("cones", "velocities"),
+          bp::args("constraint_models", "velocities"),
           "Project a vector on the cartesian product of dual cones.");
 
         // TODO(jcarpent): restore these two next signatures
         //        bp::def(
         //                "computePrimalFeasibility", computePrimalFeasibility_wrapper,
-        //                bp::args("cones", "forces"), "Compute the primal feasibility.");
+        //                bp::args("constraint_models", "forces"), "Compute the primal
+        //                feasibility.");
 
         //        bp::def(
         //                "computeReprojectionError", computeReprojectionError_wrapper,
-        //                bp::args("cones", "forces", "velocities"), "Compute the reprojection
-        //                error.");
+        //                bp::args("constraint_models", "forces", "velocities"), "Compute the
+        //                reprojection error.");
 
         bp::def(
           "computeComplementarityShift",
           computeComplementarityShift_wrapper<ConstraintModel, ConstraintModelAllocator>,
-          bp::args("cones", "velocities"),
+          bp::args("constraint_models", "velocities"),
           "Compute the complementarity shift associated to the De Saxé function.");
       }
       //
