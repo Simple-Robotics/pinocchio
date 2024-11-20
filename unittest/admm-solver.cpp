@@ -82,7 +82,7 @@ struct TestBoxTpl
     pgs_solver.setRelativePrecision(1e-14);
 
     const Eigen::VectorXd sol = G_expression.solve(-g);
-    has_converged = admm_solver.solve(G_expression, g, constraint_sets, primal_solution);
+    has_converged = admm_solver.solve(G_expression, g, constraint_models, primal_solution);
     primal_solution = admm_solver.getPrimalSolution();
     dual_solution = admm_solver.getDualSolution();
     //    std::cout << "constraint_velocity: " << constraint_velocity.transpose() << std::endl;
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   admm_solver.setAbsolutePrecision(1e-10);
   admm_solver.setRelativePrecision(1e-14);
 
-  const bool has_converged = admm_solver.solve(G_expression, g, constraint_sets, dual_solution);
+  const bool has_converged = admm_solver.solve(G_expression, g, constraint_models, dual_solution);
   BOOST_CHECK(has_converged);
 
   primal_solution = G * dual_solution + g;
