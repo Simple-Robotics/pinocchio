@@ -34,12 +34,12 @@ namespace pinocchio
 
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
 
-    template<typename DelassusDerived>
+    template<typename DelassusDerived, typename ConstraintModel, typename ConstraintModelAllocator>
     static bool solve_wrapper(
       Solver & solver,
       DelassusDerived & delassus,
       const context::VectorXs & g,
-      const context::CoulombFrictionConeVector & cones,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const context::VectorXs & R,
       const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
       const boost::optional<ConstRefVectorXs> dual_solution = boost::none,
@@ -49,63 +49,191 @@ namespace pinocchio
       bool stat_record = false)
     {
       return solver.solve(
-        delassus, g, cones, R, primal_solution, dual_solution, solve_ncp,
+        delassus, g, constraint_models, R, primal_solution, dual_solution, solve_ncp,
         compute_largest_eigen_values, admm_update_rule, stat_record);
     }
 
-    template<typename DelassusDerived>
+    template<typename DelassusDerived, typename ConstraintModel, typename ConstraintModelAllocator>
     static bool solve_wrapper2(
       Solver & solver,
       DelassusDerived & delassus,
       const context::VectorXs & g,
-      const context::CoulombFrictionConeVector & cones,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       Eigen::Ref<context::VectorXs> x,
       bool solve_ncp = true)
     {
-      return solver.solve(delassus, g, cones, x, solve_ncp);
+      return solver.solve(delassus, g, constraint_models, x, solve_ncp);
     }
 #endif
 
 #ifndef PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
 
+    template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeConeProjection_wrapper(
-      const context::CoulombFrictionConeVector & cones, const context::VectorXs & forces)
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const context::VectorXs & forces)
     {
       context::VectorXs res(forces.size());
-      ::pinocchio::internal::computeConeProjection(cones, forces, res);
+      ::pinocchio::internal::computeConeProjection(constraint_models, forces, res);
       return res;
     }
 
+    template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeDualConeProjection_wrapper(
-      const context::CoulombFrictionConeVector & cones, const context::VectorXs & velocities)
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const context::VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
-      ::pinocchio::internal::computeDualConeProjection(cones, velocities, res);
+      ::pinocchio::internal::computeDualConeProjection(constraint_models, velocities, res);
       return res;
     }
 
+    template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::Scalar computePrimalFeasibility_wrapper(
-      const context::CoulombFrictionConeVector & cones, const context::VectorXs & forces)
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const context::VectorXs & forces)
     {
-      return ::pinocchio::internal::computePrimalFeasibility(cones, forces);
+      return ::pinocchio::internal::computePrimalFeasibility(constraint_models, forces);
     }
 
+    template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::Scalar computeReprojectionError_wrapper(
-      const context::CoulombFrictionConeVector & cones,
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const context::VectorXs & forces,
       const context::VectorXs & velocities)
     {
-      return ::pinocchio::internal::computeReprojectionError(cones, forces, velocities);
+      return ::pinocchio::internal::computeReprojectionError(constraint_models, forces, velocities);
     }
 
+    template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeComplementarityShift_wrapper(
-      const context::CoulombFrictionConeVector & cones, const context::VectorXs & velocities)
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const context::VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
-      ::pinocchio::internal::computeComplementarityShift(cones, velocities, res);
+      ::pinocchio::internal::computeComplementarityShift(constraint_models, velocities, res);
       return res;
     }
 #endif // PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
+
+    struct SolveMethodExposer
+    {
+      SolveMethodExposer(bp::class_<Solver> & class_)
+      : class_(class_)
+      {
+      }
+
+      template<class T>
+      void operator()(T)
+      {
+        run(static_cast<typename T::type *>(nullptr));
+      }
+
+      template<typename ConstraintModel>
+      void run(ConstraintModelBase<ConstraintModel> * ptr = 0)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(ptr);
+        typedef Eigen::aligned_allocator<ConstraintModel> ConstraintModelAllocator;
+        class_
+          .def(
+            "solve",
+            solve_wrapper<
+              ContactCholeskyDecomposition::DelassusCholeskyExpression, ConstraintModel,
+              ConstraintModelAllocator>,
+            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+             bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
+             bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
+             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("stat_record") = false),
+            "Solve the constrained conic problem, starting from the optional initial guess.")
+          .def(
+            "solve",
+            solve_wrapper<
+              context::DelassusOperatorDense, ConstraintModel, ConstraintModelAllocator>,
+            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+             bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
+             bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
+             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("stat_record") = false),
+            "Solve the constrained conic problem, starting from the optional initial guess.")
+          .def(
+            "solve",
+            solve_wrapper<
+              context::DelassusOperatorSparse, ConstraintModel, ConstraintModelAllocator>,
+            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+             bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
+             bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
+             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("stat_record") = false),
+            "Solve the constrained conic problem, starting from the optional initial guess.");
+#ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
+        {
+          typedef Eigen::AccelerateLLT<context::SparseMatrix> AccelerateLLT;
+          typedef DelassusOperatorSparseTpl<context::Scalar, context::Options, AccelerateLLT>
+            DelassusOperatorSparseAccelerate;
+          class_.def(
+            "solve",
+            solve_wrapper<
+              DelassusOperatorSparseAccelerate, ConstraintModel, ConstraintModelAllocator>,
+            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+             bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
+             bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
+             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("stat_record") = false),
+            "Solve the constrained conic problem, starting from the optional initial guess.");
+        }
+#endif
+
+        bp::def(
+          "computeConeProjection",
+          computeConeProjection_wrapper<ConstraintModel, ConstraintModelAllocator>,
+          bp::args("constraint_models", "forces"),
+          "Project a vector on the cartesian product of the constraint set associated with each "
+          "constraint model.");
+
+        bp::def(
+          "computeDualConeProjection",
+          computeDualConeProjection_wrapper<ConstraintModel, ConstraintModelAllocator>,
+          bp::args("cones", "velocities"),
+          "Project a vector on the cartesian product of dual cones.");
+
+        // TODO(jcarpent): restore these two next signatures
+        //        bp::def(
+        //                "computePrimalFeasibility", computePrimalFeasibility_wrapper,
+        //                bp::args("cones", "forces"), "Compute the primal feasibility.");
+
+        //        bp::def(
+        //                "computeReprojectionError", computeReprojectionError_wrapper,
+        //                bp::args("cones", "forces", "velocities"), "Compute the reprojection
+        //                error.");
+
+        bp::def(
+          "computeComplementarityShift",
+          computeComplementarityShift_wrapper<ConstraintModel, ConstraintModelAllocator>,
+          bp::args("cones", "velocities"),
+          "Compute the complementarity shift associated to the De Saxé function.");
+      }
+      //
+      //      template<typename S, int O>
+      //      void run(FictiousConstraintModelTpl<S, O> * ptr = 0)
+      //      {
+      //        PINOCCHIO_UNUSED_VARIABLE(ptr);
+      //      }
+      //
+      void run(boost::blank * ptr = 0)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(ptr);
+      }
+
+      bp::class_<Solver> & class_;
+    };
+
+    template<typename ConstraintModel>
+    static void expose_solve(bp::class_<Solver> & class_)
+    {
+      SolveMethodExposer expose(class_);
+      expose.run(static_cast<ConstraintModel *>(nullptr));
+    }
 
     void exposeADMMContactSolver()
     {
@@ -129,31 +257,6 @@ namespace pinocchio
            bp::arg("max_it_largest_eigen_value_solver") = 20),
           "Default constructor."));
       cl.def(ContactSolverBasePythonVisitor<Solver>())
-
-        .def(
-          "solve", solve_wrapper<ContactCholeskyDecomposition::DelassusCholeskyExpression>,
-          (bp::args("self", "delassus", "g", "cones", "R"),
-           bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-           bp::arg("compute_largest_eigen_values") = true,
-           bp::arg("solve_ncp") = true,
-           bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
-          "Solve the constrained conic problem, starting from the optional initial guess.")
-        .def(
-          "solve", solve_wrapper<context::DelassusOperatorDense>,
-          (bp::args("self", "delassus", "g", "cones", "R"),
-           bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-           bp::arg("compute_largest_eigen_values") = true,
-           bp::arg("solve_ncp") = true,
-           bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
-          "Solve the constrained conic problem, starting from the optional initial guess.")
-        .def(
-          "solve", solve_wrapper<context::DelassusOperatorSparse>,
-          (bp::args("self", "delassus", "g", "cones", "R"),
-           bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-           bp::arg("compute_largest_eigen_values") = true,
-           bp::arg("solve_ncp") = true,
-           bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
-          "Solve the constrained conic problem, starting from the optional initial guess.")
 
         .def("setRho", &Solver::setRho, bp::args("self", "rho"), "Set the ADMM penalty value.")
         .def("getRho", &Solver::getRho, bp::arg("self"), "Get the ADMM penalty value.")
@@ -224,43 +327,12 @@ namespace pinocchio
 
         .def("getStats", &Solver::getStats, bp::arg("self"), bp::return_internal_reference<>());
 
-  #ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
-      {
-        typedef Eigen::AccelerateLLT<context::SparseMatrix> AccelerateLLT;
-        typedef DelassusOperatorSparseTpl<context::Scalar, context::Options, AccelerateLLT>
-          DelassusOperatorSparseAccelerate;
-        cl.def(
-          "solve", solve_wrapper<DelassusOperatorSparseAccelerate>,
-          (bp::args("self", "delassus", "g", "cones", "R"),
-           bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-           bp::arg("compute_largest_eigen_values") = true,
-           bp::arg("solve_ncp") = true,
-           bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL, bp::arg("stat_record") = false),
-          "Solve the constrained conic problem, starting from the optional initial guess.");
-      }
-  #endif
+      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
 
-      bp::def(
-        "computeConeProjection", computeConeProjection_wrapper, bp::args("cones", "forces"),
-        "Project a vector on the cartesian product of cones.");
-
-      bp::def(
-        "computeDualConeProjection", computeDualConeProjection_wrapper,
-        bp::args("cones", "velocities"),
-        "Project a vector on the cartesian product of dual cones.");
-
-      bp::def(
-        "computePrimalFeasibility", computePrimalFeasibility_wrapper, bp::args("cones", "forces"),
-        "Compute the primal feasibility.");
-
-      bp::def(
-        "computeReprojectionError", computeReprojectionError_wrapper,
-        bp::args("cones", "forces", "velocities"), "Compute the reprojection error.");
-
-      bp::def(
-        "computeComplementarityShift", computeComplementarityShift_wrapper,
-        bp::args("cones", "velocities"),
-        "Compute the complementarity shift associated to the De Saxé function.");
+      SolveMethodExposer solve_exposer(cl);
+      boost::mpl::for_each<
+        ConstraintModelVariant::types, boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
+      expose_solve<context::ConstraintModel>(cl);
 
       {
         bp::class_<SolverStats>(
