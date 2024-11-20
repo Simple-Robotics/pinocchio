@@ -57,6 +57,8 @@ namespace pinocchio
     };
     typedef ConstraintModelBase<FrictionalJointConstraintModelTpl> Base;
     typedef std::vector<JointIndex> JointIndexVector;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
