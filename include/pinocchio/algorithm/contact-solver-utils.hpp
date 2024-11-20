@@ -28,41 +28,41 @@ namespace pinocchio
         ProjectionVisitor<ForceVectorLike, ResultVectorLike>>
         Base;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void algo(
         const ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & force,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const ForceVectorLike & force,
+        ResultVectorLike & result)
       {
-        result.const_cast_derived() = cmodel.set().project(force.derived());
+        result = cmodel.set().project(force);
         //        assert(set.dual().isInside(result, Scalar(1e-12)));
       }
 
       using Base::run;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void run(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & force,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const ForceVectorLike & force,
+        ResultVectorLike & result)
       {
-        algo(cmodel.derived(), force.derived(), result.const_cast_derived());
+        algo(cmodel.derived(), force, result);
       }
 
       template<
         typename Scalar,
         int Options,
         template<typename S, int O>
-        class ConstraintCollectionTpl,
-        typename Vector1Like,
-        typename Vector2Like>
+        class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & force,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const ForceVectorLike & force,
+        ResultVectorLike & result)
       {
-        ArgsType args(force.derived(), result.const_cast_derived());
-        run(cmodel.derived(), args);
+        //        typedef boost::fusion::vector<const ForceVectorLike &> ArgsType1;
+        //        ArgsType args(force.derived(), result.const_cast_derived());
+        ArgsType args(force, result); //, result.const_cast_derived());
+        run(cmodel, args);
       }
     };
 
@@ -80,13 +80,17 @@ namespace pinocchio
       assert(x.size() == x_proj_.size());
       Eigen::DenseIndex index = 0;
       VectorLikeOut & x_proj = x_proj_.const_cast_derived();
+
+      typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
+      typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
+
       for (const auto & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
-        auto res = x_proj.segment(index, size);
-        const auto force_segment = x.segment(index, size);
+        SegmentType1 force_segment = x.derived().segment(index, size);
+        SegmentType2 res = x_proj.segment(index, size);
 
-        typedef ProjectionVisitor<decltype(force_segment), decltype(res)> Algo;
+        typedef ProjectionVisitor<SegmentType1, SegmentType2> Algo;
         Algo::run(cmodel, force_segment, res);
 
         index += size;
@@ -104,13 +108,13 @@ namespace pinocchio
         DualProjectionVisitor<VelocityVectorLike, ResultVectorLike>>
         Base;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void algo(
         const ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        algo_step(cmodel.set(), velocity.derived(), result.const_cast_derived());
+        algo_step(cmodel.set(), velocity, result);
       }
 
       template<typename Vector1Like, typename Vector2Like>
@@ -135,28 +139,26 @@ namespace pinocchio
 
       using Base::run;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void run(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        algo(cmodel.derived(), velocity.derived(), result.const_cast_derived());
+        algo(cmodel.derived(), velocity, result);
       }
 
       template<
         typename Scalar,
         int Options,
         template<typename S, int O>
-        class ConstraintCollectionTpl,
-        typename Vector1Like,
-        typename Vector2Like>
+        class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        ArgsType args(velocity.derived(), result.const_cast_derived());
+        ArgsType args(velocity, result);
         run(cmodel.derived(), args);
       }
     }; // struct DualProjectionVisitor
@@ -175,12 +177,18 @@ namespace pinocchio
       assert(x.size() == x_proj_.size());
       VectorLikeOut & x_proj = x_proj_.const_cast_derived();
       Eigen::DenseIndex index = 0;
+
+      typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
+      typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
+
       for (const auto & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
-        const auto velocity_segment = x.segment(index, size);
-        auto res_segment = x_proj.segment(index, size);
-        typedef DualProjectionVisitor<decltype(velocity_segment), decltype(res_segment)> Algo;
+
+        SegmentType1 velocity_segment = x.segment(index, size);
+        SegmentType2 res_segment = x_proj.segment(index, size);
+
+        typedef DualProjectionVisitor<SegmentType1, SegmentType2> Algo;
         Algo::run(cmodel, velocity_segment, res_segment);
         index += size;
       }
@@ -200,13 +208,13 @@ namespace pinocchio
         Base;
       using Base::run;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static Scalar algo(
         const ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & force)
+        const VelocityVectorLike & velocity,
+        const ForceVectorLike & force)
       {
-        return algo_step(cmodel.set(), velocity.derived(), force.derived());
+        return algo_step(cmodel.set(), velocity, force);
       }
 
       template<typename Vector1Like, typename Vector2Like>
@@ -254,27 +262,22 @@ namespace pinocchio
         return complementarity;
       }
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static Scalar run(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & force)
+        const VelocityVectorLike & velocity,
+        const ForceVectorLike & force)
       {
-        return algo(cmodel.derived(), velocity.derived(), force.derived());
+        return algo(cmodel.derived(), velocity, force);
       }
 
-      template<
-        int Options,
-        template<typename S, int O>
-        class ConstraintCollectionTpl,
-        typename Vector1Like,
-        typename Vector2Like>
+      template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
       static Scalar run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & force)
+        const VelocityVectorLike & velocity,
+        const ForceVectorLike & force)
       {
-        ArgsType args(velocity.derived(), force.derived());
+        ArgsType args(velocity, force);
         return run(cmodel.derived(), args);
       }
     }; // struct ComplementarityVisitor
@@ -293,15 +296,18 @@ namespace pinocchio
       assert(velocities.size() == forces.size());
       Eigen::DenseIndex index = 0;
       Scalar complementarity = Scalar(0);
+
+      typedef typename VectorLikeVelocity::ConstSegmentReturnType SegmentType1;
+      typedef typename VectorLikeForce::ConstSegmentReturnType SegmentType2;
+
       for (const auto & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 
-        const auto velocity_segment = velocities.segment(index, size);
-        const auto force_segment = forces.segment(index, size);
+        SegmentType1 velocity_segment = velocities.segment(index, size);
+        SegmentType2 force_segment = forces.segment(index, size);
 
-        typedef ComplementarityVisitor<Scalar, decltype(velocity_segment), decltype(force_segment)>
-          Algo;
+        typedef ComplementarityVisitor<Scalar, SegmentType1, SegmentType2> Algo;
         const Scalar constraint_complementarity =
           Algo::run(cmodel, velocity_segment, force_segment);
 
@@ -325,13 +331,13 @@ namespace pinocchio
         Base;
       using Base::run;
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void algo(
         const ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        return algo_step(cmodel.set(), velocity.derived(), result.const_cast_derived());
+        return algo_step(cmodel.set(), velocity, result);
       }
 
       template<typename Vector1Like, typename Vector2Like>
@@ -354,28 +360,26 @@ namespace pinocchio
         result.const_cast_derived().setZero();
       }
 
-      template<typename ConstraintModel, typename Vector1Like, typename Vector2Like>
+      template<typename ConstraintModel>
       static void run(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        algo(cmodel.derived(), velocity.derived(), result.const_cast_derived());
+        algo(cmodel.derived(), velocity, result);
       }
 
       template<
         typename Scalar,
         int Options,
         template<typename S, int O>
-        class ConstraintCollectionTpl,
-        typename Vector1Like,
-        typename Vector2Like>
+        class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
-        const Eigen::MatrixBase<Vector1Like> & velocity,
-        const Eigen::MatrixBase<Vector2Like> & result)
+        const VelocityVectorLike & velocity,
+        ResultVectorLike & result)
       {
-        ArgsType args(velocity.derived(), result.const_cast_derived());
+        ArgsType args(velocity, result);
         run(cmodel.derived(), args);
       }
     }; // struct DeSaxeCorrectionVisitor
@@ -393,13 +397,17 @@ namespace pinocchio
       assert(velocities.size() == shift_.size());
       Eigen::DenseIndex index = 0;
       VectorLikeOut & shift = shift_.const_cast_derived();
+
+      typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
+      typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
+
       for (const auto & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 
-        const auto velocity_segment = velocities.segment(index, size);
-        auto result_segment = shift.segment(index, size);
-        typedef DeSaxeCorrectionVisitor<decltype(velocity_segment), decltype(result_segment)> Step;
+        SegmentType1 velocity_segment = velocities.segment(index, size);
+        SegmentType2 result_segment = shift.segment(index, size);
+        typedef DeSaxeCorrectionVisitor<SegmentType1, SegmentType2> Step;
 
         Step::run(cmodel, velocity_segment, result_segment);
 
