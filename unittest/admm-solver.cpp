@@ -366,15 +366,16 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   BOOST_CHECK(dual_solution.isZero());
 
   typedef TestBoxTpl<ConstraintModel> TestBox;
+
   // Test static motion with zero external force
   {
     TestBox test(model, constraint_models);
     test(q0, v0, tau0, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
     BOOST_CHECK(test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
   }
 
   for (int i = 0; i < 6; ++i)
@@ -386,10 +387,8 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(!test.primal_solution.isZero(2e-10));
     BOOST_CHECK(!test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
-    std::cout << "dual_solution[i]: " << dual_solution[i] << std::endl;
-    std::cout << "box_set.lb()[i]: " << box_set.lb()[i] << std::endl;
-    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.lb()[i]) < 1e-8);
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
+    BOOST_CHECK(std::fabs(test.primal_solution[i] - box_set.lb()[i]) < 1e-8);
   }
 
   // Sign reversed
@@ -399,12 +398,10 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
     test(q0, v0, tau0 - 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
 
     BOOST_CHECK(test.has_converged == true);
-    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(!test.dual_solution.isZero(2e-10));
     BOOST_CHECK(!test.v_next.isZero(2e-10));
-    BOOST_CHECK(box_set.isInside(test.dual_solution));
-    std::cout << "dual_solution[i]: " << dual_solution[i] << std::endl;
-    std::cout << "box_set.ub()[i]: " << box_set.ub()[i] << std::endl;
-    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.ub()[i]) < 1e-8);
+    BOOST_CHECK(box_set.isInside(test.primal_solution));
+    BOOST_CHECK(std::fabs(test.primal_solution[i] - box_set.ub()[i]) < 1e-8);
   }
 }
 
