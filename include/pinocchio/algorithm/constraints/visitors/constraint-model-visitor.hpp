@@ -54,8 +54,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename, int>
-        class ConstraintCollectionTpl,
+        template<typename, int> class ConstraintCollectionTpl,
         typename ArgsTmp>
       static ReturnType run(
         const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
@@ -70,8 +69,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename, int>
-        class ConstraintCollectionTpl,
+        template<typename, int> class ConstraintCollectionTpl,
         typename ArgsTmp>
       static ReturnType
       run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel, ArgsTmp args)
@@ -92,8 +90,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename, int>
-        class ConstraintCollectionTpl,
+        template<typename, int> class ConstraintCollectionTpl,
         typename ArgsTmp>
       struct InternalVisitorModel : public boost::static_visitor<ReturnType>
       {
@@ -199,8 +196,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename, int>
-        class ConstraintCollectionTpl,
+        template<typename, int> class ConstraintCollectionTpl,
         typename ArgsTmp>
       struct InternalVisitorModelAndData : public boost::static_visitor<ReturnType>
       {
@@ -272,10 +268,8 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class JointCollectionTpl,
-      template<typename S, int O>
-      class ConstraintCollectionTpl>
+      template<typename S, int O> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl>
     void calc(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -292,8 +286,7 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename JacobianMatrix>
     struct ConstraintModelJacobianVisitor
     : visitors::ConstraintUnaryVisitorBase<
@@ -318,10 +311,8 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class JointCollectionTpl,
-      template<typename S, int O>
-      class ConstraintCollectionTpl,
+      template<typename S, int O> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
       typename JacobianMatrix>
     void jacobian(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
@@ -342,8 +333,7 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class ConstraintCollectionTpl>
+      template<typename S, int O> class ConstraintCollectionTpl>
     struct ConstraintModelCreateDataVisitor
     : visitors::ConstraintUnaryVisitorBase<
         ConstraintModelCreateDataVisitor<Scalar, Options, ConstraintCollectionTpl>,
@@ -365,8 +355,7 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class ConstraintCollectionTpl>
+      template<typename S, int O> class ConstraintCollectionTpl>
     ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl>
     createData(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
@@ -377,8 +366,7 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class ConstraintCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
       typename ConstraintDataDerived>
     struct ConstraintDataComparisonOperatorVisitor
     : visitors::ConstraintUnaryVisitorBase<
@@ -403,8 +391,7 @@ namespace pinocchio
     template<
       typename Scalar,
       int Options,
-      template<typename S, int O>
-      class ConstraintCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
       typename ConstraintDataDerived>
     bool isEqual(
       const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata_generic,

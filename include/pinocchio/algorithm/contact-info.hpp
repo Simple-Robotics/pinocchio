@@ -552,8 +552,7 @@ namespace pinocchio
     }
 
     template<
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename Vector3Like,
       typename Matrix6Like,
       typename Matrix6LikeAllocator>
@@ -590,8 +589,7 @@ namespace pinocchio
     template<
       typename InputMatrix,
       typename OutputMatrix,
-      template<typename, int>
-      class JointCollectionTpl>
+      template<typename, int> class JointCollectionTpl>
     void jacobian_matrix_product(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -764,8 +762,7 @@ namespace pinocchio
     /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
     /// supported by the joints.
     template<
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename ForceLike,
       typename ForceAllocator>
     void mapConstraintForceToJointForces(
@@ -789,8 +786,7 @@ namespace pinocchio
 
     /// \brief Map the joint accelerations to constraint value
     template<
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename MotionAllocator,
       typename VectorLike>
     void mapJointMotionsToConstraintMotion(
@@ -904,9 +900,10 @@ namespace pinocchio
         if (current1_id > current2_id)
         {
           const JointModel & joint1 = model.joints[current1_id];
+          const int j1nv = joint1.nv();
           joint1_span_indexes.push_back((Eigen::DenseIndex)current1_id);
           Eigen::DenseIndex current1_col_id = joint1.idx_v();
-          for (int k = 0; k < joint1.nv(); ++k, ++current1_col_id)
+          for (int k = 0; k < j1nv; ++k, ++current1_col_id)
           {
             colwise_joint1_sparsity[current1_col_id] = true;
           }
@@ -915,9 +912,10 @@ namespace pinocchio
         else
         {
           const JointModel & joint2 = model.joints[current2_id];
+          const int j2nv = joint2.nv();
           joint2_span_indexes.push_back((Eigen::DenseIndex)current2_id);
           Eigen::DenseIndex current2_col_id = joint2.idx_v();
-          for (int k = 0; k < joint2.nv(); ++k, ++current2_col_id)
+          for (int k = 0; k < j2nv; ++k, ++current2_col_id)
           {
             colwise_joint2_sparsity[current2_col_id] = true;
           }
@@ -931,10 +929,11 @@ namespace pinocchio
         while (current_id > 0)
         {
           const JointModel & joint = model.joints[current_id];
+          const int jnv = joint.nv();
           joint1_span_indexes.push_back((Eigen::DenseIndex)current_id);
           joint2_span_indexes.push_back((Eigen::DenseIndex)current_id);
           Eigen::DenseIndex current_row_id = joint.idx_v();
-          for (int k = 0; k < joint.nv(); ++k, ++current_row_id)
+          for (int k = 0; k < jnv; ++k, ++current_row_id)
           {
             colwise_joint1_sparsity[current_row_id] = true;
             colwise_joint2_sparsity[current_row_id] = true;
@@ -1080,11 +1079,43 @@ namespace pinocchio
 
     /// \brief Default constructor
     RigidConstraintDataTpl()
+    : contact_force(Force::Zero())
+    , oMc1(SE3::Identity())
+    , oMc2(SE3::Identity())
+    , c1Mc2(SE3::Identity())
+    , contact_placement_error(Motion::Zero())
+    , contact1_velocity(Motion::Zero())
+    , contact2_velocity(Motion::Zero())
+    , contact_velocity_error(Motion::Zero())
+    , contact_acceleration(Motion::Zero())
+    , contact_acceleration_desired(Motion::Zero())
+    , contact_acceleration_error(Motion::Zero())
+    , contact1_acceleration_drift(Motion::Zero())
+    , contact2_acceleration_drift(Motion::Zero())
+    , contact_acceleration_deviation(Motion::Zero())
+    , extended_motion_propagators_joint1()
+    , lambdas_joint1()
+    , extended_motion_propagators_joint2()
+    , dv1_dq(6, 0)
+    , da1_dq(6, 0)
+    , da1_dv(6, 0)
+    , da1_da(6, 0)
+    , dv2_dq(6, 0)
+    , da2_dq(6, 0)
+    , da2_dv(6, 0)
+    , da2_da(6, 0)
+    , dvc_dq()
+    , dac_dq()
+    , dac_dv()
+    , dac_da()
     {
     }
 
     explicit RigidConstraintDataTpl(const ContactModel & contact_model)
     : contact_force(Force::Zero())
+    , oMc1(SE3::Identity())
+    , oMc2(SE3::Identity())
+    , c1Mc2(SE3::Identity())
     , contact_placement_error(Motion::Zero())
     , contact1_velocity(Motion::Zero())
     , contact2_velocity(Motion::Zero())
@@ -1098,18 +1129,18 @@ namespace pinocchio
     , extended_motion_propagators_joint1(contact_model.depth_joint1, Matrix6::Zero())
     , lambdas_joint1(contact_model.depth_joint1, Matrix6::Zero())
     , extended_motion_propagators_joint2(contact_model.depth_joint2, Matrix6::Zero())
-    , dv1_dq(6, contact_model.nv)
-    , da1_dq(6, contact_model.nv)
-    , da1_dv(6, contact_model.nv)
-    , da1_da(6, contact_model.nv)
-    , dv2_dq(6, contact_model.nv)
-    , da2_dq(6, contact_model.nv)
-    , da2_dv(6, contact_model.nv)
-    , da2_da(6, contact_model.nv)
-    , dvc_dq(contact_model.size(), contact_model.nv)
-    , dac_dq(contact_model.size(), contact_model.nv)
-    , dac_dv(contact_model.size(), contact_model.nv)
-    , dac_da(contact_model.size(), contact_model.nv)
+    , dv1_dq(Matrix6x::Zero(6, contact_model.nv))
+    , da1_dq(Matrix6x::Zero(6, contact_model.nv))
+    , da1_dv(Matrix6x::Zero(6, contact_model.nv))
+    , da1_da(Matrix6x::Zero(6, contact_model.nv))
+    , dv2_dq(Matrix6x::Zero(6, contact_model.nv))
+    , da2_dq(Matrix6x::Zero(6, contact_model.nv))
+    , da2_dv(Matrix6x::Zero(6, contact_model.nv))
+    , da2_da(Matrix6x::Zero(6, contact_model.nv))
+    , dvc_dq(MatrixX::Zero(contact_model.size(), contact_model.nv))
+    , dac_dq(MatrixX::Zero(contact_model.size(), contact_model.nv))
+    , dac_dv(MatrixX::Zero(contact_model.size(), contact_model.nv))
+    , dac_da(MatrixX::Zero(contact_model.size(), contact_model.nv))
     {
     }
 

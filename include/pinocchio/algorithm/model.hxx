@@ -460,8 +460,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType>
   void buildReducedModel(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & input_model,
@@ -699,8 +698,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType>
   void buildReducedModel(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & input_model,
@@ -723,8 +721,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename GeometryModelAllocator,
     typename ConfigVectorType>
   void buildReducedModel(

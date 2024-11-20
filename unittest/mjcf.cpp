@@ -452,10 +452,11 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
   typedef pinocchio::SE3::Vector3 Vector3;
   typedef pinocchio::SE3::Matrix3 Matrix3;
 
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidConstraintModel) contact_models;
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.xml");
 
   pinocchio::Model model_m;
-  pinocchio::mjcf::buildModel(filename, model_m);
+  pinocchio::mjcf::buildModel(filename, model_m, contact_models);
 
   std::string file_u = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.urdf");
   pinocchio::Model model_u;
@@ -468,7 +469,7 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
     "joint3");
   model_u.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], model_u.joints[i]);
 }
 #endif // PINOCCHIO_WITH_URDFDOM
@@ -482,7 +483,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
                                     <asset>
                                         <texture name="testTexture" file="texture.png" type="2d"/>
                                         <material name="matTest" texture="testTexture"/>
-                                        <mesh file="C://auto/mesh.obj"/>
+                                        <mesh file="C:/auto/mesh.obj"/>
                                     </asset>
                                   </mujoco>)");
 #else
@@ -516,7 +517,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
   // Test Meshes
   pinocchio::mjcf::details::MjcfMesh mesh = graph.mapOfMeshes.at("mesh");
 #ifdef _WIN32
-  BOOST_CHECK_EQUAL(boost::filesystem::path(mesh.filePath).generic_string(), "C://auto/mesh.obj");
+  BOOST_CHECK_EQUAL(boost::filesystem::path(mesh.filePath).generic_string(), "C:/auto/mesh.obj");
 #else
   BOOST_CHECK_EQUAL(boost::filesystem::path(mesh.filePath).generic_string(), "/auto/mesh.obj");
 #endif
@@ -581,7 +582,7 @@ BOOST_AUTO_TEST_CASE(parse_RX)
   idx = modelRX.addJoint(0, pinocchio::JointModelRX(), pinocchio::SE3::Identity(), "rx");
   modelRX.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelRX.joints[i]);
 }
 
@@ -618,7 +619,7 @@ BOOST_AUTO_TEST_CASE(parse_PX)
   idx = modelPX.addJoint(0, pinocchio::JointModelPX(), pinocchio::SE3::Identity(), "px");
   modelPX.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelPX.joints[i]);
 }
 
@@ -655,7 +656,7 @@ BOOST_AUTO_TEST_CASE(parse_Sphere)
   idx = modelS.addJoint(0, pinocchio::JointModelSpherical(), pinocchio::SE3::Identity(), "s");
   modelS.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelS.joints[i]);
 }
 
@@ -692,7 +693,7 @@ BOOST_AUTO_TEST_CASE(parse_Free)
   idx = modelF.addJoint(0, pinocchio::JointModelFreeFlyer(), pinocchio::SE3::Identity(), "f");
   modelF.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelF.joints[i]);
 }
 
@@ -734,7 +735,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_RXRY)
   idx = modelRXRY.addJoint(0, joint_model_RXRY, pinocchio::SE3::Identity(), "rxry");
   modelRXRY.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelRXRY.joints[i]);
 }
 
@@ -776,7 +777,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXPY)
   idx = modelPXPY.addJoint(0, joint_model_PXPY, pinocchio::SE3::Identity(), "pxpy");
   modelPXPY.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelPXPY.joints[i]);
 }
 
@@ -818,7 +819,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXRY)
   idx = modelPXRY.addJoint(0, joint_model_PXRY, pinocchio::SE3::Identity(), "pxry");
   modelPXRY.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelPXRY.joints[i]);
 }
 
@@ -860,7 +861,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXSphere)
   idx = modelPXSphere.addJoint(0, joint_model_PXSphere, pinocchio::SE3::Identity(), "pxsphere");
   modelPXSphere.appendBodyToJoint(idx, inertia);
 
-  for (int i = 0; i < model_m.njoints; i++)
+  for (size_t i = 0; i < size_t(model_m.njoints); i++)
     BOOST_CHECK_EQUAL(model_m.joints[i], modelPXSphere.joints[i]);
 }
 
@@ -947,7 +948,7 @@ BOOST_AUTO_TEST_CASE(joint_and_inertias)
   typedef pinocchio::SE3::Matrix3 Matrix3;
 
   std::istringstream xmlData(R"(
-            <mujoco model="testKeyFrame">
+            <mujoco model="testJointInertia">
                 <worldbody>
                     <body name="body1">
                         <freejoint/>
@@ -1191,109 +1192,122 @@ BOOST_AUTO_TEST_CASE(hinge_and_slide_joints_limits)
   BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
   BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
   BOOST_CHECK(max_effort == model_m.upperEffortLimit);
-}
+  BOOST_AUTO_TEST_CASE(build_model_with_root_joint_name)
+  {
+    const std::string filename = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.xml");
+    const std::string dir = PINOCCHIO_MODEL_DIR;
+
+    pinocchio::Model model;
+    pinocchio::mjcf::buildModel(filename, pinocchio::JointModelFreeFlyer(), model);
+    BOOST_CHECK(model.names[1] == "root_joint");
+
+    pinocchio::Model model_name;
+    const std::string name_ = "freeFlyer_joint";
+    pinocchio::mjcf::buildModel(filename, pinocchio::JointModelFreeFlyer(), name_, model_name);
+    BOOST_CHECK(model_name.names[1] == name_);
+  }
 
 #ifdef PINOCCHIO_WITH_URDFDOM
-/// @brief Test all the data of the humanoid model (Need to find the urdf yet)
-/// @param
-BOOST_AUTO_TEST_CASE(compare_to_urdf)
-{
-  using namespace pinocchio;
-  typedef typename pinocchio::Model::ConfigVectorMap ConfigVectorMap;
-
-  const std::string filename = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.xml");
-
-  Model model_m;
-  pinocchio::mjcf::buildModel(filename, pinocchio::JointModelFreeFlyer(), model_m);
-
-  const std::string filename_urdf = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.urdf");
-  const std::string dir_urdf = PINOCCHIO_MODEL_DIR;
-  pinocchio::Model model_urdf;
-  pinocchio::urdf::buildModel(filename_urdf, pinocchio::JointModelFreeFlyer(), model_urdf);
-
-  BOOST_CHECK(model_urdf.nq == model_m.nq);
-  BOOST_CHECK(model_urdf.nv == model_m.nv);
-  BOOST_CHECK(model_urdf.njoints == model_m.njoints);
-  BOOST_CHECK(model_urdf.nbodies == model_m.nbodies);
-  BOOST_CHECK(model_urdf.nframes == model_m.nframes);
-  BOOST_CHECK(model_urdf.parents == model_m.parents);
-  BOOST_CHECK(model_urdf.children == model_m.children);
-  BOOST_CHECK(model_urdf.names == model_m.names);
-  BOOST_CHECK(model_urdf.subtrees == model_m.subtrees);
-  BOOST_CHECK(model_urdf.gravity == model_m.gravity);
-  BOOST_CHECK(model_urdf.name == model_m.name);
-  BOOST_CHECK(model_urdf.idx_qs == model_m.idx_qs);
-  BOOST_CHECK(model_urdf.nqs == model_m.nqs);
-  BOOST_CHECK(model_urdf.idx_vs == model_m.idx_vs);
-  BOOST_CHECK(model_urdf.nvs == model_m.nvs);
-
-  typename ConfigVectorMap::const_iterator it = model_m.referenceConfigurations.begin();
-  typename ConfigVectorMap::const_iterator it_model_urdf =
-    model_urdf.referenceConfigurations.begin();
-  for (long k = 0; k < (long)model_m.referenceConfigurations.size(); ++k)
+  /// @brief Test all the data of the humanoid model (Need to find the urdf yet)
+  /// @param
+  BOOST_AUTO_TEST_CASE(compare_to_urdf)
   {
-    std::advance(it, k);
-    std::advance(it_model_urdf, k);
-    BOOST_CHECK(it->second.size() == it_model_urdf->second.size());
-    BOOST_CHECK(it->second == it_model_urdf->second);
+    using namespace pinocchio;
+    typedef typename pinocchio::Model::ConfigVectorMap ConfigVectorMap;
+
+    const std::string filename = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.xml");
+
+    Model model_m;
+    pinocchio::mjcf::buildModel(filename, pinocchio::JointModelFreeFlyer(), model_m);
+
+    const std::string filename_urdf = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.urdf");
+    const std::string dir_urdf = PINOCCHIO_MODEL_DIR;
+    pinocchio::Model model_urdf;
+    pinocchio::urdf::buildModel(filename_urdf, pinocchio::JointModelFreeFlyer(), model_urdf);
+
+    BOOST_CHECK(model_urdf.nq == model_m.nq);
+    BOOST_CHECK(model_urdf.nv == model_m.nv);
+    BOOST_CHECK(model_urdf.njoints == model_m.njoints);
+    BOOST_CHECK(model_urdf.nbodies == model_m.nbodies);
+    BOOST_CHECK(model_urdf.nframes == model_m.nframes);
+    BOOST_CHECK(model_urdf.parents == model_m.parents);
+    BOOST_CHECK(model_urdf.children == model_m.children);
+    BOOST_CHECK(model_urdf.names == model_m.names);
+    BOOST_CHECK(model_urdf.subtrees == model_m.subtrees);
+    BOOST_CHECK(model_urdf.gravity == model_m.gravity);
+    BOOST_CHECK(model_urdf.name == model_m.name);
+    BOOST_CHECK(model_urdf.idx_qs == model_m.idx_qs);
+    BOOST_CHECK(model_urdf.nqs == model_m.nqs);
+    BOOST_CHECK(model_urdf.idx_vs == model_m.idx_vs);
+    BOOST_CHECK(model_urdf.nvs == model_m.nvs);
+
+    typename ConfigVectorMap::const_iterator it = model_m.referenceConfigurations.begin();
+    typename ConfigVectorMap::const_iterator it_model_urdf =
+      model_urdf.referenceConfigurations.begin();
+    for (long k = 0; k < (long)model_m.referenceConfigurations.size(); ++k)
+    {
+      std::advance(it, k);
+      std::advance(it_model_urdf, k);
+      BOOST_CHECK(it->second.size() == it_model_urdf->second.size());
+      BOOST_CHECK(it->second == it_model_urdf->second);
+    }
+
+    BOOST_CHECK(model_urdf.armature.size() == model_m.armature.size());
+
+    BOOST_CHECK(model_urdf.armature == model_m.armature);
+    BOOST_CHECK(model_urdf.upperDryFrictionLimit.size() == model_m.upperDryFrictionLimit.size());
+    BOOST_CHECK(model_urdf.upperDryFrictionLimit == model_m.upperDryFrictionLimit);
+
+    BOOST_CHECK(model_urdf.damping.size() == model_m.damping.size());
+
+    BOOST_CHECK(model_urdf.damping == model_m.damping);
+
+    BOOST_CHECK(model_urdf.rotorInertia.size() == model_m.rotorInertia.size());
+
+    BOOST_CHECK(model_urdf.rotorInertia == model_m.rotorInertia);
+
+    BOOST_CHECK(model_urdf.rotorGearRatio.size() == model_m.rotorGearRatio.size());
+
+    BOOST_CHECK(model_urdf.rotorGearRatio == model_m.rotorGearRatio);
+
+    BOOST_CHECK(model_urdf.upperEffortLimit.size() == model_m.upperEffortLimit.size());
+    BOOST_CHECK(model_urdf.upperEffortLimit == model_m.upperEffortLimit);
+    // Cannot test velocity limit since it does not exist in mjcf
+
+    BOOST_CHECK(model_urdf.lowerPositionLimit.size() == model_m.lowerPositionLimit.size());
+    BOOST_CHECK(model_urdf.lowerPositionLimit == model_m.lowerPositionLimit);
+
+    BOOST_CHECK(model_urdf.upperPositionLimit.size() == model_m.upperPositionLimit.size());
+    BOOST_CHECK(model_urdf.upperPositionLimit == model_m.upperPositionLimit);
+
+    for (size_t k = 1; k < model_m.inertias.size(); ++k)
+    {
+      BOOST_CHECK(model_urdf.inertias[k].isApprox(model_m.inertias[k]));
+    }
+
+    for (size_t k = 1; k < model_urdf.jointPlacements.size(); ++k)
+    {
+      BOOST_CHECK(model_urdf.jointPlacements[k] == model_m.jointPlacements[k]);
+    }
+
+    BOOST_CHECK(model_urdf.joints == model_m.joints);
+
+    BOOST_CHECK(model_urdf.frames.size() == model_m.frames.size());
+    for (size_t k = 1; k < model_urdf.frames.size(); ++k)
+    {
+      BOOST_CHECK(model_urdf.frames[k] == model_m.frames[k]);
+    }
   }
-
-  BOOST_CHECK(model_urdf.armature.size() == model_m.armature.size());
-
-  BOOST_CHECK(model_urdf.armature == model_m.armature);
-  BOOST_CHECK(model_urdf.upperDryFrictionLimit.size() == model_m.upperDryFrictionLimit.size());
-  BOOST_CHECK(model_urdf.upperDryFrictionLimit == model_m.upperDryFrictionLimit);
-
-  BOOST_CHECK(model_urdf.damping.size() == model_m.damping.size());
-
-  BOOST_CHECK(model_urdf.damping == model_m.damping);
-
-  BOOST_CHECK(model_urdf.rotorInertia.size() == model_m.rotorInertia.size());
-
-  BOOST_CHECK(model_urdf.rotorInertia == model_m.rotorInertia);
-
-  BOOST_CHECK(model_urdf.rotorGearRatio.size() == model_m.rotorGearRatio.size());
-
-  BOOST_CHECK(model_urdf.rotorGearRatio == model_m.rotorGearRatio);
-
-  BOOST_CHECK(model_urdf.upperEffortLimit.size() == model_m.upperEffortLimit.size());
-  BOOST_CHECK(model_urdf.upperEffortLimit == model_m.upperEffortLimit);
-  // Cannot test velocity limit since it does not exist in mjcf
-
-  BOOST_CHECK(model_urdf.lowerPositionLimit.size() == model_m.lowerPositionLimit.size());
-  BOOST_CHECK(model_urdf.lowerPositionLimit == model_m.lowerPositionLimit);
-
-  BOOST_CHECK(model_urdf.upperPositionLimit.size() == model_m.upperPositionLimit.size());
-  BOOST_CHECK(model_urdf.upperPositionLimit == model_m.upperPositionLimit);
-
-  for (size_t k = 1; k < model_m.inertias.size(); ++k)
-  {
-    BOOST_CHECK(model_urdf.inertias[k].isApprox(model_m.inertias[k]));
-  }
-
-  for (size_t k = 1; k < model_urdf.jointPlacements.size(); ++k)
-  {
-    BOOST_CHECK(model_urdf.jointPlacements[k] == model_m.jointPlacements[k]);
-  }
-
-  BOOST_CHECK(model_urdf.joints == model_m.joints);
-
-  BOOST_CHECK(model_urdf.frames.size() == model_m.frames.size());
-  for (size_t k = 1; k < model_urdf.frames.size(); ++k)
-  {
-    BOOST_CHECK(model_urdf.frames[k] == model_m.frames[k]);
-  }
-}
 #endif // PINOCCHIO_WITH_URDFDOM
 
 #if defined(PINOCCHIO_WITH_HPP_FCL)
-BOOST_AUTO_TEST_CASE(test_geometry_parsing)
-{
-  typedef pinocchio::Model Model;
-  typedef pinocchio::GeometryModel GeometryModel;
+  BOOST_AUTO_TEST_CASE(test_geometry_parsing)
+  {
+    typedef pinocchio::Model Model;
+    typedef pinocchio::GeometryModel GeometryModel;
 
-  // Parse the XML
-  std::istringstream xmlData(R"(<mujoco model="inertiaFromGeom">
+    // Parse the XML
+    std::istringstream xmlData(R"(<mujoco model="inertiaFromGeom">
                                     <compiler inertiafromgeom="true" />
                                     <worldbody>
                                         <body pos="0 0 0" name="bodyCylinder">
@@ -1314,40 +1328,67 @@ BOOST_AUTO_TEST_CASE(test_geometry_parsing)
                                     </worldbody>
                                   </mujoco>)");
 
-  auto namefile = createTempFile(xmlData);
+    auto namefile = createTempFile(xmlData);
 
-  Model model_m;
-  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+    Model model_m;
+    pinocchio::mjcf::buildModel(namefile.name(), model_m);
 
-  GeometryModel geomModel_m;
-  pinocchio::mjcf::buildGeom(model_m, namefile.name(), pinocchio::COLLISION, geomModel_m);
+    GeometryModel geomModel_m;
+    pinocchio::mjcf::buildGeom(model_m, namefile.name(), pinocchio::COLLISION, geomModel_m);
 
-  BOOST_CHECK(geomModel_m.ngeoms == 5);
+    BOOST_CHECK(geomModel_m.ngeoms == 5);
 
-  auto * cyl = dynamic_cast<hpp::fcl::Cylinder *>(geomModel_m.geometryObjects.at(0).geometry.get());
-  BOOST_REQUIRE(cyl);
-  BOOST_CHECK(cyl->halfLength == 0.25);
-  BOOST_CHECK(cyl->radius == 0.01);
+    auto * cyl =
+      dynamic_cast<hpp::fcl::Cylinder *>(geomModel_m.geometryObjects.at(0).geometry.get());
+    BOOST_REQUIRE(cyl);
+    BOOST_CHECK(cyl->halfLength == 0.25);
+    BOOST_CHECK(cyl->radius == 0.01);
 
-  auto * cap = dynamic_cast<hpp::fcl::Capsule *>(geomModel_m.geometryObjects.at(2).geometry.get());
-  BOOST_REQUIRE(cap);
-  BOOST_CHECK(cap->halfLength == 0.25);
-  BOOST_CHECK(cap->radius == 0.01);
+    auto * cap =
+      dynamic_cast<hpp::fcl::Capsule *>(geomModel_m.geometryObjects.at(2).geometry.get());
+    BOOST_REQUIRE(cap);
+    BOOST_CHECK(cap->halfLength == 0.25);
+    BOOST_CHECK(cap->radius == 0.01);
 
-  auto * s = dynamic_cast<hpp::fcl::Sphere *>(geomModel_m.geometryObjects.at(3).geometry.get());
-  BOOST_REQUIRE(s);
-  BOOST_CHECK(s->radius == 0.01);
+    auto * s = dynamic_cast<hpp::fcl::Sphere *>(geomModel_m.geometryObjects.at(3).geometry.get());
+    BOOST_REQUIRE(s);
+    BOOST_CHECK(s->radius == 0.01);
 
-  auto * b = dynamic_cast<hpp::fcl::Box *>(geomModel_m.geometryObjects.at(1).geometry.get());
-  BOOST_REQUIRE(b);
-  Eigen::Vector3d sides;
-  sides << 0.01, 0.01, 0.25;
-  BOOST_CHECK(b->halfSide == sides);
+    auto * b = dynamic_cast<hpp::fcl::Box *>(geomModel_m.geometryObjects.at(1).geometry.get());
+    BOOST_REQUIRE(b);
+    Eigen::Vector3d sides;
+    sides << 0.01, 0.01, 0.25;
+    BOOST_CHECK(b->halfSide == sides);
 
-  auto * e = dynamic_cast<hpp::fcl::Ellipsoid *>(geomModel_m.geometryObjects.at(4).geometry.get());
-  BOOST_REQUIRE(e);
-  BOOST_CHECK(e->radii == sides);
-}
+    auto * e =
+      dynamic_cast<hpp::fcl::Ellipsoid *>(geomModel_m.geometryObjects.at(4).geometry.get());
+    BOOST_REQUIRE(e);
+    BOOST_CHECK(e->radii == sides);
+  }
 #endif // if defined(PINOCCHIO_WITH_HPP_FCL)
 
-BOOST_AUTO_TEST_SUITE_END()
+  BOOST_AUTO_TEST_CASE(test_contact_parsing)
+  {
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidConstraintModel) contact_models;
+    std::string filename =
+      PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/closed_chain.xml");
+
+    pinocchio::Model model;
+    pinocchio::mjcf::buildModel(filename, model, contact_models);
+
+    BOOST_CHECK_EQUAL(contact_models.size(), 4);
+    BOOST_CHECK_EQUAL(
+      contact_models[0].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
+    BOOST_CHECK_EQUAL(
+      contact_models[1].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+    BOOST_CHECK_EQUAL(
+      contact_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
+    BOOST_CHECK_EQUAL(
+      contact_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+    for (const auto & cm : contact_models)
+    {
+      BOOST_CHECK(cm.joint2_placement.isApprox(cm.joint1_placement.inverse()));
+    }
+  }
+
+  BOOST_AUTO_TEST_SUITE_END()

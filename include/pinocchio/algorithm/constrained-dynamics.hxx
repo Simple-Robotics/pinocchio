@@ -21,8 +21,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     class Allocator>
   inline void initConstraintDynamics(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -64,8 +63,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType,
     bool ContactMode>
@@ -142,8 +140,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     bool ContactMode>
   struct ContactAndImpulseDynamicsBackwardStep
   : public fusion::JointUnaryVisitorBase<
@@ -185,8 +182,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
@@ -524,8 +520,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType>
   struct ContactABAForwardStep1
@@ -591,8 +586,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename TangentVectorType>
   struct ContactABABackwardStep1
   : public fusion::JointUnaryVisitorBase<
@@ -654,8 +648,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename TangentVectorType>
   struct ContactABABackwardStepAugmented
   : public fusion::JointUnaryVisitorBase<
@@ -742,8 +735,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
@@ -973,8 +965,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,

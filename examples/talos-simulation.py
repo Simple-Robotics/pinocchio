@@ -1,8 +1,9 @@
 from time import sleep
 
+import example_robot_data
 import numpy as np
 import pinocchio
-import example_robot_data
+from pinocchio.visualize import GepettoVisualizer
 
 robot = example_robot_data.load("talos")
 model = robot.model
@@ -53,6 +54,7 @@ constraint_models[2].joint2_placement = pinocchio.SE3(
     pinocchio.rpy.rpyToMatrix(np.array([0, -np.pi / 2, 0.0])), np.array([0.6, 0.4, 1.0])
 )
 
+robot.setVisualizer(GepettoVisualizer())
 robot.initViewer()
 robot.loadViewerModel("pinocchio")
 gui = robot.viewer.gui
@@ -90,7 +92,7 @@ mass = data.mass[0]
 
 def squashing(model, data, q_in):
     q = q_in.copy()
-    y = np.ones((constraint_dim))
+    y = np.ones(constraint_dim)
 
     N_full = 200
 

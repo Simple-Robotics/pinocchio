@@ -139,8 +139,7 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
       class ConstraintAllocator>
     ContactCholeskyDecompositionTpl(
@@ -165,10 +164,8 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
-      template<typename T>
-      class Holder,
+      template<typename, int> class JointCollectionTpl,
+      template<typename T> class Holder,
       class Allocator>
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
@@ -187,8 +184,7 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
       class ConstraintAllocator>
     void allocate(
@@ -212,10 +208,8 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
-      template<typename T>
-      class Holder,
+      template<typename, int> class JointCollectionTpl,
+      template<typename T> class Holder,
       class ConstraintModel,
       class ConstraintAllocator>
     void allocate(
@@ -347,8 +341,7 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
       class ConstraintModelAllocator,
       class ConstraintData,
@@ -382,10 +375,8 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
-      template<typename T>
-      class Holder,
+      template<typename, int> class JointCollectionTpl,
+      template<typename T> class Holder,
       class ConstraintModelAllocator,
       class ConstraintModel,
       class ConstraintDataAllocator,
@@ -420,8 +411,7 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
       class ConstraintModelAllocator,
       class ConstraintData,
@@ -468,10 +458,8 @@ namespace pinocchio
     template<
       typename S1,
       int O1,
-      template<typename, int>
-      class JointCollectionTpl,
-      template<typename T>
-      class Holder,
+      template<typename, int> class JointCollectionTpl,
+      template<typename T> class Holder,
       class ConstraintModel,
       class ConstraintModelAllocator,
       class ConstraintData,

@@ -54,7 +54,7 @@ namespace pinocchio
             "be all positive.")
 
           .def(
-            "matrix", (Matrix(DelassusOperator::*)() const) & DelassusOperator::matrix,
+            "matrix", (Matrix(DelassusOperator::*)() const)&DelassusOperator::matrix,
             bp::arg("self"), "Returns the Delassus expression as a dense matrix.")
           .def(
             "inverse", &DelassusOperator::inverse, bp::arg("self"),

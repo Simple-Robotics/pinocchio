@@ -9,9 +9,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - Remove DataTpl::lastChild field and associated methods
 
+### Added
+- Add `pinocchio_python_parser` target ([#2475](https://github.com/stack-of-tasks/pinocchio/pull/2475))
+
+## [3.3.0] - 2024-11-06
+
+### Added
+
+- Default visualizer can be changed with `PINOCCHIO_VIEWER` environment variable ([#2419](https://github.com/stack-of-tasks/pinocchio/pull/2419))
+- Add more Python and C++ examples related to inverse kinematics with 3d tasks ([#2428](https://github.com/stack-of-tasks/pinocchio/pull/2428))
+- Add parsing of equality/connect tag for closed-loop chains for MJCF format ([#2413](https://github.com/stack-of-tasks/pinocchio/pull/2413))
+- Add compatibility with NumPy 2 `__array__` API ([#2436](https://github.com/stack-of-tasks/pinocchio/pull/2436))
+- Added argument to let users decide of root joint name when parsing models (urdf, mjcf, sdf) ([#2402](https://github.com/stack-of-tasks/pinocchio/pull/2402))
+- Allow use of `pathlib.Path | str` for paths in python bindings ([#2431](https://github.com/stack-of-tasks/pinocchio/pull/2431))
+- Add Pseudo inertia and Log-cholesky parametrization ([#2296](https://github.com/stack-of-tasks/pinocchio/pull/2296))
+- Add Pixi support ([#2459](https://github.com/stack-of-tasks/pinocchio/pull/2459))
+
 ### Fixed
 - Fix linkage of Boost.Serialization on Windows ([#2400](https://github.com/stack-of-tasks/pinocchio/pull/2400))
 - Fix mjcf parser appending of inertias at root joint ([#2403](https://github.com/stack-of-tasks/pinocchio/pull/2403))
+- Fix unit tests with GCC 13.3 ([#2406](https://github.com/stack-of-tasks/pinocchio/pull/2416)
+- Fix class abstract error for Rviz viewer ([#2425](https://github.com/stack-of-tasks/pinocchio/pull/2425))
+- Fix compilation issue with MSCV and C++17 ([#2437](https://github.com/stack-of-tasks/pinocchio/pull/2437))
+- Fix `pinocchio-test-py-robot_wrapper` when building with SDF and collision support ([#2437](https://github.com/stack-of-tasks/pinocchio/pull/2437))
+- Fix crash when calling `Inertia::FromDynamicParameters` in Python with wrong vector size ([#2296](https://github.com/stack-of-tasks/pinocchio/pull/2296))
+- Fix `examples/cassie-simulation.py` and `examples/talos-simulation.py` ([#2443](https://github.com/stack-of-tasks/pinocchio/pull/2443))
+- Fix build with CppAd 2024 ([#2459](https://github.com/stack-of-tasks/pinocchio/pull/2459))
+- Fix `pinocchio-test-cpp-mjcf` unittest with Boost 1.86 ([#2459](https://github.com/stack-of-tasks/pinocchio/pull/2459))
+- Fix `pinocchio-test-cpp-constraint-variants` uninitialized values ([#2459](https://github.com/stack-of-tasks/pinocchio/pull/2459))
+- Fix mixing library symbols between Pinocchio scalar bindings ([#2459](https://github.com/stack-of-tasks/pinocchio/pull/2459))
+- Fix bug for get{Joint,Frame}JacobianTimeVariation ([#2466](https://github.com/stack-of-tasks/pinocchio/pull/2466))
+
+### Changed
+
+- Modernize python code base with ruff ([#2418](https://github.com/stack-of-tasks/pinocchio/pull/2418))
+- Does not create a root_joint frame from parsed models (urdf, mjcf and sdf) when no root joint is provided ([#2402](https://github.com/stack-of-tasks/pinocchio/pull/2402))
 
 ## [3.2.0] - 2024-08-27
 
@@ -1028,7 +1060,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/stack-of-tasks/pinocchio/compare/v2.7.1...v3.0.0

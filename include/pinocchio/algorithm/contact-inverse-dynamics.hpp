@@ -48,11 +48,9 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename VectorLikeC,
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
     class CoulombFrictionConelAllocator,
@@ -178,8 +176,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename VectorLikeC,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
@@ -248,13 +245,11 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
     class CoulombFrictionConelAllocator,
@@ -348,8 +343,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,

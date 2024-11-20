@@ -23,8 +23,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,
@@ -51,8 +50,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,
@@ -83,8 +81,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,
@@ -115,8 +112,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename ConstraintModelDerived,
     typename ConstraintDataDerived,
     typename Matrix6Like>
@@ -144,10 +140,8 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder,
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder,
     typename DynamicMatrixLike,
     class ConstraintModel,
     class ConstraintModelAllocator,
@@ -176,8 +170,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename DynamicMatrixLike,
     class ConstraintModel,
     class ConstraintModelAllocator,
@@ -206,8 +199,7 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,

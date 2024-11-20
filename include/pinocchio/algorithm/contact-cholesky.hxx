@@ -20,10 +20,8 @@ namespace pinocchio
   template<
     typename S1,
     int O1,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder,
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder,
     class ConstraintModel,
     class ConstraintAllocator>
   void ContactCholeskyDecompositionTpl<Scalar, Options>::allocate(
@@ -168,10 +166,8 @@ namespace pinocchio
   template<
     typename S1,
     int O1,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder,
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,
