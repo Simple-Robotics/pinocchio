@@ -19,13 +19,13 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
-    typename ConstraintSet,
-    typename ConstraintAllocator,
+    typename ConstraintModel,
+    typename ConstraintModelAllocator,
     typename VectorLikeR>
   bool ADMMContactSolverTpl<_Scalar>::solve(
     DelassusOperatorBase<DelassusDerived> & _delassus,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<ConstraintSet, ConstraintAllocator> & cones,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
@@ -112,7 +112,7 @@ namespace pinocchio
     }
 
     // Init y
-    computeConeProjection(cones, x_, y_);
+    computeConeProjection(constraint_models, x_, y_);
 
     // Init z
     if (dual_guess)
@@ -126,10 +126,10 @@ namespace pinocchio
       z_.noalias() += -prox_value * y_ + g;
       if (solve_ncp)
       {
-        computeComplementarityShift(cones, z_, s_);
+        computeComplementarityShift(constraint_models, z_, s_);
         z_ += s_; // Add De Saxé shift
       }
-      computeDualConeProjection(cones, z_, z_);
+      computeDualConeProjection(constraint_models, z_, z_);
     }
     else
     {
@@ -137,12 +137,12 @@ namespace pinocchio
     }
 
     // Checking if the initial guess is better than 0
-    complementarity =
-      computeConicComplementarity(cones, z_, y_); // Complementarity of the initial guess
+    complementarity = computeConicComplementarity(
+      constraint_models, z_, y_); // Complementarity of the initial guess
     Scalar complementarity_zero_initial_guess_max_violation = 0;
     // Search for the max violation of the constraint g_N >= 0, i.e. the smallest value of g_N over
     // all contact points.
-    for (Eigen::DenseIndex i = 0; i < static_cast<Eigen::DenseIndex>(cones.size()); ++i)
+    for (Eigen::DenseIndex i = 0; i < static_cast<Eigen::DenseIndex>(constraint_models.size()); ++i)
     { // TODO(jcarpent): adjust for other type of constraints
       if (g(3 * i + 2) < complementarity_zero_initial_guess_max_violation)
       {
@@ -158,10 +158,10 @@ namespace pinocchio
       z_ = g;
       if (solve_ncp)
       {
-        computeComplementarityShift(cones, z_, s_);
+        computeComplementarityShift(constraint_models, z_, s_);
         z_ += s_; // Add De Saxé shift
       }
-      computeDualConeProjection(cones, z_, z_);
+      computeDualConeProjection(constraint_models, z_, z_);
     }
 
     //    std::cout << "x_: " << x_.transpose() << std::endl;
@@ -208,7 +208,7 @@ namespace pinocchio
       if (solve_ncp)
       {
         // s-update
-        computeComplementarityShift(cones, z_, s_);
+        computeComplementarityShift(constraint_models, z_, s_);
       }
 
       //      std::cout << "s_: " << s_.transpose() << std::endl;
@@ -235,7 +235,7 @@ namespace pinocchio
       //      rhs *= alpha;
       //      rhs += (1-alpha)*y_previous;
       rhs -= z_ / (tau * rho);
-      computeConeProjection(cones, rhs, y_);
+      computeConeProjection(constraint_models, rhs, y_);
       //      std::cout << "y_: " << y_.transpose() << std::endl;
 
       // z-update
@@ -244,11 +244,11 @@ namespace pinocchio
 
       //      z_ += gamma * (z_ - z_previous).eval();
       //      x_ += gamma * (x_ - x_previous).eval();
-      //      computeConeProjection(cones, y_, y_);
+      //      computeConeProjection(constraint_models, y_, y_);
 
       //      z_ -= (tau*rho) * (x_ * alpha + (1-alpha)*y_previous - y_);
       //      std::cout << "z_: " << z_.transpose() << std::endl;
-      //      computeDualConeProjection(cones, z_, z_);
+      //      computeDualConeProjection(constraint_models, z_, z_);
 
       // check termination criteria
       primal_feasibility_vector = x_ - y_;
@@ -277,13 +277,13 @@ namespace pinocchio
 
       //      delassus.applyOnTheRight(x_,dual_feasibility_vector);
       //      dual_feasibility_vector.noalias() += g;
-      //      computeComplementarityShift(cones, z_, s_);
+      //      computeComplementarityShift(constraint_models, z_, s_);
       //      dual_feasibility_vector.noalias() += s_ - prox_value * x_ - z_;
 
       primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
       dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-      complementarity = computeConicComplementarity(cones, z_, y_);
-      //      complementarity = z_.dot(y_)/cones.size();
+      complementarity = computeConicComplementarity(constraint_models, z_, y_);
+      //      complementarity = z_.dot(y_)/constraint_models.size();
 
       if (stat_record)
       {
@@ -292,11 +292,11 @@ namespace pinocchio
         rhs.noalias() += g - prox_value * y_;
         if (solve_ncp)
         {
-          computeComplementarityShift(cones, rhs, tmp);
+          computeComplementarityShift(constraint_models, rhs, tmp);
           rhs.noalias() += tmp;
         }
 
-        internal::computeDualConeProjection(cones, rhs, tmp);
+        internal::computeDualConeProjection(constraint_models, rhs, tmp);
         tmp -= rhs;
 
         dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
@@ -372,7 +372,7 @@ namespace pinocchio
       //      std::cout << "rho_power: " << rho_power << std::endl;
       //      std::cout << "rho: " << rho << std::endl;
       //      std::cout << "---" << std::endl;
-    }
+    } // end main for loop
 
     PINOCCHIO_EIGEN_MALLOC_ALLOWED();
 
