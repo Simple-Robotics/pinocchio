@@ -134,6 +134,16 @@ namespace pinocchio
       {
         PINOCCHIO_UNUSED_VARIABLE(ptr);
         typedef Eigen::aligned_allocator<ConstraintModel> ConstraintModelAllocator;
+
+        if (!eigenpy::register_symbolic_link_to_registered_type<::pinocchio::ADMMUpdateRule>())
+        {
+          bp::enum_<::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
+            .value("SPECTRAL", ::pinocchio::ADMMUpdateRule::SPECTRAL)
+            .value("LINEAR", ::pinocchio::ADMMUpdateRule::LINEAR)
+            // .export_values()
+            ;
+        }
+
         class_
           .def(
             "solve",
@@ -143,7 +153,7 @@ namespace pinocchio
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
              bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
              bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
-             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("admm_update_rule") = ::pinocchio::ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.")
           .def(
@@ -153,7 +163,7 @@ namespace pinocchio
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
              bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
              bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
-             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("admm_update_rule") = ::pinocchio::ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.")
           .def(
@@ -163,7 +173,7 @@ namespace pinocchio
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
              bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
              bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
-             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("admm_update_rule") = ::pinocchio::ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
 #ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
@@ -178,7 +188,7 @@ namespace pinocchio
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
              bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
              bp::arg("compute_largest_eigen_values") = true, bp::arg("solve_ncp") = true,
-             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+             bp::arg("admm_update_rule") = pinocchioADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
         }
@@ -240,11 +250,11 @@ namespace pinocchio
     {
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
 
-      bp::enum_<::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
-        .value("SPECTRAL", ::pinocchio::ADMMUpdateRule::SPECTRAL)
-        .value("LINEAR", ::pinocchio::ADMMUpdateRule::LINEAR)
-        // .export_values()
-        ;
+      //      bp::enum_<::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
+      //        .value("SPECTRAL", ::pinocchio::ADMMUpdateRule::SPECTRAL)
+      //        .value("LINEAR", ::pinocchio::ADMMUpdateRule::LINEAR)
+      //        // .export_values()
+      //        ;
 
       bp::class_<Solver> cl(
         "ADMMContactSolver",
@@ -257,6 +267,7 @@ namespace pinocchio
            bp::arg("ratio_primal_dual") = Scalar(10),
            bp::arg("max_it_largest_eigen_value_solver") = 20),
           "Default constructor."));
+
       cl.def(ContactSolverBasePythonVisitor<Solver>())
 
         .def("setRho", &Solver::setRho, bp::args("self", "rho"), "Set the ADMM penalty value.")
