@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023 INRIA
+// Copyright (c) 2023-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraint_model_generic_hpp__
@@ -26,6 +26,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
+    typedef boost::blank ConstraintSet;
   };
 
   template<
@@ -113,7 +114,23 @@ namespace pinocchio
     {
       return ::pinocchio::visitors::size(*this);
     }
-  };
+
+    boost::blank & set()
+    {
+      static boost::blank val;
+      PINOCCHIO_THROW_PRETTY(
+        std::runtime_error, "Set method is not accessible for ConstraintModelTpl.");
+      return val;
+    }
+
+    const boost::blank & set() const
+    {
+      static boost::blank val;
+      PINOCCHIO_THROW_PRETTY(
+        std::runtime_error, "Set method is not accessible for ConstraintModelTpl.");
+      return val;
+    }
+  }; // struct ConstraintModelTpl
 
 } // namespace pinocchio
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023 INRIA
+// Copyright (c) 2023-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraint_data_generic_hpp__
@@ -26,6 +26,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
+    typedef boost::blank ConstraintSet;
   };
 
   template<
