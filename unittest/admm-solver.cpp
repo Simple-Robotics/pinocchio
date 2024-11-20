@@ -364,43 +364,48 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
 
   BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
   BOOST_CHECK(dual_solution.isZero());
-  //
-  //  // Test static motion with zero external force
-  //  {
-  //    TestBox test(model, constraint_models);
-  //    test(q0, v0, tau0, Force::Zero(), dt);
-  //
-  //    BOOST_CHECK(test.has_converged == true);
-  //    BOOST_CHECK(test.primal_solution.isZero(2e-10));
-  //    BOOST_CHECK(test.v_next.isZero(2e-10));
-  //    BOOST_CHECK(box_set.isInside(test.dual_solution));
-  //  }
-  //
-  //  for (int i = 0; i < 6; ++i)
-  //  {
-  //    TestBox test(model, constraint_models);
-  //    test(q0, v0, tau0 + 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
-  //
-  //    //    std::cout << "test.dual_solution: " << test.dual_solution.transpose() << std::endl;
-  //    BOOST_CHECK(test.has_converged == true);
-  //    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
-  //    BOOST_CHECK(!test.v_next.isZero(2e-10));
-  //    BOOST_CHECK(box_set.isInside(test.dual_solution));
-  //    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.lb()[i]) < 1e-8);
-  //  }
-  //
-  //  // Sign reversed
-  //  for (int i = 0; i < 6; ++i)
-  //  {
-  //    TestBox test(model, constraint_models);
-  //    test(q0, v0, tau0 - 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
-  //
-  //    BOOST_CHECK(test.has_converged == true);
-  //    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
-  //    BOOST_CHECK(!test.v_next.isZero(2e-10));
-  //    BOOST_CHECK(box_set.isInside(test.dual_solution));
-  //    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.ub()[i]) < 1e-8);
-  //  }
+
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  // Test static motion with zero external force
+  {
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, Force::Zero(), dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(test.v_next.isZero(2e-10));
+    BOOST_CHECK(box_set.isInside(test.dual_solution));
+  }
+
+  for (int i = 0; i < 6; ++i)
+  {
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0 + 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
+
+    //    std::cout << "test.dual_solution: " << test.dual_solution.transpose() << std::endl;
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(!test.v_next.isZero(2e-10));
+    BOOST_CHECK(box_set.isInside(test.dual_solution));
+    std::cout << "dual_solution[i]: " << dual_solution[i] << std::endl;
+    std::cout << "box_set.lb()[i]: " << box_set.lb()[i] << std::endl;
+    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.lb()[i]) < 1e-8);
+  }
+
+  // Sign reversed
+  for (int i = 0; i < 6; ++i)
+  {
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0 - 2 * Force::Vector6::Unit(i) / dt, Force::Zero(), dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(!test.primal_solution.isZero(2e-10));
+    BOOST_CHECK(!test.v_next.isZero(2e-10));
+    BOOST_CHECK(box_set.isInside(test.dual_solution));
+    std::cout << "dual_solution[i]: " << dual_solution[i] << std::endl;
+    std::cout << "box_set.ub()[i]: " << box_set.ub()[i] << std::endl;
+    BOOST_CHECK(std::fabs(test.dual_solution[i] - box_set.ub()[i]) < 1e-8);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
