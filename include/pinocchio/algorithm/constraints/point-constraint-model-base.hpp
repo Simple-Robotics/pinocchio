@@ -44,6 +44,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
+    typedef Vector3 VectorConstraintSize;
 
     Base & base()
     {

@@ -80,6 +80,7 @@ namespace pinocchio
     using typename Base::SE3;
     using typename Base::Vector3;
     using typename Base::Vector6;
+    using typename Base::VectorConstraintSize;
 
     Base & base()
     {
