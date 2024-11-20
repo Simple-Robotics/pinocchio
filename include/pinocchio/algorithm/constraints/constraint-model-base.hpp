@@ -20,6 +20,7 @@ namespace pinocchio
       Options = traits<Derived>::Options
     };
     typedef typename traits<Derived>::ConstraintData ConstraintData;
+    typedef typename traits<Derived>::ConstraintSet ConstraintSet;
 
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
     //    typedef Eigen::Matrix<Eigen::DenseIndex,Eigen::Dynamic,1,Options> IndexVector;
@@ -106,6 +107,15 @@ namespace pinocchio
     int size() const
     {
       return derived().size();
+    }
+
+    ConstraintSet & set()
+    {
+      return derived().set();
+    }
+    const ConstraintSet & set() const
+    {
+      return derived().set();
     }
 
   protected:

@@ -70,6 +70,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef boost::blank ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -81,6 +82,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef boost::blank ConstraintSet;
   };
 
   ///
