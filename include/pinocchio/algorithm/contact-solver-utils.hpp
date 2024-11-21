@@ -52,8 +52,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename S, int O>
-        class ConstraintCollectionTpl>
+        template<typename S, int O> class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
         const ForceVectorLike & force,
@@ -68,8 +67,7 @@ namespace pinocchio
 
     /// \brief Project a vector x on the vector of cones.
     template<
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
@@ -130,6 +128,17 @@ namespace pinocchio
         //        assert(set.dual().isInside(result, Scalar(1e-12)));
       }
 
+      template<typename Vector1Like, typename Vector2Like>
+      static void algo_step(
+        const UnboundedSetTpl<double> & set,
+        const Eigen::MatrixBase<Vector1Like> & velocity,
+        const Eigen::MatrixBase<Vector2Like> & result)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(set);
+        PINOCCHIO_UNUSED_VARIABLE(velocity);
+        result.const_cast_derived().setZero();
+      }
+
       template<typename ConstraintSet, typename Vector1Like, typename Vector2Like>
       static void algo_step(
         const ConstraintSet & set,
@@ -154,8 +163,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename S, int O>
-        class ConstraintCollectionTpl>
+        template<typename S, int O> class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
         const VelocityVectorLike & velocity,
@@ -168,8 +176,7 @@ namespace pinocchio
 
     /// \brief Project a vector x on the dual of the cones contained in the vector of cones.
     template<
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
@@ -289,8 +296,7 @@ namespace pinocchio
     }; // struct ComplementarityVisitor
 
     template<
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeVelocity,
@@ -381,8 +387,7 @@ namespace pinocchio
       template<
         typename Scalar,
         int Options,
-        template<typename S, int O>
-        class ConstraintCollectionTpl>
+        template<typename S, int O> class ConstraintCollectionTpl>
       static void run(
         const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
         const VelocityVectorLike & velocity,
@@ -394,8 +399,7 @@ namespace pinocchio
     }; // struct DeSaxeCorrectionVisitor
 
     template<
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
