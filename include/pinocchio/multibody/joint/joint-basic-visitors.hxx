@@ -58,6 +58,19 @@ namespace pinocchio
       typedef typename boost::mpl::contains<JointModelSequence, JointModel>::type result;
       return result::value;
     }
+
+    template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+    static bool
+    algo(const ::pinocchio::JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> & jmodel)
+    {
+      for (const auto & jmodel_internal : jmodel.joints)
+      {
+        if (!JointCheckTypeVisitor::run(jmodel_internal))
+          return false;
+      }
+
+      return true;
+    }
   };
 
   template<
