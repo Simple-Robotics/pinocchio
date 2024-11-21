@@ -11,9 +11,108 @@
 
 #include "pinocchio/algorithm/contact-solver-utils.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
+#include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 
 namespace pinocchio
 {
+
+  template<typename DriftVectorLike, typename Scalar>
+  struct ZeroInitialGuessMaxConstraintViolationVisitor
+  : visitors::ConstraintUnaryVisitorBase<
+      ZeroInitialGuessMaxConstraintViolationVisitor<DriftVectorLike, Scalar>>
+  {
+    using ArgsType = boost::fusion::vector<const DriftVectorLike &, Scalar &>;
+    using Base = visitors::ConstraintUnaryVisitorBase<
+      ZeroInitialGuessMaxConstraintViolationVisitor<DriftVectorLike, Scalar>>;
+
+    template<typename ConstraintModel>
+    static void algo(
+      const ConstraintModelBase<ConstraintModel> & cmodel,
+      const DriftVectorLike & drift,
+      Scalar & max_violation)
+    {
+      return algo_impl(cmodel.set(), drift, max_violation);
+    }
+
+    template<typename VectorLike>
+    static void algo_impl(
+      const CoulombFrictionConeTpl<Scalar> & set,
+      const Eigen::MatrixBase<VectorLike> & drift,
+      Scalar & max_violation)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(set);
+      const Scalar violation = -drift.coeff(2);
+      if (violation > max_violation)
+      {
+        max_violation = violation;
+      }
+    }
+
+    template<typename ConstraintSet, typename VectorLike>
+    static void algo_impl(
+      const ConstraintSet & set,
+      const Eigen::MatrixBase<VectorLike> & drift,
+      Scalar & max_violation)
+    {
+      // TODO: for other sets, how should we compute?
+      // do nothing
+      PINOCCHIO_UNUSED_VARIABLE(set);
+      PINOCCHIO_UNUSED_VARIABLE(drift);
+      PINOCCHIO_UNUSED_VARIABLE(max_violation);
+    }
+
+    /// ::run for individual constraints
+    template<typename ConstraintModel>
+    static void run(
+      const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+      const DriftVectorLike & drift,
+      Scalar & max_violation)
+    {
+      algo(cmodel.derived(), drift, max_violation);
+    }
+
+    /// ::run for constraints variant
+    template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
+    static void run(
+      const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const DriftVectorLike & drift,
+      Scalar & max_violation)
+    {
+      ArgsType args(drift, max_violation);
+      // Note: Base::run will call `algo` of this visitor
+      Base::run(cmodel.derived(), args);
+    }
+  }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
+
+  template<
+    template<typename T>
+    class Holder,
+    typename ConstraintModel,
+    typename ConstraintModelAllocator,
+    typename VectorLikeIn>
+  typename ConstraintModel::Scalar computeZeroInitialGuessMaxConstraintViolation(
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
+    const Eigen::DenseBase<VectorLikeIn> & drift)
+  {
+    Eigen::DenseIndex cindex = 0;
+
+    using SegmentType = typename VectorLikeIn::ConstSegmentReturnType;
+    using Scalar = typename ConstraintModel::Scalar;
+
+    Scalar max_violation = Scalar(0);
+    for (const ConstraintModel & cmodel : constraint_models)
+    {
+      const auto csize = cmodel.size();
+
+      SegmentType drift_segment = drift.segment(cindex, csize);
+      typedef ZeroInitialGuessMaxConstraintViolationVisitor<SegmentType, Scalar> Algo;
+
+      Algo::run(cmodel, drift_segment, max_violation);
+
+      cindex += csize;
+    }
+    return max_violation;
+  };
 
   template<typename _Scalar>
   template<
@@ -139,19 +238,12 @@ namespace pinocchio
     // Checking if the initial guess is better than 0
     complementarity = computeConicComplementarity(
       constraint_models, z_, y_); // Complementarity of the initial guess
-    Scalar complementarity_zero_initial_guess_max_violation = 0;
-    // Search for the max violation of the constraint g_N >= 0, i.e. the smallest value of g_N over
-    // all contact points.
-    //    for (Eigen::DenseIndex i = 0; i <
-    //    static_cast<Eigen::DenseIndex>(constraint_models.size()); ++i) { // TODO(jcarpent): adjust
-    //    for other type of constraints
-    //      if (g(3 * i + 2) < complementarity_zero_initial_guess_max_violation)
-    //      {
-    //        complementarity_zero_initial_guess_max_violation = g(3 * i + 2);
-    //      }
-    //    }
+    // we Search for the max violation of the constraints
+    // Note: max_violation is always <= 0
+    const Scalar max_violation =
+      computeZeroInitialGuessMaxConstraintViolation(constraint_models, g);
 
-    if (-complementarity_zero_initial_guess_max_violation < complementarity)
+    if (max_violation < complementarity)
     { // If true, this means that the zero value initial guess leads a better feasibility in the
       // sense of the contact complementarity
       x_.setZero();
