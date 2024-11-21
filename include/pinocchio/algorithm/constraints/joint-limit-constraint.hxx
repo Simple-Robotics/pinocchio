@@ -127,14 +127,10 @@ namespace pinocchio
       const JointModel & jmodel = model.joints[joint_id];
       const auto & jsupport = model.supports[joint_id];
 
-      const int nq = jmodel.nq();
       const int idx_q = jmodel.idx_q();
 
       const int nv = jmodel.nv();
       const int idx_v = jmodel.idx_v();
-
-      PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(nq);
-      assert(nq == nv && "joint nv and nq dimensions should be equal.");
 
       extended_support.clear();
       for (size_t j = 1; j < jsupport.size() - 1; ++j)
