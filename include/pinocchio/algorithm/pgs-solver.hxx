@@ -232,10 +232,10 @@ namespace pinocchio
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
-      for (std::size_t i = 0; i < 3; ++i)
+      for (Eigen::DenseIndex i = 0; i < 3; ++i)
       {
         Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
-        primal_vector(i) += d_primal_value;
+        primal_vector[i] += d_primal_value;
         dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized
       }
     }
