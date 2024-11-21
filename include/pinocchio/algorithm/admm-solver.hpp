@@ -388,17 +388,19 @@ namespace pinocchio
     }
 
     ///
-    /// \brief Solve the constrained conic problem composed of problem data (G,g,cones) and starting
-    /// from the initial guess.
+    /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
+    /// starting from the initial guess.
     ///
-    /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
-    /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
-    /// \param[in] cones Vector of conic constraints.
-    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
-    /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
-    /// \param[in] mu_prox Proximal smoothing value associated to the algorithm.
-    /// \param[in] R Proximal regularization value associated to the compliant contacts (corresponds
-    /// to the lowest non-zero). \param[in] tau Over relaxation value
+    /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
+    /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
+    /// \param[in] constraint_models Vector of constraints.
+    /// \param[in] R Proximal regularization value associated to the compliant constraints
+    /// (corresponds to the lowest non-zero). \param[in] primal_guess Optional initial guess of the
+    /// primal solution (constrained forces). \param[in] dual_guess Optinal Initial guess of the
+    /// dual solution (constrained velocities). \param[in] solve_ncp whether to solve the NCP (true)
+    /// or CCP (false) \param[in] compute_largest_eigen_values run power iteration algorithm
+    /// \param[in] admm_update_rule update rule for ADMM (linear or spectral)
+    /// \param[in] stat_record record solver metrics
     ///
     /// \returns True if the problem has converged.
     template<
@@ -422,8 +424,21 @@ namespace pinocchio
       bool stat_record = false);
 
     ///
-    /// \brief Solve the constrained conic problem composed of problem data (G,g,cones) and starting
-    /// from the initial guess.
+    /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
+    /// starting from the initial guess.
+    ///
+    /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
+    /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
+    /// \param[in] constraint_models Vector of constraints.
+    /// \param[in] R Proximal regularization value associated to the compliant constraints
+    /// (corresponds to the lowest non-zero). \param[in] primal_guess Optional initial guess of the
+    /// primal solution (constrained forces). \param[in] dual_guess Optinal Initial guess of the
+    /// dual solution (constrained velocities). \param[in] solve_ncp whether to solve the NCP (true)
+    /// or CCP (false) \param[in] compute_largest_eigen_values run power iteration algorithm
+    /// \param[in] admm_update_rule update rule for ADMM (linear or spectral)
+    /// \param[in] stat_record record solver metrics
+    ///
+    /// \returns True if the problem has converged.
     template<
       typename DelassusDerived,
       typename VectorLike,
@@ -454,12 +469,14 @@ namespace pinocchio
     }
 
     ///
-    /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
-    /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
-    /// \param[in] cones Vector of conic constraints.
+    /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
+    /// starting from the initial guess.
+    ///
+    /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
+    /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
+    /// \param[in] constraint_models Vector of constraints.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
-    /// \param[in] mu_prox Proximal smoothing value associated to the algorithm.
-    /// \param[in] tau Over relaxation value
+    /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
     ///
     /// \returns True if the problem has converged.
     template<
@@ -482,6 +499,17 @@ namespace pinocchio
         primal_guess.const_cast_derived(), boost::none, solve_ncp);
     }
 
+    ///
+    /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
+    /// starting from the initial guess.
+    ///
+    /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
+    /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
+    /// \param[in] constraint_models Vector of constraints.
+    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
+    /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
+    ///
+    /// \returns True if the problem has converged.
     template<
       typename DelassusDerived,
       typename VectorLike,
