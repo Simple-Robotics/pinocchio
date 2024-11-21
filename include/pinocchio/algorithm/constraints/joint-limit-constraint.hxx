@@ -9,27 +9,26 @@
 
 namespace pinocchio
 {
-  template<typename Scalar, int Options>
-  template<template<typename, int> class JointCollectionTpl>
-  int JointLimitConstraintModelTpl<Scalar, Options>::check_active_joints(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    const JointIndexVector & active_joints)
-  {
-    for (const JointIndex joint_id : active_joints)
-    {
-      const JointModel & jmodel = model.joints[joint_id];
-
-      if (!check_joint_type_within_sequence<ValidJointTypes>(jmodel))
-        return int(joint_id);
-    }
-
-    return -1;
-  }
+  //  template<typename Scalar, int Options>
+  //  template<template<typename, int> class JointCollectionTpl>
+  //  int JointLimitConstraintModelTpl<Scalar, Options>::check_active_joints(
+  //    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+  //    const JointIndexVector & active_joints)
+  //  {
+  //    for (const JointIndex joint_id : active_joints)
+  //    {
+  //      const JointModel & jmodel = model.joints[joint_id];
+  //
+  //      if (!check_joint_type_within_sequence<ValidJointTypes>(jmodel))
+  //        return int(joint_id);
+  //    }
+  //
+  //    return -1;
+  //  }
 
   template<typename Scalar, int Options>
   template<
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     typename VectorLowerConfiguration,
     typename VectorUpperConfiguration>
   void JointLimitConstraintModelTpl<Scalar, Options>::init(
@@ -51,9 +50,9 @@ namespace pinocchio
         joint_id < model.joints.size(),
         "joint_id is larger than the total number of joints contained in the model.");
     }
-    PINOCCHIO_CHECK_INPUT_ARGUMENT(
-      check_active_joints(model, active_joints) == -1,
-      "One of the joint is not supported by JointLimitConstraintModelTpl.")
+    //    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+    //      check_active_joints(model, active_joints) == -1,
+    //      "One of the joint is not supported by JointLimitConstraintModelTpl.")
 
     // Collect all potentially active bounds
     BooleanVector is_lower_bound_constraint_active = BooleanVector::Constant(model.nq, false),
@@ -73,9 +72,13 @@ namespace pinocchio
       const int nq = jmodel.nq();
 
       assert(nq == jmodel.nv() && "joint nv and nq dimensions should be equal.");
+      const auto has_configuration_limit = jmodel.hasConfigurationLimit();
       for (int k = 0; k < nq; ++k)
       {
         const int q_index = idx_q + k;
+        if (!has_configuration_limit[k])
+          continue;
+
         const int v_index = idx_v + k;
         if (lb[q_index] != -std::numeric_limits<Scalar>::max())
         {

@@ -82,16 +82,16 @@ namespace pinocchio
     typedef JointModelPrismaticTpl<Scalar, Options, 2> JointModelPZ;
     typedef JointModelPrismaticUnalignedTpl<Scalar, Options> JointModelPrismaticUnaligned;
 
-    typedef boost::mpl::vector<
-      JointModelRX,
-      JointModelRY,
-      JointModelRZ,
-      JointModelRevoluteUnaligned,
-      JointModelPX,
-      JointModelPY,
-      JointModelPZ,
-      JointModelPrismaticUnaligned>
-      ValidJointTypes;
+    //    typedef boost::mpl::vector<
+    //      JointModelRX,
+    //      JointModelRY,
+    //      JointModelRZ,
+    //      JointModelRevoluteUnaligned,
+    //      JointModelPX,
+    //      JointModelPY,
+    //      JointModelPZ,
+    //      JointModelPrismaticUnaligned>
+    //      ValidJointTypes;
 
     template<template<typename, int> class JointCollectionTpl>
     JointLimitConstraintModelTpl(
@@ -102,8 +102,7 @@ namespace pinocchio
     }
 
     template<
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename VectorLowerConfiguration,
       typename VectorUpperConfiguration>
     JointLimitConstraintModelTpl(
@@ -187,8 +186,7 @@ namespace pinocchio
 
   protected:
     template<
-      template<typename, int>
-      class JointCollectionTpl,
+      template<typename, int> class JointCollectionTpl,
       typename VectorLowerConfiguration,
       typename VectorUpperConfiguration>
     void init(
@@ -197,12 +195,12 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub);
 
-    /// \brief Check whether the active joints are bound to the joint types contained in
-    /// SupportedJointTypes.
-    template<template<typename, int> class JointCollectionTpl>
-    static int check_active_joints(
-      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const JointIndexVector & active_joints);
+    //    /// \brief Check whether the active joints are bound to the joint types contained in
+    //    /// SupportedJointTypes.
+    //    template<template<typename, int> class JointCollectionTpl>
+    //    static int check_active_joints(
+    //      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    //      const JointIndexVector & active_joints);
 
     /// \brief Selected dof in the configuration vector
     EigenIndexVector active_configuration_components;
