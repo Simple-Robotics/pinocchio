@@ -68,12 +68,15 @@ namespace pinocchio
 
     /// \brief Project a vector x on the vector of cones.
     template<
+      template<typename T>
+      class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
       typename VectorLikeOut>
     void computeConeProjection(
-      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
       const Eigen::DenseBase<VectorLikeIn> & x,
       const Eigen::DenseBase<VectorLikeOut> & x_proj_)
     {
@@ -84,7 +87,7 @@ namespace pinocchio
       typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
       typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
 
-      for (const auto & cmodel : constraint_models)
+      for (const ConstraintModel & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
         SegmentType1 force_segment = x.derived().segment(index, size);
@@ -165,12 +168,15 @@ namespace pinocchio
 
     /// \brief Project a vector x on the dual of the cones contained in the vector of cones.
     template<
+      template<typename T>
+      class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
       typename VectorLikeOut>
     void computeDualConeProjection(
-      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
       const Eigen::DenseBase<VectorLikeIn> & x,
       const Eigen::DenseBase<VectorLikeOut> & x_proj_)
     {
@@ -181,7 +187,7 @@ namespace pinocchio
       typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
       typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
 
-      for (const auto & cmodel : constraint_models)
+      for (const ConstraintModel & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 
@@ -283,12 +289,15 @@ namespace pinocchio
     }; // struct ComplementarityVisitor
 
     template<
+      template<typename T>
+      class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeVelocity,
       typename VectorLikeForce>
     typename ConstraintModel::Scalar computeConicComplementarity(
-      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
       const Eigen::DenseBase<VectorLikeVelocity> & velocities,
       const Eigen::DenseBase<VectorLikeForce> & forces)
     {
@@ -300,7 +309,7 @@ namespace pinocchio
       typedef typename VectorLikeVelocity::ConstSegmentReturnType SegmentType1;
       typedef typename VectorLikeForce::ConstSegmentReturnType SegmentType2;
 
-      for (const auto & cmodel : constraint_models)
+      for (const ConstraintModel & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 
@@ -385,12 +394,15 @@ namespace pinocchio
     }; // struct DeSaxeCorrectionVisitor
 
     template<
+      template<typename T>
+      class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
       typename VectorLikeOut>
     void computeComplementarityShift(
-      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
       const Eigen::DenseBase<VectorLikeIn> & velocities,
       const Eigen::DenseBase<VectorLikeOut> & shift_)
     {
@@ -401,7 +413,7 @@ namespace pinocchio
       typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
       typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
 
-      for (const auto & cmodel : constraint_models)
+      for (const ConstraintModel & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 

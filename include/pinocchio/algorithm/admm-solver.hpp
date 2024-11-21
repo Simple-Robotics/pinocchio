@@ -404,13 +404,15 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
-      typename ConstraintSet,
+      template<typename T>
+      class Holder,
+      typename ConstraintModel,
       typename ConstraintAllocator,
       typename VectorLikeR>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<ConstraintSet, ConstraintAllocator> & cones,
+      const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
@@ -422,6 +424,35 @@ namespace pinocchio
     ///
     /// \brief Solve the constrained conic problem composed of problem data (G,g,cones) and starting
     /// from the initial guess.
+    template<
+      typename DelassusDerived,
+      typename VectorLike,
+      typename ConstraintModel,
+      typename ConstraintAllocator,
+      typename VectorLikeR>
+    bool solve(
+      DelassusOperatorBase<DelassusDerived> & delassus,
+      const Eigen::MatrixBase<VectorLike> & g,
+      const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
+      const Eigen::MatrixBase<VectorLikeR> & R,
+      const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
+      const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
+      bool solve_ncp = true,
+      bool compute_largest_eigen_values = true,
+      ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
+      bool stat_record = false)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      return solve(
+        delassus, g, wrapped_constraint_models, R, primal_guess, dual_guess, solve_ncp,
+        compute_largest_eigen_values, admm_update_rule, stat_record);
+    }
+
     ///
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
@@ -434,19 +465,43 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
-      typename ConstraintSet,
+      template<typename T>
+      class Holder,
+      typename ConstraintModel,
       typename ConstraintAllocator,
       typename VectorLikeOut>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
-      const std::vector<ConstraintSet, ConstraintAllocator> & cones,
+      const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
       bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), cones, VectorXs::Zero(problem_size),
+        delassus.derived(), g.derived(), constraint_models, VectorXs::Zero(problem_size),
         primal_guess.const_cast_derived(), boost::none, solve_ncp);
+    }
+
+    template<
+      typename DelassusDerived,
+      typename VectorLike,
+      typename ConstraintModel,
+      typename ConstraintAllocator,
+      typename VectorLikeOut>
+    bool solve(
+      DelassusOperatorBase<DelassusDerived> & delassus,
+      const Eigen::MatrixBase<VectorLike> & g,
+      const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
+      const Eigen::DenseBase<VectorLikeOut> & primal_guess,
+      bool solve_ncp = true)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      return solve(delassus, g, wrapped_constraint_models, primal_guess, solve_ncp);
     }
 
     /// \returns the primal solution of the problem

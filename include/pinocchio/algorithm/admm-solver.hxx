@@ -135,13 +135,15 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
+    template<typename T>
+    class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeR>
   bool ADMMContactSolverTpl<_Scalar>::solve(
     DelassusOperatorBase<DelassusDerived> & _delassus,
     const Eigen::MatrixBase<VectorLike> & g,
-    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,

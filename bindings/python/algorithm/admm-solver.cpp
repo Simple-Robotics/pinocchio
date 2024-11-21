@@ -74,7 +74,14 @@ namespace pinocchio
       const context::VectorXs & forces)
     {
       context::VectorXs res(forces.size());
-      ::pinocchio::internal::computeConeProjection(constraint_models, forces, res);
+
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      ::pinocchio::internal::computeConeProjection(wrapped_constraint_models, forces, res);
       return res;
     }
 
@@ -84,7 +91,14 @@ namespace pinocchio
       const context::VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
-      ::pinocchio::internal::computeDualConeProjection(constraint_models, velocities, res);
+
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      ::pinocchio::internal::computeDualConeProjection(wrapped_constraint_models, velocities, res);
       return res;
     }
 
@@ -111,7 +125,14 @@ namespace pinocchio
       const context::VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
-      ::pinocchio::internal::computeComplementarityShift(constraint_models, velocities, res);
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      ::pinocchio::internal::computeComplementarityShift(
+        wrapped_constraint_models, velocities, res);
       return res;
     }
 #endif // PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
