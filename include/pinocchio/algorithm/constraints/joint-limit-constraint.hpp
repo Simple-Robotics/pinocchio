@@ -33,19 +33,19 @@ namespace pinocchio
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
+
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
+
+    typedef VectorXs ComplianceVectorType;
+    typedef ComplianceVectorType & ComplianceVectorTypeRef;
+    typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
   };
 
   template<typename _Scalar, int _Options>
   struct traits<JointLimitConstraintDataTpl<_Scalar, _Options>>
+  : traits<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
-    typedef _Scalar Scalar;
-    enum
-    {
-      Options = _Options
-    };
-    typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
-    typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -61,6 +61,7 @@ namespace pinocchio
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
+    typedef VectorXs ComplianceVectorType;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -72,15 +73,15 @@ namespace pinocchio
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
     typedef BoxSetTpl<Scalar, Options> BoxSet;
 
-    typedef JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
-    typedef JointModelRevoluteTpl<Scalar, Options, 1> JointModelRY;
-    typedef JointModelRevoluteTpl<Scalar, Options, 2> JointModelRZ;
-    typedef JointModelRevoluteUnalignedTpl<Scalar, Options> JointModelRevoluteUnaligned;
-
-    typedef JointModelPrismaticTpl<Scalar, Options, 0> JointModelPX;
-    typedef JointModelPrismaticTpl<Scalar, Options, 1> JointModelPY;
-    typedef JointModelPrismaticTpl<Scalar, Options, 2> JointModelPZ;
-    typedef JointModelPrismaticUnalignedTpl<Scalar, Options> JointModelPrismaticUnaligned;
+    //    typedef JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
+    //    typedef JointModelRevoluteTpl<Scalar, Options, 1> JointModelRY;
+    //    typedef JointModelRevoluteTpl<Scalar, Options, 2> JointModelRZ;
+    //    typedef JointModelRevoluteUnalignedTpl<Scalar, Options> JointModelRevoluteUnaligned;
+    //
+    //    typedef JointModelPrismaticTpl<Scalar, Options, 0> JointModelPX;
+    //    typedef JointModelPrismaticTpl<Scalar, Options, 1> JointModelPY;
+    //    typedef JointModelPrismaticTpl<Scalar, Options, 2> JointModelPZ;
+    //    typedef JointModelPrismaticUnalignedTpl<Scalar, Options> JointModelPrismaticUnaligned;
 
     //    typedef boost::mpl::vector<
     //      JointModelRX,
@@ -114,6 +115,29 @@ namespace pinocchio
       init(model, active_joints, lb, ub);
     }
 
+    /// \brief Cast operator
+    template<typename NewScalar>
+    typename CastType<NewScalar, JointLimitConstraintModelTpl>::type cast() const
+    {
+      typedef typename CastType<NewScalar, JointLimitConstraintModelTpl>::type ReturnType;
+      ReturnType res;
+      Base::template cast<NewScalar>(res);
+
+      res.active_configuration_components = active_configuration_components;
+      res.active_lower_bound_constraints = active_lower_bound_constraints;
+      res.active_lower_bound_constraints_tangent = active_lower_bound_constraints_tangent;
+      res.active_upper_bound_constraints = active_upper_bound_constraints;
+      res.active_upper_bound_constraints_tangent = active_upper_bound_constraints_tangent;
+      res.active_configuration_limits = active_configuration_limits;
+      res.row_active_indexes = row_active_indexes;
+      res.row_sparsity_pattern = row_sparsity_pattern;
+      res.active_configuration_components = active_configuration_components;
+
+      res.m_set = m_set.template cast<NewScalar>();
+      res.m_compliance = m_compliance.template cast<NewScalar>();
+      return res;
+    }
+
     ConstraintData createData() const
     {
       return ConstraintData(*this);
@@ -123,6 +147,16 @@ namespace pinocchio
     {
       return int(row_active_indexes.size());
     }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
+    }
+
     template<template<typename, int> class JointCollectionTpl>
     void calc(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -184,6 +218,42 @@ namespace pinocchio
       return m_set;
     }
 
+    /// \brief Returns the compliance internally stored in the constraint model
+    const ComplianceVectorType & compliance() const
+    {
+      return m_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorType & compliance()
+    {
+      return m_compliance;
+    }
+
+    ///
+    ///  \brief Comparison operator
+    ///
+    /// \param[in] other Other FrictionalJointConstraintModelTpl to compare with.
+    ///
+    /// \returns true if the two *this is equal to other (type, joint1_id and placement attributs
+    /// must be the same).
+    ///
+    bool operator==(const JointLimitConstraintModelTpl & other) const
+    {
+      return base() == other.base()
+             && active_configuration_components == other.active_configuration_components
+             && active_lower_bound_constraints == other.active_lower_bound_constraints
+             && active_lower_bound_constraints_tangent
+                  == other.active_lower_bound_constraints_tangent
+             && active_upper_bound_constraints == other.active_upper_bound_constraints
+             && active_upper_bound_constraints_tangent
+                  == other.active_upper_bound_constraints_tangent
+             && active_configuration_limits == other.active_configuration_limits
+             && row_active_indexes == other.row_active_indexes
+             && row_sparsity_pattern == other.row_sparsity_pattern && m_set == other.m_set
+             && m_compliance == other.m_compliance;
+    }
+
   protected:
     template<
       template<typename, int> class JointCollectionTpl,
@@ -215,6 +285,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
+    ComplianceVectorType m_compliance;
   };
 
   template<typename _Scalar, int _Options>

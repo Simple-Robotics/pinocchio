@@ -11,6 +11,12 @@
 namespace pinocchio
 {
 
+  template<typename NewScalar, typename Scalar, int Options>
+  struct CastType<NewScalar, BoxSetTpl<Scalar, Options>>
+  {
+    typedef BoxSetTpl<NewScalar, Options> type;
+  };
+
   template<typename _Scalar, int _Options>
   struct traits<BoxSetTpl<_Scalar, _Options>>
   {
@@ -57,6 +63,14 @@ namespace pinocchio
 
     /// \brief Copy constructor.
     BoxSetTpl(const BoxSetTpl & other) = default;
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    BoxSetTpl<NewScalar, Options> cast() const
+    {
+      typedef BoxSetTpl<NewScalar, Options> ReturnType;
+      return ReturnType(this->m_lb, this->m_ub);
+    }
 
     /// \brief Copy operator
     BoxSetTpl & operator=(const BoxSetTpl & other) = default;

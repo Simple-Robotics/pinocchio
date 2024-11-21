@@ -12,6 +12,12 @@
 namespace pinocchio
 {
 
+  template<typename NewScalar, typename Scalar>
+  struct CastType<NewScalar, CoulombFrictionConeTpl<Scalar>>
+  {
+    typedef CoulombFrictionConeTpl<NewScalar> type;
+  };
+
   template<typename Scalar>
   struct DualCoulombFrictionConeTpl;
 
@@ -47,6 +53,14 @@ namespace pinocchio
 
     /// \brief Copy operator
     CoulombFrictionConeTpl & operator=(const CoulombFrictionConeTpl & other) = default;
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    CoulombFrictionConeTpl<NewScalar> cast() const
+    {
+      typedef CoulombFrictionConeTpl<NewScalar> ReturnType;
+      return ReturnType(NewScalar(this->mu));
+    }
 
     /// \brief Comparison operator
     bool operator==(const CoulombFrictionConeTpl & other) const

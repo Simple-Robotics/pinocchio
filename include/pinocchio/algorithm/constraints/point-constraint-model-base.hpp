@@ -45,6 +45,9 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Vector3 VectorConstraintSize;
+    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     Base & base()
     {
@@ -105,10 +108,10 @@ namespace pinocchio
     ///  \brief Depth of the kinematic tree for joint1 and joint2
     size_t depth_joint1, depth_joint2;
 
-    /// \brief Compliance associated with the contact model
-    Vector3 compliance;
-
   protected:
+    /// \brief Compliance associated with the contact model
+    ComplianceVectorType m_compliance = ComplianceVectorType::Zero();
+
     ///
     ///  \brief Default constructor
     ///
@@ -151,7 +154,6 @@ namespace pinocchio
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -182,7 +184,6 @@ namespace pinocchio
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -211,7 +212,6 @@ namespace pinocchio
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -240,7 +240,6 @@ namespace pinocchio
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
     {
       init(model);
     }
@@ -266,6 +265,21 @@ namespace pinocchio
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_span_indexes;
     }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeConstRef compliance() const
+    {
+      return m_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeRef compliance()
+    {
+      return m_compliance;
+    }
+
+    template<typename OtherDerived>
+    friend struct PointConstraintModelBase;
 
     using Base::derived;
 
@@ -293,7 +307,7 @@ namespace pinocchio
              && depth_joint1 == other.depth_joint1 && depth_joint2 == other.depth_joint2
              && colwise_sparsity == other.colwise_sparsity
              && colwise_span_indexes == other.colwise_span_indexes
-             && loop_span_indexes == other.loop_span_indexes && compliance == other.compliance;
+             && loop_span_indexes == other.loop_span_indexes && m_compliance == other.m_compliance;
     }
 
     ///
@@ -535,8 +549,7 @@ namespace pinocchio
     template<
       typename InputMatrix,
       typename OutputMatrix,
-      template<typename, int>
-      class JointCollectionTpl>
+      template<typename, int> class JointCollectionTpl>
     void jacobian_matrix_product(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
@@ -732,7 +745,7 @@ namespace pinocchio
       res.depth_joint1 = depth_joint1;
       res.depth_joint2 = depth_joint2;
       res.loop_span_indexes = loop_span_indexes;
-      res.compliance = compliance.template cast<NewScalar>();
+      res.m_compliance = m_compliance.template cast<NewScalar>();
       ;
     }
 

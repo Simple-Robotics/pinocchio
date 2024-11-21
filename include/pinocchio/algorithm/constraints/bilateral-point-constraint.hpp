@@ -32,19 +32,19 @@ namespace pinocchio
     typedef BilateralPointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
+
+    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
+    typedef Vector3 VectorConstraintSize;
+
+    typedef Vector3 ComplianceVectorType;
+    typedef ComplianceVectorType & ComplianceVectorTypeRef;
+    typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
   };
 
   template<typename _Scalar, int _Options>
   struct traits<BilateralPointConstraintDataTpl<_Scalar, _Options>>
+  : traits<BilateralPointConstraintModelTpl<_Scalar, _Options>>
   {
-    typedef _Scalar Scalar;
-    enum
-    {
-      Options = _Options
-    };
-    typedef BilateralPointConstraintModelTpl<Scalar, Options> ConstraintModel;
-    typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
   };
 
   ///
@@ -72,6 +72,7 @@ namespace pinocchio
 
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
+    using typename Base::ComplianceVectorType;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
     using typename Base::Matrix36;
@@ -180,12 +181,14 @@ namespace pinocchio
       return ConstraintData(*this);
     }
 
+    /// \brief Cast operator
     template<typename NewScalar>
     typename CastType<NewScalar, BilateralPointConstraintModelTpl>::type cast() const
     {
       typedef typename CastType<NewScalar, BilateralPointConstraintModelTpl>::type ReturnType;
       ReturnType res;
       Base::template cast<NewScalar>(res);
+      res.m_set = m_set.template cast<NewScalar>();
       return res;
     }
 
@@ -224,6 +227,8 @@ namespace pinocchio
     {
       return m_set;
     }
+
+    using Base::compliance;
 
   protected:
     ConstraintSet m_set = ConstraintSet(3);

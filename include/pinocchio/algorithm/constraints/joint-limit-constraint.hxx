@@ -76,7 +76,7 @@ namespace pinocchio
       for (int k = 0; k < nq; ++k)
       {
         const int q_index = idx_q + k;
-        if (!has_configuration_limit[k])
+        if (!has_configuration_limit[size_t(k)])
           continue;
 
         const int v_index = idx_v + k;
@@ -201,6 +201,8 @@ namespace pinocchio
       for (const auto val : extended_support)
         sparsity_pattern[val] = true;
     }
+
+    m_compliance = ComplianceVectorType::Zero(size());
   }
 
   template<typename Scalar, int Options>

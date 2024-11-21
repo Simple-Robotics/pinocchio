@@ -21,6 +21,8 @@ namespace pinocchio
     };
     typedef typename traits<Derived>::ConstraintData ConstraintData;
     typedef typename traits<Derived>::ConstraintSet ConstraintSet;
+    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
     //    typedef Eigen::Matrix<Eigen::DenseIndex,Eigen::Dynamic,1,Options> IndexVector;
@@ -118,15 +120,16 @@ namespace pinocchio
       return derived().set();
     }
 
-  protected:
-    template<int Options, template<typename, int> class JointCollectionTpl>
-    explicit ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & /*model*/)
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeConstRef compliance() const
     {
+      return derived().compliance();
     }
 
-    /// \brief Default constructor
-    ConstraintModelBase()
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeRef compliance()
     {
+      return derived().compliance();
     }
 
     ConstraintModelBase & base()
@@ -137,6 +140,17 @@ namespace pinocchio
     const ConstraintModelBase & base() const
     {
       return *this;
+    }
+
+  protected:
+    template<int Options, template<typename, int> class JointCollectionTpl>
+    explicit ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & /*model*/)
+    {
+    }
+
+    /// \brief Default constructor
+    ConstraintModelBase()
+    {
     }
   };
 

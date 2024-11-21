@@ -69,20 +69,20 @@ namespace pinocchio
     {
       Options = _Options
     };
+    typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef boost::blank ConstraintSet;
+    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
+    typedef Vector3 VectorConstraintSize;
+    typedef Vector3 ComplianceVectorType;
+    typedef ComplianceVectorType & ComplianceVectorTypeRef;
+    typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
   };
 
   template<typename _Scalar, int _Options>
   struct traits<RigidConstraintDataTpl<_Scalar, _Options>>
+  : traits<RigidConstraintModelTpl<_Scalar, _Options>>
   {
-    typedef _Scalar Scalar;
-    enum
-    {
-      Options = _Options
-    };
-    typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
-    typedef boost::blank ConstraintSet;
   };
 
   ///

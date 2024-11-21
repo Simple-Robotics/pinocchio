@@ -11,6 +11,12 @@
 namespace pinocchio
 {
 
+  template<typename NewScalar, typename Scalar, int Options>
+  struct CastType<NewScalar, UnboundedSetTpl<Scalar, Options>>
+  {
+    typedef UnboundedSetTpl<NewScalar, Options> type;
+  };
+
   template<typename _Scalar, int _Options>
   struct traits<UnboundedSetTpl<_Scalar, _Options>>
   {
@@ -44,6 +50,14 @@ namespace pinocchio
 
     /// \brief Copy operator
     UnboundedSetTpl & operator=(const UnboundedSetTpl & other) = default;
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    UnboundedSetTpl<NewScalar, Options> cast() const
+    {
+      typedef UnboundedSetTpl<NewScalar, Options> ReturnType;
+      return ReturnType(this->size());
+    }
 
     /// \brief Comparison operator
     bool operator==(const UnboundedSetTpl & other) const

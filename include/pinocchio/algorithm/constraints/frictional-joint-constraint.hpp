@@ -31,19 +31,19 @@ namespace pinocchio
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
+
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
+
+    typedef VectorXs ComplianceVectorType;
+    typedef ComplianceVectorType & ComplianceVectorTypeRef;
+    typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
   };
 
   template<typename _Scalar, int _Options>
   struct traits<FrictionalJointConstraintDataTpl<_Scalar, _Options>>
+  : traits<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   {
-    typedef _Scalar Scalar;
-    enum
-    {
-      Options = _Options
-    };
-    typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
-    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
   };
 
   template<typename _Scalar, int _Options>
@@ -59,6 +59,7 @@ namespace pinocchio
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
+    typedef VectorXs ComplianceVectorType;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -76,6 +77,24 @@ namespace pinocchio
     {
       init(model, active_joints);
       m_set = ConstraintSet(size());
+      m_compliance = ComplianceVectorType::Zero(size());
+    }
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    typename CastType<NewScalar, FrictionalJointConstraintModelTpl>::type cast() const
+    {
+      typedef typename CastType<NewScalar, FrictionalJointConstraintModelTpl>::type ReturnType;
+      ReturnType res;
+      Base::template cast<NewScalar>(res);
+
+      res.active_dofs = active_dofs;
+      res.row_sparsity_pattern = row_sparsity_pattern;
+      res.row_active_indexes = row_active_indexes;
+
+      res.m_set = m_set.template cast<NewScalar>();
+      res.m_compliance = m_compliance.template cast<NewScalar>();
+      return res;
     }
 
     ConstraintData createData() const
@@ -86,6 +105,15 @@ namespace pinocchio
     int size() const
     {
       return int(active_dofs.size());
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
     }
 
     template<template<typename, int> class JointCollectionTpl>
@@ -136,6 +164,34 @@ namespace pinocchio
       return m_set;
     }
 
+    /// \brief Returns the compliance internally stored in the constraint model
+    const ComplianceVectorType & compliance() const
+    {
+      return m_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorType & compliance()
+    {
+      return m_compliance;
+    }
+
+    ///
+    ///  \brief Comparison operator
+    ///
+    /// \param[in] other Other FrictionalJointConstraintModelTpl to compare with.
+    ///
+    /// \returns true if the two *this is equal to other (type, joint1_id and placement attributs
+    /// must be the same).
+    ///
+    bool operator==(const FrictionalJointConstraintModelTpl & other) const
+    {
+      return base() == other.base() && active_dofs == other.active_dofs
+             && row_sparsity_pattern == other.row_sparsity_pattern
+             && row_active_indexes == other.row_active_indexes && m_set == other.m_set
+             && m_compliance == other.m_compliance;
+    }
+
   protected:
     template<template<typename, int> class JointCollectionTpl>
     void init(
@@ -147,6 +203,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
+    ComplianceVectorType m_compliance;
   };
 
   template<typename _Scalar, int _Options>
