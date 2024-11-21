@@ -155,6 +155,8 @@ namespace pinocchio
 
       for (int k = 0; k < nv; ++k)
       {
+        // TODO(jcarpent): potential issue for mapping row_id_v and row_id_q together for joints
+        // with nq != nv.
         const int row_id_v = idx_v + k;
         const int row_id_q = idx_q + k;
 
