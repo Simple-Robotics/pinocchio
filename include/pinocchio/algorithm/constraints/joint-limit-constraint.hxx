@@ -71,7 +71,6 @@ namespace pinocchio
       const int idx_v = jmodel.idx_v();
       const int nq = jmodel.nq();
 
-      assert(nq == jmodel.nv() && "joint nv and nq dimensions should be equal.");
       const auto has_configuration_limit = jmodel.hasConfigurationLimit();
       for (int k = 0; k < nq; ++k)
       {
