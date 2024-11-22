@@ -671,7 +671,8 @@ namespace pinocchio
         const SdfGraph & graph,
         const urdf::details::UrdfVisitorBase & visitor,
         const Model & model,
-        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models);
+        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+          & constraint_models);
 
       /**
        * @brief Find the parent of all elements, the root link, and return it.
@@ -689,7 +690,7 @@ namespace pinocchio
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       const std::string & rootJointName,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
@@ -719,7 +720,7 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, contact_models);
+      details::parseContactInformation(graph, visitor, model, constraint_models);
 
       return model;
     }
@@ -729,13 +730,13 @@ namespace pinocchio
       const std::string & xmlStream,
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
       return buildModelFromXML(
-        xmlStream, rootJoint, "root_joint", model, contact_models, rootLinkName, parentGuidance,
+        xmlStream, rootJoint, "root_joint", model, constraint_models, rootLinkName, parentGuidance,
         verbose);
     }
 
@@ -745,7 +746,7 @@ namespace pinocchio
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       const std::string & rootJointName,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
@@ -775,7 +776,7 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, contact_models);
+      details::parseContactInformation(graph, visitor, model, constraint_models);
 
       return model;
     }
@@ -785,13 +786,13 @@ namespace pinocchio
       const std::string & filename,
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
       return buildModel(
-        filename, rootJoint, "root_joint", model, contact_models, rootLinkName, parentGuidance,
+        filename, rootJoint, "root_joint", model, constraint_models, rootLinkName, parentGuidance,
         verbose);
     }
 
@@ -799,7 +800,7 @@ namespace pinocchio
     ModelTpl<Scalar, Options, JointCollectionTpl> & buildModelFromXML(
       const std::string & xmlStream,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
@@ -824,7 +825,7 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, contact_models);
+      details::parseContactInformation(graph, visitor, model, constraint_models);
 
       return model;
     }
@@ -833,7 +834,7 @@ namespace pinocchio
     ModelTpl<Scalar, Options, JointCollectionTpl> & buildModel(
       const std::string & filename,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName,
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
@@ -858,7 +859,7 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, contact_models);
+      details::parseContactInformation(graph, visitor, model, constraint_models);
 
       return model;
     }

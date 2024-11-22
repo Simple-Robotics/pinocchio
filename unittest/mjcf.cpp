@@ -452,11 +452,12 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
   typedef pinocchio::SE3::Vector3 Vector3;
   typedef pinocchio::SE3::Matrix3 Matrix3;
 
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidConstraintModel) contact_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::BilateralPointConstraintModel)
+  constraint_models;
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.xml");
 
   pinocchio::Model model_m;
-  pinocchio::mjcf::buildModel(filename, model_m, contact_models);
+  pinocchio::mjcf::buildModel(filename, model_m, constraint_models);
 
   std::string file_u = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.urdf");
   pinocchio::Model model_u;
@@ -1368,22 +1369,23 @@ BOOST_AUTO_TEST_CASE(test_geometry_parsing)
 
 BOOST_AUTO_TEST_CASE(test_contact_parsing)
 {
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidConstraintModel) contact_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::BilateralPointConstraintModel)
+  constraint_models;
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/closed_chain.xml");
 
   pinocchio::Model model;
-  pinocchio::mjcf::buildModel(filename, model, contact_models);
+  pinocchio::mjcf::buildModel(filename, model, constraint_models);
 
-  BOOST_CHECK_EQUAL(contact_models.size(), 4);
+  BOOST_CHECK_EQUAL(constraint_models.size(), 4);
   BOOST_CHECK_EQUAL(
-    contact_models[0].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
+    constraint_models[0].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
-    contact_models[1].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+    constraint_models[1].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
   BOOST_CHECK_EQUAL(
-    contact_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
+    constraint_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
-    contact_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
-  for (const auto & cm : contact_models)
+    constraint_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+  for (const auto & cm : constraint_models)
   {
     BOOST_CHECK(cm.joint2_placement.isApprox(cm.joint1_placement.inverse()));
   }

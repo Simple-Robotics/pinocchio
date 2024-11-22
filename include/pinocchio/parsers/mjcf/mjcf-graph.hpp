@@ -9,6 +9,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/joint/joints.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
@@ -540,10 +541,11 @@ namespace pinocchio
 
         /// @brief Parse the equality constraints and add them to the model
         /// @param model Model to add the constraints to
-        /// @param contact_models Vector of contact models to add the constraints to
+        /// @param constraint_models Vector of contact models to add the constraints to
         void parseContactInformation(
           const Model & model,
-          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models);
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+            & constraint_models);
 
         /// @brief Fill geometry model with all the info taken from the mjcf model file
         /// @param type Type of geometry to parse (COLLISION or VISUAL)

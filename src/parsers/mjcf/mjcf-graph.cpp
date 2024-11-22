@@ -4,7 +4,6 @@
 
 #include "pinocchio/parsers/mjcf/mjcf-graph.hpp"
 #include "pinocchio/multibody/model.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
 
 namespace pinocchio
 {
@@ -1113,7 +1112,8 @@ namespace pinocchio
 
       void MjcfGraph::parseContactInformation(
         const Model & model,
-        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models)
+        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+          & constraint_models)
       {
         for (const auto & entry : mapOfEqualities)
         {
@@ -1129,15 +1129,15 @@ namespace pinocchio
           // when body2 is not specified, we link to the world
           if (eq.body2 == "")
           {
-            RigidConstraintModel rcm(CONTACT_3D, model, body1, jointPlacement, LOCAL);
-            contact_models.push_back(rcm);
+            BilateralPointConstraintModel bpcm(model, body1, jointPlacement);
+            constraint_models.push_back(bpcm);
           }
           else
           {
             const JointIndex body2 = urdfVisitor.getParentId(eq.body2);
-            RigidConstraintModel rcm(
-              CONTACT_3D, model, body1, jointPlacement, body2, jointPlacement.inverse(), LOCAL);
-            contact_models.push_back(rcm);
+            BilateralPointConstraintModel bpcm(
+              model, body1, jointPlacement, body2, jointPlacement.inverse());
+            constraint_models.push_back(bpcm);
           }
         }
       }

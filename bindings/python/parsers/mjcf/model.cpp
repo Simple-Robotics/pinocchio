@@ -7,6 +7,7 @@
 #include "pinocchio/bindings/python/utils/path.hpp"
 
 #include <boost/python.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 namespace pinocchio
 {
@@ -35,9 +36,53 @@ namespace pinocchio
       const std::string & root_joint_name)
     {
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) contact_models;
       ::pinocchio::mjcf::buildModel(
         path(filename), root_joint, root_joint_name, model, contact_models);
+      return bp::make_tuple(model, contact_models);
+    }
+
+    Model buildModelFromMJCFString(const std::string & xml_string)
+    {
+      const std::istringstream xml_data(xml_string);
+      boost::filesystem::path path(
+        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
+      boost::filesystem::ofstream file_stream(path);
+      file_stream << xml_data.rdbuf();
+      file_stream.close();
+      Model model;
+      ::pinocchio::mjcf::buildModel(path.string(), model);
+      return model;
+    }
+
+    Model buildModelFromMJCFString(const std::string & xml_string, const JointModel & root_joint)
+    {
+      const std::istringstream xml_data(xml_string);
+      boost::filesystem::path path(
+        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
+      boost::filesystem::ofstream file_stream(path);
+      file_stream << xml_data.rdbuf();
+      file_stream.close();
+      Model model;
+      ::pinocchio::mjcf::buildModel(path.string(), root_joint, model);
+      return model;
+    }
+
+    bp::tuple buildModelFromMJCFString(
+      const std::string & xml_string,
+      const JointModel & root_joint,
+      const std::string & root_joint_name)
+    {
+      const std::istringstream xml_data(xml_string);
+      boost::filesystem::path path(
+        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
+      boost::filesystem::ofstream file_stream(path);
+      file_stream << xml_data.rdbuf();
+      file_stream.close();
+      Model model;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) contact_models;
+      ::pinocchio::mjcf::buildModel(
+        path.string(), root_joint, root_joint_name, model, contact_models);
       return bp::make_tuple(model, contact_models);
     }
 
@@ -62,6 +107,27 @@ namespace pinocchio
           pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "root_joint", "root_joint_name"),
         "Parse the MJCF file and return a pinocchio Model with the given root Joint and its "
+        "specified name as well as a constraint list if some are present in the MJCF file.");
+
+      bp::def(
+        "buildModelFromMJCFString",
+        static_cast<Model (*)(const std::string &)>(pinocchio::python::buildModelFromMJCFString),
+        bp::args("xml_string"),
+        "Parse the MJCF string given in input and return a pinocchio Model.");
+
+      bp::def(
+        "buildModelFromMJCFString",
+        static_cast<Model (*)(const std::string &, const JointModel &)>(
+          pinocchio::python::buildModelFromMJCFString),
+        bp::args("mjcf_filename", "root_joint"),
+        "Parse the MJCF string and return a pinocchio Model with the given root Joint.");
+
+      bp::def(
+        "buildModelFromMJCFString",
+        static_cast<bp::tuple (*)(const std::string &, const JointModel &, const std::string &)>(
+          pinocchio::python::buildModelFromMJCFString),
+        bp::args("mjcf_filename", "root_joint", "root_joint_name"),
+        "Parse the MJCF string and return a pinocchio Model with the given root Joint and its "
         "specified name as well as a constraint list if some are present in the MJCF file.");
     }
   } // namespace python
