@@ -84,39 +84,6 @@ namespace pinocchio
     }
   }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
 
-  namespace internal
-  {
-    template<
-      template<typename T> class Holder,
-      typename ConstraintModel,
-      typename ConstraintModelAllocator,
-      typename VectorLikeIn>
-    typename VectorLikeIn::Scalar computeZeroInitialGuessMaxConstraintViolation_impl(
-      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
-        constraint_models,
-      const Eigen::DenseBase<VectorLikeIn> & drift)
-    {
-      Eigen::DenseIndex cindex = 0;
-
-      using SegmentType = typename VectorLikeIn::ConstSegmentReturnType;
-      using Scalar = typename ConstraintModel::Scalar;
-
-      Scalar max_violation = Scalar(0);
-      for (const ConstraintModel & cmodel : constraint_models)
-      {
-        const auto csize = cmodel.size();
-
-        SegmentType drift_segment = drift.segment(cindex, csize);
-        typedef ZeroInitialGuessMaxConstraintViolationVisitor<SegmentType, Scalar> Algo;
-
-        Algo::run(cmodel, drift_segment, max_violation);
-
-        cindex += csize;
-      }
-      return max_violation;
-    };
-  } // namespace internal
-
   template<
     template<typename T> class Holder,
     typename ConstraintModel,
@@ -126,15 +93,24 @@ namespace pinocchio
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeIn> & drift)
   {
-    return internal::computeZeroInitialGuessMaxConstraintViolation_impl(constraint_models, drift);
-  }
+    Eigen::DenseIndex cindex = 0;
 
-  template<typename ConstraintModel, typename ConstraintModelAllocator, typename VectorLikeIn>
-  typename ConstraintModel::Scalar computeZeroInitialGuessMaxConstraintViolation(
-    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-    const Eigen::DenseBase<VectorLikeIn> & drift)
-  {
-    return internal::computeZeroInitialGuessMaxConstraintViolation_impl(constraint_models, drift);
+    using SegmentType = typename VectorLikeIn::ConstSegmentReturnType;
+    using Scalar = typename ConstraintModel::Scalar;
+
+    Scalar max_violation = Scalar(0);
+    for (const ConstraintModel & cmodel : constraint_models)
+    {
+      const auto csize = cmodel.size();
+
+      SegmentType drift_segment = drift.segment(cindex, csize);
+      typedef ZeroInitialGuessMaxConstraintViolationVisitor<SegmentType, Scalar> Algo;
+
+      Algo::run(cmodel, drift_segment, max_violation);
+
+      cindex += csize;
+    }
+    return max_violation;
   }
 
   template<typename _Scalar>
