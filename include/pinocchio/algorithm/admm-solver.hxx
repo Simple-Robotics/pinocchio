@@ -86,9 +86,15 @@ namespace pinocchio
 
   namespace internal
   {
-    template<typename StdVectorType, typename VectorLikeIn>
+    template<
+      template<typename T> class Holder,
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn>
     typename VectorLikeIn::Scalar computeZeroInitialGuessMaxConstraintViolation_impl(
-      const StdVectorType & constraint_models, const Eigen::DenseBase<VectorLikeIn> & drift)
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & drift)
     {
       Eigen::DenseIndex cindex = 0;
 
