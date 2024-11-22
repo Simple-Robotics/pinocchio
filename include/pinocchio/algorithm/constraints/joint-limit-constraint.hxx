@@ -182,11 +182,11 @@ namespace pinocchio
     set_ub.setZero();
 
     // Compare to the reference document, we need to reverse the box bounds, as -force \in BoxSet
-    set_ub.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
-      .fill(+std::numeric_limits<Scalar>::max());
-
-    set_lb.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
+    set_lb.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
       .fill(-std::numeric_limits<Scalar>::max());
+
+    set_ub.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
+      .fill(+std::numeric_limits<Scalar>::max());
 
     // Fill row_sparsity_pattern from row_active_indexes content
     row_sparsity_pattern.resize(total_size, BooleanVector::Zero(model.nv));
@@ -217,12 +217,12 @@ namespace pinocchio
 
     for (const auto q_index : active_lower_bound_constraints)
     {
-      constraint_residual[row_index++] = data.q_in[q_index] - model.lowerPositionLimit[q_index];
+      constraint_residual[row_index++] = -(data.q_in[q_index] - model.lowerPositionLimit[q_index]);
     }
 
     for (const auto q_index : active_upper_bound_constraints)
     {
-      constraint_residual[row_index++] = data.q_in[q_index] - model.upperPositionLimit[q_index];
+      constraint_residual[row_index++] = -(data.q_in[q_index] - model.upperPositionLimit[q_index]);
     }
 
     assert(row_index == this->size());
@@ -252,13 +252,13 @@ namespace pinocchio
          ++constraint_id, ++row_id)
     {
       const auto col_id = active_lower_bound_constraints_tangent[constraint_id];
-      jacobian_matrix(row_id, col_id) = Scalar(1);
+      jacobian_matrix(row_id, col_id) = -Scalar(1);
     }
     for (size_t constraint_id = 0; constraint_id < active_upper_bound_constraints_tangent.size();
          ++constraint_id, ++row_id)
     {
       const auto col_id = active_upper_bound_constraints_tangent[constraint_id];
-      jacobian_matrix(row_id, col_id) = Scalar(1);
+      jacobian_matrix(row_id, col_id) = -Scalar(1);
     }
   }
 } // namespace pinocchio
