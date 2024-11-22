@@ -89,27 +89,15 @@ namespace pinocchio
 
     Model buildModelFromMJCFString(const std::string & xml_string)
     {
-      const std::istringstream xml_data(xml_string);
-      boost::filesystem::path path(
-        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
-      boost::filesystem::ofstream file_stream(path);
-      file_stream << xml_data.rdbuf();
-      file_stream.close();
       Model model;
-      ::pinocchio::mjcf::buildModel(path.string(), model);
+      ::pinocchio::mjcf::buildModelFromXML(xml_string, model);
       return model;
     }
 
     Model buildModelFromMJCFString(const std::string & xml_string, const JointModel & root_joint)
     {
-      const std::istringstream xml_data(xml_string);
-      boost::filesystem::path path(
-        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
-      boost::filesystem::ofstream file_stream(path);
-      file_stream << xml_data.rdbuf();
-      file_stream.close();
       Model model;
-      ::pinocchio::mjcf::buildModel(path.string(), root_joint, model);
+      ::pinocchio::mjcf::buildModelFromXML(xml_string, root_joint, model);
       return model;
     }
 
@@ -118,16 +106,10 @@ namespace pinocchio
       const JointModel & root_joint,
       const std::string & root_joint_name)
     {
-      const std::istringstream xml_data(xml_string);
-      boost::filesystem::path path(
-        boost::filesystem::temp_directory_path() / boost::filesystem::unique_path());
-      boost::filesystem::ofstream file_stream(path);
-      file_stream << xml_data.rdbuf();
-      file_stream.close();
       Model model;
       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
-      ::pinocchio::mjcf::buildModel(
-        path.string(), root_joint, root_joint_name, model, constraint_models);
+      ::pinocchio::mjcf::buildModelFromXML(
+        xml_string, root_joint, root_joint_name, model, constraint_models);
       return bp::make_tuple(model, constraint_models);
     }
 
