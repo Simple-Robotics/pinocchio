@@ -326,14 +326,14 @@ namespace pinocchio
           VectorXs & dx = rhs;
           dx = x_ - x_previous;
           dx_norm = dx.template lpNorm<Eigen::Infinity>(); // check relative progress on x
-          dual_feasibility_vector.noalias() += mu_prox * dx;
+          dual_feasibility_vector.noalias() = mu_prox * dx;
         }
 
         {
           VectorXs & dy = rhs;
           dy = y_ - y_previous;
           dy_norm = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
-          dual_feasibility_vector.noalias() = (tau * rho) * dy;
+          dual_feasibility_vector.noalias() += (tau * rho) * dy;
         }
 
         {
