@@ -79,13 +79,15 @@ namespace pinocchio
           continue;
 
         const int v_index = idx_v + k;
-        if (lb[q_index] != -std::numeric_limits<Scalar>::max())
+        if (!(lb[q_index] == -std::numeric_limits<Scalar>::max()
+              || lb[q_index] == -std::numeric_limits<Scalar>::infinity()))
         {
           is_lower_bound_constraint_active[q_index] = true;
           active_lower_bound_constraints.push_back(q_index);
           active_lower_bound_constraints_tangent.push_back(v_index);
         }
-        if (ub[q_index] != +std::numeric_limits<Scalar>::max())
+        if (!(ub[q_index] == +std::numeric_limits<Scalar>::max()
+              || ub[q_index] == +std::numeric_limits<Scalar>::infinity()))
         {
           is_upper_bound_constraint_active[q_index] = true;
           active_upper_bound_constraints.push_back(q_index);
