@@ -23,11 +23,32 @@ namespace pinocchio
       return model;
     }
 
+    Model buildModelFromMJCF(const bp::object & filename, Model & model)
+    {
+      return ::pinocchio::mjcf::buildModel(path(filename), model);
+    }
+
     Model buildModelFromMJCF(const bp::object & filename, const JointModel & root_joint)
     {
       Model model;
       ::pinocchio::mjcf::buildModel(path(filename), root_joint, model);
       return model;
+    }
+
+    Model
+    buildModelFromMJCF(const bp::object & filename, const JointModel & root_joint, Model & model)
+    {
+      return ::pinocchio::mjcf::buildModel(path(filename), root_joint, model);
+    }
+
+    bp::tuple buildModelFromMJCF(
+      const bp::object & filename,
+      const JointModel & root_joint,
+      Model & model,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models)
+    {
+      ::pinocchio::mjcf::buildModel(path(filename), root_joint, model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
     }
 
     bp::tuple buildModelFromMJCF(
@@ -36,10 +57,34 @@ namespace pinocchio
       const std::string & root_joint_name)
     {
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       ::pinocchio::mjcf::buildModel(
-        path(filename), root_joint, root_joint_name, model, contact_models);
-      return bp::make_tuple(model, contact_models);
+        path(filename), root_joint, root_joint_name, model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
+    }
+
+    bp::tuple buildModelFromMJCF(
+      const bp::object & filename,
+      const JointModel & root_joint,
+      const std::string & root_joint_name,
+      Model & model)
+    {
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
+      ::pinocchio::mjcf::buildModel(
+        path(filename), root_joint, root_joint_name, model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
+    }
+
+    bp::tuple buildModelFromMJCF(
+      const bp::object & filename,
+      const JointModel & root_joint,
+      const std::string & root_joint_name,
+      Model & model,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models)
+    {
+      ::pinocchio::mjcf::buildModel(
+        path(filename), root_joint, root_joint_name, model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
     }
 
     Model buildModelFromMJCFString(const std::string & xml_string)
@@ -80,10 +125,10 @@ namespace pinocchio
       file_stream << xml_data.rdbuf();
       file_stream.close();
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       ::pinocchio::mjcf::buildModel(
-        path.string(), root_joint, root_joint_name, model, contact_models);
-      return bp::make_tuple(model, contact_models);
+        path.string(), root_joint, root_joint_name, model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
     }
 
     void exposeMJCFModel()
@@ -96,6 +141,12 @@ namespace pinocchio
 
       bp::def(
         "buildModelFromMJCF",
+        static_cast<Model (*)(const bp::object &, Model &)>(pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "model"),
+        "Parse the MJCF file given in input and return a pinocchio Model.");
+
+      bp::def(
+        "buildModelFromMJCF",
         static_cast<Model (*)(const bp::object &, const JointModel &)>(
           pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "root_joint"),
@@ -103,9 +154,45 @@ namespace pinocchio
 
       bp::def(
         "buildModelFromMJCF",
+        static_cast<Model (*)(const bp::object &, const JointModel &, Model &)>(
+          pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "root_joint", "model"),
+        "Parse the MJCF file and return a pinocchio Model with the given root Joint.");
+
+      bp::def(
+        "buildModelFromMJCF",
+        static_cast<bp::tuple (*)(
+          const bp::object &, const JointModel &, Model &,
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)>(
+          pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "root_joint", "model", "constraint_models"),
+        "Parse the MJCF file and return a pinocchio Model with the given root Joint and the "
+        "constraint models.");
+
+      bp::def(
+        "buildModelFromMJCF",
         static_cast<bp::tuple (*)(const bp::object &, const JointModel &, const std::string &)>(
           pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "root_joint", "root_joint_name"),
+        "Parse the MJCF file and return a pinocchio Model with the given root Joint and its "
+        "specified name as well as a constraint list if some are present in the MJCF file.");
+
+      bp::def(
+        "buildModelFromMJCF",
+        static_cast<bp::tuple (*)(
+          const bp::object &, const JointModel &, const std::string &, Model &)>(
+          pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "root_joint", "root_joint_name", "model"),
+        "Parse the MJCF file and return a pinocchio Model with the given root Joint and its "
+        "specified name as well as a constraint list if some are present in the MJCF file.");
+
+      bp::def(
+        "buildModelFromMJCF",
+        static_cast<bp::tuple (*)(
+          const bp::object &, const JointModel &, const std::string &, Model &,
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)>(
+          pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "root_joint", "root_joint_name", "model", "constraint_models"),
         "Parse the MJCF file and return a pinocchio Model with the given root Joint and its "
         "specified name as well as a constraint list if some are present in the MJCF file.");
 
