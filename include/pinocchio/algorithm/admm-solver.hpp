@@ -13,6 +13,8 @@
 #include "pinocchio/algorithm/contact-solver-base.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 
+#include "pinocchio/math/lanczos-decomposition.hpp"
+
 #include <boost/optional.hpp>
 
 namespace pinocchio
@@ -153,14 +155,14 @@ namespace pinocchio
   template<typename Scalar>
   union ADMMUpdateRuleContainerTpl {
     ADMMUpdateRuleContainerTpl()
-    : dummy() {};
+    : dummy(){};
     ADMMSpectralUpdateRuleTpl<Scalar> spectral_rule;
     ADMMLinearUpdateRuleTpl<Scalar> linear_rule;
 
   protected:
     struct Dummy
     {
-      Dummy() {};
+      Dummy(){};
     };
 
     Dummy dummy{};
@@ -175,7 +177,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
-    typedef PowerIterationAlgoTpl<VectorXs> PowerIterationAlgo;
+    typedef LanczosDecompositionTpl<VectorXs> LanczosAlgo;
 
     using Base::problem_size;
 
@@ -285,7 +287,6 @@ namespace pinocchio
     , linear_update_rule_factor(linear_update_rule_factor)
     , ratio_primal_dual(ratio_primal_dual)
     , max_it_largest_eigen_value_solver(max_it_largest_eigen_value_solver)
-    , power_iteration_algo(problem_dim)
     , x_(VectorXs::Zero(problem_dim))
     , y_(VectorXs::Zero(problem_dim))
     , x_previous(VectorXs::Zero(problem_dim))
@@ -298,7 +299,6 @@ namespace pinocchio
     , dual_feasibility_vector(VectorXs::Zero(problem_dim))
     , stats(Base::max_it)
     {
-      power_iteration_algo.max_it = max_it_largest_eigen_value_solver;
     }
 
     /// \brief Set the ADMM penalty value.
@@ -548,11 +548,6 @@ namespace pinocchio
       return s_;
     }
 
-    PowerIterationAlgo & getPowerIterationAlgo()
-    {
-      return power_iteration_algo;
-    }
-
     SolverStats & getStats()
     {
       return stats;
@@ -584,9 +579,6 @@ namespace pinocchio
 
     /// \brief Maximum number of iterarions called for the power iteration algorithm
     int max_it_largest_eigen_value_solver;
-
-    /// \brief Power iteration algo.
-    PowerIterationAlgo power_iteration_algo;
 
     /// \brief Primal variables (corresponds to the contact forces)
     VectorXs x_, y_;

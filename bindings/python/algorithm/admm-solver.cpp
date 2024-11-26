@@ -24,7 +24,6 @@ namespace pinocchio
     namespace bp = boost::python;
 
     typedef ADMMContactSolverTpl<context::Scalar> Solver;
-    typedef Solver::PowerIterationAlgo PowerIterationAlgo;
     typedef Solver::SolverStats SolverStats;
     typedef context::Scalar Scalar;
     typedef context::VectorXs VectorXs;
@@ -353,10 +352,6 @@ namespace pinocchio
         //         "Compute the  scaling spectral factor of the ADMM penalty term from the current
         //         largest and lowest eigenvalues and the ADMM penalty term.")
         //    .staticmethod("computeRhoPower")
-
-        .def(
-          "getPowerIterationAlgo", &Solver::getPowerIterationAlgo, bp::arg("self"),
-          bp::return_internal_reference<>())
 
         .def("getStats", &Solver::getStats, bp::arg("self"), bp::return_internal_reference<>());
 

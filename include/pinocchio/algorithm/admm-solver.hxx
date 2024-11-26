@@ -257,17 +257,15 @@ namespace pinocchio
       ADMMUpdateRuleContainer admm_update_rule_container;
       switch (admm_update_rule)
       {
-      case (ADMMUpdateRule::SPECTRAL):
-        if (compute_largest_eigen_values)
-        {
-          power_iteration_algo.run(delassus);
-        }
-        m = mu_prox + mu_R;
-        L = power_iteration_algo.largest_eigen_value;
+      case (ADMMUpdateRule::SPECTRAL): {
+        LanczosAlgo lanczos_algo(delassus, 3);
+        m = rhs.minCoeff();
+        L = lanczos_algo.Ts().computeEigenvalue(2);
         admm_update_rule_container.spectral_rule =
           ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
         rho = ADMMSpectralUpdateRule::computeRho(L, m, rho_power);
         break;
+      }
       case (ADMMUpdateRule::LINEAR):
         admm_update_rule_container.linear_rule =
           ADMMLinearUpdateRule(ratio_primal_dual, linear_update_rule_factor);
