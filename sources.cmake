@@ -171,6 +171,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/tensor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/triangular-matrix.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/tridiagonal-matrix.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/math/eigenvalues-tridiagonal-matrix.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/data.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/fcl.hpp
