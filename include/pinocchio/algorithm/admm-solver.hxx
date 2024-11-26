@@ -48,6 +48,34 @@ namespace pinocchio
       }
     }
 
+    template<typename VectorLike>
+    static void algo_impl(
+      const UnboundedSetTpl<Scalar> & set,
+      const Eigen::MatrixBase<VectorLike> & drift,
+      Scalar & max_violation)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(set);
+      const Scalar violation = drift.template lpNorm<Eigen::Infinity>();
+      if (violation > max_violation)
+      {
+        max_violation = violation;
+      }
+    }
+
+    template<typename VectorLike>
+    static void algo_impl(
+      const BoxSetTpl<Scalar> & set,
+      const Eigen::MatrixBase<VectorLike> & drift,
+      Scalar & max_violation)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(set);
+      const Scalar violation = drift.template lpNorm<Eigen::Infinity>();
+      if (violation > max_violation)
+      {
+        max_violation = violation;
+      }
+    }
+
     template<typename ConstraintSet, typename VectorLike>
     static void algo_impl(
       const ConstraintSet & set,
