@@ -258,9 +258,10 @@ namespace pinocchio
       switch (admm_update_rule)
       {
       case (ADMMUpdateRule::SPECTRAL): {
-        LanczosAlgo lanczos_algo(delassus, 3);
+        int lanczos_size = delassus.size() < 3 ? delassus.size() : 3;
+        LanczosAlgo lanczos_algo(delassus, lanczos_size);
         m = rhs.minCoeff();
-        L = lanczos_algo.Ts().computeEigenvalue(2);
+        L = lanczos_algo.Ts().computeEigenvalue(lanczos_size - 1);
         admm_update_rule_container.spectral_rule =
           ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
         rho = ADMMSpectralUpdateRule::computeRho(L, m, rho_power);
