@@ -289,10 +289,6 @@ namespace pinocchio
       if (stat_record)
       {
         stats.reset();
-
-        // Compute initial problem primal and dual feasibility
-        primal_feasibility_vector = x_ - y_;
-        primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
       }
 
       is_initialized = true;
@@ -363,7 +359,6 @@ namespace pinocchio
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         complementarity = computeConicComplementarity(constraint_models, z_, y_);
-        //      complementarity = z_.dot(y_)/constraint_models.size();
 
         if (stat_record)
         {
