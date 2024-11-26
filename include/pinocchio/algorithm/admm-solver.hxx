@@ -113,7 +113,8 @@ namespace pinocchio
   }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
 
   template<
-    template<typename T> class Holder,
+    template<typename T>
+    class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeIn>
@@ -145,7 +146,8 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
-    template<typename T> class Holder,
+    template<typename T>
+    class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeR>
@@ -195,33 +197,21 @@ namespace pinocchio
       x_ = primal_guess.get();
       PINOCCHIO_CHECK_ARGUMENT_SIZE(x_.size(), problem_size);
     }
-    else if (!is_initialized)
-    {
-      x_.setZero();
-    }
     else
     {
-      x_ = y_; // takes the current value stored in the solver
+      x_.setZero();
     }
 
     // Init y
     computeConeProjection(constraint_models, x_, y_);
 
     // Init z
-    if (dual_guess)
+    delassus.applyOnTheRight(y_, z_); // z = (G + R + mu_prox*Id)* y
+    z_.noalias() += -mu_prox * y_ + g;
+    if (solve_ncp)
     {
-      z_ = dual_guess.get();
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(z_.size(), problem_size);
-    }
-    else if (!is_initialized)
-    {
-      delassus.applyOnTheRight(y_, z_); // z = (G + R + mu_prox*Id)* y
-      z_.noalias() += -mu_prox * y_ + g;
-      if (solve_ncp)
-      {
-        computeComplementarityShift(constraint_models, z_, s_);
-        z_ += s_; // Add De Saxé shift
-      }
+      computeComplementarityShift(constraint_models, z_, s_);
+      z_ += s_; // Add De Saxé shift
     }
 
     dual_feasibility_vector = z_;
