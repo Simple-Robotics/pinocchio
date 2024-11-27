@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_identity)
   // Fill matrix
   {
     PlainMatrixType mat(mat_size, mat_size);
-    mat = tridiagonal_matrix;
+    mat = tridiagonal_matrix.eigen();
 
     BOOST_CHECK(mat.isIdentity(0));
   }
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_identity)
     PlainMatrixType mat = PlainMatrixType::Random(mat_size, mat_size);
 
     PlainMatrixType plain(mat_size, mat_size);
-    plain = tridiagonal_matrix;
+    plain = tridiagonal_matrix.eigen();
 
     PlainMatrixType res_apply_on_the_right = tridiagonal_matrix * mat;
     PlainMatrixType res_apply_on_the_right_ref = plain * mat;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_random)
   // Fill matrix
   {
     PlainMatrixType mat(mat_size, mat_size);
-    mat = tridiagonal_matrix;
+    mat = tridiagonal_matrix.eigen();
 
     BOOST_CHECK(mat.diagonal() == tridiagonal_matrix.diagonal());
     BOOST_CHECK(mat.diagonal<-1>() == tridiagonal_matrix.subDiagonal());
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     PlainMatrixType rhs_mat = PlainMatrixType::Random(mat_size, mat_size);
 
     PlainMatrixType plain(mat_size, mat_size);
-    plain = tridiagonal_matrix;
+    plain = tridiagonal_matrix.eigen();
 
     PlainMatrixType res = tridiagonal_matrix * rhs_mat;
 
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_inverse)
   tridiagonal_matrix.setRandom();
 
   PlainMatrixType plain_mat(mat_size, mat_size);
-  plain_mat = tridiagonal_matrix;
+  plain_mat = tridiagonal_matrix.eigen();
   const PlainMatrixType plain_mat_inverse = plain_mat.inverse();
 
   const TridiagonalSymmetricMatrixInverse<TridiagonalSymmetricMatrixd> &
