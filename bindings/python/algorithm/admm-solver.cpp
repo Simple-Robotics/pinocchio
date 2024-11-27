@@ -284,8 +284,7 @@ namespace pinocchio
            bp::arg("tau") = Scalar(0.5), bp::arg("rho_power") = Scalar(0.2),
            bp::arg("rho_power_factor") = Scalar(0.05),
            bp::arg("linear_update_rule_factor") = Scalar(10),
-           bp::arg("ratio_primal_dual") = Scalar(10),
-           bp::arg("max_it_largest_eigen_value_solver") = 20),
+           bp::arg("ratio_primal_dual") = Scalar(10), bp::arg("lanczos_size") = 3),
           "Default constructor."));
 
       cl.def(ContactSolverBasePythonVisitor<Solver>())

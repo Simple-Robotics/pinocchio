@@ -46,6 +46,21 @@ namespace pinocchio
       compute(mat);
     }
 
+    /// \brief Cnstructor for the Lanczos decomposition that only allocates data.
+    /// Compute must be called afterwards.
+    LanczosDecompositionTpl(Eigen::DenseIndex problem_size, Eigen::DenseIndex decomposition_size)
+    : m_Qs(problem_size, decomposition_size)
+    , m_Ts(decomposition_size)
+    , m_A_times_q(problem_size)
+    , m_rank(-1)
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        decomposition_size >= 1, "The size of the decomposition should be greater than one.");
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        decomposition_size <= problem_size,
+        "The size of the decomposition should not be larger than the number of rows.");
+    }
+
     bool operator==(const LanczosDecompositionTpl & other) const
     {
       if (this == &other)
@@ -168,6 +183,12 @@ namespace pinocchio
     Eigen::DenseIndex rank() const
     {
       return m_rank;
+    }
+
+    /// \brief Returns the size of the decomposition
+    Eigen::DenseIndex size() const
+    {
+      return m_Ts.rows();
     }
 
   protected:

@@ -276,7 +276,7 @@ namespace pinocchio
       Scalar rho_power_factor = Scalar(0.05),
       Scalar linear_update_rule_factor = Scalar(2),
       Scalar ratio_primal_dual = Scalar(10),
-      int max_it_largest_eigen_value_solver = 20)
+      int lanczos_size = int(3))
     : Base(problem_dim)
     , is_initialized(false)
     , mu_prox(mu_prox)
@@ -286,7 +286,9 @@ namespace pinocchio
     , rho_power_factor(rho_power_factor)
     , linear_update_rule_factor(linear_update_rule_factor)
     , ratio_primal_dual(ratio_primal_dual)
-    , max_it_largest_eigen_value_solver(max_it_largest_eigen_value_solver)
+    , lanczos_algo(
+        static_cast<Eigen::DenseIndex>(math::max(2, problem_dim)),
+        static_cast<Eigen::DenseIndex>(math::max(2, math::min(lanczos_size, problem_dim))))
     , x_(VectorXs::Zero(problem_dim))
     , y_(VectorXs::Zero(problem_dim))
     , x_previous(VectorXs::Zero(problem_dim))
@@ -385,6 +387,29 @@ namespace pinocchio
     int getCholeskyUpdateCount() const
     {
       return cholesky_update_count;
+    }
+
+    /// \brief Sets the size of triangular matrix of Lanczos decomposition.
+    /// The higher the size, the more accurate the estimation of min/max eigenvalues will be.
+    /// Note: the maximum size is the size of the problem
+    void setLanczosSize(int size)
+    {
+      // TODO(lmontaut): should we throw if size > problem_size or instead take the min as done
+      // below?
+      int new_lanczos_size = size;
+      new_lanczos_size = math::max(2, math::min(new_lanczos_size, this->problem_size));
+      if (new_lanczos_size != this->lanczos_algo.size())
+      {
+        this->lanczos_algo = LanczosAlgo(
+          static_cast<Eigen::DenseIndex>(math::max(2, this->problem_size)),
+          static_cast<Eigen::DenseIndex>(new_lanczos_size));
+      }
+    }
+
+    /// \returns the Lanczos algorithm used for eigenvalues estimation.
+    LanczosAlgo & getLanczosAlgo() const
+    {
+      return lanczos_algo;
     }
 
     ///
@@ -575,8 +600,8 @@ namespace pinocchio
     ///  \brief Ratio primal/dual
     Scalar ratio_primal_dual;
 
-    /// \brief Maximum number of iterarions called for the power iteration algorithm
-    int max_it_largest_eigen_value_solver;
+    /// \brief Lanczos decomposition algorithm.
+    LanczosAlgo lanczos_algo;
 
     /// \brief Primal variables (corresponds to the contact forces)
     VectorXs x_, y_;

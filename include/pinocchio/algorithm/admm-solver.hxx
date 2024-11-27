@@ -256,11 +256,18 @@ namespace pinocchio
       switch (admm_update_rule)
       {
       case (ADMMUpdateRule::SPECTRAL): {
-        const Eigen::DenseIndex lanczos_size =
-          delassus.size() < 3 ? delassus.size() : 3; // max lanczos dimension is 3.
-        LanczosAlgo lanczos_algo(delassus, lanczos_size);
-        m = rhs.minCoeff();
-        L = lanczos_algo.Ts().computeEigenvalue(lanczos_size - 1);
+        if (this->problem_size > 1)
+        {
+          m = rhs.minCoeff();
+          this->lanczos_algo.compute(delassus);
+          L = this->lanczos_algo.Ts().computeEigenvalue(this->lanczos_algo.size() - 1);
+        }
+        else
+        {
+          typedef Eigen::Matrix<Scalar, 1, 1> Vector1;
+          const Vector1 G = delassus * Vector1::Constant(1);
+          m = L = G.coeff(0);
+        }
         admm_update_rule_container.spectral_rule =
           ADMMSpectralUpdateRule(ratio_primal_dual, L, m, rho_power_factor);
         rho = ADMMSpectralUpdateRule::computeRho(L, m, rho_power);
