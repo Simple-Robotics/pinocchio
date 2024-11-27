@@ -113,8 +113,7 @@ namespace pinocchio
   }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
 
   template<
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeIn>
@@ -146,8 +145,7 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeR>
@@ -258,7 +256,8 @@ namespace pinocchio
       switch (admm_update_rule)
       {
       case (ADMMUpdateRule::SPECTRAL): {
-        int lanczos_size = delassus.size() < 3 ? delassus.size() : 3;
+        const Eigen::DenseIndex lanczos_size =
+          delassus.size() < 3 ? delassus.size() : 3; // max lanczos dimension is 3.
         LanczosAlgo lanczos_algo(delassus, lanczos_size);
         m = rhs.minCoeff();
         L = lanczos_algo.Ts().computeEigenvalue(lanczos_size - 1);
