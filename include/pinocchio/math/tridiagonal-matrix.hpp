@@ -63,6 +63,46 @@ namespace pinocchio
     MatrixDerived>> : public traits<TridiagonalSymmetricMatrixInverse>
   {
   };
+
+  template<typename Scalar, int Options>
+  struct traits<EigenMatrixExpression<TridiagonalSymmetricMatrixTpl<Scalar, Options>>>
+  : traits<TridiagonalSymmetricMatrixTpl<Scalar, Options>>
+  {
+  };
+
+  template<typename Scalar, int Options>
+  struct EigenMatrixExpression<TridiagonalSymmetricMatrixTpl<Scalar, Options>>
+  : public Eigen::ReturnByValue<
+      EigenMatrixExpression<TridiagonalSymmetricMatrixTpl<Scalar, Options>>>
+  {
+    typedef TridiagonalSymmetricMatrixTpl<Scalar, Options> TridiagonalSymmetricMatrix;
+
+    EigenMatrixExpression(const TridiagonalSymmetricMatrix & self)
+    : self(self)
+    {
+    }
+
+    template<typename ResultType>
+    inline void evalTo(ResultType & result) const
+    {
+      result.setZero();
+      result.template diagonal<1>() = self.subDiagonal().conjugate();
+      result.diagonal() = self.diagonal();
+      result.template diagonal<-1>() = self.subDiagonal();
+    }
+
+    EIGEN_CONSTEXPR Eigen::Index rows() const EIGEN_NOEXCEPT
+    {
+      return self.rows();
+    }
+    EIGEN_CONSTEXPR Eigen::Index cols() const EIGEN_NOEXCEPT
+    {
+      return self.cols();
+    }
+
+  protected:
+    const TridiagonalSymmetricMatrix & self;
+  };
 } // namespace pinocchio
 
 namespace Eigen
@@ -72,6 +112,20 @@ namespace Eigen
 
     template<typename Scalar, int Options>
     struct traits<pinocchio::TridiagonalSymmetricMatrixTpl<Scalar, Options>>
+    : public traits<typename pinocchio::traits<
+        pinocchio::TridiagonalSymmetricMatrixTpl<Scalar, Options>>::PlainMatrixType>
+    {
+      typedef pinocchio::traits<pinocchio::TridiagonalSymmetricMatrixTpl<Scalar, Options>> Base;
+      typedef typename Base::PlainMatrixType ReturnType;
+      enum
+      {
+        Flags = 0
+      };
+    };
+
+    template<typename Scalar, int Options>
+    struct traits<
+      pinocchio::EigenMatrixExpression<pinocchio::TridiagonalSymmetricMatrixTpl<Scalar, Options>>>
     : public traits<typename pinocchio::traits<
         pinocchio::TridiagonalSymmetricMatrixTpl<Scalar, Options>>::PlainMatrixType>
     {
@@ -160,8 +214,8 @@ namespace pinocchio
   ///  This class is in practice used in Lanczos decomposition
   template<typename _Scalar, int _Options>
   struct TridiagonalSymmetricMatrixTpl
-  : public Eigen::ReturnByValue<TridiagonalSymmetricMatrixTpl<_Scalar, _Options>>
   {
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     typedef TridiagonalSymmetricMatrixTpl Self;
     typedef _Scalar Scalar;
@@ -272,16 +326,13 @@ namespace pinocchio
 
     PlainMatrixType matrix() const
     {
-      return PlainMatrixType(*this);
+      return PlainMatrixType(eigen());
     }
 
-    template<typename ResultType>
-    inline void evalTo(ResultType & result) const
+    EigenMatrixExpression<TridiagonalSymmetricMatrixTpl> eigen() const
     {
-      result.setZero();
-      result.template diagonal<1>() = subDiagonal().conjugate();
-      result.diagonal() = diagonal();
-      result.template diagonal<-1>() = subDiagonal();
+      typedef EigenMatrixExpression<TridiagonalSymmetricMatrixTpl> ReturnType;
+      return ReturnType(*this);
     }
 
     template<typename MatrixDerived>
