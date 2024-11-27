@@ -155,14 +155,14 @@ namespace pinocchio
   template<typename Scalar>
   union ADMMUpdateRuleContainerTpl {
     ADMMUpdateRuleContainerTpl()
-    : dummy(){};
+    : dummy() {};
     ADMMSpectralUpdateRuleTpl<Scalar> spectral_rule;
     ADMMLinearUpdateRuleTpl<Scalar> linear_rule;
 
   protected:
     struct Dummy
     {
-      Dummy(){};
+      Dummy() {};
     };
 
     Dummy dummy{};
@@ -177,7 +177,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
-    typedef LanczosDecompositionTpl<VectorXs> LanczosAlgo;
+    typedef LanczosDecompositionTpl<MatrixXs> LanczosAlgo;
 
     using Base::problem_size;
 
@@ -406,8 +406,7 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintAllocator,
       typename VectorLikeR>
@@ -482,8 +481,7 @@ namespace pinocchio
     template<
       typename DelassusDerived,
       typename VectorLike,
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintAllocator,
       typename VectorLikeOut>
