@@ -14,6 +14,9 @@ namespace pinocchio
 {
 
   template<typename T>
+  struct EigenMatrixExpression;
+
+  template<typename T>
   struct is_floating_point : boost::is_floating_point<T>
   {
   };
