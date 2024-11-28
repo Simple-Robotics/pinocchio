@@ -2,8 +2,8 @@
 // Copyright (c) 2024 INRIA
 //
 
-#ifndef __pinocchio_algorithm_constraints_box_set_hpp__
-#define __pinocchio_algorithm_constraints_box_set_hpp__
+#ifndef __pinocchio_algorithm_constraints_orthant_cone_hpp__
+#define __pinocchio_algorithm_constraints_orthant_cone_hpp__
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/set-base.hpp"
@@ -219,4 +219,4 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_box_set_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_orthant_cone_hpp__
