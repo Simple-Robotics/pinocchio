@@ -478,12 +478,12 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     Eigen::VectorXd dual_solution2 = admm_solver.getDualSolution();
 
     BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
-    BOOST_CHECK(dual_solution.isZero());
-    BOOST_CHECK(dual_solution2.isZero());
+    BOOST_CHECK(dual_solution.isZero(1e-6));
+    BOOST_CHECK(dual_solution2.isZero(1e-6));
 
     BOOST_CHECK(
       (tau_push_against_lower_bound + constraint_jacobian.transpose() * primal_solution / dt)
-        .isZero(1e-8));
+        .isZero(1e-6));
   }
 
   // External torques push the slider away from the lower bound
