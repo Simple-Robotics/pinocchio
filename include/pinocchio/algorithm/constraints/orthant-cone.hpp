@@ -161,6 +161,8 @@ namespace pinocchio
     }
 
     using Base::project;
+    using Base::operator==;
+    using Base::operator!=;
 
     /// \brief Project a vector x into orthant.
     ///
@@ -197,6 +199,8 @@ namespace pinocchio
     }
 
     using Base::project;
+    using Base::operator==;
+    using Base::operator!=;
 
     /// \brief Project a vector x into orthant.
     ///
