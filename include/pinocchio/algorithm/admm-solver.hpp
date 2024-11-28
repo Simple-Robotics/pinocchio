@@ -392,18 +392,19 @@ namespace pinocchio
     /// \brief Sets the size of triangular matrix of Lanczos decomposition.
     /// The higher the size, the more accurate the estimation of min/max eigenvalues will be.
     /// Note: the maximum size is the size of the problem
-    void setLanczosSize(int size)
+    void setLanczosSize(int decomposition_size)
     {
       // TODO(lmontaut): should we throw if size > problem_size or instead take the min as done
       // below?
-      int new_lanczos_problem_size = math::max(2, this->problem_size);
-      int new_lanczos_decomposition_size = math::max(2, math::min(size, this->problem_size));
+      int new_lanczos_size = math::max(2, this->problem_size);
+      int new_lanczos_decomposition_size =
+        math::max(2, math::min(decomposition_size, this->problem_size));
       if (
-        new_lanczos_problem_size != this->lanczos_algo.Qs().rows()
-        || new_lanczos_decomposition_size != this->lanczos_algo.Ts().rows())
+        new_lanczos_size != this->lanczos_algo.size()
+        || new_lanczos_decomposition_size != this->lanczos_algo.decompositionSize())
       {
         this->lanczos_algo = LanczosAlgo(
-          static_cast<Eigen::DenseIndex>(new_lanczos_problem_size),
+          static_cast<Eigen::DenseIndex>(new_lanczos_size),
           static_cast<Eigen::DenseIndex>(new_lanczos_decomposition_size));
       }
     }

@@ -262,7 +262,7 @@ namespace pinocchio
         {
           m = rhs.minCoeff();
           this->lanczos_algo.compute(delassus);
-          L = this->lanczos_algo.Ts().computeEigenvalue(this->lanczos_algo.size() - 1);
+          L = ::pinocchio::computeLargestEigenvalue(this->lanczos_algo.Ts());
         }
         else
         {
