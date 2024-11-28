@@ -422,10 +422,10 @@ namespace pinocchio
     /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
-    /// (corresponds to the lowest non-zero). \param[in] primal_guess Optional initial guess of the
-    /// primal solution (constrained forces). \param[in] dual_guess Optinal Initial guess of the
-    /// dual solution (constrained velocities). \param[in] solve_ncp whether to solve the NCP (true)
-    /// or CCP (false) \param[in] compute_largest_eigen_values run power iteration algorithm
+    /// (corresponds to the lowest non-zero).
+    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
+    /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
+    /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
     /// \param[in] admm_update_rule update rule for ADMM (linear or spectral)
     /// \param[in] stat_record record solver metrics
     ///
@@ -445,7 +445,6 @@ namespace pinocchio
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
-      bool compute_largest_eigen_values = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false);
 
@@ -457,10 +456,11 @@ namespace pinocchio
     /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
-    /// (corresponds to the lowest non-zero). \param[in] primal_guess Optional initial guess of the
-    /// primal solution (constrained forces). \param[in] dual_guess Optinal Initial guess of the
-    /// dual solution (constrained velocities). \param[in] solve_ncp whether to solve the NCP (true)
-    /// or CCP (false) \param[in] compute_largest_eigen_values run power iteration algorithm
+    /// (corresponds to the lowest non-zero).
+    /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
+    /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
+    /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
+    /// \param[in] compute_largest_eigen_values run power iteration algorithm
     /// \param[in] admm_update_rule update rule for ADMM (linear or spectral)
     /// \param[in] stat_record record solver metrics
     ///
@@ -479,7 +479,6 @@ namespace pinocchio
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
-      bool compute_largest_eigen_values = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false)
     {
@@ -491,7 +490,7 @@ namespace pinocchio
 
       return solve(
         delassus, g, wrapped_constraint_models, R, primal_guess, dual_guess, solve_ncp,
-        compute_largest_eigen_values, admm_update_rule, stat_record);
+        admm_update_rule, stat_record);
     }
 
     ///

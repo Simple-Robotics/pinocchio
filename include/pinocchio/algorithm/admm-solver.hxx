@@ -157,11 +157,13 @@ namespace pinocchio
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
     bool solve_ncp,
-    bool compute_largest_eigen_values,
     ADMMUpdateRule admm_update_rule,
     bool stat_record)
 
   {
+    // Unused for now
+    PINOCCHIO_UNUSED_VARIABLE(dual_guess);
+
     using namespace internal;
     typedef ADMMSpectralUpdateRuleTpl<Scalar> ADMMSpectralUpdateRule;
     typedef ADMMLinearUpdateRuleTpl<Scalar> ADMMLinearUpdateRule;
