@@ -278,9 +278,26 @@ namespace pinocchio
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
+      const Eigen::MatrixBase<BlockType> & G_block,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector) const
+    {
+      project_impl(
+        this->set, this->over_relax_value, G_block.derived(), primal_vector.const_cast_derived(),
+        dual_vector.const_cast_derived());
+    }
+
+    template<
+      typename ConstraintSetType,
+      typename BlockType,
+      typename PrimalVectorType,
+      typename DualVectorType>
+    static void project_impl(
+      const ConstraintSetType & set,
+      const Scalar over_relax_value,
       const Eigen::MatrixBase<BlockType> & G_block_,
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
-      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_)
     {
       const auto & G_block = G_block_.derived();
       auto & primal_vector = primal_vector_.const_cast_derived();
@@ -297,16 +314,13 @@ namespace pinocchio
         && "The the dual vector should be of the same size than the box set.");
 
       const Eigen::DenseIndex size = set.size();
-      const auto & lb = set.lb();
-      const auto & ub = set.ub();
 
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
-        value -=
-          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
-        value = math::max(lb[row_id], math::min(ub[row_id], value));
+        value -= Scalar(over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
+        value = set.rowiseProject(row_id, value);
         dual_vector.noalias() +=
           G_block.col(row_id)
           * Scalar(value - value_previous); // TODO optimize: we only need dual_vector[row_id] for
@@ -323,9 +337,26 @@ namespace pinocchio
     ///
     template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
     void project(
+      const Eigen::EigenBase<BlockType> & G_block,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector) const
+    {
+      project_impl(
+        this->set, this->over_relax_value, G_block.derived(), primal_vector.const_cast_derived(),
+        dual_vector.const_cast_derived());
+    }
+
+    template<
+      typename ConstraintSetType,
+      typename BlockType,
+      typename PrimalVectorType,
+      typename DualVectorType>
+    static void project_impl(
+      const ConstraintSetType & set,
+      const Scalar over_relax_value,
       const Eigen::EigenBase<BlockType> & G_block_, // for Sparse matrices
       const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
-      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_)
     {
       const auto & G_block = G_block_.derived();
       auto & primal_vector = primal_vector_.const_cast_derived();
@@ -342,16 +373,13 @@ namespace pinocchio
         && "The the dual vector should be of the same size than the box set.");
 
       const Eigen::DenseIndex size = set.size();
-      const auto & lb = set.lb();
-      const auto & ub = set.ub();
 
       for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
-        value -=
-          Scalar(this->over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
-        value = math::max(lb[row_id], math::min(ub[row_id], value));
+        value -= Scalar(over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
+        value = set.rowiseProject(row_id, value);
         dual_vector += G_block.col(row_id) * Scalar(value - value_previous);
       }
     }
@@ -390,11 +418,93 @@ namespace pinocchio
   }; // PGSConstraintProjectionStep<BoxSetTpl<_Scalar>>
 
   template<typename _Scalar>
+  struct PGSConstraintProjectionStep<JointLimitConstraintConeTpl<_Scalar>>
+  : PGSConstraintProjectionStepBase<_Scalar>
+  {
+    typedef _Scalar Scalar;
+    typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
+    typedef BoxSetTpl<Scalar> BoxSet;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> Vector;
+    typedef PGSConstraintProjectionStepBase<Scalar> Base;
+
+    PGSConstraintProjectionStep(const Scalar over_relax_value, const ConstraintSet & set)
+    : Base(over_relax_value)
+    , set(set)
+    {
+    }
+
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::MatrixBase<BlockType> & G_block_,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+      PGSConstraintProjectionStep<BoxSet>::project_impl(
+        this->set, this->over_relax_value, G_block_.derived(), primal_vector_.const_cast_derived(),
+        dual_vector_.const_cast_derived());
+    }
+
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::EigenBase<BlockType> & G_block_, // for Sparse matrices
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+      PGSConstraintProjectionStep<BoxSet>::project_impl(
+        this->set, this->over_relax_value, G_block_.derived(), primal_vector_.const_cast_derived(),
+        dual_vector_.const_cast_derived());
+    }
+
+    /// \brief Compute the feasibility conditions associated with the optimization problem
+    template<typename PrimalVectorType, typename DualVectorType>
+    void computeFeasibility(
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector)
+    {
+      this->primal_feasibility =
+        Scalar(0); // always zero as the primal variable belongs to the constraint set.
+
+      const Eigen::DenseIndex size = set.size();
+      Scalar complementarity = Scalar(0);
+      Scalar dual_feasibility = Scalar(0);
+
+      for (Eigen::DenseIndex row_id = 0; row_id < size; ++row_id)
+      {
+        const Scalar row_complementarity =
+          math::fabs(Scalar(primal_vector[row_id] * dual_vector[row_id]));
+        complementarity = math::max(complementarity, row_complementarity);
+
+        const Scalar row_dual_feasibility =
+          math::fabs(dual_vector[row_id] - set.dual().rowiseProject(row_id, dual_vector[row_id]));
+        dual_feasibility = math::max(dual_feasibility, row_dual_feasibility);
+      }
+      this->complementarity = complementarity;
+      this->dual_feasibility = dual_feasibility;
+    }
+
+    const ConstraintSet & set;
+
+  }; // PGSConstraintProjectionStep<JointLimitConstraintConeTpl<_Scalar>>
+
+  template<typename _Scalar>
   template<
     typename MatrixLike,
     typename VectorLike,
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeOut>
