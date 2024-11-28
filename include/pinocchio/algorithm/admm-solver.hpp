@@ -409,7 +409,7 @@ namespace pinocchio
     }
 
     /// \returns the Lanczos algorithm used for eigenvalues estimation.
-    LanczosAlgo & getLanczosAlgo() const
+    const LanczosAlgo & getLanczosAlgo() const
     {
       return lanczos_algo;
     }
