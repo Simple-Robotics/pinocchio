@@ -1,16 +1,20 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_coulomb_friction_cone_hpp__
 #define __pinocchio_algorithm_constraints_coulomb_friction_cone_hpp__
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
+#include "pinocchio/algorithm/constraints/set-base.hpp"
 #include "pinocchio/math/fwd.hpp"
 #include "pinocchio/math/comparison-operators.hpp"
 
 namespace pinocchio
 {
+
+  template<typename Scalar>
+  struct DualCoulombFrictionConeTpl;
 
   template<typename NewScalar, typename Scalar>
   struct CastType<NewScalar, CoulombFrictionConeTpl<Scalar>>
@@ -18,16 +22,32 @@ namespace pinocchio
     typedef CoulombFrictionConeTpl<NewScalar> type;
   };
 
-  template<typename Scalar>
-  struct DualCoulombFrictionConeTpl;
+  template<typename NewScalar, typename Scalar>
+  struct CastType<NewScalar, DualCoulombFrictionConeTpl<Scalar>>
+  {
+    typedef DualCoulombFrictionConeTpl<NewScalar> type;
+  };
+
+  template<typename _Scalar>
+  struct traits<CoulombFrictionConeTpl<_Scalar>>
+  {
+    typedef _Scalar Scalar;
+  };
+
+  template<typename _Scalar>
+  struct traits<DualCoulombFrictionConeTpl<_Scalar>>
+  {
+    typedef _Scalar Scalar;
+  };
 
   ///  \brief 3d Coulomb friction cone.
   template<typename _Scalar>
-  struct CoulombFrictionConeTpl
+  struct CoulombFrictionConeTpl : SetBase<CoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
     typedef DualCoulombFrictionConeTpl<Scalar> DualCone;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
+    typedef SetBase<CoulombFrictionConeTpl> Base;
 
     ///
     /// \brief Default constructor
@@ -89,40 +109,45 @@ namespace pinocchio
       return f_normalized.template head<2>().norm() <= mu * f_normalized[2] + prec;
     }
 
+    using Base::project;
+
     /// \brief Project a vector x onto the cone.
     ///
     /// \param[in] x a 3d vector to project.
     ///
-    template<typename Vector3Like>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like)
-      project(const Eigen::MatrixBase<Vector3Like> & x) const
+    template<typename Vector3LikeIn, typename Vector3LikeOut>
+    void project(
+      const Eigen::MatrixBase<Vector3LikeIn> & x,
+      const Eigen::MatrixBase<Vector3LikeOut> & res_) const
     {
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
       typedef Eigen::Matrix<Scalar, 2, 1> Vector2Plain;
-      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
+
       const Scalar & z = x[2];
       const Scalar mu_z = mu * z;
+
+      auto & res = res_.const_cast_derived();
 
       const Vector2Plain t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
       if (mu * t_norm <= -z)
-        return Vector3Plain::Zero();
+      {
+        res.setZero();
+      }
       else if (t_norm <= mu_z)
       {
-        return x;
+        res = x;
       }
       else
       {
-        Vector3Plain res;
         res.template head<2>() = (mu / t_norm) * t;
         res[2] = 1;
         res.normalize();
         const Scalar scale = x.dot(res);
         res *= scale;
-        return res;
       }
     }
 
@@ -235,11 +260,12 @@ namespace pinocchio
 
   ///  \brief Dual of the 3d Coulomb friction cone.
   template<typename _Scalar>
-  struct DualCoulombFrictionConeTpl
+  struct DualCoulombFrictionConeTpl : SetBase<DualCoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
     typedef CoulombFrictionConeTpl<Scalar> DualCone;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
+    typedef SetBase<DualCoulombFrictionConeTpl> Base;
 
     ///
     /// \brief Default constructor
@@ -292,10 +318,12 @@ namespace pinocchio
       return mu * v_normalized.template head<2>().norm() <= v_normalized[2] + prec;
     }
 
+    using Base::project;
     /// \brief Project a vector x onto the cone
-    template<typename Vector3Like>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like)
-      project(const Eigen::MatrixBase<Vector3Like> & x) const
+    template<typename Vector3LikeIn, typename Vector3LikeOut>
+    void project(
+      const Eigen::MatrixBase<Vector3LikeIn> & x,
+      const Eigen::MatrixBase<Vector3LikeOut> & res_) const
     {
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
@@ -303,14 +331,18 @@ namespace pinocchio
       typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
       const Scalar & z = x[2];
 
+      auto & res = res_.const_cast_derived();
+
       const Eigen::Matrix<Scalar, 2, 1> t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
       if (t_norm <= -mu * z)
-        return Vector3Plain::Zero();
+      {
+        res.setZero();
+      }
       else if (mu * t_norm <= z)
       {
-        return x;
+        res = x;
       }
       else
       {
@@ -320,7 +352,6 @@ namespace pinocchio
         res.normalize();
         const Scalar scale = x.dot(res);
         res *= scale;
-        return res;
       }
     }
 

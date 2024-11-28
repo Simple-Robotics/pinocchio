@@ -30,10 +30,22 @@ namespace pinocchio
       return derived().dim();
     }
 
-    template<typename Vector>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector) project(const Eigen::MatrixBase<Vector> & x) const
+    template<typename VectorLike>
+    typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike)
+      project(const Eigen::MatrixBase<VectorLike> & x) const
     {
-      return derived().project(x);
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike) ReturnType;
+      ReturnType res(x.size());
+      derived().project(x, res);
+      return res;
+    }
+
+    template<typename VectorLikeIn, typename VectorLikeOut>
+    void project(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeOut> & x_proj) const
+    {
+      return derived().projec(x.derived(), x_proj.const_cast_derived());
     }
 
     template<typename Vector>

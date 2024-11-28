@@ -37,6 +37,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
+    typedef SetBase<UnboundedSetTpl> Base;
 
     /// \brief Constructor from a given size
     ///
@@ -84,16 +85,19 @@ namespace pinocchio
       return true;
     }
 
-    /// \brief Project a vector x into the box.
+    using Base::project;
+
+    /// \brief Project a vector x into orthant.
     ///
     /// \param[in] x a vector to project.
+    /// \param[in] res result of the projection.
     ///
-    template<typename VectorLike>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike)
-      project(const Eigen::MatrixBase<VectorLike> & x) const
+    template<typename VectorLikeIn, typename VectorLikeOut>
+    void project(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike) VectorPlain;
-      return VectorPlain(x); // make a copy
+      res_.const_cast_derived() = x;
     }
 
     /// \brief Returns the dimension of the ambiant space.
