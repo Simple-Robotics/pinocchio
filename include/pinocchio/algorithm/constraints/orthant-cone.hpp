@@ -212,7 +212,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
-      res_.const_cast_derived() = x.array().max(Scalar(0)).matrix();
+      res_.const_cast_derived() = x.array().min(Scalar(0)).matrix();
     }
 
   }; // struct PositiveOrthantTpl
