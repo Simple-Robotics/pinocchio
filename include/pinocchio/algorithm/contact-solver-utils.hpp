@@ -121,7 +121,7 @@ namespace pinocchio
 
       template<typename Vector1Like, typename Vector2Like>
       static void algo_step(
-        const CoulombFrictionConeTpl<double> & set,
+        const CoulombFrictionConeTpl<Scalar> & cone,
         const Eigen::MatrixBase<Vector1Like> & velocity,
         const Eigen::MatrixBase<Vector2Like> & result)
       {
@@ -139,7 +139,7 @@ namespace pinocchio
 
       template<typename Vector1Like, typename Vector2Like>
       static void algo_step(
-        const UnboundedSetTpl<double> & set,
+        const UnboundedSetTpl<Scalar> & set,
         const Eigen::MatrixBase<Vector1Like> & velocity,
         const Eigen::MatrixBase<Vector2Like> & result)
       {
