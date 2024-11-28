@@ -163,6 +163,8 @@ namespace pinocchio
     using Base::project;
     using Base::operator==;
     using Base::operator!=;
+    using Base::dim;
+    using Base::size;
 
     /// \brief Project a vector x into orthant.
     ///
@@ -175,6 +177,13 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
       res_.const_cast_derived() = x.array().max(Scalar(0)).matrix();
+    }
+
+    /// \brief Project the value given as input for the given row index.
+    Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
+    {
+      assert(row_id < size());
+      return math::max(Scalar(0), value);
     }
 
   }; // struct PositiveOrthantTpl
@@ -201,6 +210,8 @@ namespace pinocchio
     using Base::project;
     using Base::operator==;
     using Base::operator!=;
+    using Base::dim;
+    using Base::size;
 
     /// \brief Project a vector x into orthant.
     ///
@@ -213,6 +224,13 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
       res_.const_cast_derived() = x.array().min(Scalar(0)).matrix();
+    }
+
+    /// \brief Project the value given as input for the given row index.
+    Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
+    {
+      assert(row_id < size());
+      return math::min(Scalar(0), value);
     }
 
   }; // struct PositiveOrthantTpl

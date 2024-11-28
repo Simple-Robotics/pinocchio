@@ -132,6 +132,20 @@ namespace pinocchio
       positive_orthant.project(x.tail(positive_orthant.size()), res.tail(positive_orthant.size()));
     }
 
+    /// \brief Project the value given as input for the given row index.
+    Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
+    {
+      assert(row_id < size());
+      if (row_id < negative_orthant.size())
+      {
+        return negative_orthant.rowiseProject(row_id, value);
+      }
+      else
+      {
+        return positive_orthant.rowiseProject(row_id - negative_orthant.size(), value);
+      }
+    }
+
   protected:
     NegativeOrthantCone negative_orthant;
     PositiveOrthantCone positive_orthant;

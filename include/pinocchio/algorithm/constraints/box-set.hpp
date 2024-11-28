@@ -163,6 +163,13 @@ namespace pinocchio
       (m_lb.array() <= m_ub.array).all();
     }
 
+    /// \brief Project the value given as input for the given row index.
+    Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
+    {
+      assert(row_id < size());
+      return math::max(m_lb[row_id], math::min(m_ub[row_id], value));
+    }
+
   protected:
     Vector m_lb, m_ub;
   }; // BoxSetTpl
