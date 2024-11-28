@@ -103,6 +103,7 @@ namespace pinocchio
     : visitors::ConstraintUnaryVisitorBase<
         DualProjectionVisitor<VelocityVectorLike, ResultVectorLike>>
     {
+      typedef typename VelocityVectorLike::Scalar Scalar;
       typedef boost::fusion::vector<const VelocityVectorLike &, ResultVectorLike &> ArgsType;
 
       typedef visitors::ConstraintUnaryVisitorBase<
@@ -124,7 +125,15 @@ namespace pinocchio
         const Eigen::MatrixBase<Vector1Like> & velocity,
         const Eigen::MatrixBase<Vector2Like> & result)
       {
-        result.const_cast_derived() = set.dual().project(velocity);
+      }
+
+      template<typename Vector1Like, typename Vector2Like>
+      static void algo_step(
+        const JointLimitConstraintConeTpl<double> & cone,
+        const Eigen::MatrixBase<Vector1Like> & velocity,
+        const Eigen::MatrixBase<Vector2Like> & result)
+      {
+        result.const_cast_derived() = cone.dual().project(velocity);
         //        assert(set.dual().isInside(result, Scalar(1e-12)));
       }
 
@@ -269,6 +278,23 @@ namespace pinocchio
           Scalar row_complementarity = velocity_positive_part * (force[row_id] - lb[row_id]);
           row_complementarity =
             math::max(row_complementarity, velocity_negative_part * (ub[row_id] - force[row_id]));
+          complementarity = math::max(complementarity, row_complementarity);
+        }
+
+        return complementarity;
+      }
+
+      template<typename Vector1Like, typename Vector2Like>
+      static Scalar algo_step(
+        const JointLimitConstraintConeTpl<Scalar> & cone,
+        const Eigen::MatrixBase<Vector1Like> & velocity,
+        const Eigen::MatrixBase<Vector2Like> & force)
+      {
+        Scalar complementarity = Scalar(0);
+
+        for (Eigen::DenseIndex row_id = 0; row_id < cone.size(); ++row_id)
+        {
+          const Scalar row_complementarity = math::fabs(Scalar(velocity[row_id] * force[row_id]));
           complementarity = math::max(complementarity, row_complementarity);
         }
 
