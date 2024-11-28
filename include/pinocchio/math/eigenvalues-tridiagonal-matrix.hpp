@@ -168,6 +168,42 @@ namespace pinocchio
     return computeSpectrum(
       tridiagonal_mat, eigenvalue_index, eigenvalue_index, eps)[eigenvalue_index];
   }
+
+  ///
+  ///  \brief Computes the lowest eigenvalue associated with the input tridiagonal matrix up to
+  /// precision eps
+  ///
+  /// \param[in] tridiagonal_mat a Tridiagonal Symmetric matrix
+  /// \param[in] eigenvalue_index index of the eigenvalue to compute
+  /// \param[in] eps tolerance in the estimate of the eigenvalues
+  ///
+  /// \returns The lowest eigenvalue
+  /// \see computeSpectrum
+  template<typename Scalar, int Options>
+  Scalar computeLowestEigenvalue(
+    const TridiagonalSymmetricMatrixTpl<Scalar, Options> & tridiagonal_mat, Scalar eps = 1e-4)
+  {
+    return computeSpectrum(tridiagonal_mat, 0, 0, eps)[0];
+  }
+
+  ///
+  ///  \brief Computes the largest eigenvalue associated with the input tridiagonal matrix up to
+  /// precision eps
+  ///
+  /// \param[in] tridiagonal_mat a Tridiagonal Symmetric matrix
+  /// \param[in] eigenvalue_index index of the eigenvalue to compute
+  /// \param[in] eps tolerance in the estimate of the eigenvalues
+  ///
+  /// \returns The largest eigenvalue
+  /// \see computeSpectrum
+  template<typename Scalar, int Options>
+  Scalar computeLargestEigenvalue(
+    const TridiagonalSymmetricMatrixTpl<Scalar, Options> & tridiagonal_mat, Scalar eps = 1e-4)
+  {
+    return computeSpectrum(
+      tridiagonal_mat, tridiagonal_mat.cols() - 1, tridiagonal_mat.cols() - 1,
+      eps)[tridiagonal_mat.cols() - 1];
+  }
 } // namespace pinocchio
 
 #endif // #ifndef __pinocchio_math_eigenvalues_tridiagonal_matrix_hpp__
