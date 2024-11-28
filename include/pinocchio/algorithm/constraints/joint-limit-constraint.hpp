@@ -36,7 +36,7 @@ namespace pinocchio
     };
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
+    typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
@@ -159,7 +159,7 @@ namespace pinocchio
     typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
 
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
+    typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
     typedef BoxSetTpl<Scalar, Options> BoxSet;
 
     //    typedef JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;

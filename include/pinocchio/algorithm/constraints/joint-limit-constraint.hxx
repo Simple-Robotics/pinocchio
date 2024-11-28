@@ -175,18 +175,9 @@ namespace pinocchio
     assert(row_active_indexes.size() == total_size);
 
     // Fill force limits
-    m_set.resize(Eigen::DenseIndex(total_size));
-    auto & set_lb = m_set.lb();
-    set_lb.setZero();
-    auto & set_ub = m_set.ub();
-    set_ub.setZero();
-
-    // Compare to the reference document, we need to reverse the box bounds, as -force \in BoxSet
-    set_lb.head(Eigen::DenseIndex(active_lower_bound_constraints.size()))
-      .fill(-std::numeric_limits<Scalar>::max());
-
-    set_ub.tail(Eigen::DenseIndex(active_upper_bound_constraints.size()))
-      .fill(+std::numeric_limits<Scalar>::max());
+    m_set.resize(
+      Eigen::DenseIndex(active_lower_bound_constraints.size()),
+      Eigen::DenseIndex(active_upper_bound_constraints.size()));
 
     // Fill row_sparsity_pattern from row_active_indexes content
     row_sparsity_pattern.resize(total_size, BooleanVector::Zero(model.nv));
