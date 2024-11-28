@@ -47,6 +47,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/joint-limit-constraint.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frictional-joint-constraint.hxx
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/orthant-cone.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/point-constraint-model-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/point-constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/set-base.hpp
