@@ -62,6 +62,13 @@ namespace pinocchio
             "Computes the residual associated with the decomposition, namely, the quantity \f$ A "
             "Q_s - Q_s T_s \f$")
 
+          .def(
+            "size", &LanczosDecomposition::size, bp::arg("self"),
+            "Returns the size of the underlying matrix.")
+          .def(
+            "decompositionSize", &LanczosDecomposition::decompositionSize, bp::arg("self"),
+            "Returns the size of the decomposition.")
+
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
