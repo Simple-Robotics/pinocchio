@@ -15,6 +15,18 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 using namespace pinocchio;
 
+BOOST_AUTO_TEST_CASE(test_basic_constructor)
+{
+  const Eigen::DenseIndex mat_size = 20;
+  const Eigen::DenseIndex decomposition_size = 10;
+
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  LanczosDecomposition lanczos_decomposition(mat_size, decomposition_size);
+
+  BOOST_CHECK(lanczos_decomposition.size() == mat_size);
+  BOOST_CHECK(lanczos_decomposition.decompositionSize() == decomposition_size);
+}
+
 BOOST_AUTO_TEST_CASE(test_identity)
 {
   const Eigen::DenseIndex mat_size = 20;
