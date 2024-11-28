@@ -108,6 +108,20 @@ namespace pinocchio
       }
     }
 
+    /// \brief Returns a const reference to the negative orthant.
+    ///
+    const NegativeOrthantCone & getNegativeOrthant() const
+    {
+      return negative_orthant;
+    }
+
+    /// \brief Returns a const reference to the positive orthant.
+    ///
+    const PositiveOrthantCone & getPositiveOrthant() const
+    {
+      return positive_orthant;
+    }
+
   protected:
     NegativeOrthantCone negative_orthant;
     PositiveOrthantCone positive_orthant;

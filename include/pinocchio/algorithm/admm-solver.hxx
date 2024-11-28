@@ -76,13 +76,37 @@ namespace pinocchio
       }
     }
 
+    template<typename VectorLike>
+    static void algo_impl(
+      const JointLimitConstraintConeTpl<Scalar> & set,
+      const Eigen::MatrixBase<VectorLike> & drift,
+      Scalar & max_violation)
+    {
+      Scalar negative_orthant_violation = 0;
+      if (set.getNegativeOrthant().size() > 0)
+      {
+        negative_orthant_violation =
+          math::max(Scalar(0), drift.head(set.getNegativeOrthant().size()).maxCoeff());
+      }
+      Scalar positive_orthant_violation = 0;
+      if (set.getPositiveOrthant().size() > 0)
+      {
+        positive_orthant_violation =
+          -math::min(Scalar(0), drift.tail(set.getPositiveOrthant().size()).minCoeff());
+      }
+      const Scalar violation = math::max(negative_orthant_violation, positive_orthant_violation);
+      if (violation > max_violation)
+      {
+        max_violation = violation;
+      }
+    }
+
     template<typename ConstraintSet, typename VectorLike>
     static void algo_impl(
       const ConstraintSet & set,
       const Eigen::MatrixBase<VectorLike> & drift,
       Scalar & max_violation)
     {
-      // TODO: for other sets, how should we compute?
       // do nothing
       PINOCCHIO_UNUSED_VARIABLE(set);
       PINOCCHIO_UNUSED_VARIABLE(drift);
