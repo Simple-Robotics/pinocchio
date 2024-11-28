@@ -125,6 +125,8 @@ namespace pinocchio
         const Eigen::MatrixBase<Vector1Like> & velocity,
         const Eigen::MatrixBase<Vector2Like> & result)
       {
+        result.const_cast_derived() = cone.dual().project(velocity);
+        //        assert(set.dual().isInside(result, Scalar(1e-12)));
       }
 
       template<typename Vector1Like, typename Vector2Like>
