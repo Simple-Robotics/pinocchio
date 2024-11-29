@@ -8,6 +8,7 @@
 #include "pinocchio/math/fwd.hpp"
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
+#include "pinocchio/algorithm/constraints/box-set.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 
