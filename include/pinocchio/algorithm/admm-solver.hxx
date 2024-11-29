@@ -242,17 +242,23 @@ namespace pinocchio
     computeDualConeProjection(constraint_models, z_, z_);
     dual_feasibility_vector -= z_;
 
-    // Checking if the initial guess is better than 0
+    // Computing the convergence criterion of the initial guess
     complementarity = computeConicComplementarity(
       constraint_models, z_, y_); // Complementarity of the initial guess
-    // we Search for the max violation of the constraints
-    // Note: max_violation is always <= 0
-    const Scalar max_violation =
+    dual_feasibility =
+      dual_feasibility_vector
+        .template lpNorm<Eigen::Infinity>(); // dual feasibility of the initial guess
+    this->absolute_residual = math::max(complementarity, dual_feasibility);
+    // Checking if the initial guess is better than 0.
+    // we compute the convergence criterion of the 0 guess
+    const Scalar absolute_residual_zero_guess =
       computeZeroInitialGuessMaxConstraintViolation(constraint_models, g);
 
-    if (max_violation < complementarity)
+    if (absolute_residual_zero_guess < this->absolute_residual)
     { // If true, this means that the zero value initial guess leads a better feasibility in the
       // sense of the contact complementarity
+      // So we set the primal variables to the 0 initial guess and the dual variables accordingly to
+      // g
       x_.setZero();
       y_.setZero();
       z_ = g;
@@ -264,12 +270,10 @@ namespace pinocchio
       dual_feasibility_vector = z_;
       computeDualConeProjection(constraint_models, z_, z_);
       dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
-      complementarity = computeConicComplementarity(
-        constraint_models, z_, y_); // Complementarity of the new null guess
+      // We set the new convergence criterion
+      this->absolute_residual = absolute_residual_zero_guess;
     }
-    // We compute the convergence criterion
-    dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-    this->absolute_residual = math::max(complementarity, dual_feasibility);
+    // We test convergence
     bool abs_prec_reached = this->absolute_residual < this->absolute_precision;
 
     if (!abs_prec_reached)
@@ -499,7 +503,6 @@ namespace pinocchio
 
     this->it = it;
 
-    //    if(abs_prec_reached || rel_prec_reached)
     if (abs_prec_reached)
       return true;
 
