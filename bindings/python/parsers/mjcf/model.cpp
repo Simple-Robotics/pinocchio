@@ -28,6 +28,15 @@ namespace pinocchio
       return ::pinocchio::mjcf::buildModel(path(filename), model);
     }
 
+    bp::tuple buildModelFromMJCF(
+      const bp::object & filename,
+      Model & model,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models)
+    {
+      ::pinocchio::mjcf::buildModel(path(filename), model, constraint_models);
+      return bp::make_tuple(model, constraint_models);
+    }
+
     Model buildModelFromMJCF(const bp::object & filename, const JointModel & root_joint)
     {
       Model model;
@@ -125,6 +134,15 @@ namespace pinocchio
         "buildModelFromMJCF",
         static_cast<Model (*)(const bp::object &, Model &)>(pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "model"),
+        "Parse the MJCF file given in input and return a pinocchio Model.");
+
+      bp::def(
+        "buildModelFromMJCF",
+        static_cast<bp::tuple (*)(
+          const bp::object &, Model &,
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)>(
+          pinocchio::python::buildModelFromMJCF),
+        bp::args("mjcf_filename", "model", "constraint_models"),
         "Parse the MJCF file given in input and return a pinocchio Model.");
 
       bp::def(
