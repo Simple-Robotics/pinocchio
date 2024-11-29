@@ -238,6 +238,8 @@ namespace pinocchio
       z_ += s_; // Add De Saxé shift
     }
 
+    primal_feasibility = 0; // always feasible because y is projected
+
     dual_feasibility_vector = z_;
     computeDualConeProjection(constraint_models, z_, z_);
     dual_feasibility_vector -= z_;
