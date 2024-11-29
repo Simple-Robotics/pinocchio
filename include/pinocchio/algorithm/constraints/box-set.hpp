@@ -70,7 +70,8 @@ namespace pinocchio
     BoxSetTpl<NewScalar, Options> cast() const
     {
       typedef BoxSetTpl<NewScalar, Options> ReturnType;
-      return ReturnType(this->m_lb, this->m_ub);
+      return ReturnType(
+        this->m_lb.template cast<NewScalar>(), this->m_ub.template cast<NewScalar>());
     }
 
     /// \brief Copy operator
