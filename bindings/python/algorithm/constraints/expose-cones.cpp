@@ -36,6 +36,9 @@ namespace pinocchio
       BoxSetPythonVisitor<context::BoxSet>::expose();
 
       BilateralPointConstraintModelPythonVisitor<context::BilateralPointConstraintModel>::expose();
+
+      StdVectorPythonVisitor<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(
+        context::BilateralPointConstraintModel)>::expose("StdVec_BilateralPointConstraintModel");
 #endif
     }
 
