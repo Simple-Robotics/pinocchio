@@ -18,8 +18,6 @@
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
 
-#include "pinocchio/algorithm/constraints/box-set.hpp"
-#include "pinocchio/algorithm/constraints/unbounded-set.hpp"
-#include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
+#include "pinocchio/algorithm/constraints/sets.hpp"
 
 #endif // ifndef __pinocchio_algorithm_constraints_constraints_hpp__
