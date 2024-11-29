@@ -14,6 +14,12 @@ namespace pinocchio
   template<typename Scalar>
   struct JointLimitConstraintConeTpl;
 
+  template<typename NewScalar, typename Scalar>
+  struct CastType<NewScalar, JointLimitConstraintConeTpl<Scalar>>
+  {
+    typedef JointLimitConstraintConeTpl<NewScalar> type;
+  };
+
   template<typename _Scalar>
   struct traits<JointLimitConstraintConeTpl<_Scalar>>
   {
@@ -46,6 +52,14 @@ namespace pinocchio
     {
       negative_orthant.resize(negative_orthant_size);
       positive_orthant.resize(positive_orthant_size);
+    }
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    JointLimitConstraintConeTpl<NewScalar> cast() const
+    {
+      typedef JointLimitConstraintConeTpl<NewScalar> ReturnType;
+      return ReturnType(negative_orthant.size(), positive_orthant.size());
     }
 
     /// \brief Returns the dual cone associated with this.
