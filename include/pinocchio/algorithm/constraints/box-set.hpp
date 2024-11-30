@@ -5,6 +5,7 @@
 #ifndef __pinocchio_algorithm_constraints_box_set_hpp__
 #define __pinocchio_algorithm_constraints_box_set_hpp__
 
+#include "pinocchio/math/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/set-base.hpp"
 
