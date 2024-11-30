@@ -229,15 +229,16 @@ namespace pinocchio
       const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
     {
 
+      const Eigen::DenseIndex size = set.size();
       auto & G_block = G_block_.derived();
       auto & primal_vector = primal_vector_.const_cast_derived();
       auto & dual_vector = dual_vector_.const_cast_derived();
 
-      for (Eigen::DenseIndex i = 0; i < 3; ++i)
+      for (Eigen::DenseIndex i = 0; i < size; ++i)
       {
         Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
         primal_vector[i] += d_primal_value;
-        dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized
+        dual_vector.noalias() += G_block.col(i) * d_primal_value; // TODO: this could be optimized
       }
     }
 
