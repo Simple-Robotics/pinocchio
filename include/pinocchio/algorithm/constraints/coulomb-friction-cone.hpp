@@ -138,10 +138,12 @@ namespace pinocchio
       if (mu * t_norm <= -z)
       {
         res.setZero();
+        return;
       }
       else if (t_norm <= mu_z)
       {
         res = x;
+        return;
       }
       else
       {
@@ -150,6 +152,7 @@ namespace pinocchio
         res.normalize();
         const Scalar scale = x.dot(res);
         res *= scale;
+        return;
       }
     }
 
@@ -330,7 +333,6 @@ namespace pinocchio
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
-      typedef Eigen::Matrix<Scalar, 3, 1> Vector3Plain;
       const Scalar & z = x[2];
 
       auto & res = res_.const_cast_derived();
@@ -341,19 +343,21 @@ namespace pinocchio
       if (t_norm <= -mu * z)
       {
         res.setZero();
+        return;
       }
       else if (mu * t_norm <= z)
       {
         res = x;
+        return;
       }
       else
       {
-        Vector3Plain res;
         res.template head<2>() = t;
         res[2] = mu * t_norm;
         res.normalize();
         const Scalar scale = x.dot(res);
         res *= scale;
+        return;
       }
     }
 
