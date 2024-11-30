@@ -24,13 +24,15 @@ namespace pinocchio
   struct traits<JointLimitConstraintConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
+    typedef JointLimitConstraintConeTpl<Scalar> DualCone;
   };
 
   template<typename _Scalar>
-  struct JointLimitConstraintConeTpl : SetBase<JointLimitConstraintConeTpl<_Scalar>>
+  struct JointLimitConstraintConeTpl : ConeBase<JointLimitConstraintConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
-    typedef SetBase<JointLimitConstraintConeTpl> Base;
+    typedef ConeBase<JointLimitConstraintConeTpl> Base;
+    typedef typename traits<JointLimitConstraintConeTpl>::DualCone DualCone;
 
     typedef PositiveOrthantConeTpl<Scalar> PositiveOrthantCone;
     typedef NegativeOrthantConeTpl<Scalar> NegativeOrthantCone;
@@ -44,6 +46,13 @@ namespace pinocchio
       const Eigen::DenseIndex negative_orthant_size, const Eigen::DenseIndex positive_orthant_size)
     : negative_orthant(negative_orthant_size)
     , positive_orthant(positive_orthant_size)
+    {
+    }
+
+    ///  \brief Copy constructor
+    JointLimitConstraintConeTpl(const JointLimitConstraintConeTpl & other)
+    : negative_orthant(other.negative_orthant)
+    , positive_orthant(other.positive_orthant)
     {
     }
 
@@ -65,9 +74,9 @@ namespace pinocchio
     /// \brief Returns the dual cone associated with this.
     ///
     /// \remarks Orthant cones are by definition self dual.
-    const JointLimitConstraintConeTpl & dual() const
+    DualCone dual() const
     {
-      return *this;
+      return JointLimitConstraintConeTpl(*this);
     }
 
     /// \brief Returns the dimension of the box.

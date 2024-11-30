@@ -6,7 +6,7 @@
 #define __pinocchio_algorithm_constraints_coulomb_friction_cone_hpp__
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/set-base.hpp"
+#include "pinocchio/algorithm/constraints/cone-base.hpp"
 #include "pinocchio/math/fwd.hpp"
 #include "pinocchio/math/comparison-operators.hpp"
 
@@ -32,22 +32,24 @@ namespace pinocchio
   struct traits<CoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
+    typedef DualCoulombFrictionConeTpl<Scalar> DualCone;
   };
 
   template<typename _Scalar>
   struct traits<DualCoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
+    typedef CoulombFrictionConeTpl<Scalar> DualCone;
   };
 
   ///  \brief 3d Coulomb friction cone.
   template<typename _Scalar>
-  struct CoulombFrictionConeTpl : SetBase<CoulombFrictionConeTpl<_Scalar>>
+  struct CoulombFrictionConeTpl : ConeBase<CoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
-    typedef DualCoulombFrictionConeTpl<Scalar> DualCone;
+    typedef typename traits<CoulombFrictionConeTpl>::DualCone DualCone;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
-    typedef SetBase<CoulombFrictionConeTpl> Base;
+    typedef ConeBase<CoulombFrictionConeTpl> Base;
 
     ///
     /// \brief Default constructor
@@ -260,12 +262,12 @@ namespace pinocchio
 
   ///  \brief Dual of the 3d Coulomb friction cone.
   template<typename _Scalar>
-  struct DualCoulombFrictionConeTpl : SetBase<DualCoulombFrictionConeTpl<_Scalar>>
+  struct DualCoulombFrictionConeTpl : ConeBase<DualCoulombFrictionConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
-    typedef CoulombFrictionConeTpl<Scalar> DualCone;
+    typedef typename traits<DualCoulombFrictionConeTpl>::DualCone DualCone;
     typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
-    typedef SetBase<DualCoulombFrictionConeTpl> Base;
+    typedef ConeBase<DualCoulombFrictionConeTpl> Base;
 
     ///
     /// \brief Default constructor

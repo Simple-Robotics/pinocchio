@@ -5,8 +5,8 @@
 #ifndef __pinocchio_algorithm_constraints_orthant_cone_hpp__
 #define __pinocchio_algorithm_constraints_orthant_cone_hpp__
 
-#include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/set-base.hpp"
+#include "pinocchio/math/fwd.hpp"
+#include "pinocchio/algorithm/constraints/cone-base.hpp"
 
 namespace pinocchio
 {
@@ -21,6 +21,7 @@ namespace pinocchio
   struct traits<PositiveOrthantConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
+    typedef PositiveOrthantConeTpl<Scalar> DualCone;
   };
 
   template<typename NewScalar, typename Scalar>
@@ -33,16 +34,18 @@ namespace pinocchio
   struct traits<NegativeOrthantConeTpl<_Scalar>>
   {
     typedef _Scalar Scalar;
+    typedef NegativeOrthantConeTpl<Scalar> DualCone;
   };
 
   ///  \brief Box set defined by a lower and an upper bounds [lb;ub].
   template<typename Derived>
-  struct OrthantConeBase : SetBase<Derived>
+  struct OrthantConeBase : ConeBase<Derived>
   {
     typedef typename traits<Derived>::Scalar Scalar;
+    typedef typename traits<Derived>::DualCone DualCone;
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> Vector;
-    typedef SetBase<Derived> Base;
+    typedef ConeBase<Derived> Base;
 
     const Base & base() const
     {
@@ -122,7 +125,7 @@ namespace pinocchio
     /// \brief Returns the dual cone associated with this.
     ///
     /// \remarks Orthant cone are by definition self dual.
-    const Derived & dual() const
+    DualCone dual() const
     {
       return derived();
     }

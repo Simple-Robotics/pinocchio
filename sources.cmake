@@ -32,6 +32,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/bilateral-point-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/bilateral-weld-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/box-set.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/cone-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/coulomb-friction-cone.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraints.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fictious-constraint.hpp

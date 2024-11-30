@@ -23,7 +23,7 @@ void common_test(const int num_tests, const int dim)
 
   BOOST_CHECK(orthant.isInside(Vector::Zero(dim)));
   BOOST_CHECK(orthant.project(Vector::Zero(dim)) == Vector::Zero(dim));
-  BOOST_CHECK(&orthant.dual() == &orthant);
+  BOOST_CHECK(orthant.dual() == orthant);
 
   for (int k = 0; k < num_tests; ++k)
   {
