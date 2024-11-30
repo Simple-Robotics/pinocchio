@@ -134,7 +134,7 @@ void check_A1_and_A2(
 
   Data::MatrixXs res(cmodel.size(), m);
   res.setZero();
-  cmodel.jacobian_matrix_product(model, data, cdata, mat, res);
+  cmodel.jacobianMatrixProduct(model, data, cdata, mat, res);
 
   const Data::MatrixXs res_ref = J_ref * mat;
 
