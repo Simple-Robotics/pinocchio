@@ -5,10 +5,7 @@
 #ifndef __pinocchio_algorithm_pgs_solver_hxx__
 #define __pinocchio_algorithm_pgs_solver_hxx__
 
-#include <limits>
-#include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
-#include "pinocchio/algorithm/constraints/box-set.hpp"
-#include "pinocchio/algorithm/constraints/joint-limit-constraint-cone.hpp"
+#include "pinocchio/algorithm/constraints/sets.hpp"
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 
 namespace pinocchio
