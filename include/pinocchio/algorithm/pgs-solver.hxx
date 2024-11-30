@@ -206,13 +206,39 @@ namespace pinocchio
       Options = _Options
     };
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
-    typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
     typedef PGSConstraintProjectionStepBase<Scalar> Base;
 
     PGSConstraintProjectionStep(const Scalar over_relax_value, const ConstraintSet & set)
     : Base(over_relax_value)
     , set(set)
     {
+    }
+
+    ///
+    /// \brief Perform a projection step associated with the PGS algorithm
+    ///
+    /// \param[in] G_block block asscociated with the current
+    /// \param[in,out] primal_vector_ primal vector which will be update with the new estimate
+    /// \param[in,out] dual_vector_ dual vector which will be update with the new estimate
+    ///
+    template<typename BlockType, typename PrimalVectorType, typename DualVectorType>
+    void project(
+      const Eigen::MatrixBase<BlockType> & G_block_,
+      const Eigen::MatrixBase<PrimalVectorType> & primal_vector_,
+      const Eigen::MatrixBase<DualVectorType> & dual_vector_) const
+    {
+
+      const Eigen::DenseIndex size = set.size();
+      auto & G_block = G_block_.derived();
+      auto & primal_vector = primal_vector_.const_cast_derived();
+      auto & dual_vector = dual_vector_.const_cast_derived();
+
+      for (Eigen::DenseIndex i = 0; i < size; ++i)
+      {
+        Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
+        primal_vector[i] += d_primal_value;
+        dual_vector.noalias() += G_block.col(i) * d_primal_value; // TODO: this could be optimized
+      }
     }
 
     ///
@@ -238,7 +264,7 @@ namespace pinocchio
       {
         Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
         primal_vector[i] += d_primal_value;
-        dual_vector.noalias() += G_block.col(i) * d_primal_value; // TODO: this could be optimized
+        dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized using aloca
       }
     }
 
