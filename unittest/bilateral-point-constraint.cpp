@@ -75,6 +75,70 @@ BOOST_AUTO_TEST_CASE(basic_constructor)
   BOOST_CHECK(cmodel3 == cmodel2);
 }
 
+void check_jacobians_operations(
+  const Model & model,
+  const Data & data,
+  const BilateralPointConstraintModel & cmodel,
+  BilateralPointConstraintData & cdata)
+{
+  Data::MatrixXs J_ref = Data::MatrixXs::Zero(3, model.nv);
+  getConstraintJacobian(model, data, cmodel, cdata, J_ref);
+
+  // Check Jacobian matrix product
+#ifdef NDEBUG
+  const int num_tests = int(1e4);
+#else
+  const int num_tests = int(1e2);
+#endif
+
+  const Eigen::DenseIndex m = 40;
+  for (int k = 0; k < num_tests; ++k)
+  {
+    const Data::MatrixXs mat = Data::MatrixXs::Random(model.nv, m);
+    Data::MatrixXs res(cmodel.size(), m);
+
+    const Data::MatrixXs mat_transpose = Data::MatrixXs::Random(cmodel.size(), m);
+    Data::MatrixXs res_transpose(model.nv, m);
+
+    // Set to
+    cmodel.jacobianMatrixProduct(model, data, cdata, mat, res);
+    Data::MatrixXs res_ref = J_ref * mat;
+    BOOST_CHECK(res.isApprox(res_ref));
+
+    cmodel.jacobianTransposeMatrixProduct(model, data, cdata, mat_transpose, res_transpose);
+    Data::MatrixXs res_transpose_ref = J_ref.transpose() * mat_transpose;
+    BOOST_CHECK(res_transpose.isApprox(res_transpose_ref));
+
+    // Add to
+    res = res_ref.setRandom();
+    cmodel.jacobianMatrixProduct(model, data, cdata, mat, res, AddTo());
+    res_ref += J_ref * mat;
+    BOOST_CHECK(res.isApprox(res_ref));
+
+    res_transpose = res_transpose_ref.setRandom();
+    cmodel.jacobianTransposeMatrixProduct(
+      model, data, cdata, mat_transpose, res_transpose, AddTo());
+    res_transpose_ref += J_ref.transpose() * mat_transpose;
+    BOOST_CHECK(res_transpose.isApprox(res_transpose_ref));
+
+    // Remove to
+    res = res_ref.setRandom();
+    cmodel.jacobianMatrixProduct(model, data, cdata, mat, res, RmTo());
+    res_ref -= J_ref * mat;
+    BOOST_CHECK(res.isApprox(res_ref));
+
+    res_transpose = res_transpose_ref.setRandom();
+    cmodel.jacobianTransposeMatrixProduct(model, data, cdata, mat_transpose, res_transpose, RmTo());
+    res_transpose_ref -= J_ref.transpose() * mat_transpose;
+    BOOST_CHECK(res_transpose.isApprox(res_transpose_ref));
+  }
+
+  {
+    const auto identity = Eigen::MatrixXd::Identity(model.nv, model.nv);
+    BOOST_CHECK(cmodel.jacobianMatrixProduct(model, data, cdata, identity).isApprox(J_ref));
+  }
+}
+
 void check_A1_and_A2(
   const Model & model,
   const Data & data,
@@ -128,17 +192,7 @@ void check_A1_and_A2(
 
   BOOST_CHECK(J_local.isApprox(J_ref));
 
-  // Check Jacobian matrix product
-  const Eigen::DenseIndex m = 40;
-  const Data::MatrixXs mat = Data::MatrixXs::Random(model.nv, m);
-
-  Data::MatrixXs res(cmodel.size(), m);
-  res.setZero();
-  cmodel.jacobianMatrixProduct(model, data, cdata, mat, res);
-
-  const Data::MatrixXs res_ref = J_ref * mat;
-
-  BOOST_CHECK(res.isApprox(res_ref));
+  check_jacobians_operations(model, data, cmodel, cdata);
 }
 
 BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
