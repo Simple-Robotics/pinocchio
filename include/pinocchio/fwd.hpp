@@ -143,12 +143,24 @@ namespace pinocchio
     ARG4 = 4
   };
 
+  /// \brief Assignment operator list.
+  ///
   enum AssignmentOperatorType
   {
     SETTO,
     ADDTO,
     RMTO
   };
+
+  ///  \brief Assignment operator tags
+  template<AssignmentOperatorType val>
+  struct AssignmentOperatorTag
+  {
+  };
+
+  using SetTo = AssignmentOperatorTag<SETTO>;
+  using AddTo = AssignmentOperatorTag<ADDTO>;
+  using RmTo = AssignmentOperatorTag<RMTO>;
 
   /** This value means that a positive quantity (e.g., a size) is not known at compile-time, and
    * that instead the value is stored in some runtime variable.
