@@ -619,6 +619,73 @@ namespace pinocchio
       }
     }
 
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    Eigen::Matrix<Scalar, Eigen::Dynamic, 3, Options> jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3, Options> ReturnType;
+      ReturnType res(model.nv, mat.cols());
+      jacobianTransposeMatrixProduct(model, data, cdata, mat.derived(), res);
+      return res;
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
+    void jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat,
+      const Eigen::MatrixBase<OutputMatrix> & _res,
+      AssignmentOperatorTag<op> aot = SetTo()) const
+    {
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef typename Data::Vector3 Vector3;
+      OutputMatrix & res = _res.const_cast_derived();
+
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), size());
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), mat.cols());
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), model.nv);
+      PINOCCHIO_UNUSED_VARIABLE(aot);
+
+      if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
+        res.setZero();
+
+      const Matrix36 A1 = getA1(cdata, WorldFrame());
+      const Matrix36 A2 = getA2(cdata, WorldFrame());
+
+      const Matrix36 A = A1 + A2;
+      for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
+      {
+        if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
+          continue;
+        Vector3 AxSi;
+
+        typedef typename Data::Matrix6x::ConstColXpr ConstColXpr;
+        const ConstColXpr Jcol = data.J.col(jj);
+
+        if (colwise_joint1_sparsity[jj] && colwise_joint2_sparsity[jj])
+        {
+          AxSi.noalias() = A * Jcol;
+        }
+        else if (colwise_joint1_sparsity[jj])
+          AxSi.noalias() = A1 * Jcol;
+        else
+          AxSi.noalias() = A2 * Jcol;
+
+        if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
+          res.row(jj).noalias() -= AxSi.transpose() * mat;
+        else
+          res.row(jj).noalias() += AxSi.transpose() * mat;
+      }
+    }
+
     ///  \brief Evaluate the Jacobian associated to the constraint at the given state stored in data
     /// and cdata.  The results Jacobian is evaluated in the jacobian input/output matrix.
     template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
