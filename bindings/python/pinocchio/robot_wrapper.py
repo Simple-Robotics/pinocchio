@@ -60,7 +60,7 @@ class RobotWrapper:
         return robot
 
     def initFromMJCF(self, filename, *args, **kwargs):
-        model, collision_model, visual_model = buildModelsFromMJCF(
+        model, constraint_models, collision_model, visual_model = buildModelsFromMJCF(
             filename, *args, **kwargs
         )
 
@@ -69,14 +69,21 @@ class RobotWrapper:
             model=model,
             collision_model=collision_model,
             visual_model=visual_model,
+            constraint_models=constraint_models
         )
 
     def __init__(
-        self, model=pin.Model(), collision_model=None, visual_model=None, verbose=False
+        self,
+        model=pin.Model(),
+        collision_model=None,
+        visual_model=None,
+        constraint_models=None,
+        verbose=False,
     ):
         self.model = model
         self.collision_model = collision_model
         self.visual_model = visual_model
+        self.constraint_models = constraint_models
 
         self.data, self.collision_data, self.visual_data = createDatas(
             model, collision_model, visual_model
