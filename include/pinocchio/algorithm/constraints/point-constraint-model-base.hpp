@@ -546,16 +546,31 @@ namespace pinocchio
     //      }
     //    }
 
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    Eigen::Matrix<Scalar, 3, Eigen::Dynamic, Options> jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      typedef Eigen::Matrix<Scalar, 3, Eigen::Dynamic, Options> ReturnType;
+      ReturnType res(3, mat.cols());
+      jacobianMatrixProduct(model, data, cdata, mat.derived(), res);
+      return res;
+    }
+
     template<
       typename InputMatrix,
       typename OutputMatrix,
-      template<typename, int> class JointCollectionTpl>
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
     void jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat,
-      const Eigen::MatrixBase<OutputMatrix> & _res) const
+      const Eigen::MatrixBase<OutputMatrix> & _res,
+      AssignmentOperatorTag<op> aot = SetTo()) const
     {
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
       typedef typename Data::Vector3 Vector3;
@@ -564,7 +579,10 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), model.nv);
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.cols(), res.cols());
       PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), size());
-      res.setZero();
+      PINOCCHIO_UNUSED_VARIABLE(aot);
+
+      if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
+        res.setZero();
 
       //      const Eigen::DenseIndex constraint_dim = size();
       //
@@ -594,7 +612,10 @@ namespace pinocchio
         else
           AxSi.noalias() = A2 * Jcol;
 
-        res.noalias() += AxSi * mat.row(jj);
+        if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
+          res.noalias() -= AxSi * mat.row(jj);
+        else // AddTo, SetTo
+          res.noalias() += AxSi * mat.row(jj);
       }
     }
 
