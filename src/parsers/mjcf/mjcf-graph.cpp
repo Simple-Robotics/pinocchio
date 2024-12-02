@@ -1118,7 +1118,16 @@ namespace pinocchio
           & constraint_models)
       {
         Data data(model);
-        ::pinocchio::forwardKinematics(model, data, model.referenceConfigurations.begin()->second);
+        Eigen::VectorXd qref;
+        if (!model.referenceConfigurations.empty())
+        {
+          qref = model.referenceConfigurations.begin()->second;
+        }
+        else
+        {
+          qref = ::pinocchio::neutral(model);
+        }
+        ::pinocchio::forwardKinematics(model, data, qref);
         for (const auto & entry : mapOfEqualities)
         {
           const MjcfEquality & eq = entry.second;
