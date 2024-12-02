@@ -4,6 +4,8 @@
 
 #include "pinocchio/parsers/mjcf/mjcf-graph.hpp"
 #include "pinocchio/multibody/model.hpp"
+#include "pinocchio/multibody/data.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
 
 namespace pinocchio
 {
@@ -1115,6 +1117,8 @@ namespace pinocchio
         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
           & constraint_models)
       {
+        Data data(model);
+        ::pinocchio::forwardKinematics(model, data, model.referenceConfigurations.begin()->second);
         for (const auto & entry : mapOfEqualities)
         {
           const MjcfEquality & eq = entry.second;
@@ -1134,9 +1138,15 @@ namespace pinocchio
           }
           else
           {
+            // We compute the placement of the point constraint with respect to the 2nd joint
+            // This is similar to what is done in
+            // https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect
             const JointIndex body2 = urdfVisitor.getParentId(eq.body2);
-            BilateralPointConstraintModel bpcm(
-              model, body1, jointPlacement, body2, jointPlacement.inverse());
+            const SE3 & oMi1 = data.oMi[body1];
+            const SE3 & oMi2 = data.oMi[body2];
+            const SE3 c1Mo = jointPlacement * oMi1.inverse();
+            const SE3 c2Mi2 = c1Mo * oMi2;
+            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, body2, c2Mi2);
             constraint_models.push_back(bpcm);
           }
         }
