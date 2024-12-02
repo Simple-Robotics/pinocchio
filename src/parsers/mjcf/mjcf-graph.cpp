@@ -1205,11 +1205,13 @@ namespace pinocchio
 
           // Get Joint Indices from the model
           const JointIndex body1 = urdfVisitor.getParentId(eq.body1);
+          const SE3 & oMi1 = data.oMi[body1];
+          const SE3 oMc1 = oMi1 * jointPlacement;
 
           // when body2 is not specified, we link to the world
           if (eq.body2 == "")
           {
-            BilateralPointConstraintModel bpcm(model, body1, jointPlacement);
+            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, 0, oMc1);
             constraint_models.push_back(bpcm);
           }
           else
@@ -1218,11 +1220,9 @@ namespace pinocchio
             // This is similar to what is done in
             // https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect
             const JointIndex body2 = urdfVisitor.getParentId(eq.body2);
-            const SE3 & oMi1 = data.oMi[body1];
             const SE3 & oMi2 = data.oMi[body2];
-            const SE3 c1Mo = jointPlacement * oMi1.inverse();
-            const SE3 c2Mi2 = c1Mo * oMi2;
-            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, body2, c2Mi2);
+            const SE3 i2Mc2 = oMi2.inverse() * oMc1;
+            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, body2, i2Mc2);
             constraint_models.push_back(bpcm);
           }
         }
