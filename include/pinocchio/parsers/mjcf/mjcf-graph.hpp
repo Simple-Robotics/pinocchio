@@ -144,7 +144,7 @@ namespace pinocchio
         Eigen::VectorXd damping;
 
         // Armature inertia created by this joint
-        double armature = 0.;
+        Eigen::VectorXd armature;
         // Dry friction.
         // double frictionLoss = 0.;
 
@@ -160,11 +160,11 @@ namespace pinocchio
           maxConfig = Eigen::VectorXd::Constant(1, infty);
           springStiffness = Eigen::VectorXd::Constant(1, v);
           springReference = Eigen::VectorXd::Constant(1, v);
-          ;
           minDryFriction = Eigen::VectorXd::Constant(1, 0.);
           maxDryFriction = Eigen::VectorXd::Constant(1, 0.);
-          // friction = Eigen::VectorXd::Constant(1, 0.);
+          friction = Eigen::VectorXd::Constant(1, 0.);
           damping = Eigen::VectorXd::Constant(1, 0.);
+          armature = Eigen::VectorXd::Constant(1, 0.);
         }
 
         /// @brief Set dimension to the limits to match the joint nq and nv.
@@ -459,7 +459,7 @@ namespace pinocchio
         /// @brief Go through the default part of the file and get all the class name. Fill the
         /// mapOfDefault for later use.
         /// @param el ptree element. Root of the default
-        void parseDefault(ptree & el, const ptree & parent);
+        void parseDefault(ptree & el, const ptree & parent, const std::string & parentTag);
 
         /// @brief Go through the main body of the mjcf file "worldbody" to get all the info ready
         /// to create the model.
