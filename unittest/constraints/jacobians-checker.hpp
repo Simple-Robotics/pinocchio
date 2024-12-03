@@ -1,7 +1,9 @@
 #pragma once
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
+
 #include "pinocchio/algorithm/constraints/constraints.hpp"
+#include "pinocchio/algorithm/contact-jacobian.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,7 +17,7 @@ namespace pinocchio
     const ConstraintModelBase<ConstraintModelDerived> & cmodel,
     ConstraintDataBase<ConstraintDataDerived> & cdata)
   {
-    Data::MatrixXs J_ref = Data::MatrixXs::Zero(3, model.nv);
+    Data::MatrixXs J_ref = Data::MatrixXs::Zero(cmodel.size(), model.nv);
     getConstraintJacobian(model, data, cmodel, cdata, J_ref);
 
     // Check Jacobian matrix product
