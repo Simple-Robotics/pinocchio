@@ -17,7 +17,8 @@ function(ADD_TEST_CFLAGS target)
   endforeach()
 endfunction()
 
-set(PINOCCHIO_UNIT_TEST_HEADERS ${PROJECT_SOURCE_DIR}/unittest/constraints/init_constraints.hpp)
+set(PINOCCHIO_UNIT_TEST_HEADERS ${PROJECT_SOURCE_DIR}/unittest/constraints/init_constraints.hpp
+                                ${PROJECT_SOURCE_DIR}/unittest/constraints/jacobians-checker.hpp)
 
 # Compute flags outside the macro to avoid recomputing it for each tests
 cxx_flags_by_compiler_frontend(MSVC _USE_MATH_DEFINES OUTPUT TEST_PRIVATE_DEFINITIONS)
