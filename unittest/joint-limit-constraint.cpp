@@ -7,6 +7,9 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
 
+// Helpers
+#include "constraints/jacobians-checker.hpp"
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
@@ -190,6 +193,8 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian)
 
     BOOST_CHECK(jacobian_matrix.isApprox(jacobian_matrix_fd, math::sqrt(eps_fd)));
   }
+
+  check_jacobians_operations(model, data, constraint_model, constraint_data);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
