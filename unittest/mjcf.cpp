@@ -979,7 +979,6 @@ BOOST_AUTO_TEST_CASE(armature)
 {
   typedef pinocchio::SE3::Vector3 Vector3;
   typedef pinocchio::SE3::Matrix3 Matrix3;
-  std::cout << " Armature ------------ " << std::endl;
   std::istringstream xmlData(R"(
             <mujoco model="model_RX">
                 <default>
