@@ -640,7 +640,6 @@ namespace pinocchio
 
     is_same &= (parents_fromRow == other.parents_fromRow);
     is_same &= (nv_subtree_fromRow == other.nv_subtree_fromRow);
-    is_same &= (last_child == other.last_child);
     //        is_same &= (rowise_sparsity_pattern == other.rowise_sparsity_pattern);
 
     return is_same;

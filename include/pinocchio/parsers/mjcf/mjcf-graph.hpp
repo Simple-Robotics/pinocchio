@@ -138,8 +138,6 @@ namespace pinocchio
         Eigen::VectorXd minDryFriction;
         // Max friction applied in this joint
         Eigen::VectorXd maxDryFriction;
-        // friction applied in this joint
-        // Eigen::VectorXd friction;
         // Damping applied by this joint.
         Eigen::VectorXd damping;
 
@@ -162,7 +160,6 @@ namespace pinocchio
           springReference = Eigen::VectorXd::Constant(1, v);
           minDryFriction = Eigen::VectorXd::Constant(1, 0.);
           maxDryFriction = Eigen::VectorXd::Constant(1, 0.);
-          friction = Eigen::VectorXd::Constant(1, 0.);
           damping = Eigen::VectorXd::Constant(1, 0.);
           armature = Eigen::VectorXd::Constant(1, 0.);
         }

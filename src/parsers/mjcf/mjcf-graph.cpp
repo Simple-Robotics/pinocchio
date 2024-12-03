@@ -130,10 +130,8 @@ namespace pinocchio
         ret.minConfig = Vector::Constant(Nq, -1.01);
         ret.maxDryFriction = Vector::Constant(Nv, 0.);
         ret.minDryFriction = Vector::Constant(Nv, 0.);
-        // ret.friction = Vector::Constant(Nv, 0.);
         ret.damping = Vector::Constant(Nv, 0.);
         ret.armature = Vector::Constant(Nv, armature[0]);
-        ret.frictionLoss = frictionLoss;
         ret.springStiffness = springStiffness;
         ret.springReference = springReference;
         return ret;
@@ -166,8 +164,6 @@ namespace pinocchio
         ret.minDryFriction.tail(Nv) = range.minDryFriction;
         ret.maxDryFriction.conservativeResize(maxDryFriction.size() + Nv);
         ret.maxDryFriction.tail(Nv) = range.maxDryFriction;
-        // ret.friction.conservativeResize(friction.size() + Nv);
-        // ret.friction.tail(Nv) = range.friction;
 
         ret.springReference.conservativeResize(springReference.size() + 1);
         ret.springReference.tail(1) = range.springReference;
