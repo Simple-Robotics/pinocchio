@@ -17,6 +17,9 @@
 #include "pinocchio/spatial/classic-acceleration.hpp"
 #include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
 
+// Helpers
+#include "constraints/jacobians-checker.hpp"
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
@@ -420,8 +423,13 @@ BOOST_AUTO_TEST_CASE(contact_models_sparsity_and_jacobians)
     }
 
     check_A1_and_A2(model, data, cm_RF, cd_RF);
+    check_jacobians_operations(model, data, cm_RF, cd_RF);
+
     check_A1_and_A2(model, data, cm_LF, cd_LF);
+    check_jacobians_operations(model, data, cm_LF, cd_LF);
+
     check_A1_and_A2(model, data, clm_RF_LF, cld_RF_LF);
+    check_jacobians_operations(model, data, clm_RF_LF, cld_RF_LF);
 
     // Check acceleration contributions
     {
