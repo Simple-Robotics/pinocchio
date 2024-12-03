@@ -77,6 +77,23 @@ namespace pinocchio
     typedef Vector3 ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+
+    template<typename InputMatrix>
+    struct JacobianMatrixProductReturnType
+    {
+      typedef typename InputMatrix::Scalar Scalar;
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(InputMatrix) InputMatrixPlain;
+      typedef Eigen::Matrix<Scalar, 3, InputMatrix::ColsAtCompileTime, InputMatrixPlain::Options>
+        type;
+    };
+
+    template<typename InputMatrix>
+    struct JacobianTransposeMatrixProductReturnType
+    {
+      typedef typename InputMatrix::Scalar Scalar;
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(InputMatrix) InputMatrixPlain;
+      typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3, InputMatrixPlain::Options> type;
+    };
   };
 
   template<typename _Scalar, int _Options>

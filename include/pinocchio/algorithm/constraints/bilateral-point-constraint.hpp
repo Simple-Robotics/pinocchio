@@ -21,6 +21,7 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct traits<BilateralPointConstraintModelTpl<_Scalar, _Options>>
+  : traits<PointConstraintModelBase<BilateralPointConstraintModelTpl<_Scalar, _Options>>>
   {
     typedef _Scalar Scalar;
 

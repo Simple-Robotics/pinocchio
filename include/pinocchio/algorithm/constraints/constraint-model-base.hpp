@@ -70,6 +70,62 @@ namespace pinocchio
       derived().jacobian(model, data, cdata, jacobian_matrix.const_cast_derived());
     }
 
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    typename traits<Derived>::template JacobianMatrixProductReturnType<InputMatrix>::type
+    jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      return derived().jacobianMatrixProduct(model, data, cdata, mat.derived());
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
+    void jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat,
+      const Eigen::MatrixBase<OutputMatrix> & res,
+      AssignmentOperatorTag<op> aot = SetTo()) const
+    {
+      derived().jacobianMatrixProduct(
+        model, data, cdata, mat.derived(), res.const_cast_derived(), aot);
+    }
+
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    typename traits<Derived>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+    jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      return derived().jacobianTransposeMatrixProduct(model, data, cdata, mat.derived());
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
+    void jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat,
+      const Eigen::MatrixBase<OutputMatrix> & res,
+      AssignmentOperatorTag<op> aot = SetTo()) const
+    {
+      derived().jacobianTransposeMatrixProduct(
+        model, data, cdata, mat.derived(), res.const_cast_derived(), aot);
+    }
+
     // Attributes common to all constraints
 
     /// \brief Name of the constraint

@@ -17,6 +17,30 @@
 namespace pinocchio
 {
 
+  template<typename Derived>
+  struct PointConstraintModelBase;
+
+  template<typename Derived>
+  struct traits<PointConstraintModelBase<Derived>>
+  {
+    template<typename InputMatrix>
+    struct JacobianMatrixProductReturnType
+    {
+      typedef typename InputMatrix::Scalar Scalar;
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(InputMatrix) InputMatrixPlain;
+      typedef Eigen::Matrix<Scalar, 3, InputMatrix::ColsAtCompileTime, InputMatrixPlain::Options>
+        type;
+    };
+
+    template<typename InputMatrix>
+    struct JacobianTransposeMatrixProductReturnType
+    {
+      typedef typename InputMatrix::Scalar Scalar;
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(InputMatrix) InputMatrixPlain;
+      typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3, InputMatrixPlain::Options> type;
+    };
+  };
+
   ///
   ///  \brief Contact model structure containg all the info describing the rigid contact model
   ///
@@ -547,13 +571,15 @@ namespace pinocchio
     //    }
 
     template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
-    Eigen::Matrix<Scalar, 3, Eigen::Dynamic, Options> jacobianMatrixProduct(
+    typename traits<Derived>::template JacobianMatrixProductReturnType<InputMatrix>::type
+    jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat) const
     {
-      typedef Eigen::Matrix<Scalar, 3, Eigen::Dynamic, Options> ReturnType;
+      typedef typename traits<Derived>::template JacobianMatrixProductReturnType<InputMatrix>::type
+        ReturnType;
       ReturnType res(3, mat.cols());
       jacobianMatrixProduct(model, data, cdata, mat.derived(), res);
       return res;
@@ -620,13 +646,15 @@ namespace pinocchio
     }
 
     template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
-    Eigen::Matrix<Scalar, Eigen::Dynamic, 3, Options> jacobianTransposeMatrixProduct(
+    typename traits<Derived>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+    jacobianTransposeMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat) const
     {
-      typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3, Options> ReturnType;
+      typedef typename traits<Derived>::template JacobianTransposeMatrixProductReturnType<
+        InputMatrix>::type ReturnType;
       ReturnType res(model.nv, mat.cols());
       jacobianTransposeMatrixProduct(model, data, cdata, mat.derived(), res);
       return res;
