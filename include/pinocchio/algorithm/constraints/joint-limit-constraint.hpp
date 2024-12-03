@@ -77,6 +77,7 @@ namespace pinocchio
   : ConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
+    typedef JointLimitConstraintModelTpl Self;
     enum
     {
       Options = _Options
@@ -187,13 +188,6 @@ namespace pinocchio
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata) const;
 
-    template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
-    void jacobian(
-      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
-      const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const;
-
     /// \brief Returns the sparsity associated with a given row
     const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
     {
@@ -277,6 +271,72 @@ namespace pinocchio
              && row_sparsity_pattern == other.row_sparsity_pattern && m_set == other.m_set
              && m_compliance == other.m_compliance;
     }
+
+    // Jacobian operations
+
+    template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
+    void jacobian(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const;
+
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    typename traits<Self>::template JacobianMatrixProductReturnType<InputMatrix>::type
+    jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      typedef typename traits<Self>::template JacobianMatrixProductReturnType<InputMatrix>::type
+        ReturnType;
+      ReturnType res(size(), mat.cols());
+      jacobianMatrixProduct(model, data, cdata, mat.derived(), res);
+      return res;
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
+    void jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat,
+      const Eigen::MatrixBase<OutputMatrix> & _res,
+      AssignmentOperatorTag<op> aot = SetTo()) const;
+
+    template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
+    typename traits<Self>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+    jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat) const
+    {
+      typedef
+        typename traits<Self>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+          ReturnType;
+      ReturnType res(model.nv, mat.cols());
+      jacobianTransposeMatrixProduct(model, data, cdata, mat.derived(), res);
+      return res;
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
+    void jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & mat,
+      const Eigen::MatrixBase<OutputMatrix> & _res,
+      AssignmentOperatorTag<op> aot = SetTo()) const;
 
   protected:
     template<
