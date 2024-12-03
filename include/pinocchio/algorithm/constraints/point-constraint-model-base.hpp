@@ -37,7 +37,12 @@ namespace pinocchio
     {
       typedef typename InputMatrix::Scalar Scalar;
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(InputMatrix) InputMatrixPlain;
-      typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3, InputMatrixPlain::Options> type;
+      typedef Eigen::Matrix<
+        Scalar,
+        Eigen::Dynamic,
+        InputMatrixPlain::ColsAtCompileTime,
+        InputMatrixPlain::Options>
+        type;
     };
   };
 
