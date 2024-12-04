@@ -9,6 +9,9 @@
 
 #include <iostream>
 
+// Helpers
+#include "constraints/jacobians-checker.hpp"
+
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
@@ -120,6 +123,8 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian)
         ? (jacobian_matrix.row(row_id).tail(model.nv - dof_id - 1).array() == 0).all()
         : true);
   }
+
+  check_jacobians_operations(model, data, constraint_model, constraint_data);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
