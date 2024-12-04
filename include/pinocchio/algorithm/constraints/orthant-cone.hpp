@@ -186,6 +186,7 @@ namespace pinocchio
     Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
     {
       assert(row_id < size());
+      PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(row_id);
       return math::max(Scalar(0), value);
     }
 
@@ -233,6 +234,7 @@ namespace pinocchio
     Scalar rowiseProject(const Eigen::DenseIndex row_id, const Scalar value) const
     {
       assert(row_id < size());
+      PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(row_id);
       return math::min(Scalar(0), value);
     }
 
