@@ -99,6 +99,81 @@ namespace pinocchio
       jacobian_matrix(Eigen::DenseIndex(row_id), col_id) = Scalar(1);
     }
   }
+
+  template<typename Scalar, int Options>
+  template<
+    typename InputMatrix,
+    typename OutputMatrix,
+    template<typename, int> class JointCollectionTpl,
+    AssignmentOperatorType op>
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::jacobianMatrixProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    ConstraintData & cdata,
+    const Eigen::MatrixBase<InputMatrix> & mat,
+    const Eigen::MatrixBase<OutputMatrix> & _res,
+    AssignmentOperatorTag<op> aot) const
+  {
+    OutputMatrix & res = _res.const_cast_derived();
+
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), model.nv);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.cols(), res.cols());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), size());
+    PINOCCHIO_UNUSED_VARIABLE(data);
+    PINOCCHIO_UNUSED_VARIABLE(cdata);
+    PINOCCHIO_UNUSED_VARIABLE(aot);
+
+    if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
+      res.setZero();
+
+    for (size_t row_id = 0; row_id < active_dofs.size(); ++row_id)
+    {
+      const auto col_id = active_dofs[row_id];
+
+      if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
+        res.row(Eigen::DenseIndex(row_id)) -= mat.row(col_id);
+      else
+        res.row(Eigen::DenseIndex(row_id)) += mat.row(col_id);
+    }
+  }
+
+  template<typename Scalar, int Options>
+  template<
+    typename InputMatrix,
+    typename OutputMatrix,
+    template<typename, int> class JointCollectionTpl,
+    AssignmentOperatorType op>
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::jacobianTransposeMatrixProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    ConstraintData & cdata,
+    const Eigen::MatrixBase<InputMatrix> & mat,
+    const Eigen::MatrixBase<OutputMatrix> & _res,
+    AssignmentOperatorTag<op> aot) const
+  {
+    OutputMatrix & res = _res.const_cast_derived();
+
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), mat.cols());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), model.nv);
+    PINOCCHIO_UNUSED_VARIABLE(data);
+    PINOCCHIO_UNUSED_VARIABLE(cdata);
+    PINOCCHIO_UNUSED_VARIABLE(aot);
+
+    if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
+      res.setZero();
+
+    for (size_t row_id = 0; row_id < active_dofs.size(); ++row_id)
+    {
+      const auto col_id = active_dofs[row_id];
+
+      if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
+        res.row(col_id) -= mat.row(Eigen::DenseIndex(row_id));
+      else
+        res.row(col_id) += mat.row(Eigen::DenseIndex(row_id));
+    }
+  }
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hxx__
