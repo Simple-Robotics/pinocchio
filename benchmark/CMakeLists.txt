@@ -5,26 +5,28 @@
 # ----------------------------------------------------
 # --- BENCHMARK --------------------------------------
 # ----------------------------------------------------
-add_custom_target(bench)
+add_custom_target(${PROJECT_NAME}-bench)
 
 macro(ADD_BENCH bench_name)
+  set(full_bench_name "${PROJECT_NAME}-${bench_name}")
   if(BUILD_BENCHMARK)
-    add_executable(${bench_name} ${bench_name}.cpp)
+    add_executable(${full_bench_name} ${bench_name}.cpp)
   else(BUILD_BENCHMARK)
-    add_executable(${bench_name} EXCLUDE_FROM_ALL ${bench_name}.cpp)
+    add_executable(${full_bench_name} EXCLUDE_FROM_ALL ${bench_name}.cpp)
   endif(BUILD_BENCHMARK)
   set(ExtraMacroArgs ${ARGN})
   list(LENGTH ExtraMacroArgs NumExtraMacroArgs)
   if(NumExtraMacroArgs GREATER 0)
     set(link_to_main_lib ${ARGV1})
     if(link_to_main_lib)
-      set_target_properties(${bench_name} PROPERTIES COMPILE_DEFINITIONS
-                                                     PINOCCHIO_MODEL_DIR="${PINOCCHIO_MODEL_DIR}")
-      target_link_libraries(${bench_name} PUBLIC ${PROJECT_NAME})
+      set_target_properties(
+        ${full_bench_name} PROPERTIES COMPILE_DEFINITIONS
+                                      PINOCCHIO_MODEL_DIR="${PINOCCHIO_MODEL_DIR}")
+      target_link_libraries(${full_bench_name} PUBLIC ${PROJECT_NAME})
     endif(link_to_main_lib)
   endif()
 
-  add_dependencies(bench ${bench_name})
+  add_dependencies(${PROJECT_NAME}-bench ${full_bench_name})
 endmacro(ADD_BENCH)
 
 macro(ADD_TEST_CFLAGS target flag)
@@ -47,7 +49,7 @@ endif(cppadcg_FOUND)
 add_bench(timings TRUE)
 if(cppadcg_FOUND)
   add_bench(timings-cg TRUE)
-  target_link_libraries(timings-cg PUBLIC ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
+  target_link_libraries(${PROJECT_NAME}-timings-cg PUBLIC ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
 endif(cppadcg_FOUND)
 
 if(BUILD_WITH_OPENMP_SUPPORT)
@@ -64,9 +66,9 @@ add_bench(timings-derivatives TRUE)
 if(CPPAD_FOUND)
   # timings-cppad-jit
   add_bench(timings-cppad-jit TRUE)
-  target_link_libraries(timings-derivatives PUBLIC ${cppad_LIBRARY})
-  target_link_libraries(timings-cppad-jit PUBLIC ${cppad_LIBRARY} ${CMAKE_DL_LIBS})
-  target_compile_definitions(timings-cppad-jit
+  target_link_libraries(${PROJECT_NAME}-timings-derivatives PUBLIC ${cppad_LIBRARY})
+  target_link_libraries(${PROJECT_NAME}-timings-cppad-jit PUBLIC ${cppad_LIBRARY} ${CMAKE_DL_LIBS})
+  target_compile_definitions(${PROJECT_NAME}-timings-cppad-jit
                              PUBLIC PINOCCHIO_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\")
 endif()
 
@@ -74,7 +76,7 @@ endif()
 #
 add_bench(timings-eigen)
 modernize_target_link_libraries(
-  timings-eigen
+  ${PROJECT_NAME}-timings-eigen
   SCOPE PUBLIC
   TARGETS Eigen3::Eigen
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
