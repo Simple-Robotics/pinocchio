@@ -10,19 +10,20 @@
 namespace pinocchio
 {
 
-  template<typename Scalar, int MaxSizeAtCompileTime = Eigen::Dynamic>
+  template<typename Scalar, int MaxSizeAtCompileTime = Eigen::Dynamic, int Options = 0>
   struct EigenStorageTpl;
 
-  template<typename _Scalar, int _MaxSizeAtCompileTime>
+  template<typename _Scalar, int _MaxSizeAtCompileTime, int _Options>
   struct EigenStorageTpl
   {
     typedef _Scalar Scalar;
     enum
     {
-      MaxSizeAtCompileTime = _MaxSizeAtCompileTime
+      MaxSizeAtCompileTime = _MaxSizeAtCompileTime,
+      Options = _Options
     };
 
-    typedef Eigen::Matrix<Scalar, MaxSizeAtCompileTime, 1> StorageVector;
+    typedef Eigen::Matrix<Scalar, MaxSizeAtCompileTime, 1, Options> StorageVector;
 
     /// \brief Default constructor from a given maximum size.
     ///
