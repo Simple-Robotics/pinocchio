@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2021 CNRS INRIA
+// Copyright (c) 2015-2024 CNRS INRIA
 // Copyright (c) 2016 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -321,12 +321,6 @@ namespace pinocchio
     {
       return SE3Tpl(
         rot.transpose() * m2.rotation(), rot.transpose() * (m2.translation() - translation()));
-    }
-
-    template<int O2>
-    SE3Tpl __mult__(const SE3Tpl<Scalar, O2> & m2) const
-    {
-      return this->act_impl(m2);
     }
 
     template<int O2>
