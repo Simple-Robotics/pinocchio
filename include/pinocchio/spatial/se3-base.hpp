@@ -135,9 +135,10 @@ namespace pinocchio
       derived().toDualActionMatrix_impl(dual_action_matrix);
     }
 
-    typename SE3GroupAction<Derived>::ReturnType operator*(const Derived & m2) const
+    template<typename OtherDerived>
+    typename SE3GroupAction<Derived>::ReturnType operator*(const SE3Base<OtherDerived> & m2) const
     {
-      return derived().__mult__(m2);
+      return derived().act(m2.derived());
     }
 
     /// ay = aXb.act(by)
