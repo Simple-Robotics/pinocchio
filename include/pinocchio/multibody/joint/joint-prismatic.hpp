@@ -261,12 +261,13 @@ namespace pinocchio
 
     template<typename S2, int O2>
     typename SE3GroupAction<TransformPrismaticTpl>::ReturnType
-    se3action(const SE3Tpl<S2, O2> & m) const
+    se3Action(const SE3Tpl<S2, O2> & m) const
     {
       typedef typename SE3GroupAction<TransformPrismaticTpl>::ReturnType ReturnType;
       ReturnType res(m);
       res.translation()[axis] += m_displacement;
 
+      assert(res.isApprox(m * plain()));
       return res;
     }
 

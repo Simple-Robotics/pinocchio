@@ -122,7 +122,7 @@ namespace pinocchio
 
     template<typename S2, int O2>
     typename SE3GroupAction<TransformRevoluteTpl>::ReturnType
-    se3action(const SE3Tpl<S2, O2> & m) const
+    se3Action(const SE3Tpl<S2, O2> & m) const
     {
       typedef typename SE3GroupAction<TransformRevoluteTpl>::ReturnType ReturnType;
       ReturnType res;
@@ -152,6 +152,7 @@ namespace pinocchio
       }
       }
       res.translation() = m.translation();
+      assert(res.isApprox(m * plain()));
       return res;
     }
 
