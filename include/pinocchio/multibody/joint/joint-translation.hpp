@@ -261,7 +261,7 @@ namespace pinocchio
     {
       typedef typename SE3GroupAction<TransformTranslationTpl>::ReturnType ReturnType;
       ReturnType res(m);
-      res.translation() += translation();
+      res.translation().noalias() += m.rotation() * translation();
 
       assert(res.isApprox(m * plain()));
       return res;

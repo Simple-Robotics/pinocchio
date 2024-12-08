@@ -155,8 +155,7 @@ namespace pinocchio
         break;
       }
       }
-      res.translation() = m.translation();
-      res.translation()[axis] += m_displacement;
+      res.translation().noalias() = m.translation() + m.rotation().col(axis) * m_displacement;
       assert(res.isApprox(m * plain()));
       return res;
     }
