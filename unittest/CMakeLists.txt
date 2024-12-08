@@ -76,6 +76,8 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
 
   if(NOT unit_test_HEADER_ONLY)
     target_link_libraries(${TEST_NAME} PUBLIC ${PROJECT_NAME}_default)
+  else()
+    target_link_libraries(${TEST_NAME} PUBLIC ${PROJECT_NAME}_headers)
   endif()
 
   if(unit_test_PARSERS OR (unit_test_PARSERS_OPTIONAL AND TARGET ${PROJECT_NAME}_parsers))
