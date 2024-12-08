@@ -977,8 +977,6 @@ BOOST_AUTO_TEST_CASE(joint_and_inertias)
 
 BOOST_AUTO_TEST_CASE(armature)
 {
-  typedef pinocchio::SE3::Vector3 Vector3;
-  typedef pinocchio::SE3::Matrix3 Matrix3;
   std::istringstream xmlData(R"(
             <mujoco model="model_RX">
                 <default>
@@ -1011,7 +1009,7 @@ BOOST_AUTO_TEST_CASE(armature)
   Eigen::VectorXd armature_real(model_m.nv);
   armature_real << 1.3, 2.4, 0.4, 1, 1, 1;
 
-  for (size_t i = 0; i < size_t(model_m.nv); i++)
+  for (Eigen::DenseIndex i = 0; i < model_m.nv; i++)
     BOOST_CHECK_EQUAL(model_m.armature[i], armature_real[i]);
 }
 

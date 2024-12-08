@@ -78,7 +78,6 @@ BOOST_AUTO_TEST_CASE(renorm_rotation)
   SE3::Matrix3 R_normed;
   SE3::Matrix3 Id(SE3::Matrix3::Identity());
   SE3::Vector3 vals;
-  double tr0, tr;
   const size_t num_tries = 20;
 
   for (size_t i = 0; i < num_tries; i++)
@@ -88,10 +87,6 @@ BOOST_AUTO_TEST_CASE(renorm_rotation)
     R1 = M1.rotation();
     R_normed = pinocchio::renormalize_rotation_matrix(R1);
     BOOST_CHECK((R_normed.transpose() * R_normed).isApprox(Id));
-    tr0 = R1.trace();
-
-    tr = R_normed.trace();
-    vals = 2. * R_normed.diagonal().array() - tr + 1.;
   }
 }
 
