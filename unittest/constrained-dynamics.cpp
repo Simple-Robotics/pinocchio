@@ -548,10 +548,6 @@ BOOST_AUTO_TEST_CASE(test_constraint_dynamics_LOCAL_6D_loop_closure_j1j2)
   constraint_data.push_back(RigidConstraintData(ci_closure));
   constraint_data_fd.push_back(RigidConstraintData(ci_closure));
 
-  Eigen::DenseIndex constraint_dim = 0;
-  for (size_t k = 0; k < constraint_models.size(); ++k)
-    constraint_dim += constraint_models[k].size();
-
   const double mu0 = 0.;
   ProximalSettings prox_settings(1e-12, mu0, 100);
 
@@ -1500,7 +1496,7 @@ BOOST_AUTO_TEST_CASE(test_sparse_forward_dynamics_in_contact_specifying_joint2id
       BOOST_CHECK(false);
       break;
     }
-}
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_contact_ABA_with_armature)
