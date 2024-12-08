@@ -4,6 +4,7 @@
 
 #include "pinocchio/container/storage.hpp"
 
+#include <iostream>
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
@@ -36,11 +37,11 @@ BOOST_AUTO_TEST_CASE(eigen_storage)
   // Check resize
   storage.conservativeResize(2 * storage.capacity());
   BOOST_CHECK(storage.as<Eigen::MatrixXd>(rows, cols).isOnes(0.));
-  matrix_map = storage.as<Eigen::MatrixXd>(rows, 2 * cols);
-  BOOST_CHECK(matrix_map.leftCols(cols).isOnes(0.));
+  auto matrix_map2 = storage.as<Eigen::MatrixXd>(rows, 2 * cols);
+  BOOST_CHECK(matrix_map2.leftCols(cols).isOnes(0.));
 
   // Check throw
-  BOOST_CHECK_THROW(storage.as<Eigen::MatrixXd>(2 * rows, 2 * cols), std::invalid_argument);
+  BOOST_CHECK_THROW(storage.as<Eigen::MatrixXd>(4 * rows, 4 * cols), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
