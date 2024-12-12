@@ -75,9 +75,9 @@ namespace pinocchio
 /// \brief Helper to declare that a parameter is unused
 #define PINOCCHIO_UNUSED_VARIABLE(var) (void)(var)
 #ifndef NDEBUG
-  #define PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(var)
+  #define PINOCCHIO_ONLY_USED_FOR_DEBUG(var)
 #else
-  #define PINOCCHIO_USED_VARIABLE_FOR_DEBUG_ONLY(var) PINOCCHIO_UNUSED_VARIABLE(var)
+  #define PINOCCHIO_ONLY_USED_FOR_DEBUG(var) PINOCCHIO_UNUSED_VARIABLE(var)
 #endif
 
 /// Ensure that a matrix (or vector) is of correct size (compile-time and run-time assertion)
