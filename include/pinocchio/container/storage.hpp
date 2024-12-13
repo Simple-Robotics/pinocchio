@@ -49,16 +49,51 @@ namespace pinocchio
     {
     }
 
+#ifdef PINOCCHIO_PARSED_BY_DOXYGEN
     /// \brief Default constructor from given matrix dimension (rows, cols).
     ///
     /// \param[in] rows Number of rows.
     /// \param[in] cols Number of columns.
     ///
     EigenStorageTpl(const Index rows, const Index cols)
-    : m_storage(Eigen::DenseIndex(rows * cols))
-    , m_map(MapType(m_storage.data(), rows, cols))
+    : m_map(NULL, rows, cols)
+    {
+      _init2(rows, cols);
+    }
+
+    /// \brief Default constructor from given matrix dimension (rows, cols).
+    ///
+    /// \param[in] rows Number of rows.
+    /// \param[in] cols Number of columns.
+    ///
+    EigenStorageTpl(const Index size, const Index max_size)
+    : m_map(NULL, size)
+    {
+      _init2(rows, cols);
+    }
+#else
+    EigenStorageTpl(const Index arg0, const Index arg1)
+    : m_map(NULL, arg0, arg1)
+    {
+      _init2(arg0, arg1);
+    }
+#endif
+
+    explicit EigenStorageTpl(const Index size)
+    : m_storage(size)
+    , m_map(m_storage.data(), size)
     {
     }
+
+    /// \brief Copy constructor
+    EigenStorageTpl(const EigenStorageTpl & other)
+    : m_storage(other.m_storage)
+    , m_map(m_storage.data(), other.m_map.rows(), other.m_map.cols())
+    {
+    }
+
+    /// \brief Move constructor
+    EigenStorageTpl(EigenStorageTpl && other) = default;
 
     /// \brief Resize the current capacity of the internal storage.
     ///
@@ -69,6 +104,14 @@ namespace pinocchio
       if (new_size > capacity())
         m_storage.resize(2 * new_size); // Double the size of the storage
       new (&m_map) MapType(m_storage.data(), rows, cols);
+    }
+
+    void resize(const Index new_size)
+    {
+      EIGEN_STATIC_ASSERT_VECTOR_ONLY(MatrixLike)
+      if (new_size > capacity())
+        m_storage.resize(2 * new_size); // Double the size of the storage
+      new (&m_map) MapType(m_storage.data(), new_size);
     }
 
     /// \brief Conservative resize of the current capacity of the internal storage. The data are
@@ -84,6 +127,22 @@ namespace pinocchio
       // copy back values
       const Index min_rows = (std::min)(rows, old_rows), min_cols = (std::min)(cols, old_cols);
       map().topLeftCorner(min_rows, min_cols) = copy.topLeftCorner(min_rows, min_cols);
+    }
+
+    /// \brief Conservative resize of the current capacity of the internal storage. The data are
+    /// kepts in memory.
+    ///
+    /// \remarks The resizing only happens when the new_size is greater than the current capacity
+    void conservativeResize(const Index new_size)
+    {
+      EIGEN_STATIC_ASSERT_VECTOR_ONLY(MatrixLike)
+      const Index old_size = this->size();
+      const PlainMatrixType copy(map()); // save current value in the storage
+      this->resize(new_size);
+
+      // copy back values
+      const Index min_size = (std::min)(new_size, old_size);
+      map().head(min_size) = copy.head(min_size);
     }
 
     ///  \brief Returns the size of the storage space currently allocated.
@@ -140,6 +199,20 @@ namespace pinocchio
 
     /// \brief Map
     MapType m_map;
+
+    template<typename T>
+    void _init2(const T rows, const T cols, std::enable_if_t<!IsVectorAtCompileTime, T> * = 0)
+    {
+      m_storage = StorageVector(Eigen::DenseIndex(rows * cols));
+      new (&m_map) MapType(m_storage.data(), rows, cols);
+    }
+
+    template<typename T>
+    void _init2(const T size, const T max_size, std::enable_if_t<IsVectorAtCompileTime, T> * = 0)
+    {
+      m_storage = StorageVector(max_size);
+      new (&m_map) MapType(m_storage.data(), size);
+    }
   }; // struct EigenStorageTpl
 
 } // namespace pinocchio
