@@ -133,12 +133,9 @@ namespace pinocchio
     /// \brief Constructor from a model and a collection of RigidConstraintModel objects.
     ///
     /// \param[in] model Model of the kinematic tree
-    /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact
+    /// \param[in] constraint_models Vector of ConstraintModels
     /// information
     ///
-    // TODO Remove when API is stabilized
-    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
     template<
       typename S1,
       int O1,
@@ -155,7 +152,6 @@ namespace pinocchio
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
       allocate(model, wrapped_contact_models);
     }
-    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
     ///
     /// \brief Constructor from a model and a collection of RigidConstraintModel objects.
