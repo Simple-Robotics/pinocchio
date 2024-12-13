@@ -79,6 +79,13 @@ namespace pinocchio
     }
 #endif
 
+    /// \brief Default constructor
+    EigenStorageTpl()
+    : m_map(NULL, 0, IsVectorAtCompileTime ? 1 : 0)
+    {
+    }
+
+    /// \brief Constructor from a given size. For vector only.
     explicit EigenStorageTpl(const Index size)
     : m_storage(size)
     , m_map(m_storage.data(), size)
