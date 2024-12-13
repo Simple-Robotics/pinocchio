@@ -203,8 +203,7 @@ namespace pinocchio
               DelassusOperatorSparseAccelerate, ConstraintModel, ConstraintModelAllocator>,
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
              bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-             bp::arg("solve_ncp") = true,
-             bp::arg("admm_update_rule") = pinocchioADMMUpdateRule::SPECTRAL,
+             bp::arg("solve_ncp") = true, bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
         }
