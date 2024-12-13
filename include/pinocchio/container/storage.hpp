@@ -6,7 +6,6 @@
 #define __pinocchio_container_storage_hpp__
 
 #include "pinocchio/fwd.hpp"
-#include <iostream>
 
 namespace pinocchio
 {
