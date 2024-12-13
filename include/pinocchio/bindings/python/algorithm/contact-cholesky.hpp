@@ -30,11 +30,17 @@ namespace pinocchio
         ContactCholeskyDecompositionPythonVisitor<ContactCholeskyDecomposition>>
     {
       typedef ContactCholeskyDecomposition Self;
-      typedef typename ContactCholeskyDecomposition::Scalar Scalar;
-      typedef typename ContactCholeskyDecomposition::RigidConstraintModel RigidConstraintModel;
-      typedef typename ContactCholeskyDecomposition::RigidConstraintData RigidConstraintData;
-      typedef typename ContactCholeskyDecomposition::Matrix Matrix;
-      typedef typename ContactCholeskyDecomposition::Vector Vector;
+      typedef typename Self::Scalar Scalar;
+      typedef typename Self::RigidConstraintModel RigidConstraintModel;
+      typedef typename Self::RigidConstraintData RigidConstraintData;
+      typedef typename Self::Matrix Matrix;
+      typedef typename Self::RowMatrix RowMatrix;
+      typedef typename Self::Vector Vector;
+
+      typedef Eigen::Ref<Matrix> RefMatrix;
+      typedef Eigen::Ref<RowMatrix> RefRowMatrix;
+      typedef Eigen::Ref<Vector> RefVector;
+
       typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel)
         RigidConstraintModelVector;
       typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
@@ -52,9 +58,24 @@ namespace pinocchio
             (bp::arg("self"), bp::arg("model"), bp::arg("contact_models")),
             "Constructor from a model and a collection of RigidConstraintModels."))
 
-          .PINOCCHIO_ADD_PROPERTY_READONLY_BYVALUE(Self, U, "")
-          .PINOCCHIO_ADD_PROPERTY_READONLY_BYVALUE(Self, D, "")
-          .PINOCCHIO_ADD_PROPERTY_READONLY_BYVALUE(Self, Dinv, "")
+          .add_property(
+            "U",
+            bp::make_function(
+              +[](const Self & self) -> RefRowMatrix { return RefRowMatrix(self.U); },
+              bp::with_custodian_and_ward_postcall<0, 1>()),
+            "")
+          .add_property(
+            "D",
+            bp::make_function(
+              +[](const Self & self) -> RefVector { return RefVector(self.D); },
+              bp::with_custodian_and_ward_postcall<0, 1>()),
+            "")
+          .add_property(
+            "Dinv",
+            bp::make_function(
+              +[](const Self & self) -> RefVector { return RefVector(self.Dinv); },
+              bp::with_custodian_and_ward_postcall<0, 1>()),
+            "")
 
           .def("size", &Self::size, bp::arg("self"), "Size of the decomposition.")
           .def(
@@ -103,8 +124,8 @@ namespace pinocchio
             "terms should be all positives.")
 
           .def(
-            "getDamping", &Self::getDamping, bp::arg("self"), "Returns the current damping vector.",
-            bp::return_value_policy<bp::copy_const_reference>())
+            "getDamping", +[](const Self & self) -> Vector { return Vector(self.getDamping()); },
+            bp::arg("self"), "Returns the current damping vector.")
 
           .def(
             "getInverseOperationalSpaceInertiaMatrix",
