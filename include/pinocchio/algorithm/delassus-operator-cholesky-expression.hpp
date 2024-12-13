@@ -59,8 +59,7 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), self.constraintDim());
       PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), x.cols());
 
-      const RowMatrixConstBlockXpr U1 =
-        self.U.topLeftCorner(self.constraintDim(), self.constraintDim());
+      const auto U1 = self.U.topLeftCorner(self.constraintDim(), self.constraintDim());
 
       if (x.cols() <= self.constraintDim())
       {
@@ -105,9 +104,8 @@ namespace pinocchio
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(x.rows(), self.constraintDim());
 
-      const Eigen::TriangularView<RowMatrixConstBlockXpr, Eigen::UnitUpper> U1 =
-        self.U.topLeftCorner(self.constraintDim(), self.constraintDim())
-          .template triangularView<Eigen::UnitUpper>();
+      const auto U1 = self.U.topLeftCorner(self.constraintDim(), self.constraintDim())
+                        .template triangularView<Eigen::UnitUpper>();
 
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U1.solveInPlace(x.const_cast_derived());

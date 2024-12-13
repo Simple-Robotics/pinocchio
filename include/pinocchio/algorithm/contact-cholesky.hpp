@@ -111,7 +111,14 @@ namespace pinocchio
     ///
     /// \brief Default constructor
     ///
-    ContactCholeskyDecompositionTpl() = default;
+    ContactCholeskyDecompositionTpl()
+    : D(D_storage.map())
+    , Dinv(Dinv_storage.map())
+    , U(U_storage.map())
+    , DUt(DUt_storage.map())
+    , damping(damping_storage.map())
+    {
+    }
 
     ///
     /// \brief Constructor from a model.
@@ -120,6 +127,11 @@ namespace pinocchio
     ///
     template<typename S1, int O1, template<typename, int> class JointCollectionTpl>
     explicit ContactCholeskyDecompositionTpl(const ModelTpl<S1, O1, JointCollectionTpl> & model)
+    : D(D_storage.map())
+    , Dinv(Dinv_storage.map())
+    , U(U_storage.map())
+    , DUt(DUt_storage.map())
+    , damping(damping_storage.map())
     {
       // TODO Remove when API is stabilized
       PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
@@ -145,6 +157,11 @@ namespace pinocchio
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
+    : D(D_storage.map())
+    , Dinv(Dinv_storage.map())
+    , U(U_storage.map())
+    , DUt(DUt_storage.map())
+    , damping(damping_storage.map())
     {
       typedef std::reference_wrapper<const ConstraintModel> WrappedType;
       typedef std::vector<WrappedType> WrappedTypeVector;
@@ -169,8 +186,30 @@ namespace pinocchio
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, Allocator> & contact_models)
+    : D(D_storage.map())
+    , Dinv(Dinv_storage.map())
+    , U(U_storage.map())
+    , DUt(DUt_storage.map())
+    , damping(damping_storage.map())
     {
       allocate(model, contact_models);
+    }
+
+    ContactCholeskyDecompositionTpl & operator=(const ContactCholeskyDecompositionTpl & other)
+    {
+      parents_fromRow = other.parents_fromRow;
+      nv_subtree_fromRow = other.nv_subtree_fromRow;
+      nv = other.nv;
+
+      rowise_sparsity_pattern = other.rowise_sparsity_pattern;
+
+      D_storage = other.D_storage;
+      Dinv_storage = other.Dinv_storage;
+      U_storage = other.U_storage;
+      DUt_storage = other.DUt_storage;
+      damping_storage = other.damping_storage;
+
+      return *this;
     }
 
     ///
@@ -229,10 +268,7 @@ namespace pinocchio
     template<typename MatrixType>
     void getInverseOperationalSpaceInertiaMatrix(const Eigen::MatrixBase<MatrixType> & res) const
     {
-      typedef typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::ConstType
-        ConstBlockXpr;
-      //        typedef typename RowMatrix::ConstBlockXpr ConstBlockXpr;
-      const ConstBlockXpr U1 = U.topLeftCorner(constraintDim(), constraintDim());
+      const auto U1 = U.topLeftCorner(constraintDim(), constraintDim());
 
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       MatrixType & res_ = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res);
@@ -262,12 +298,9 @@ namespace pinocchio
     void getOperationalSpaceInertiaMatrix(const Eigen::MatrixBase<MatrixType> & res_) const
     {
       MatrixType & res = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res_);
-      typedef typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::ConstType
-        ConstBlockXpr;
       //        typedef typename RowMatrix::ConstBlockXpr ConstBlockXpr;
-      const Eigen::TriangularView<ConstBlockXpr, Eigen::UnitUpper> U1 =
-        U.topLeftCorner(constraintDim(), constraintDim())
-          .template triangularView<Eigen::UnitUpper>();
+      const auto U1 = U.topLeftCorner(constraintDim(), constraintDim())
+                        .template triangularView<Eigen::UnitUpper>();
 
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U1inv.setIdentity();
@@ -288,11 +321,8 @@ namespace pinocchio
     void getInverseMassMatrix(const Eigen::MatrixBase<MatrixType> & res_) const
     {
       MatrixType & res = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res_);
-      typedef typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::ConstType
-        ConstBlockXpr;
       //        typedef typename RowMatrix::ConstBlockXpr ConstBlockXpr;
-      const Eigen::TriangularView<ConstBlockXpr, Eigen::UnitUpper> U4 =
-        U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
+      const auto U4 = U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
 
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U4inv.setIdentity();
@@ -306,11 +336,8 @@ namespace pinocchio
     void getJMinv(const Eigen::MatrixBase<MatrixType> & res_) const
     {
       MatrixType & res = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res_);
-      typedef typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::ConstType
-        ConstBlockXpr;
-      const Eigen::TriangularView<ConstBlockXpr, Eigen::UnitUpper> U4 =
-        U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
-      ConstBlockXpr U2 = U.topRightCorner(constraintDim(), nv);
+      const auto U4 = U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
+      auto U2 = U.topRightCorner(constraintDim(), nv);
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U4inv.setIdentity();
       U4.solveInPlace(U4inv); // TODO: implement Sparse Inverse
@@ -493,7 +520,7 @@ namespace pinocchio
     ///
     /// \brief Returns the current damping vector.
     ///
-    const Vector & getDamping() const
+    const typename EigenStorageVector::MapType getDamping() const
     {
       return damping;
     }
@@ -576,8 +603,12 @@ namespace pinocchio
     void inverse(const Eigen::MatrixBase<MatrixType> & res) const;
 
     // data
-    Vector D, Dinv;
-    RowMatrix U;
+    EigenStorageVector D_storage;
+    typename EigenStorageVector::RefMapType D;
+    EigenStorageVector Dinv_storage;
+    typename EigenStorageVector::RefMapType Dinv;
+    EigenStorageRowMatrix U_storage;
+    typename EigenStorageRowMatrix::RefMapType U;
 
     ///@{
     /// \brief Friend algorithms
@@ -614,7 +645,8 @@ namespace pinocchio
     EigenIndexVector parents_fromRow;
     EigenIndexVector nv_subtree_fromRow;
 
-    Vector DUt; // temporary containing the results of D * U^t
+    EigenStorageVector DUt_storage;
+    typename EigenStorageVector::RefMapType DUt; // temporary containing the results of D * U^t
 
     /// \brief Dimension of the tangent of the configuration space of the model
     Eigen::DenseIndex nv;
@@ -629,7 +661,8 @@ namespace pinocchio
     mutable RowMatrix OSIMinv_tmp, Minv_tmp;
 
     /// \brief Store the current damping value
-    Vector damping;
+    EigenStorageVector damping_storage;
+    typename EigenStorageVector::RefMapType damping;
   };
 
 } // namespace pinocchio

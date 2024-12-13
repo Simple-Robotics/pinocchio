@@ -46,12 +46,6 @@ namespace pinocchio
       num_total_constraints += cmodel.size();
     }
 
-    U1inv.resize(num_total_constraints, num_total_constraints);
-    OSIMinv_tmp.resize(num_total_constraints, num_total_constraints);
-    U4inv.resize(nv, nv);
-    Minv_tmp.resize(nv, nv);
-    damping = Vector::Zero(num_total_constraints);
-
     const Eigen::DenseIndex total_dim = nv + num_total_constraints;
 
     // Compute first parents_fromRow for all the joints.
@@ -153,12 +147,20 @@ namespace pinocchio
           }
      */
 
-    // Allocate memory
-    D.resize(total_dim);
-    Dinv.resize(total_dim);
-    U.resize(total_dim, total_dim);
+    // Allocate Eigen memory
+
+    U1inv.resize(num_total_constraints, num_total_constraints);
+    OSIMinv_tmp.resize(num_total_constraints, num_total_constraints);
+    U4inv.resize(nv, nv);
+    Minv_tmp.resize(nv, nv);
+    damping_storage.resize(num_total_constraints);
+    damping.setZero();
+
+    D_storage.resize(total_dim);
+    Dinv_storage.resize(total_dim);
+    U_storage.resize(total_dim, total_dim);
     U.setIdentity();
-    DUt.resize(total_dim);
+    DUt_storage.resize(total_dim);
   }
 
   template<typename Scalar, int Options>
@@ -233,7 +235,7 @@ namespace pinocchio
       // Classic Cholesky decomposition related to the mass matrix
       const Eigen::DenseIndex jj = total_constraints_dim + j; // shifted index
       const Eigen::DenseIndex NVT = nv_subtree_fromRow[jj] - 1;
-      typename Vector::SegmentReturnType DUt_partial = DUt.head(NVT);
+      auto DUt_partial = DUt.head(NVT);
 
       if (NVT)
         DUt_partial.noalias() =
@@ -289,7 +291,7 @@ namespace pinocchio
     for (Eigen::DenseIndex j = total_constraints_dim - 1; j >= 0; --j)
     {
       const Eigen::DenseIndex slice_dim = total_dim - j - 1;
-      typename Vector::SegmentReturnType DUt_partial = DUt.head(slice_dim);
+      auto DUt_partial = DUt.head(slice_dim);
       DUt_partial.noalias() =
         U.row(j).segment(j + 1, slice_dim).transpose().cwiseProduct(D.segment(j + 1, slice_dim));
 
@@ -659,7 +661,6 @@ namespace pinocchio
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorLike);
 
       typedef ContactCholeskyDecompositionTpl<Scalar, Options> ContactCholeskyDecomposition;
-      typedef typename ContactCholeskyDecomposition::RowMatrix RowMatrix;
 
       const Eigen::DenseIndex & chol_dim = chol.size();
       PINOCCHIO_CHECK_INPUT_ARGUMENT(col < chol_dim && col >= 0);
@@ -677,7 +678,7 @@ namespace pinocchio
       for (Eigen::DenseIndex k = last_col; k >= 0; --k)
       {
         const Eigen::DenseIndex nvt_max = std::min(col - k, nvt[k] - 1);
-        const typename RowMatrix::ConstRowXpr U_row = chol.U.row(k);
+        const auto U_row = chol.U.row(k);
         vec_[k] = -U_row.segment(k + 1, nvt_max).dot(vec_.segment(k + 1, nvt_max));
         //          if(k >= chol_constraint_dim)
         //          {
