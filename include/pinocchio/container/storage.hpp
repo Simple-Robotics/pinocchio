@@ -6,109 +6,89 @@
 #define __pinocchio_container_storage_hpp__
 
 #include "pinocchio/fwd.hpp"
+#include <iostream>
 
 namespace pinocchio
 {
 
-  template<typename Scalar, int MaxSizeAtCompileTime = Eigen::Dynamic, int Options = 0>
-  struct EigenStorageTpl;
-
-  template<typename _Scalar, int _MaxSizeAtCompileTime, int _Options>
+  template<typename MatrixLike>
   struct EigenStorageTpl
   {
-    typedef _Scalar Scalar;
+    typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike) PlainMatrixType;
+    typedef typename MatrixLike::Scalar Scalar;
+
+    typedef Eigen::Map<PlainMatrixType> MapType;
+    typedef Eigen::Map<PlainMatrixType> & RefMapType;
+    typedef const Eigen::Map<PlainMatrixType> & ConstRefMapType;
+    typedef const Eigen::Map<const PlainMatrixType> ConstMapType;
+    typedef Eigen::DenseIndex Index;
+
     enum
     {
-      MaxSizeAtCompileTime = _MaxSizeAtCompileTime,
-      Options = _Options
+      MaxSizeAtCompileTime =
+        ((PlainMatrixType::MaxRowsAtCompileTime != Eigen::Dynamic)
+         && (PlainMatrixType::MaxRowsAtCompileTime != Eigen::Dynamic))
+          ? PlainMatrixType::MaxRowsAtCompileTime * PlainMatrixType::MaxColsAtCompileTime
+          : Eigen::Dynamic,
+      IsVectorAtCompileTime = MatrixLike::IsVectorAtCompileTime,
+      Options = PlainMatrixType::Options
     };
 
     typedef Eigen::Matrix<Scalar, MaxSizeAtCompileTime, 1, Options> StorageVector;
 
-    /// \brief Default constructor from a given maximum size.
+    /// \brief Default constructor from given matrix dimension (rows, cols) and maximum rows and
+    /// columns
     ///
-    /// \param[in] max_size Size of the allocated memory chunk (max_size * sizeof(Scalar)).
-    explicit EigenStorageTpl(const Eigen::DenseIndex max_size)
-    : m_storage(max_size)
+    /// \param[in] rows Number of rows
+    /// \param[in] cols Number of columns
+    /// \param[in] max_rows Maximum number of rows
+    /// \param[in] max_cols Maximum number of columns
+    ///
+    EigenStorageTpl(const Index rows, const Index cols, const Index max_rows, const Index max_cols)
+    : m_storage(max_rows * max_cols)
+    , m_map(MapType(m_storage.data(), rows, cols))
+    {
+    }
+
+    /// \brief Default constructor from given matrix dimension (rows, cols).
+    ///
+    /// \param[in] rows Number of rows.
+    /// \param[in] cols Number of columns.
+    ///
+    EigenStorageTpl(const Index rows, const Index cols)
+    : m_storage(Eigen::DenseIndex(rows * cols))
+    , m_map(MapType(m_storage.data(), rows, cols))
     {
     }
 
     /// \brief Resize the current capacity of the internal storage.
     ///
     /// \remarks The resizing only happens when the new_size is greater than the current capacity
-    void resize(const Eigen::DenseIndex new_size)
+    void resize(const Index rows, const Index cols)
     {
+      const Index new_size = rows * cols;
       if (new_size > capacity())
         m_storage.resize(2 * new_size); // Double the size of the storage
+      new (&m_map) MapType(m_storage.data(), rows, cols);
     }
 
     /// \brief Conservative resize of the current capacity of the internal storage. The data are
     /// kepts in memory.
     ///
     /// \remarks The resizing only happens when the new_size is greater than the current capacity
-    void conservativeResize(const Eigen::DenseIndex new_size)
+    void conservativeResize(const Index rows, const Index cols)
     {
-      if (new_size > capacity())
-        m_storage.conservativeResize(2 * new_size); // Double the size of the storage
-    }
+      const Index old_rows = this->rows(), old_cols = this->cols();
+      const PlainMatrixType copy(map()); // save current value in the storage
+      this->resize(rows, cols);
 
-    template<typename MatrixLike>
-    Eigen::Map<typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike)>
-    as(const Eigen::DenseIndex rows, const Eigen::DenseIndex cols)
-    {
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike) PlainType;
-      typedef Eigen::Map<PlainType> ReturnType;
-
-      const Eigen::DenseIndex size = rows * cols;
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        size <= capacity(), "You ask for a matrix that exceeds the storage capacity");
-
-      return ReturnType(m_storage.data(), rows, cols);
-    }
-
-    template<typename MatrixLike>
-    const Eigen::Map<const typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike)>
-    as(const Eigen::DenseIndex rows, const Eigen::DenseIndex cols) const
-    {
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike) PlainType;
-      typedef const Eigen::Map<const PlainType> ReturnType;
-
-      const Eigen::DenseIndex size = rows * cols;
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        size <= capacity(), "You ask for a matrix that exceeds the storage capacity");
-
-      return ReturnType(m_storage.data(), rows, cols);
-    }
-
-    template<typename VectorLike>
-    Eigen::Map<typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike)> as(const Eigen::DenseIndex size)
-    {
-      EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorLike);
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike) PlainType;
-      typedef Eigen::Map<PlainType> ReturnType;
-
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        size <= capacity(), "You ask for a vector that exceeds the storage capacity");
-
-      return ReturnType(m_storage.data(), size);
-    }
-
-    template<typename VectorLike>
-    const Eigen::Map<const typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike)>
-    as(const Eigen::DenseIndex size) const
-    {
-      EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorLike);
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLike) PlainType;
-      typedef const Eigen::Map<const PlainType> ReturnType;
-
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        size <= capacity(), "You ask for a vector that exceeds the storage capacity");
-
-      return ReturnType(m_storage.data(), size);
+      // copy back values
+      const Index min_rows = (std::min)(rows, old_rows), min_cols = (std::min)(cols, old_cols);
+      map().topLeftCorner(min_rows, min_cols) = copy.topLeftCorner(min_rows, min_cols);
     }
 
     ///  \brief Returns the size of the storage space currently allocated.
-    Eigen::DenseIndex capacity() const
+    Index capacity() const
     {
       return m_storage.size();
     }
@@ -125,9 +105,42 @@ namespace pinocchio
       return m_storage.data();
     }
 
+    /// \brief Returns a map toward the internal matrix.
+    ConstRefMapType map() const
+    {
+      return m_map;
+    }
+
+    /// \brief Returns a map toward the internal matrix.
+    RefMapType map()
+    {
+      return m_map;
+    }
+
+    /// \brief Returns the number of rows
+    Index rows() const
+    {
+      return map().rows();
+    }
+
+    /// \brief Returns the number of columns
+    Index cols() const
+    {
+      return map().cols();
+    }
+
+    ///  \brief Returns the size of the underlying matrix or vector.
+    Index size() const
+    {
+      return map().size();
+    }
+
   protected:
     /// \brief Internal vector containing the stored quantities
     StorageVector m_storage;
+
+    /// \brief Map
+    MapType m_map;
   }; // struct EigenStorageTpl
 
 } // namespace pinocchio
