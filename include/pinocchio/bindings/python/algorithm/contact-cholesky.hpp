@@ -62,9 +62,6 @@ namespace pinocchio
             "Returns the total dimension of the constraints contained in the Cholesky "
             "factorization.")
           .def(
-            "numContacts", &Self::numContacts, bp::arg("self"),
-            "Returns the number of contacts associated to this decomposition.")
-          .def(
             "matrix", (Matrix(Self::*)(void) const)&Self::matrix, bp::arg("self"),
             "Returns the matrix resulting from the decomposition.")
 
