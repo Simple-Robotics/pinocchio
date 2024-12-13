@@ -24,7 +24,7 @@ namespace pinocchio
     template<typename T> class Holder,
     class ConstraintModel,
     class ConstraintAllocator>
-  void ContactCholeskyDecompositionTpl<Scalar, Options>::allocate(
+  void ContactCholeskyDecompositionTpl<Scalar, Options>::resize(
     const ModelTpl<S1, O1, JointCollectionTpl> & model,
     const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & contact_models)
   {
@@ -147,8 +147,7 @@ namespace pinocchio
           }
      */
 
-    // Allocate Eigen memory
-
+    // Allocate Eigen memory if needed
     U1inv.resize(num_total_constraints, num_total_constraints);
     OSIMinv_tmp.resize(num_total_constraints, num_total_constraints);
     U4inv.resize(nv, nv);

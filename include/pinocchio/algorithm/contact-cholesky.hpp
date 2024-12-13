@@ -138,7 +138,7 @@ namespace pinocchio
       PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) empty_contact_models;
       PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-      allocate(model, empty_contact_models);
+      resize(model, empty_contact_models);
     }
 
     ///
@@ -167,7 +167,7 @@ namespace pinocchio
       typedef std::vector<WrappedType> WrappedTypeVector;
 
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
-      allocate(model, wrapped_contact_models);
+      resize(model, wrapped_contact_models);
     }
 
     ///
@@ -192,7 +192,7 @@ namespace pinocchio
     , DUt(DUt_storage.map())
     , damping(damping_storage.map())
     {
-      allocate(model, contact_models);
+      resize(model, contact_models);
     }
 
     ContactCholeskyDecompositionTpl & operator=(const ContactCholeskyDecompositionTpl & other)
@@ -225,7 +225,7 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
       class ConstraintAllocator>
-    void allocate(
+    void resize(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
     {
@@ -233,7 +233,7 @@ namespace pinocchio
       typedef std::vector<WrappedType> WrappedTypeVector;
 
       WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
-      allocate(model, wrapped_contact_models);
+      resize(model, wrapped_contact_models);
     }
 
     ///
@@ -250,7 +250,7 @@ namespace pinocchio
       template<typename T> class Holder,
       class ConstraintModel,
       class ConstraintAllocator>
-    void allocate(
+    void resize(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & contact_models);
 

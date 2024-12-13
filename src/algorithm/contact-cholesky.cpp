@@ -25,7 +25,7 @@ namespace pinocchio
     ContactCholeskyDecompositionTpl<context::Scalar, context::Options>;
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
-  ContactCholeskyDecompositionTpl<context::Scalar, context::Options>::allocate<
+  ContactCholeskyDecompositionTpl<context::Scalar, context::Options>::resize<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
