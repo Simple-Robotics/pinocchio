@@ -30,7 +30,7 @@ namespace pinocchio
           ? PlainMatrixType::MaxRowsAtCompileTime * PlainMatrixType::MaxColsAtCompileTime
           : Eigen::Dynamic,
       IsVectorAtCompileTime = MatrixLike::IsVectorAtCompileTime,
-      Options = PlainMatrixType::Options
+      Options = PlainMatrixType::Options & ~Eigen::RowMajorBit
     };
 
     typedef Eigen::Matrix<Scalar, MaxSizeAtCompileTime, 1, Options> StorageVector;
