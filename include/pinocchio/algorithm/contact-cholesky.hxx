@@ -36,7 +36,6 @@ namespace pinocchio
       "ConstraintModel is not a ConstraintModelBase");
 
     nv = model.nv;
-    num_contacts = (Eigen::DenseIndex)contact_models.size();
 
     Eigen::DenseIndex num_total_constraints = 0;
     for (auto it = contact_models.cbegin(); it != contact_models.cend(); ++it)
@@ -189,14 +188,9 @@ namespace pinocchio
 
     assert(model.check(data) && "data is not consistent with model.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
-      (Eigen::DenseIndex)contact_models.size() == num_contacts,
-      "The number of contacts inside contact_models and the one during allocation do not match.\n"
-      "Please call first ContactCholeskyDecompositionTpl::allocate method.");
-    PINOCCHIO_CHECK_INPUT_ARGUMENT(
-      (Eigen::DenseIndex)contact_datas.size() == num_contacts,
-      "The number of contacts inside contact_datas and the one during allocation do not match.\n"
-      "Please call first ContactCholeskyDecompositionTpl::allocate method.");
-    PINOCCHIO_UNUSED_VARIABLE(model);
+      contact_models.size() == contact_datas.size(),
+      "The number of constraints between contact_models and contact_datas vectors is different.");
+    PINOCCHIO_ONLY_USED_FOR_DEBUG(model);
 
     const Eigen::DenseIndex total_dim = size();
     const Eigen::DenseIndex total_constraints_dim = total_dim - nv;
@@ -626,7 +620,7 @@ namespace pinocchio
   {
     bool is_same = true;
 
-    if (nv != other.nv || num_contacts != other.num_contacts)
+    if (nv != other.nv)
       return false;
 
     if (
