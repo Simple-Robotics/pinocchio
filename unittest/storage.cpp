@@ -10,6 +10,8 @@
 
 using namespace pinocchio;
 typedef EigenStorageTpl<Eigen::MatrixXd> EigenStorageMatrix;
+typedef EigenStorageTpl<PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(Eigen::MatrixXd)>
+  EigenStorageRowMatrix;
 typedef EigenStorageTpl<Eigen::VectorXd> EigenStorageVector;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
@@ -46,6 +48,42 @@ BOOST_AUTO_TEST_CASE(eigen_storage_matrix)
 
   // Check copy
   EigenStorageMatrix storage_copy(storage);
+  BOOST_CHECK(storage_copy.data() != storage.data());
+  BOOST_CHECK(storage_copy.map() == storage.map());
+  BOOST_CHECK(storage_copy.capacity() == storage.capacity());
+  BOOST_CHECK(storage_copy.storage() == storage.storage());
+
+  // Check resize
+  const Eigen::DenseIndex new_rows = 2 * rows, new_cols = cols;
+  storage.conservativeResize(new_rows, new_cols);
+  BOOST_CHECK(matrix_map.data() == storage.data());
+  BOOST_CHECK(storage.map().topLeftCorner(rows, cols).isOnes(0.));
+}
+
+BOOST_AUTO_TEST_CASE(eigen_storage_row_matrix)
+{
+  const Eigen::DenseIndex rows = 10, cols = 20;
+
+  const Eigen::DenseIndex initial_capacity = rows * cols;
+  EigenStorageRowMatrix storage(rows, cols);
+  BOOST_CHECK(storage.isValid());
+
+  BOOST_CHECK(storage.capacity() == initial_capacity);
+  BOOST_CHECK(storage.rows() == rows);
+  BOOST_CHECK(storage.cols() == cols);
+
+  EigenStorageRowMatrix::RefMapType matrix_map = storage.map();
+  BOOST_CHECK(matrix_map.data() == storage.data());
+
+  matrix_map.setIdentity();
+  BOOST_CHECK(storage.map().isIdentity(0.));
+  BOOST_CHECK(static_cast<const EigenStorageRowMatrix &>(storage).map().isIdentity(0.));
+  matrix_map.setOnes();
+  BOOST_CHECK(storage.map().isOnes(0.));
+  BOOST_CHECK(static_cast<const EigenStorageRowMatrix &>(storage).map().isOnes(0.));
+
+  // Check copy
+  EigenStorageRowMatrix storage_copy(storage);
   BOOST_CHECK(storage_copy.data() != storage.data());
   BOOST_CHECK(storage_copy.map() == storage.map());
   BOOST_CHECK(storage_copy.capacity() == storage.capacity());
