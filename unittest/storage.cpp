@@ -14,12 +14,21 @@ typedef EigenStorageTpl<Eigen::VectorXd> EigenStorageVector;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
+BOOST_AUTO_TEST_CASE(eigen_storage_default)
+{
+  EigenStorageMatrix storage_matrix;
+  BOOST_CHECK(!storage_matrix.isValid());
+  EigenStorageVector storage_vector;
+  BOOST_CHECK(!storage_vector.isValid());
+}
+
 BOOST_AUTO_TEST_CASE(eigen_storage_matrix)
 {
   const Eigen::DenseIndex rows = 10, cols = 20;
 
   const Eigen::DenseIndex initial_capacity = rows * cols;
   EigenStorageMatrix storage(rows, cols);
+  BOOST_CHECK(storage.isValid());
 
   BOOST_CHECK(storage.capacity() == initial_capacity);
   BOOST_CHECK(storage.rows() == rows);
@@ -55,6 +64,7 @@ BOOST_AUTO_TEST_CASE(eigen_storage_vector)
 
   const Eigen::DenseIndex initial_capacity = size;
   EigenStorageVector storage(size);
+  BOOST_CHECK(storage.isValid());
 
   BOOST_CHECK(storage.capacity() == initial_capacity);
   BOOST_CHECK(storage.rows() == size);
