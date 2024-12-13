@@ -8,6 +8,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/math/matrix-block.hpp"
 #include "pinocchio/math/triangular-matrix.hpp"
+#include "pinocchio/container/storage.hpp"
 
 #include "pinocchio/algorithm/constraints/constraints.hpp"
 #include <functional>
@@ -69,6 +70,11 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> Matrix;
     typedef typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(Matrix) RowMatrix;
+
+    typedef EigenStorageTpl<Vector> EigenStorageVector;
+    typedef EigenStorageTpl<Matrix> EigenStorageMatrix;
+    typedef EigenStorageTpl<RowMatrix> EigenStorageRowMatrix;
+
     // TODO Remove when API is stabilized
     PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
     PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
