@@ -200,6 +200,12 @@ namespace pinocchio
       return map().size();
     }
 
+    /// \brief Whether the internal map points towards a valid data.
+    bool isValid() const
+    {
+      return data() != NULL;
+    }
+
   protected:
     /// \brief Internal vector containing the stored quantities
     StorageVector m_storage;
