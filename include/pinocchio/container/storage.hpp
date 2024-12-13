@@ -102,6 +102,14 @@ namespace pinocchio
     /// \brief Move constructor
     EigenStorageTpl(EigenStorageTpl && other) = default;
 
+    EigenStorageTpl & operator=(const EigenStorageTpl & other)
+    {
+      m_storage = other.m_storage;
+      new (&m_map) MapType(m_storage.data(), other.m_map.rows(), other.m_map.cols());
+
+      return *this;
+    }
+
     /// \brief Resize the current capacity of the internal storage.
     ///
     /// \remarks The resizing only happens when the new_size is greater than the current capacity
