@@ -4,11 +4,6 @@
 
 #include "pinocchio/fwd.hpp"
 
-#ifdef WIN32
-#else
-  #include <alloca.h>
-#endif
-
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
@@ -43,6 +38,17 @@ BOOST_AUTO_TEST_CASE(copy_eigen_input)
     const auto mat_copy = copy(mat);
     BOOST_CHECK(mat_copy == mat);
   }
+}
+
+BOOST_AUTO_TEST_CASE(macro)
+{
+  const Eigen::DenseIndex rows = 10, cols = 20;
+  typedef Eigen::Map<Eigen::MatrixXd> MapType;
+  MapType map = MapType(PINOCCHIO_EIGEN_MAP_ALLOCA(Eigen::MatrixXd::Scalar, rows, cols));
+  map.setZero();
+  BOOST_CHECK(map.rows() == rows);
+  BOOST_CHECK(map.cols() == cols);
+  BOOST_CHECK(map.isZero(0.));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
