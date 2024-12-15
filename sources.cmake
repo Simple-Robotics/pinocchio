@@ -119,6 +119,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/rnea-second-order-derivatives.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/utils/force.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/utils/motion.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/alloca.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/casadi-algo.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/casadi.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/casadi/math/matrix.hpp
