@@ -45,14 +45,14 @@ namespace pinocchio
   template<class ConstraintDerived, typename Force>
   struct ConstraintForceOp
   {
-    typedef ReturnTypeNotDefined ReturnType;
+    typedef UndefinedReturnType ReturnType;
   };
 
   /// \brief Return type of the Constraint::Transpose * ForceSet operation
   template<class ConstraintDerived, typename ForceSet>
   struct ConstraintForceSetOp
   {
-    typedef ReturnTypeNotDefined ReturnType;
+    typedef UndefinedReturnType ReturnType;
   };
 
   template<class Derived>

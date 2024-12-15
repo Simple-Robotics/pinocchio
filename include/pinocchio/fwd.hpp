@@ -167,9 +167,9 @@ namespace pinocchio
    */
   const int Dynamic = -1;
 
-  /// \brief Return type undefined
+  /// \brief Undefined return type
   ///        This is an helper structure to help internal diagnosis.
-  struct ReturnTypeNotDefined;
+  struct UndefinedReturnType;
 
   typedef Eigen::Matrix<bool, Eigen::Dynamic, 1> VectorXb;
 } // namespace pinocchio
