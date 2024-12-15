@@ -148,10 +148,6 @@ namespace pinocchio
      */
 
     // Allocate Eigen memory if needed
-    U1inv.resize(num_total_constraints, num_total_constraints);
-    OSIMinv_tmp.resize(num_total_constraints, num_total_constraints);
-    U4inv.resize(nv, nv);
-    Minv_tmp.resize(nv, nv);
     damping_storage.resize(num_total_constraints);
     damping.setZero();
 

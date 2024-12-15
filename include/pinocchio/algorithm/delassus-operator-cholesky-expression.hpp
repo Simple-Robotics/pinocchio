@@ -60,30 +60,10 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), x.cols());
 
       const auto U1 = self.U.topLeftCorner(self.constraintDim(), self.constraintDim());
-
-      if (x.cols() <= self.constraintDim())
       {
         PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
-        RowMatrixBlockXpr tmp_mat =
-          const_cast<ContactCholeskyDecomposition &>(self).OSIMinv_tmp.topLeftCorner(
-            self.constraintDim(), x.cols());
-        //            tmp_mat.noalias() = U1.adjoint() * x;
-        triangularMatrixMatrixProduct<Eigen::UnitLower>(U1.adjoint(), x.derived(), tmp_mat);
-
-        // The following commented lines produced some memory allocation.
-        // Should be replaced by a manual loop
-        //          tmp_mat.array().colwise() *= -self.D.head(self.constraintDim()).array();
-        for (Eigen::DenseIndex i = 0; i < x.cols(); ++i)
-          tmp_mat.col(i).array() *= -self.D.head(self.constraintDim()).array();
-
-        //            res.const_cast_derived().noalias() = U1 * tmp_mat;
-        triangularMatrixMatrixProduct<Eigen::UnitUpper>(U1, tmp_mat, res.const_cast_derived());
-        PINOCCHIO_EIGEN_MALLOC_ALLOWED();
-      }
-      else // do memory allocation
-      {
-        RowMatrix tmp_mat(x.rows(), x.cols());
-        PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
+        typedef Eigen::Map<RowMatrix> MapType;
+        MapType tmp_mat = MapType(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, x.rows(), x.cols()));
         //            tmp_mat.noalias() = U1.adjoint() * x;
         triangularMatrixMatrixProduct<Eigen::UnitLower>(U1.adjoint(), x.derived(), tmp_mat);
 

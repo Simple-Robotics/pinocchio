@@ -302,10 +302,14 @@ namespace pinocchio
     {
       const auto U1 = U.topLeftCorner(constraintDim(), constraintDim());
 
+      const auto dim = constraintDim();
+      typedef Eigen::Map<RowMatrix> MapRowMatrix;
+      MapRowMatrix OSIMinv = MapRowMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, dim, dim));
+
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
-      MatrixType & res_ = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res);
-      OSIMinv_tmp.noalias() = D.head(constraintDim()).asDiagonal() * U1.adjoint();
-      res_.noalias() = -U1 * OSIMinv_tmp;
+      MatrixType & res_ = res.const_cast_derived();
+      OSIMinv.noalias() = D.head(dim).asDiagonal() * U1.adjoint();
+      res_.noalias() = -U1 * OSIMinv;
       PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
@@ -334,11 +338,18 @@ namespace pinocchio
       const auto U1 = U.topLeftCorner(constraintDim(), constraintDim())
                         .template triangularView<Eigen::UnitUpper>();
 
+      const auto dim = constraintDim();
+      typedef Eigen::Map<RowMatrix> MapRowMatrix;
+      MapRowMatrix OSIMinv = MapRowMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, dim, dim));
+
+      typedef Eigen::Map<Matrix> MapMatrix;
+      MapMatrix U1inv = MapMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, dim, dim));
+
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U1inv.setIdentity();
       U1.solveInPlace(U1inv); // TODO: implement Sparse Inverse
-      OSIMinv_tmp.noalias() = -U1inv.adjoint() * Dinv.head(constraintDim()).asDiagonal();
-      res.noalias() = OSIMinv_tmp * U1inv;
+      OSIMinv.noalias() = -U1inv.adjoint() * Dinv.head(dim).asDiagonal();
+      res.noalias() = OSIMinv * U1inv;
       PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
@@ -356,21 +367,31 @@ namespace pinocchio
       //        typedef typename RowMatrix::ConstBlockXpr ConstBlockXpr;
       const auto U4 = U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
 
+      typedef Eigen::Map<RowMatrix> MapRowMatrix;
+      MapRowMatrix Minv = MapRowMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, nv, nv));
+
+      typedef Eigen::Map<Matrix> MapMatrix;
+      MapMatrix U4inv = MapMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, nv, nv));
+
       PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       U4inv.setIdentity();
       U4.solveInPlace(U4inv); // TODO: implement Sparse Inverse
-      Minv_tmp.noalias() = U4inv.adjoint() * Dinv.tail(nv).asDiagonal();
-      res.noalias() = Minv_tmp * U4inv;
+      Minv.noalias() = U4inv.adjoint() * Dinv.tail(nv).asDiagonal();
+      res.noalias() = Minv * U4inv;
       PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
     template<typename MatrixType>
     void getJMinv(const Eigen::MatrixBase<MatrixType> & res_) const
     {
+      PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       MatrixType & res = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, res_);
       const auto U4 = U.bottomRightCorner(nv, nv).template triangularView<Eigen::UnitUpper>();
       auto U2 = U.topRightCorner(constraintDim(), nv);
-      PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
+
+      typedef Eigen::Map<Matrix> MapMatrix;
+      MapMatrix U4inv = MapMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, nv, nv));
+
       U4inv.setIdentity();
       U4.solveInPlace(U4inv); // TODO: implement Sparse Inverse
       res.noalias() = U2 * U4inv;
@@ -411,7 +432,7 @@ namespace pinocchio
       std::vector<ConstraintData, ConstraintDataAllocator> & contact_datas,
       const S1 mu = S1(0.))
     {
-      compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(), mu));
+      compute(model, data, contact_models, contact_datas, Vector::Constant(constraintDim(), mu));
     }
 
     ///
@@ -446,7 +467,7 @@ namespace pinocchio
       std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & contact_datas,
       const S1 mu = S1(0.))
     {
-      compute(model, data, contact_models, contact_datas, Vector::Constant(U1inv.rows(), mu));
+      compute(model, data, contact_models, contact_datas, Vector::Constant(constraintDim(), mu));
     }
     PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
@@ -684,13 +705,6 @@ namespace pinocchio
     Eigen::DenseIndex nv;
 
     VectorOfSliceVector rowise_sparsity_pattern;
-
-    /// \brief Inverse of the top left block of U
-    mutable Matrix U1inv;
-    /// \brief Inverse of the bottom right block of U
-    mutable Matrix U4inv;
-
-    mutable RowMatrix OSIMinv_tmp, Minv_tmp;
 
     /// \brief Store the current damping value
     EigenStorageVector damping_storage;
