@@ -1746,19 +1746,28 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_check_resize)
   const std::string RF = "rleg6_joint";
   const std::string LF = "lleg6_joint";
 
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contact_datas;
-  RigidConstraintModel ci_RF(CONTACT_6D, model, model.getJointId(RF), LOCAL);
-  contact_models.push_back(ci_RF);
-  contact_datas.push_back(RigidConstraintData(ci_RF));
-  RigidConstraintModel ci_LF(CONTACT_6D, model, model.getJointId(LF), LOCAL);
-  contact_models.push_back(ci_LF);
-  contact_datas.push_back(RigidConstraintData(ci_LF));
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel)
+    RigidConstraintModelStdVector;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
+    RigidConstraintDataStdVector;
+
+  RigidConstraintModelStdVector contact_models;
+  RigidConstraintDataStdVector contact_datas;
+
+  {
+    RigidConstraintModel ci_RF(CONTACT_6D, model, model.getJointId(RF), LOCAL);
+    contact_models.push_back(ci_RF);
+    contact_datas.push_back(RigidConstraintData(ci_RF));
+    RigidConstraintModel ci_LF(CONTACT_6D, model, model.getJointId(LF), LOCAL);
+    contact_models.push_back(ci_LF);
+    contact_datas.push_back(RigidConstraintData(ci_LF));
+  }
 
   Data data(model);
   crba(model, data, q, Convention::WORLD);
   ContactCholeskyDecomposition contact_chol_decomposition;
   contact_chol_decomposition.resize(model, contact_models);
+  contact_chol_decomposition.compute(model, data, contact_models, contact_datas);
 
   // Check copy constructor
   {
@@ -1770,6 +1779,60 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_check_resize)
     BOOST_CHECK(contact_chol_decomposition_copy.Dinv == contact_chol_decomposition.Dinv);
     BOOST_CHECK(
       contact_chol_decomposition_copy.Dinv.data() != contact_chol_decomposition.Dinv.data());
+  }
+
+  // Test resize
+  {
+    ContactCholeskyDecomposition contact_chol_decomposition_empty(model);
+    {
+      RigidConstraintModelStdVector contact_models_empty;
+      RigidConstraintDataStdVector contact_datas_empty;
+      contact_chol_decomposition_empty.compute(
+        model, data, contact_models_empty, contact_datas_empty);
+
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.U.bottomRightCorner(model.nv, model.nv)
+        == contact_chol_decomposition.U.bottomRightCorner(model.nv, model.nv));
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.D.tail(model.nv)
+        == contact_chol_decomposition.D.tail(model.nv));
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.Dinv.tail(model.nv)
+        == contact_chol_decomposition.Dinv.tail(model.nv));
+    }
+
+    contact_chol_decomposition_empty.resize(model, contact_models);
+    {
+      RigidConstraintDataStdVector contact_datas;
+      for (const auto & cmodel : contact_models)
+        contact_datas.push_back(cmodel.createData());
+
+      contact_chol_decomposition_empty.compute(model, data, contact_models, contact_datas);
+      BOOST_CHECK(contact_chol_decomposition_empty.U == contact_chol_decomposition.U);
+      BOOST_CHECK(contact_chol_decomposition_empty.D == contact_chol_decomposition.D);
+      BOOST_CHECK(contact_chol_decomposition_empty.Dinv == contact_chol_decomposition.Dinv);
+    }
+
+    contact_chol_decomposition_empty.resize(model, RigidConstraintModelStdVector());
+    {
+      RigidConstraintModelStdVector contact_models_empty;
+      RigidConstraintDataStdVector contact_datas_empty;
+      contact_chol_decomposition_empty.U.triangularView<Eigen::StrictlyUpper>().setZero();
+      contact_chol_decomposition_empty.D.setZero();
+      contact_chol_decomposition_empty.Dinv.setZero();
+      contact_chol_decomposition_empty.compute(
+        model, data, contact_models_empty, contact_datas_empty);
+
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.U.bottomRightCorner(model.nv, model.nv)
+        == contact_chol_decomposition.U.bottomRightCorner(model.nv, model.nv));
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.D.tail(model.nv)
+        == contact_chol_decomposition.D.tail(model.nv));
+      BOOST_CHECK(
+        contact_chol_decomposition_empty.Dinv.tail(model.nv)
+        == contact_chol_decomposition.Dinv.tail(model.nv));
+    }
   }
 }
 
