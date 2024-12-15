@@ -237,11 +237,23 @@ namespace pinocchio
     }
 
     ///
-    ///  \brief Memory allocation of the vectors D, Dinv, and the upper triangular matrix U.
+    ///  \brief Internal memory allocation.
     ///
     /// \param[in] model Model of the kinematic tree
-    /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact
-    /// information
+    /// \param[in] contact_models Vector of ConstraintModel
+    ///
+    template<
+      typename S1,
+      int O1,
+      template<typename, int> class JointCollectionTpl,
+      class ConstraintModel,
+      class ConstraintAllocator>
+    PINOCCHIO_DEPRECATED void allocate(
+      const ModelTpl<S1, O1, JointCollectionTpl> & model,
+      const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
+    {
+      resize(model, contact_models);
+    }
     ///
     template<
       typename S1,
