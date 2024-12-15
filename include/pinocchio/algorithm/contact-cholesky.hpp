@@ -195,6 +195,21 @@ namespace pinocchio
       resize(model, contact_models);
     }
 
+    ///
+    /// \brief Copy constructor
+    ///
+    /// \param[in] other ContactCholeskyDecompositionTpl to copy
+    ///
+    ContactCholeskyDecompositionTpl(const ContactCholeskyDecompositionTpl & other)
+    : D(D_storage.map())
+    , Dinv(Dinv_storage.map())
+    , U(U_storage.map())
+    , DUt(DUt_storage.map())
+    , damping(damping_storage.map())
+    {
+      *this = other;
+    }
+
     ContactCholeskyDecompositionTpl & operator=(const ContactCholeskyDecompositionTpl & other)
     {
       parents_fromRow = other.parents_fromRow;
