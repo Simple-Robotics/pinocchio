@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - Remove DataTpl::lastChild field and associated methods
 
+## [3.3.1] - 2024-12-13
+
 ### Added
 - Add `pinocchio_python_parser` target ([#2475](https://github.com/stack-of-tasks/pinocchio/pull/2475))
 
@@ -16,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix mjcf parsing of armature and of the default tag in models ([#2477](https://github.com/stack-of-tasks/pinocchio/pull/2477))
 - Fix undefined behavior when using the site attribute in mjcf ([#2477](https://github.com/stack-of-tasks/pinocchio/pull/2477))
 - Fix the type of image paths when loading textures in the meshcat visualizer ([#2478](https://github.com/stack-of-tasks/pinocchio/pull/2478))
+- Fix meshcat examples ([#2503])[https://github.com/stack-of-tasks/pinocchio/pull/2503]
+- Fix `pinocchio-test-cpp-parallel-geometry` when built with Coal ([#2502](https://github.com/stack-of-tasks/pinocchio/pull/2502))
+- Fix scaling support for meshcat ([#2511](https://github.com/stack-of-tasks/pinocchio/pull/2511))
 
 ### Changed
 - On GNU/Linux and macOS, hide all symbols by default ([#2469](https://github.com/stack-of-tasks/pinocchio/pull/2469))
@@ -1068,7 +1073,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.1...HEAD
+[3.3.1]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.0.0...v3.1.0
