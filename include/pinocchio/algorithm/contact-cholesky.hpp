@@ -213,11 +213,10 @@ namespace pinocchio
     }
 
     ///
-    ///  \brief Memory allocation of the vectors D, Dinv, and the upper triangular matrix U.
+    ///  \brief Internal memory allocation.
     ///
     /// \param[in] model Model of the kinematic tree
-    /// \param[in] contact_models Vector of RigidConstraintModel objects containing the contact
-    /// information
+    /// \param[in] contact_models Vector of ConstraintModel
     ///
     template<
       typename S1,
@@ -254,6 +253,12 @@ namespace pinocchio
     {
       resize(model, contact_models);
     }
+
+    ///
+    ///  \brief Internal memory allocation.
+    ///
+    /// \param[in] model Model of the kinematic tree
+    /// \param[in] contact_models Vector of ConstraintModel
     ///
     template<
       typename S1,
