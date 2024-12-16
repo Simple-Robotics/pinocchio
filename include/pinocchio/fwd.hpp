@@ -175,5 +175,6 @@ namespace pinocchio
 } // namespace pinocchio
 
 #include "pinocchio/context.hpp"
+#include "pinocchio/alloca.hpp"
 
 #endif // #ifndef __pinocchio_fwd_hpp__
