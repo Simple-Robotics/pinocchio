@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Helpers for mapping heap allocation for Eigen::Map via alloca
+- Introduce EigenStorageTpl
+
+### Changed
+- Major refactorization of ContactCholeskyDecompositionTpl to ease online resizing
+
 ### Removed
 - Remove DataTpl::lastChild field and associated methods
 
