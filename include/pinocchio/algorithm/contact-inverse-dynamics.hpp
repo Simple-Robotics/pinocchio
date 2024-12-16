@@ -5,20 +5,11 @@
 #ifndef __pinocchio_algorithm_contact_inverse_dynamics__hpp__
 #define __pinocchio_algorithm_contact_inverse_dynamics__hpp__
 
-#include "pinocchio/context.hpp"
-#include "pinocchio/context/generic.hpp"
-#include "pinocchio/math/fwd.hpp"
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/multibody/data.hpp"
-#include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
-#include <Eigen/src/Core/util/Meta.h>
-#include <boost/optional/optional.hpp>
-#include <cstdlib>
-#include <pinocchio/algorithm/contact-cholesky.hpp>
-#include <pinocchio/algorithm/contact-jacobian.hpp>
+#include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/proximal.hpp"
 
+// #include <cstdlib>
 #include <boost/optional.hpp>
 
 namespace pinocchio
