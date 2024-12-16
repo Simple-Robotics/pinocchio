@@ -78,6 +78,7 @@ namespace pinocchio
     typedef PINOCCHIO_ALIGNED_STD_VECTOR(Frame) FrameVector;
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> MatrixXs;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
 
     typedef PINOCCHIO_ALIGNED_STD_VECTOR(Inertia) InertiaVector;
