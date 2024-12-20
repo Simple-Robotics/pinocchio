@@ -38,6 +38,7 @@ set(${PROJECT_NAME}_PYTHON_TESTS
     bindings_com_velocity_derivatives
     # Parsers
     bindings_sample_models
+    bindings_mjcf
     # Others
     robot_wrapper
     utils
