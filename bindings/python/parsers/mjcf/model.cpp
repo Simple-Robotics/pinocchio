@@ -23,7 +23,7 @@ namespace pinocchio
       return model;
     }
 
-    Model buildModelFromMJCF(const bp::object & filename, Model & model)
+    Model & buildModelFromMJCF(const bp::object & filename, Model & model)
     {
       return ::pinocchio::mjcf::buildModel(path(filename), model);
     }
@@ -132,7 +132,8 @@ namespace pinocchio
 
       bp::def(
         "buildModelFromMJCF",
-        static_cast<Model (*)(const bp::object &, Model &)>(pinocchio::python::buildModelFromMJCF),
+        static_cast<Model & (*)(const bp::object &, Model &)>(
+          pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "model"),
         "Parse the MJCF file given in input and return a pinocchio Model.");
 
