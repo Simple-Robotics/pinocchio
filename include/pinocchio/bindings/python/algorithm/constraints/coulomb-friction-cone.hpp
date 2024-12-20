@@ -41,7 +41,8 @@ namespace pinocchio
             "project", &Self::template project<context::Vector3s>, bp::args("self", "f"),
             "Normal projection of a vector f onto the cone.")
           .def(
-            "weightedProject", &Self::template weightedProject<context::Vector3s>,
+            "weightedProject",
+            &Self::template weightedProject<context::Vector3s, context::Vector3s>,
             bp::args("self", "f", "R"), "Weighted projection of a vector f onto the cone.")
           .def(
             "computeNormalCorrection", &Self::template computeNormalCorrection<context::Vector3s>,
