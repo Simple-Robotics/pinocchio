@@ -4,6 +4,7 @@
 
 #include "pinocchio/parsers/mjcf.hpp"
 #include "pinocchio/bindings/python/parsers/mjcf.hpp"
+#include "pinocchio/bindings/python/utils/keep-alive.hpp"
 #include "pinocchio/bindings/python/utils/path.hpp"
 
 #include <boost/python.hpp>
@@ -92,7 +93,7 @@ namespace pinocchio
           pinocchio::python::buildModelFromMJCF),
         bp::args("mjcf_filename", "model"),
         "Parse the MJCF file given in input and return a pinocchio Model.",
-        bp::with_custodian_and_ward_postcall<0, 2>());
+        keep_alive<bp::tuple, 0, 2>());
 
       bp::def(
         "buildModelFromMJCF",
@@ -110,7 +111,7 @@ namespace pinocchio
          bp::arg("model")),
         "Parse the MJCF file and return a pinocchio Model with the given root Joint and the "
         "constraint models.",
-        bp::with_custodian_and_ward_postcall<0, 4>());
+        keep_alive<bp::tuple, 0, 4>());
 
       bp::def(
         "buildModelFromMJCF",
