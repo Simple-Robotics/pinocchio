@@ -169,10 +169,12 @@ namespace pinocchio
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
-      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) Vector3Plain;
       assert(R(2) > 0 && "R(2) must be strictly positive");
+
+      typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) Vector3Plain;
+
       Scalar weighted_mu = mu * math::sqrt(R(0) / R(2));
-      CoulombFrictionConeTpl weighted_cone(weighted_mu);
+      const CoulombFrictionConeTpl weighted_cone(weighted_mu);
       Vector3Plain R_sqrt = R.cwiseSqrt();
       Vector3Plain R_sqrt_times_x = (R_sqrt.array() * x.array()).matrix();
       Vector3Plain res = (weighted_cone.project(R_sqrt_times_x).array() / R_sqrt.array()).matrix();
