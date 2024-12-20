@@ -162,9 +162,9 @@ namespace pinocchio
     /// \param[in] R a 3d vector representing the diagonal of the weights matrix. The tangential
     /// components (the first two) of R should be equal.
     ///
-    template<typename Vector3Like>
-    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like) weightedProject(
-      const Eigen::MatrixBase<Vector3Like> & x, const Eigen::MatrixBase<Vector3Like> & R) const
+    template<typename Vector3Like1, typename Vector3Like2>
+    typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) weightedProject(
+      const Eigen::MatrixBase<Vector3Like1> & x, const Eigen::MatrixBase<Vector3Like2> & R) const
     {
       assert(mu >= 0 && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
