@@ -159,8 +159,8 @@ namespace pinocchio
     /// \brief Project a vector x onto the cone with a matric specified by the diagonal matrix R.
     ///
     /// \param[in] x a 3d vector to project.
-    /// \param[in] R a 3d vector representing the diagonal of the weights matrix. The tangential
-    /// components (the first two) of R should be equal.
+    /// \param[in] R a 3d vector representing the diagonal of the weight matrix. The tangential
+    /// components (the first two) of R should be equal, assuming an isotropic scaling.
     ///
     template<typename Vector3Like1, typename Vector3Like2>
     typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) weightedProject(
@@ -170,6 +170,7 @@ namespace pinocchio
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
       assert(R(2) > 0 && "R(2) must be strictly positive");
+      assert(R(0) == R(1) && "R(0) must be equal to R(1)");
 
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) Vector3Plain;
 
