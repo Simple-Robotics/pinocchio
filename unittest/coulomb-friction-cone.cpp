@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 INRIA
+// Copyright (c) 2022-2024 INRIA
 //
 
 #include <iostream>
@@ -11,6 +11,12 @@
 using namespace pinocchio;
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
+
+Eigen::Vector3d positiveRandomScaling()
+{
+  const Eigen::Vector2d random_vec = Eigen::abs(Eigen::Vector2d::Random().array());
+  return Eigen::Vector3d(random_vec[0], random_vec[0], random_vec[1]);
+}
 
 BOOST_AUTO_TEST_CASE(test_proj)
 {
@@ -68,6 +74,52 @@ BOOST_AUTO_TEST_CASE(test_proj)
       else
         BOOST_CHECK(radial_proj_x.head<2>().isZero());
       BOOST_CHECK(radial_proj_radial_proj_x.isApprox(radial_proj_radial_proj_x));
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_weighted_projection)
+{
+  const int num_tests = int(1e4);
+  const double mu = 1;
+
+  const CoulombFrictionCone cone(mu);
+
+  // Test with idendity scaling
+  {
+    const auto Ones4d = Eigen::Vector3d::Ones();
+    for (int k = 0; k < num_tests; ++k)
+    {
+      const Eigen::Vector3d x = Eigen::Vector3d::Random();
+      const Eigen::Vector3d proj_x = cone.weightedProject(x, Ones4d);
+      const Eigen::Vector3d proj_x_ref = cone.project(x);
+
+      BOOST_CHECK(proj_x.isApprox(proj_x_ref));
+    }
+  }
+
+  // Test with any positive scaling
+  {
+    for (int k = 0; k < num_tests; ++k)
+    {
+      const Eigen::Vector3d scaling = positiveRandomScaling() + Eigen::Vector3d::Constant(1e-8);
+      BOOST_CHECK((scaling.array() > 0).all());
+
+      const Eigen::Vector3d scaling_sqrt = Eigen::sqrt(scaling.array());
+      const Eigen::Vector3d scaling_sqrt_inv = Eigen::inverse(scaling_sqrt.array());
+
+      const Eigen::Vector3d x = Eigen::Vector3d::Random();
+      const Eigen::Vector3d proj_x = cone.weightedProject(x, scaling);
+
+      const double mu_scale = math::sqrt(scaling[0] / scaling[2]) * mu;
+      const CoulombFrictionCone cone_scale(mu_scale);
+      const Eigen::Vector3d x_scale = scaling_sqrt.asDiagonal() * x;
+      const Eigen::Vector3d proj_x_ref_scale = cone_scale.project(x_scale);
+      const Eigen::Vector3d proj_x_ref = scaling_sqrt_inv.array() * proj_x_ref_scale.array();
+
+      //      std::cout << "proj_x: " << proj_x.transpose() << std::endl;
+      //      std::cout << "proj_x_ref: " << proj_x_ref.transpose() << std::endl;
+      BOOST_CHECK(proj_x.isApprox(proj_x_ref));
     }
   }
 }
