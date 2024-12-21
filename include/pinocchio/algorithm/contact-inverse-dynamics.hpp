@@ -2,8 +2,8 @@
 // Copyright (c) 2024 INRIA
 //
 
-#ifndef __pinocchio_algorithm_contact_inverse_dynamics__hpp__
-#define __pinocchio_algorithm_contact_inverse_dynamics__hpp__
+#ifndef __pinocchio_algorithm_contact_inverse_dynamics_hpp__
+#define __pinocchio_algorithm_contact_inverse_dynamics_hpp__
 
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
