@@ -174,11 +174,11 @@ namespace pinocchio
 
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) Vector3Plain;
 
-      Scalar weighted_mu = mu * math::sqrt(R(0) / R(2));
+      const Scalar weighted_mu = mu * math::sqrt(R(0) / R(2));
       const CoulombFrictionConeTpl weighted_cone(weighted_mu);
-      Vector3Plain R_sqrt = R.cwiseSqrt();
-      Vector3Plain R_sqrt_times_x = (R_sqrt.array() * x.array()).matrix();
-      Vector3Plain res = (weighted_cone.project(R_sqrt_times_x).array() / R_sqrt.array()).matrix();
+      const Vector3Plain R_sqrt = R.cwiseSqrt();
+      const Vector3Plain R_sqrt_times_x = R_sqrt.array() * x.array();
+      Vector3Plain res = weighted_cone.project(R_sqrt_times_x).array() / R_sqrt.array();
       return res;
     }
 
