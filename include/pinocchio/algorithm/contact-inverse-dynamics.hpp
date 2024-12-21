@@ -24,15 +24,15 @@ namespace pinocchio
   ///
   /// \param[in] model The model structure of the rigid body system.
   /// \param[in] data The data structure of the rigid body system.
-  /// \param[in] c_ref The contact point velocity
-  /// \param[in] contact_models The list of contact models.
-  /// \param[in] contact_datas The list of contact_datas.
+  /// \param[in] c_ref The desired constraint velocity.
+  /// \param[in] contact_models The vector of constraint models.
+  /// \param[in] contact_datas The vector of constraint datas.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
-  /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] lambda_guess initial guess for the contact forces.
+  /// \param[in,out] settings The settings for the proximal algorithm.
+  /// \param[in] lambda_guess initial guess for the contact forces (optional). Set to zero by
+  /// default.
   ///
-  /// \return The desired joint torques stored in data.tau.
   ///
   template<
     typename Scalar,
