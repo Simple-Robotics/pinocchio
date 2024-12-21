@@ -2,6 +2,7 @@
 // Copyright (c) 2024 INRIA
 //
 
+#include <iostream>
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/frames.hpp"
@@ -18,66 +19,9 @@
 #include "pinocchio/utils/timer.hpp"
 #include "pinocchio/spatial/classic-acceleration.hpp"
 
-#include <iostream>
-
 #include <boost/test/unit_test.hpp>
-#include <boost/utility/binary.hpp>
-#include <optional>
-
-#define KP 10
-#define KD 10
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
-
-/// \brief Computes motions in the world frame
-pinocchio::Motion computeAcceleration(
-  const pinocchio::Model & model,
-  pinocchio::Data & data,
-  const pinocchio::JointIndex & joint_id,
-  pinocchio::ReferenceFrame reference_frame,
-  const pinocchio::ContactType type,
-  const pinocchio::SE3 & placement = pinocchio::SE3::Identity())
-{
-  PINOCCHIO_UNUSED_VARIABLE(model);
-  using namespace pinocchio;
-  Motion res(Motion::Zero());
-
-  const Data::SE3 & oMi = data.oMi[joint_id];
-  const Data::SE3 & iMc = placement;
-  const Data::SE3 oMc = oMi * iMc;
-
-  const Motion ov = oMi.act(data.v[joint_id]);
-  const Motion oa = oMi.act(data.a[joint_id]);
-
-  switch (reference_frame)
-  {
-  case WORLD:
-    if (type == CONTACT_3D)
-      classicAcceleration(ov, oa, res.linear());
-    else
-      res.linear() = oa.linear();
-    res.angular() = oa.angular();
-    break;
-  case LOCAL_WORLD_ALIGNED:
-    if (type == CONTACT_3D)
-      res.linear() = oMc.rotation() * classicAcceleration(data.v[joint_id], data.a[joint_id], iMc);
-    else
-      res.linear() = oMc.rotation() * (iMc.actInv(data.a[joint_id])).linear();
-    res.angular() = oMi.rotation() * data.a[joint_id].angular();
-    break;
-  case LOCAL:
-    if (type == CONTACT_3D)
-      classicAcceleration(data.v[joint_id], data.a[joint_id], iMc, res.linear());
-    else
-      res.linear() = (iMc.actInv(data.a[joint_id])).linear();
-    res.angular() = iMc.rotation().transpose() * data.a[joint_id].angular();
-    break;
-  default:
-    break;
-  }
-
-  return res;
-}
 
 BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
 {
@@ -129,53 +73,13 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
   double dt = 1e-3;
   Eigen::VectorXd R = Eigen::VectorXd::Zero(constraint_dim);
   Eigen::VectorXd constraint_correction = Eigen::VectorXd::Zero(constraint_dim);
-  boost::optional<Eigen::VectorXd> lambda_guess = boost::optional<Eigen::VectorXd>(boost::none);
+  boost::optional<Eigen::VectorXd> lambda_guess = boost::none;
   Eigen::VectorXd a = Eigen::VectorXd::Zero(model.nv);
   ProximalSettings prox_settings(1e-12, 1e-6, 1);
   initConstraintDynamics(model, data_ref, contact_models);
   contactInverseDynamics(
     model, data_ref, q, v, a, dt, contact_models, contact_datas, R, constraint_correction,
     prox_settings, lambda_guess);
-  //   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas_ref,
-  //   prox_settings_cd); forwardKinematics(model, data_ref, q, v, v*0);
-
-  //   Data::Matrix6x Jtmp = Data::Matrix6x::Zero(6,model.nv);
-  //   getJointJacobian(model,data_ref,ci_RF.joint1_id,ci_RF.reference_frame,Jtmp);
-  //   J_ref.middleRows<3>(0) = Jtmp.middleRows<3>(Motion::LINEAR);
-  //   Jtmp.setZero(); getJointJacobian(model,data_ref,ci_LF.joint1_id,ci_LF.reference_frame,Jtmp);
-  //   J_ref.middleRows<3>(3) = Jtmp.middleRows<3>(Motion::LINEAR);
-
-  //   Eigen::VectorXd gamma(constraint_dim);
-
-  //   gamma.segment<3>(0) =
-  //   computeAcceleration(model,data_ref,ci_RF.joint1_id,ci_RF.reference_frame,ci_RF.type).linear();
-  //   gamma.segment<3>(3) =
-  //   computeAcceleration(model,data_ref,ci_LF.joint1_id,ci_LF.reference_frame,ci_LF.type).linear();
-
-  //   BOOST_CHECK((J_ref*data_ref.ddq + gamma).isZero());
-
-  //   Data data_constrained_dyn(model);
-
-  // PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-  // PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
-  //   forwardDynamics(model,data_constrained_dyn,q,v,tau,J_ref,gamma,0.);
-  // PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-
-  //   BOOST_CHECK((J_ref*data_constrained_dyn.ddq + gamma).isZero());
-
-  //   ProximalSettings prox_settings;
-  //   prox_settings.max_iter = 10;
-  //   prox_settings.mu = 1e8;
-  //   contactABA(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
-
-  //   BOOST_CHECK((J_ref*data.ddq + gamma).isZero());
-
-  //   // Call the algorithm a second time
-  //   Data data2(model);
-  //   ProximalSettings prox_settings2;
-  //   contactABA(model, data2, q, v, tau, contact_models, contact_datas, prox_settings2);
-
-  //   BOOST_CHECK(prox_settings2.iter == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
