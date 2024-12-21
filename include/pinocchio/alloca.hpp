@@ -6,6 +6,7 @@
 #define __pinocchio_alloca_hpp__
 
 #ifdef WIN32
+  #include <malloc.h>
 #else
   #include <alloca.h>
 #endif
