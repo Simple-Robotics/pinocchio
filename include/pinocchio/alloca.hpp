@@ -18,7 +18,7 @@
   PINOCCHIO_EIGEN_MAP_ALLOCA_ALIGNED(Scalar, rows, cols, EIGEN_DEFAULT_ALIGN_BYTES)
 #define PINOCCHIO_EIGEN_MAP_ALLOCA_ALIGNED(Scalar, rows, cols, align)                              \
   static_cast<Scalar *>(PINOCCHIO_ALIGNED_PTR(                                                     \
-    PINOCCHIO_ALLOCA(size_t(rows * cols) * sizeof(Scalar) + (align > 0 ? (align - 1) : 1)),        \
+    PINOCCHIO_ALLOCA(size_t(rows * cols) * sizeof(Scalar) + (align > 0 ? (align - 1) : 0)),        \
     align)),                                                                                       \
     rows, cols
 
