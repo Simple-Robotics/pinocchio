@@ -9,209 +9,159 @@
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/proximal.hpp"
 
-#include <boost/optional.hpp>
-
 namespace pinocchio
 {
 
   ///
   /// \brief Compute the contact forces given a target velocity of contact points.
   ///
-  /// \tparam JointCollection Collection of Joint types.
-  /// \tparam ConfigVectorType Type of the joint configuration vector.
-  /// \tparam TangentVectorType1 Type of the joint velocity vector.
-  /// \tparam TangentVectorType2 Type of the joint acceleration vector.
-  ///
-  /// \param[in] model The model structure of the rigid body system.
-  /// \param[in] data The data structure of the rigid body system.
-  /// \param[in] c_ref The desired constraint velocity.
   /// \param[in] contact_models The vector of constraint models.
-  /// \param[in] contact_datas The vector of constraint datas.
+  /// \param[in] c_ref The desired constraint velocity.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
-  /// \param[in] constraint_correction vector representing the constraint correction.
+  /// \param[in,out] lambda Vector of solution. Should be initialized with zeros or from an initial
+  /// estimate.
   /// \param[in,out] settings The settings for the proximal algorithm.
-  /// \param[in] lambda_guess initial guess for the contact forces (optional). Set to zero by
-  /// default.
-  ///
   ///
   template<
     typename Scalar,
     int Options,
-    template<typename, int> class JointCollectionTpl,
-    typename VectorLikeC,
     template<typename T> class Holder,
     class ConstraintModelAllocator,
-    class ConstraintDataAllocator,
+    typename VectorLikeC,
     typename VectorLikeR,
-    typename VectorLikeImp>
-  const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  computeContactForces(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<VectorLikeC> & c_ref,
+    typename VectorLikeResult>
+  bool computeInverseDynamicsConstraintForces(
     const std::vector<
       Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<
-      Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>,
-      ConstraintDataAllocator> & contact_datas,
+    const Eigen::MatrixBase<VectorLikeC> & c_ref,
     const Eigen::MatrixBase<VectorLikeR> & R,
-    // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    ProximalSettingsTpl<Scalar> & settings,
-    const boost::optional<VectorLikeImp> & lambda_guess = boost::none)
+    const Eigen::MatrixBase<VectorLikeResult> & _lambda,
+    ProximalSettingsTpl<Scalar> & settings)
   {
-    PINOCCHIO_UNUSED_VARIABLE(model);
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    using VectorXs = typename Model::VectorXs;
-    using Vector3 = typename Model::Vector3;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
 
-    const Eigen::Index problem_size = R.size();
-    const std::size_t n_contacts = contact_models.size();
+    auto & lambda = _lambda.const_cast_derived();
+
     // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_contacts);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_datas.size(), n_contacts);
+    const std::size_t n_constraints = contact_models.size();
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_constraints);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(lambda.size(), R.size());
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       check_expression_if_real<Scalar>(settings.mu > Scalar(0)), "mu has to be strictly positive");
 
+    const Eigen::Index problem_size = R.size();
     const VectorXs R_prox = R + VectorXs::Constant(problem_size, settings.mu);
-    if (lambda_guess)
-    {
-      data.lambda_c = lambda_guess.get();
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(data.lambda_c.size(), problem_size);
-    }
-    else
-    {
-      data.lambda_c.setZero();
-    }
 
-    Scalar lambda_c_prev_norm_inf = data.lambda_c.template lpNorm<Eigen::Infinity>();
-    bool abs_prec_reached = false, rel_prec_reached = false;
+    Scalar lambda_c_prev_norm_inf = lambda.template lpNorm<Eigen::Infinity>();
+
+    bool has_converged = false;
     settings.iter = 1;
     for (; settings.iter <= settings.max_iter; ++settings.iter)
     {
-      settings.absolute_residual = Scalar(0);
-      settings.relative_residual = Scalar(0);
-      Eigen::DenseIndex row_id = 0;
-      for (std::size_t constraint_id = 0; constraint_id < n_contacts; ++constraint_id)
-      {
+      bool abs_prec_reached = false, rel_prec_reached = false;
+      settings.relative_residual = settings.absolute_residual = Scalar(0);
 
+      Eigen::DenseIndex row_id = 0;
+      for (std::size_t constraint_id = 0; constraint_id < n_constraints; ++constraint_id)
+      {
         const ConstraintModel & cmodel = contact_models[constraint_id];
         const auto constraint_size = cmodel.size();
 
-        const CoulombFrictionCone & cone = cmodel.set();
-        const Vector3 lambda_c_previous = data.lambda_c.template segment<3>(row_id);
-        auto lambda_segment = data.lambda_c.template segment<3>(row_id);
-        const auto R_prox_segment = R_prox.template segment<3>(row_id);
-        const auto c_ref_segment = c_ref.template segment<3>(row_id);
+        const auto & cone = cmodel.set();
+        auto lambda_segment = lambda.segment(row_id, constraint_size);
+        const Vector3 lambda_c_previous = lambda_segment;
+
+        const auto R_segment = R.segment(row_id, constraint_size);
+        const auto R_prox_segment = R_prox.segment(row_id, constraint_size);
+        const auto c_ref_segment = c_ref.segment(row_id, constraint_size);
+
         const Vector3 sigma_segment =
-          c_ref_segment + (R.template segment<3>(row_id).array() * lambda_segment.array()).matrix();
+          c_ref_segment + (R_segment.array() * lambda_segment.array()).matrix();
         const Vector3 desaxce_correction = cone.computeNormalCorrection(sigma_segment);
         const Vector3 c_cor_segment = c_ref_segment + desaxce_correction;
+
+        // Update segment value
         lambda_segment =
-          -((c_cor_segment - settings.mu * lambda_c_previous).array() / R_prox_segment.array())
-             .matrix();
-        lambda_segment = cone.weightedProject(Vector3(lambda_segment), R_prox_segment);
+          -(Vector3(c_cor_segment - settings.mu * lambda_c_previous).array()
+            / R_prox_segment.array());
+        lambda_segment = cone.weightedProject(lambda_segment, R_prox_segment);
 
         // Compute convergence criteria
-        Scalar contact_complementarity =
+        const Scalar contact_complementarity =
           cone.computeConicComplementarity(sigma_segment + desaxce_correction, lambda_segment);
-        Scalar dual_feasibility =
+        const Scalar dual_feasibility =
           std::abs(math::min(0., sigma_segment(2))); // proxy of dual feasibility
         settings.absolute_residual = math::max(
           settings.absolute_residual, math::max(contact_complementarity, dual_feasibility));
+
         const Vector3 dlambda_c = lambda_segment - lambda_c_previous;
-        Scalar proximal_metric = dlambda_c.template lpNorm<Eigen::Infinity>();
+        const Scalar proximal_metric = dlambda_c.template lpNorm<Eigen::Infinity>();
         settings.relative_residual = math::max(settings.relative_residual, proximal_metric);
 
         row_id += constraint_size;
       }
 
-      const Scalar lambda_c_norm_inf = data.lambda_c.template lpNorm<Eigen::Infinity>();
+      const Scalar lambda_c_norm_inf = lambda.template lpNorm<Eigen::Infinity>();
 
       if (check_expression_if_real<Scalar, false>(
             settings.absolute_residual <= settings.absolute_accuracy))
         abs_prec_reached = true;
-      else
-        abs_prec_reached = false;
 
       if (check_expression_if_real<Scalar, false>(
             settings.relative_residual
             <= settings.relative_accuracy * math::max(lambda_c_norm_inf, lambda_c_prev_norm_inf)))
         rel_prec_reached = true;
-      else
-        rel_prec_reached = false;
 
       if (abs_prec_reached || rel_prec_reached)
+      {
+        has_converged = true;
         break;
+      }
 
       lambda_c_prev_norm_inf = lambda_c_norm_inf;
     }
 
-    return data.lambda_c;
+    return has_converged;
   }
 
   ///
   /// \brief Compute the contact forces given a target velocity of contact points.
   ///
-  /// \tparam JointCollection Collection of Joint types.
-  /// \tparam ConfigVectorType Type of the joint configuration vector.
-  /// \tparam TangentVectorType1 Type of the joint velocity vector.
-  /// \tparam TangentVectorType2 Type of the joint acceleration vector.
-  ///
-  /// \param[in] model The model structure of the rigid body system.
-  /// \param[in] data The data structure of the rigid body system.
-  /// \param[in] c_ref The contact point velocity
-  /// \param[in] contact_models The list of contact models.
-  /// \param[in] contact_datas The list of contact_datas.
+  /// \param[in] contact_models The vector of constraint models.
+  /// \param[in] c_ref The desired constraint velocity.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
-  /// \param[in] constraint_correction vector representing the constraint correction.
-  /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] lambda_guess initial guess for the contact forces.
-  ///
-  /// \return The desired joint torques stored in data.tau.
+  /// \param[in,out] lambda Vector of solution. Should be initialized with zeros or from an initial
+  /// estimate.
+  /// \param[in,out] settings The settings for the proximal algorithm.
   ///
   template<
     typename Scalar,
     int Options,
-    template<typename, int> class JointCollectionTpl,
-    typename VectorLikeC,
     class ConstraintModelAllocator,
-    class ConstraintDataAllocator,
+    typename VectorLikeC,
     typename VectorLikeR,
-    typename VectorLikeImp>
-  const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  computeContactForces(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const Eigen::MatrixBase<VectorLikeC> & c_ref,
+    typename VectorLikeResult>
+  bool computeInverseDynamicsConstraintForces(
     const std::vector<
       FrictionalPointConstraintModelTpl<Scalar, Options>,
       ConstraintModelAllocator> & contact_models,
-    std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
-      contact_datas,
+    const Eigen::MatrixBase<VectorLikeC> & c_ref,
     const Eigen::MatrixBase<VectorLikeR> & R,
-    // const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    ProximalSettingsTpl<Scalar> & settings,
-    const boost::optional<VectorLikeImp> & lambda_guess = boost::none)
+    const Eigen::MatrixBase<VectorLikeResult> & lambda_sol,
+    ProximalSettingsTpl<Scalar> & settings)
   {
-    typedef std::reference_wrapper<const FrictionalPointConstraintModelTpl<Scalar, Options>>
-      WrappedConstraintModelType;
+    typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
     typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
 
     WrappedConstraintModelVector wrapped_constraint_models(
       contact_models.cbegin(), contact_models.cend());
 
-    typedef std::reference_wrapper<FrictionalPointConstraintDataTpl<Scalar, Options>>
-      WrappedConstraintDataType;
-    typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
-
-    WrappedConstraintDataVector wrapped_constraint_datas(
-      contact_datas.begin(), contact_datas.end());
-
-    return computeContactForces(
-      model, data, c_ref, wrapped_constraint_models, wrapped_constraint_datas, R, settings,
-      lambda_guess);
+    return computeInverseDynamicsConstraintForces(
+      wrapped_constraint_models, c_ref, R, lambda_sol.const_cast_derived(), settings);
   }
 
   ///
@@ -249,8 +199,8 @@ namespace pinocchio
     template<typename T> class Holder,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    typename VectorLikeR,
     typename VectorLikeGamma,
+    typename VectorLikeR,
     typename VectorLikeLam>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(
@@ -259,17 +209,17 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & a,
-    Scalar dt,
+    const Scalar dt,
     const std::vector<
       Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
     std::vector<
       Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>,
       ConstraintDataAllocator> & contact_datas,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    ProximalSettingsTpl<Scalar> & settings,
-    const boost::optional<VectorLikeLam> & lambda_guess = boost::none)
+    const Eigen::MatrixBase<VectorLikeR> & R,
+    const Eigen::MatrixBase<VectorLikeLam> & _lambda_sol,
+    ProximalSettingsTpl<Scalar> & settings)
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     //    typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
@@ -278,8 +228,11 @@ namespace pinocchio
     typedef typename Model::VectorXs VectorXs;
     typedef typename Model::Force Force;
 
+    auto & lambda_sol = _lambda_sol.const_cast_derived();
+
     const Eigen::Index problem_size = R.size();
-    const std::size_t n_contacts = contact_models.size();
+    const std::size_t n_constraints = contact_models.size();
+
     MatrixXs J = MatrixXs::Zero(problem_size, model.nv); // TODO: malloc
     getConstraintsJacobian(model, data, contact_models, contact_datas, J);
     VectorXs v_ref, c_ref, tau_c;
@@ -287,18 +240,17 @@ namespace pinocchio
     c_ref.noalias() = J * v_ref; // TODO should rather use the displacement
     c_ref += constraint_correction;
     c_ref /= dt; // we work with a formulation on forces
-    computeContactForces(
-      model, data, c_ref, contact_models, contact_datas, R, settings, lambda_guess);
+    computeInverseDynamicsConstraintForces(contact_models, c_ref, R, lambda_sol, settings);
     PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force)
     fext(std::size_t(model.njoints), Force::Zero());
 
     Eigen::DenseIndex row_id = 0;
-    for (std::size_t i = 0; i < n_contacts; i++)
+    for (std::size_t i = 0; i < n_constraints; i++)
     {
       const FrictionalPointConstraintModel & cmodel = contact_models[i];
       const auto constraint_size = cmodel.size();
 
-      auto lambda_segment = data.lambda_c.segment(row_id, constraint_size);
+      auto lambda_segment = lambda_sol.segment(row_id, constraint_size);
       typename RigidConstraintData::Matrix6 actInv_transpose1 =
         cmodel.joint1_placement.toActionMatrixInverse();
       actInv_transpose1.transposeInPlace();
@@ -348,8 +300,8 @@ namespace pinocchio
     typename TangentVectorType2,
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
-    typename VectorLikeR,
     typename VectorLikeGamma,
+    typename VectorLikeR,
     typename VectorLikeLam>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(
@@ -358,16 +310,16 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & a,
-    Scalar dt,
+    const Scalar dt,
     const std::vector<
       FrictionalPointConstraintModelTpl<Scalar, Options>,
       ConstraintModelAllocator> & contact_models,
     std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
       contact_datas,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    ProximalSettingsTpl<Scalar> & settings,
-    const boost::optional<VectorLikeLam> & lambda_guess = boost::none)
+    const Eigen::MatrixBase<VectorLikeR> & R,
+    const Eigen::MatrixBase<VectorLikeLam> & lambda_sol,
+    ProximalSettingsTpl<Scalar> & settings)
   {
 
     typedef std::reference_wrapper<const FrictionalPointConstraintModelTpl<Scalar, Options>>
@@ -385,8 +337,8 @@ namespace pinocchio
       contact_datas.begin(), contact_datas.end());
 
     return contactInverseDynamics(
-      model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas, R,
-      constraint_correction, settings, lambda_guess);
+      model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas,
+      constraint_correction, R, lambda_sol.const_cast_derived(), settings);
   }
 
 } // namespace pinocchio
