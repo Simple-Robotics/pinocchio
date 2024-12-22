@@ -12,6 +12,8 @@
 #include "pinocchio/spatial/motion.hpp"
 #include "pinocchio/spatial/inertia.hpp"
 
+#include "pinocchio/common/model-entity.hpp"
+
 #include "pinocchio/multibody/fwd.hpp"
 #include "pinocchio/multibody/frame.hpp"
 #include "pinocchio/multibody/joint/joint-generic.hpp"
@@ -51,17 +53,18 @@ namespace pinocchio
   struct ModelTpl
   : serialization::Serializable<ModelTpl<_Scalar, _Options, JointCollectionTpl>>
   , NumericalBase<ModelTpl<_Scalar, _Options, JointCollectionTpl>>
+  , ModelEntity<ModelTpl<_Scalar, _Options, JointCollectionTpl>>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef _Scalar Scalar;
+    typedef typename traits<ModelTpl>::Scalar Scalar;
     enum
     {
-      Options = _Options
+      Options = traits<ModelTpl>::Options
     };
 
-    typedef JointCollectionTpl<Scalar, Options> JointCollection;
-    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+    typedef typename traits<ModelTpl>::JointCollection JointCollection;
+    typedef typename traits<ModelTpl>::Data Data;
 
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
