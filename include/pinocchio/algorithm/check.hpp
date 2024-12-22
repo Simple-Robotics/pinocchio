@@ -2,11 +2,12 @@
 // Copyright (c) 2016-2018 CNRS
 //
 
-#ifndef __pinocchio_check_hpp__
-#define __pinocchio_check_hpp__
+#ifndef __pinocchio_algorithm_check_hpp__
+#define __pinocchio_algorithm_check_hpp__
 
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
+
 #include <boost/fusion/container/list.hpp>
 #include <boost/fusion/container/generation/make_list.hpp>
 
@@ -127,4 +128,4 @@ namespace pinocchio
 /* --- Details -------------------------------------------------------------------- */
 #include "pinocchio/algorithm/check.hxx"
 
-#endif // ifndef __pinocchio_check_hpp__
+#endif // ifndef __pinocchio_algorithm_check_hpp__

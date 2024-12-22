@@ -2,8 +2,8 @@
 // Copyright (c) 2016-2024 CNRS INRIA
 //
 
-#ifndef __pinocchio_check_hxx__
-#define __pinocchio_check_hxx__
+#ifndef __pinocchio_algorithm_check_hxx__
+#define __pinocchio_algorithm_check_hxx__
 
 #include <boost/fusion/algorithm.hpp>
 #include <boost/foreach.hpp>
@@ -196,4 +196,4 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_check_hxx__
+#endif // ifndef __pinocchio_algorithm_check_hxx__
