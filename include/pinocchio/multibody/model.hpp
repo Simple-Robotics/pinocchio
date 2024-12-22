@@ -538,7 +538,7 @@ namespace pinocchio
     /// \return true if the Model is valid, false otherwise.
     ///
     template<typename D>
-    bool check(const AlgorithmCheckerBase<D> & checker = AlgorithmCheckerBase<D>()) const
+    bool check(const AlgorithmCheckerBase<D> & checker) const
     {
       return checker.checkModel(*this);
     }
