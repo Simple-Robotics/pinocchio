@@ -134,6 +134,9 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/cppad/spatial/log.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/cppad/spatial/se3-tpl.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/autodiff/cppad/utils/static-if.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/common/data-entity.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/common/fwd.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/common/model-entity.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/codegen/code-generator-algo.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/codegen/code-generator-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/codegen/cppadcg.hpp
