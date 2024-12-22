@@ -39,6 +39,12 @@ namespace pinocchio
   struct traits<ModelTpl<_Scalar, _Options, JointCollectionTpl>>
   {
     typedef _Scalar Scalar;
+    enum
+    {
+      Options = _Options
+    };
+    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+    typedef JointCollectionTpl<Scalar, Options> JointCollection;
   };
 
   template<typename _Scalar, int _Options, template<typename, int> class JointCollectionTpl>
