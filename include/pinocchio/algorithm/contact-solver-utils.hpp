@@ -499,6 +499,26 @@ namespace pinocchio
       }
     }
 
+    template<
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn,
+      typename VectorLikeOut>
+    void computeDeSaxeCorrection(
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & velocities,
+      const Eigen::DenseBase<VectorLikeOut> & correction)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      computeDeSaxeCorrection(
+        wrapped_constraint_models, velocities.derived(), correction.const_cast_derived());
+    }
+
     template<typename ConstraintSet, typename ConstraintAllocator, typename VectorLikeIn>
     typename ConstraintSet::Scalar computePrimalFeasibility(
       const std::vector<ConstraintSet, ConstraintAllocator> & sets,
