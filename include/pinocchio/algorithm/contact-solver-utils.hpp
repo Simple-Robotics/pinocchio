@@ -476,21 +476,21 @@ namespace pinocchio
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
       const Eigen::DenseBase<VectorLikeIn> & velocities,
-      const Eigen::DenseBase<VectorLikeOut> & shift_)
+      const Eigen::DenseBase<VectorLikeOut> & correction_)
     {
-      assert(velocities.size() == shift_.size());
-      Eigen::DenseIndex index = 0;
-      VectorLikeOut & shift = shift_.const_cast_derived();
+      assert(velocities.size() == correction_.size());
+      VectorLikeOut & correction = correction_.const_cast_derived();
 
       typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
       typedef typename VectorLikeOut::SegmentReturnType SegmentType2;
 
+      Eigen::DenseIndex index = 0;
       for (const ConstraintModel & cmodel : constraint_models)
       {
         const auto size = cmodel.size();
 
         SegmentType1 velocity_segment = velocities.segment(index, size);
-        SegmentType2 result_segment = shift.segment(index, size);
+        SegmentType2 result_segment = correction.segment(index, size);
         typedef DeSaxeCorrectionVisitor<SegmentType1, SegmentType2> Step;
 
         Step::run(cmodel, velocity_segment, result_segment);
