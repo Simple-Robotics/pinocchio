@@ -20,7 +20,8 @@ namespace pinocchio
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in,out] lambda Vector of solution. Should be initialized with zeros or from an initial
   /// estimate.
-  /// \param[in,out] settings The settings for the proximal algorithm.
+  /// \param[in,out] settings The settings for the proximal algorithm
+  /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false).
   ///
   template<
     typename Scalar,
@@ -37,7 +38,8 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeResult> & _lambda,
-    ProximalSettingsTpl<Scalar> & settings)
+    ProximalSettingsTpl<Scalar> & settings,
+    bool solve_ncp = true)
   {
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
@@ -84,18 +86,20 @@ namespace pinocchio
 
         const Vector3 sigma_segment =
           c_ref_segment + (R_segment.array() * lambda_segment.array()).matrix();
-        const Vector3 desaxce_correction = cone.computeNormalCorrection(sigma_segment);
+        Vector3 desaxce_correction = Vector3::Zero();
+        if (solve_ncp)
+          desaxce_correction = cone.computeNormalCorrection(sigma_segment);
         const Vector3 c_cor_segment = c_ref_segment + desaxce_correction;
 
         // Update segment value
-        lambda_segment =
+        const Vector3 lambda_ref =
           -(Vector3(c_cor_segment - settings.mu * lambda_c_previous).array()
             / R_prox_segment.array());
-        lambda_segment = cone.weightedProject(lambda_segment, R_prox_segment);
+        lambda_segment = cone.weightedProject(lambda_ref, R_prox_segment);
 
         // Compute convergence criteria
-        const Scalar contact_complementarity =
-          cone.computeConicComplementarity(sigma_segment + desaxce_correction, lambda_segment);
+        const Scalar contact_complementarity = cone.computeConicComplementarity(
+          Vector3(sigma_segment + desaxce_correction), lambda_segment);
         const Scalar dual_feasibility =
           std::abs(math::min(0., sigma_segment(2))); // proxy of dual feasibility
         settings.absolute_residual = math::max(
@@ -137,9 +141,10 @@ namespace pinocchio
   /// \param[in] contact_models The vector of constraint models.
   /// \param[in] c_ref The desired constraint velocity.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
-  /// \param[in,out] lambda Vector of solution. Should be initialized with zeros or from an initial
-  /// estimate.
-  /// \param[in,out] settings The settings for the proximal algorithm.
+  /// \param[in,out] lambda_sol Vector of solution. Should be initialized with zeros or from an
+  /// initial estimate
+  /// \param[in,out] settings The settings for the proximal algorithm
+  /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false).
   ///
   template<
     typename Scalar,
@@ -155,7 +160,8 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeResult> & lambda_sol,
-    ProximalSettingsTpl<Scalar> & settings)
+    ProximalSettingsTpl<Scalar> & settings,
+    bool solve_ncp = true)
   {
     typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
@@ -165,7 +171,8 @@ namespace pinocchio
       contact_models.cbegin(), contact_models.cend());
 
     return computeInverseDynamicsConstraintForces(
-      wrapped_constraint_models, c_ref, R, lambda_sol.const_cast_derived(), settings);
+      wrapped_constraint_models, c_ref.derived(), R.derived(), lambda_sol.const_cast_derived(),
+      settings, solve_ncp);
   }
 
   ///
@@ -188,8 +195,9 @@ namespace pinocchio
   /// \param[in] contact_datas The list of contact_datas.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
-  /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] lambda_guess initial guess for the contact forces.
+  /// \param[in] lambda_sol initial guess for the contact forces
+  /// \param[in] settings The settings for the proximal algorithm
+  /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false).
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
@@ -223,14 +231,15 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeLam> & _lambda_sol,
-    ProximalSettingsTpl<Scalar> & settings)
+    ProximalSettingsTpl<Scalar> & settings,
+    bool solve_ncp = true)
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    //    typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef typename ConstraintModel::ConstraintData ConstraintData;
 
     typedef typename Model::MatrixXs MatrixXs;
     typedef typename Model::VectorXs VectorXs;
-    typedef typename Model::Force Force;
 
     auto & lambda_sol = _lambda_sol.const_cast_derived();
 
@@ -244,29 +253,25 @@ namespace pinocchio
     c_ref.noalias() = J * v_ref; // TODO should rather use the displacement
     c_ref += constraint_correction;
     c_ref /= dt; // we work with a formulation on forces
-    computeInverseDynamicsConstraintForces(contact_models, c_ref, R, lambda_sol, settings);
-    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force)
-    fext(std::size_t(model.njoints), Force::Zero());
+    computeInverseDynamicsConstraintForces(
+      contact_models, c_ref, R, lambda_sol, settings, solve_ncp);
 
-    Eigen::DenseIndex row_id = 0;
-    for (std::size_t i = 0; i < n_constraints; i++)
     {
-      const FrictionalPointConstraintModel & cmodel = contact_models[i];
-      const auto constraint_size = cmodel.size();
+      rnea(model, data, q, v, a);
+      auto & tau = data.tau;
+      Eigen::DenseIndex row_id = 0;
+      for (std::size_t i = 0; i < n_constraints; i++)
+      {
+        const ConstraintModel & cmodel = contact_models[i];
+        ConstraintData & cdata = contact_datas[i];
+        const auto constraint_size = cmodel.size();
 
-      auto lambda_segment = lambda_sol.segment(row_id, constraint_size);
-      typename RigidConstraintData::Matrix6 actInv_transpose1 =
-        cmodel.joint1_placement.toActionMatrixInverse();
-      actInv_transpose1.transposeInPlace();
-      fext[cmodel.joint1_id] += Force(actInv_transpose1.template leftCols<3>() * lambda_segment);
-      typename RigidConstraintData::Matrix6 actInv_transpose2 =
-        cmodel.joint2_placement.toActionMatrixInverse();
-      actInv_transpose2.transposeInPlace();
-      fext[cmodel.joint2_id] += Force(actInv_transpose2.template leftCols<3>() * lambda_segment);
+        const auto lambda_segment = lambda_sol.segment(row_id, constraint_size);
+        cmodel.jacobianTransposeMatrixProduct(model, data, cdata, lambda_segment, tau, RmTo());
 
-      row_id += constraint_size;
+        row_id += constraint_size;
+      }
     }
-    rnea(model, data, q, v, a, fext);
     return data.tau;
   }
 
@@ -290,8 +295,9 @@ namespace pinocchio
   /// \param[in] contact_datas The list of contact_datas.
   /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
-  /// \param[in] settings The settings for the proximal algorithm.
-  /// \param[in] lambda_guess initial guess for the contact forces.
+  /// \param[in] lambda_sol initial guess for the contact forces
+  /// \param[in] settings The settings for the proximal algorithm
+  /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false).
   ///
   /// \return The desired joint torques stored in data.tau.
   ///
@@ -323,7 +329,8 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeLam> & lambda_sol,
-    ProximalSettingsTpl<Scalar> & settings)
+    ProximalSettingsTpl<Scalar> & settings,
+    bool solve_ncp = true)
   {
 
     typedef std::reference_wrapper<const FrictionalPointConstraintModelTpl<Scalar, Options>>
@@ -342,7 +349,7 @@ namespace pinocchio
 
     return contactInverseDynamics(
       model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas,
-      constraint_correction, R, lambda_sol.const_cast_derived(), settings);
+      constraint_correction, R, lambda_sol.const_cast_derived(), settings, solve_ncp);
   }
 
 } // namespace pinocchio
