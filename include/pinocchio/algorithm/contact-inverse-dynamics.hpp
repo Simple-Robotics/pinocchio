@@ -55,6 +55,10 @@ namespace pinocchio
     const Eigen::Index problem_size = R.size();
     const VectorXs R_prox = R + VectorXs::Constant(problem_size, settings.mu);
 
+    assert(
+      R.size() > 0 && check_expression_if_real<Scalar>(R_prox.minCoeff() >= Scalar(0))
+      && "The minimal value of R_prox should strictly positive");
+
     Scalar lambda_c_prev_norm_inf = lambda.template lpNorm<Eigen::Infinity>();
 
     bool has_converged = false;
