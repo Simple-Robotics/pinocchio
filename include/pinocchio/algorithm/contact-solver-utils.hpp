@@ -98,6 +98,26 @@ namespace pinocchio
       }
     }
 
+    /// \brief Project a vector x on the vector of cones.
+    template<
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn,
+      typename VectorLikeOut>
+    void computeConeProjection(
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & x,
+      const Eigen::DenseBase<VectorLikeOut> & x_proj)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      computeConeProjection(wrapped_constraint_models, x.derived(), x_proj.const_cast_derived());
+    }
+
     template<typename VelocityVectorLike, typename ResultVectorLike>
     struct DualProjectionVisitor
     : visitors::ConstraintUnaryVisitorBase<
@@ -216,6 +236,26 @@ namespace pinocchio
         Algo::run(cmodel, velocity_segment, res_segment);
         index += size;
       }
+    }
+
+    template<
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn,
+      typename VectorLikeOut>
+    void computeDualConeProjection(
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & x,
+      const Eigen::DenseBase<VectorLikeOut> & x_proj)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      computeDualConeProjection(
+        wrapped_constraint_models, x.derived(), x_proj.const_cast_derived());
     }
 
     template<typename Scalar, typename VelocityVectorLike, typename ForceVectorLike>
