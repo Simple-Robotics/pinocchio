@@ -50,7 +50,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_constraints);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(lambda.size(), R.size());
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
-      check_expression_if_real<Scalar>(settings.mu > Scalar(0)), "mu has to be strictly positive");
+      check_expression_if_real<Scalar>(settings.mu >= Scalar(0)), "mu has to be strictly positive");
 
     const Eigen::Index problem_size = R.size();
     const VectorXs R_prox = R + VectorXs::Constant(problem_size, settings.mu);
