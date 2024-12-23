@@ -7,9 +7,9 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
-#include "pinocchio/algorithm/constraints/frictional-joint-constraint.hpp"
-#include "pinocchio/algorithm/constraints/frictional-point-constraint.hpp"
-#include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
+#include "pinocchio/algorithm/constraints/joint-frictional-constraint.hpp"
+#include "pinocchio/algorithm/constraints/point-frictional-constraint.hpp"
+#include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint.hpp"
 // #include "pinocchio/algorithm/constraints/fictious-constraint.hpp"
 

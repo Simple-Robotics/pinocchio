@@ -3,7 +3,7 @@
 //
 
 #include "pinocchio/algorithm/kinematics.hpp"
-#include "pinocchio/algorithm/constraints/frictional-joint-constraint.hpp"
+#include "pinocchio/algorithm/constraints/joint-frictional-constraint.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
 

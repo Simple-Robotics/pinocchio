@@ -7,7 +7,7 @@
 
 #include <eigenpy/eigenpy.hpp>
 
-#include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
+#include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 
 #include "pinocchio/bindings/python/utils/cast.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"

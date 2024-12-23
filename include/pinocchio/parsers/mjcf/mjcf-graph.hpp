@@ -9,7 +9,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/joint/joints.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
-#include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
+#include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>

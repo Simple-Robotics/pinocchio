@@ -313,6 +313,6 @@ namespace pinocchio
   };
 } // namespace pinocchio
 
-#include "pinocchio/algorithm/constraints/frictional-joint-constraint.hxx"
+#include "pinocchio/algorithm/constraints/joint-frictional-constraint.hxx"
 
 #endif // ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hpp__

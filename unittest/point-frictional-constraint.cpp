@@ -15,7 +15,7 @@
 #include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/utils/timer.hpp"
 #include "pinocchio/spatial/classic-acceleration.hpp"
-#include "pinocchio/algorithm/constraints/bilateral-point-constraint.hpp"
+#include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 
 // Helpers
 #include "constraints/jacobians-checker.hpp"
@@ -106,8 +106,8 @@ void check_A1_and_A2(
 
   BOOST_CHECK(A1_local.isApprox(A1_local_ref));
 
-  const BilateralPointConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrame());
-  const BilateralPointConstraintModel::Matrix36 A2_local_ref =
+  const RigidConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrame());
+  const RigidConstraintModel::Matrix36 A2_local_ref =
     cdata.c1Mc2.rotation() * cmodel.joint2_placement.toActionMatrixInverse().topRows<3>();
 
   BOOST_CHECK(A2_local.isApprox(A2_local_ref));
@@ -130,6 +130,18 @@ void check_A1_and_A2(
   const Data::Matrix3x J_local = A1_local * J1_local + A2_local * J2_local;
 
   BOOST_CHECK(J_local.isApprox(J_ref));
+
+  // Check Jacobian matrix product
+  const Eigen::DenseIndex m = 40;
+  const Data::MatrixXs mat = Data::MatrixXs::Random(model.nv, m);
+
+  Data::MatrixXs res(cmodel.size(), m);
+  res.setZero();
+  cmodel.jacobianMatrixProduct(model, data, cdata, mat, res);
+
+  const Data::MatrixXs res_ref = J_ref * mat;
+
+  BOOST_CHECK(res.isApprox(res_ref));
 }
 
 BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
