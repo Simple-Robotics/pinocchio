@@ -118,7 +118,7 @@ namespace pinocchio
     }
 
     template<typename ConstraintModel, typename ConstraintModelAllocator>
-    static context::VectorXs computeComplementarityShift_wrapper(
+    static context::VectorXs computeDeSaxeCorrection_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const context::VectorXs & velocities)
     {
@@ -129,8 +129,7 @@ namespace pinocchio
       WrappedConstraintModelVector wrapped_constraint_models(
         constraint_models.cbegin(), constraint_models.cend());
 
-      ::pinocchio::internal::computeComplementarityShift(
-        wrapped_constraint_models, velocities, res);
+      ::pinocchio::internal::computeDeSaxeCorrection(wrapped_constraint_models, velocities, res);
       return res;
     }
 #endif // PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
@@ -234,8 +233,8 @@ namespace pinocchio
         //                reprojection error.");
 
         bp::def(
-          "computeComplementarityShift",
-          computeComplementarityShift_wrapper<ConstraintModel, ConstraintModelAllocator>,
+          "computeDeSaxeCorrection",
+          computeDeSaxeCorrection_wrapper<ConstraintModel, ConstraintModelAllocator>,
           bp::args("constraint_models", "velocities"),
           "Compute the complementarity shift associated to the De Saxé function.");
       }

@@ -232,7 +232,7 @@ namespace pinocchio
     z_.noalias() += -mu_prox * y_ + g;
     if (solve_ncp)
     {
-      computeComplementarityShift(constraint_models, z_, s_);
+      computeDeSaxeCorrection(constraint_models, z_, s_);
       z_ += s_; // Add De Saxé shift
     }
 
@@ -264,7 +264,7 @@ namespace pinocchio
       z_ = g;
       if (solve_ncp)
       {
-        computeComplementarityShift(constraint_models, z_, s_);
+        computeDeSaxeCorrection(constraint_models, z_, s_);
         z_ += s_; // Add De Saxé shift
       }
       dual_feasibility_vector = z_;
@@ -353,7 +353,7 @@ namespace pinocchio
         if (solve_ncp)
         {
           // s-update
-          computeComplementarityShift(constraint_models, z_, s_);
+          computeDeSaxeCorrection(constraint_models, z_, s_);
         }
 
         // x-update
@@ -402,7 +402,7 @@ namespace pinocchio
           rhs.noalias() += g - prox_value * y_;
           if (solve_ncp)
           {
-            computeComplementarityShift(constraint_models, rhs, tmp);
+            computeDeSaxeCorrection(constraint_models, rhs, tmp);
             rhs.noalias() += tmp;
           }
 

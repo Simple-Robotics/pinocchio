@@ -472,7 +472,7 @@ namespace pinocchio
       typename ConstraintModelAllocator,
       typename VectorLikeIn,
       typename VectorLikeOut>
-    void computeComplementarityShift(
+    void computeDeSaxeCorrection(
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
       const Eigen::DenseBase<VectorLikeIn> & velocities,
