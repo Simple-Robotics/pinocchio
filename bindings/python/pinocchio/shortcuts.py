@@ -281,14 +281,14 @@ def _buildModelsFromMJCF(
         geometry_types = [pin.GeometryType.COLLISION, pin.GeometryType.VISUAL]
 
     model = pin.Model()
-    constraint_models = pin.StdVec_BilateralPointConstraintModel()
+    # model, constraint_models = pin.buildModelFromMJCF(filename, root_joint = root_joint, root_joint_name = root_joint_name)
     if root_joint is None:
-        model, constraint_models = pin.buildModelFromMJCF(filename, model, constraint_models)
+        model, constraint_models = pin.buildModelFromMJCF(filename)
     elif root_joint is not None and root_joint_name is None:
-        model, constraint_models = pin.buildModelFromMJCF(filename, root_joint, model, constraint_models)
+        model, constraint_models = pin.buildModelFromMJCF(filename, root_joint)
     else:
         model, constraint_models = pin.buildModelFromMJCF(
-            filename, root_joint, root_joint_name, model, constraint_models
+            filename, root_joint, root_joint_name
         )
 
     if verbose and not WITH_HPP_FCL and meshLoader is not None:
