@@ -35,6 +35,9 @@ namespace pinocchio
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
 
+    typedef ConstraintModel Model;
+    typedef ConstraintData Data;
+
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
 

@@ -72,6 +72,10 @@ namespace pinocchio
     typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef boost::blank ConstraintSet;
+
+    typedef ConstraintModel Model;
+    typedef ConstraintData Data;
+
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Vector3 VectorConstraintSize;
     typedef Vector3 ComplianceVectorType;

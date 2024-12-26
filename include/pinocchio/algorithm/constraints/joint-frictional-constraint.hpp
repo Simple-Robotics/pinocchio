@@ -33,6 +33,9 @@ namespace pinocchio
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
+    typedef ConstraintModel Model;
+    typedef ConstraintData Data;
+
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
 

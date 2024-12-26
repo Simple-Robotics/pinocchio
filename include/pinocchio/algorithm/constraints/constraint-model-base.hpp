@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023 INRIA
+// Copyright (c) 2023-2024 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraint_model_base_hpp__
@@ -7,18 +7,23 @@
 
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
+#include "pinocchio/common/model-entity.hpp"
 
 namespace pinocchio
 {
 
   template<class Derived>
-  struct ConstraintModelBase : NumericalBase<Derived>
+  struct ConstraintModelBase
+  : NumericalBase<Derived>
+  , ModelEntity<Derived>
   {
     typedef typename traits<Derived>::Scalar Scalar;
     enum
     {
       Options = traits<Derived>::Options
     };
+
+    typedef ModelEntity<Derived> Base;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
     typedef typename traits<Derived>::ConstraintSet ConstraintSet;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
@@ -27,6 +32,8 @@ namespace pinocchio
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
     //    typedef Eigen::Matrix<Eigen::DenseIndex,Eigen::Dynamic,1,Options> IndexVector;
     typedef std::vector<Eigen::DenseIndex> EigenIndexVector;
+
+    using Base::createData;
 
     Derived & derived()
     {

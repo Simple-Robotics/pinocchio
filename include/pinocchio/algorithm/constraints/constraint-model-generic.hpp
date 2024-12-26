@@ -25,6 +25,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
+    typedef ConstraintData Data;
     typedef boost::blank ConstraintSet;
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;

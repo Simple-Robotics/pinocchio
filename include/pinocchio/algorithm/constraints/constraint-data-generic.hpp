@@ -25,6 +25,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
+    typedef ConstraintModel Model;
     typedef boost::blank ConstraintSet;
   };
 

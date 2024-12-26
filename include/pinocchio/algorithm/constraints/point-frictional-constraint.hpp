@@ -34,6 +34,9 @@ namespace pinocchio
     typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
 
+    typedef ConstraintModel Model;
+    typedef ConstraintData Data;
+
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Vector3 VectorConstraintSize;
 
