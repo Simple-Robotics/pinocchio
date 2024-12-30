@@ -41,6 +41,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-data-generic.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/constraint-model-generic.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frame-constraint-model-base.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/frame-constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/patch-frictional-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/point-frictional-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/fwd.hpp
