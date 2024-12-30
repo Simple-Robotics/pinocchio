@@ -11,6 +11,7 @@
 #include "pinocchio/algorithm/constraints/point-frictional-constraint.hpp"
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint.hpp"
+#include "pinocchio/algorithm/constraints/weld-constraint.hpp"
 // #include "pinocchio/algorithm/constraints/fictious-constraint.hpp"
 
 #include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"

@@ -52,6 +52,13 @@ namespace pinocchio
   typedef FrictionalPointConstraintDataTpl<context::Scalar> FrictionalPointConstraintData;
 
   template<typename Scalar, int Options = 0>
+  struct WeldConstraintModelTpl;
+  typedef WeldConstraintModelTpl<context::Scalar> WeldConstraintModel;
+  template<typename Scalar, int Options = 0>
+  struct WeldConstraintDataTpl;
+  typedef WeldConstraintDataTpl<context::Scalar> WeldConstraintData;
+
+  template<typename Scalar, int Options = 0>
   struct ConstraintCollectionDefaultTpl;
 
   typedef ConstraintCollectionDefaultTpl<context::Scalar, context::Options>
