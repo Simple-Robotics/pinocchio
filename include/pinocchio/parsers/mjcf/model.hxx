@@ -29,27 +29,6 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
-      return buildModelFromXML(xmlStream, model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModel(
-      const std::string & filename,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
-      return buildModelFromXML(filename, model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModelFromXML(
-      const std::string & xmlStream,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
       ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
 
       typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
@@ -62,9 +41,33 @@ namespace pinocchio
 
       // Use the Mjcf graph to create the model
       graph.parseRootTree();
-      graph.parseContactInformation(model, constraint_models);
 
       return model;
+    }
+
+    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+      & buildConstraintModelsFromXML(
+        const std::string & xmlStream,
+        ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+          & constraint_models,
+        const bool verbose)
+    {
+      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+
+      typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+
+      MjcfGraph graph(visitor, xmlStream);
+      if (verbose)
+        visitor.log = &std::cout;
+
+      graph.parseGraphFromXML(xmlStream);
+
+      // Use the Mjcf graph to create the model
+      graph.parseContactInformation(model, constraint_models);
+
+      return constraint_models;
     }
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -84,9 +87,7 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
-      return buildModelFromXML(
-        xmlStream, rootJoint, "root_joint", model, constraint_models, verbose);
+      return buildModelFromXML(xmlStream, rootJoint, "root_joint", model, verbose);
     }
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -108,56 +109,6 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
-      return buildModelFromXML(
-        xmlStream, rootJoint, rootJointName, model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModel(
-      const std::string & filename,
-      const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
-      return buildModelFromXML(filename, rootJoint, model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModelFromXML(
-      const std::string & xmlStream,
-      const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
-      return buildModelFromXML(
-        xmlStream, rootJoint, "root_joint", model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModel(
-      const std::string & filename,
-      const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
-      const std::string & rootJointName,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
-      return buildModelFromXML(
-        filename, rootJoint, rootJointName, model, constraint_models, verbose);
-    }
-
-    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-    ModelTpl<Scalar, Options, JointCollectionTpl> & buildModelFromXML(
-      const std::string & xmlStream,
-      const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
-      const std::string & rootJointName,
-      ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
-      const bool verbose)
-    {
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
@@ -175,7 +126,6 @@ namespace pinocchio
 
       // Use the Mjcf graph to create the model
       graph.parseRootTree();
-      graph.parseContactInformation(model, constraint_models);
 
       return model;
     }

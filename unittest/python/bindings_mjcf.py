@@ -10,7 +10,8 @@ class TestMJCFBindings(unittest.TestCase):
         current_dir = Path(__file__).parent
         model_dir = current_dir / "../models/"
         model_path = model_dir / "closed_chain.xml"
-        model, constraint_models = pin.buildModelFromMJCF(model_path, model)
+        model = pin.buildModelFromMJCF(model_path, model)
+        constraint_models = pin.buildConstraintModelsFromMJCF(model_path, model)
         self.assertEqual(len(constraint_models), 4)
 
 

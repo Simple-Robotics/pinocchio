@@ -458,7 +458,8 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.xml");
 
   pinocchio::Model model_m;
-  pinocchio::mjcf::buildModel(filename, model_m, constraint_models);
+  pinocchio::mjcf::buildModel(filename, model_m);
+  pinocchio::mjcf::buildConstraintModelsFromXML(filename, model_m, constraint_models);
 
   std::string file_u = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.urdf");
   pinocchio::Model model_u;
@@ -1417,7 +1418,8 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/closed_chain.xml");
 
   pinocchio::Model model;
-  pinocchio::mjcf::buildModel(filename, model, constraint_models);
+  pinocchio::mjcf::buildModel(filename, model);
+  pinocchio::mjcf::buildConstraintModelsFromXML(filename, model, constraint_models);
 
   BOOST_CHECK_EQUAL(constraint_models.size(), 4);
   BOOST_CHECK_EQUAL(
