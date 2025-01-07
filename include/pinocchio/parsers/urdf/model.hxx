@@ -10,6 +10,7 @@
 #include "pinocchio/parsers/config.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 #include "pinocchio/multibody/model.hpp"
+#include "pinocchio/algorithm/joint-configuration.hpp"
 
 #include <sstream>
 #include <boost/foreach.hpp>
@@ -51,6 +52,8 @@ namespace pinocchio
         virtual void setName(const std::string & name) = 0;
 
         virtual void addRootJoint(const Inertia & Y, const std::string & body_name) = 0;
+
+        virtual void preambleFillModel(Eigen::VectorXd & reference_config) = 0;
 
         virtual void addJointAndBody(
           JointType type,
@@ -184,6 +187,12 @@ namespace pinocchio
 
           model.addFrame(
             Frame(body_name, parent_frame.parentJoint, 0, parent_frame.placement, BODY, Y));
+        }
+
+        virtual void preambleFillModel(Eigen::VectorXd & reference_config)
+        {
+          PINOCCHIO_UNUSED_VARIABLE(reference_config);
+          return;
         }
 
         void addJointAndBody(
@@ -545,6 +554,18 @@ namespace pinocchio
 
           FrameIndex jointFrameId = model.addJointFrame(idx, 0);
           appendBodyToJoint(jointFrameId, Y, SE3::Identity(), body_name);
+        }
+
+        virtual void preambleFillModel(Eigen::VectorXd & reference_config)
+        {
+          Model tmp_model;
+          tmp_model.addJoint(0, root_joint, ::pinocchio::SE3::Identity(), "root_joint");
+          Eigen::VectorXd qroot = ::pinocchio::neutral(tmp_model);
+          assert(qroot.size() == tmp_model.nq);
+          assert(tmp_model.nq == root_joint.nq());
+          reference_config.conservativeResize(qroot.size() + reference_config.size());
+          reference_config.tail(qroot.size()) = qroot;
+          return;
         }
       };
 

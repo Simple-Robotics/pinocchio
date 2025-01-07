@@ -1114,12 +1114,16 @@ namespace pinocchio
           if (joint.jointType == "free")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 7);
-            referenceConfig.tail(7) << Eigen::Matrix<double, 7, 1>::Zero();
+            // referenceConfig.tail(7) << Eigen::Matrix<double, 7, 1>(0, 0, 0, 0, 0, 0, 1);
+            const SE3::Quaternion q(currentBody.bodyPlacement.rotation());
+            const SE3::Quaternion qinv = q.inverse();
+            const Eigen::Vector3d t(-currentBody.bodyPlacement.translation());
+            referenceConfig.tail(7) << t(0), t(1), t(2), qinv.x(), qinv.y(), qinv.z(), qinv.w();
           }
           else if (joint.jointType == "ball")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 4);
-            referenceConfig.tail(4) << Eigen::Vector4d::Zero();
+            referenceConfig.tail(4) << Eigen::Vector4d(0, 0, 0, 1);
           }
           else if (joint.jointType == "slide" || joint.jointType == "hinge")
           {
@@ -1143,7 +1147,6 @@ namespace pinocchio
             int nq = joint.nq();
 
             Eigen::VectorXd qpos_j = keyframe.segment(idx_q, nq);
-            Eigen::VectorXd q_ref = referenceConfig.segment(idx_q, nq);
             if (joint.shortname() == "JointModelFreeFlyer")
             {
               Eigen::Vector4d new_quat(qpos_j(4), qpos_j(5), qpos_j(6), qpos_j(3));
@@ -1166,16 +1169,10 @@ namespace pinocchio
                     qpos_j(idx_q_ + 1), qpos_j(idx_q_ + 2), qpos_j(idx_q_ + 3), qpos_j(idx_q_));
                   qpos_j.segment(idx_q_, nq_) = new_quat;
                 }
-                else
-                  qpos_j.segment(idx_q_, nq_) -= q_ref.segment(idx_q_, nq_);
               }
             }
-            else
-              qpos_j -= q_ref;
-
             qpos.segment(idx_q, nq) = qpos_j;
           }
-
           urdfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
         }
         else
@@ -1231,6 +1228,33 @@ namespace pinocchio
         }
       }
 
+      void MjcfGraph::updateJointPlacementsFromReferenceConfig()
+      {
+        Data data(urdfVisitor.model);
+        ::pinocchio::forwardKinematics(urdfVisitor.model, data, referenceConfig);
+        for (std::size_t i = 1; i < urdfVisitor.model.joints.size(); i++)
+        {
+          auto & joint = urdfVisitor.model.joints[i];
+          if (joint.shortname() == "JointModelComposite")
+          {
+            JointModelComposite & joint_composite =
+              boost::get<JointModelComposite>(joint.toVariant());
+            for (std::size_t j = 1; j < joint_composite.joints.size(); j++)
+            {
+              joint_composite.jointPlacements[j] =
+                boost::get<JointDataComposite>(data.joints[i]).pjMi[j];
+            }
+          }
+          else
+          {
+            const std::size_t parenti = urdfVisitor.model.parents[i];
+            const ::pinocchio::SE3 oMparenti = data.oMi[parenti];
+            const ::pinocchio::SE3 oMi = data.oMi[i];
+            urdfVisitor.model.jointPlacements[i] = oMparenti.inverse() * oMi;
+          }
+        }
+      }
+
       void MjcfGraph::parseRootTree()
       {
         urdfVisitor.setName(modelName);
@@ -1240,11 +1264,16 @@ namespace pinocchio
         if (rootBody.jointChildren.size() == 0)
           urdfVisitor.addRootJoint(rootBody.bodyInertia, rootLinkName);
 
-        fillReferenceConfig(rootBody);
+        // in the case with a root joint provided from pinocchio, we extend the referenceConfig
+        urdfVisitor.preambleFillModel(referenceConfig);
         for (const auto & entry : bodiesList)
         {
           fillModel(entry);
         }
+
+        // We update the joint placements so their base placement is matching with the
+        // referenceConfig
+        updateJointPlacementsFromReferenceConfig();
 
         for (const auto & entry : mapOfConfigs)
         {

@@ -945,6 +945,53 @@ BOOST_AUTO_TEST_CASE(adding_keyframes)
   BOOST_CHECK(vect_model == vect_ref);
 }
 
+// Test laoding a model with a spherical joint and verify that keyframe is valid
+BOOST_AUTO_TEST_CASE(adding_keyframes_with_ref_and_freejoint)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="testKeyFrame">
+                <default>
+                    <position ctrllimited="true" ctrlrange="-.1 .1" kp="30"/>
+                    <default class="joint">
+                    <geom type="cylinder" size=".006" fromto="0 0 0 0 0 .05" rgba=".9 .6 1 1"/>
+                    </default>
+                </default>
+                <worldbody>
+                    <body name="body1" pos="0 0 1.1">
+                        <freejoint/>
+                        <geom type="capsule" size=".01" fromto="0 0 0 .2 0 0"/>
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="ball" damping=".1"/>
+                            <geom type="capsule" size=".01" fromto="0 -.15 0 0 0 0"/>
+                        </body>
+                    </body>
+                </worldbody>
+                <keyframe>
+                    <key name="test"
+                    qpos="0 0 0.596
+                        0.988015 0 0.154359 0
+                        0.988015 0 0.154359 0"/>
+                </keyframe>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::Vector3d freejoint_trans_test = Eigen::Vector3d::Zero();
+  Eigen::Vector3d freejoint_trans = model_m.jointPlacements[1].translation();
+  BOOST_CHECK(freejoint_trans_test == freejoint_trans);
+
+  Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
+
+  Eigen::VectorXd vect_ref(model_m.nq);
+  vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+
+  BOOST_CHECK(vect_model.size() == vect_ref.size());
+  BOOST_CHECK(vect_model == vect_ref);
+}
+
 // Test on which joints inertias are append
 BOOST_AUTO_TEST_CASE(joint_and_inertias)
 {
@@ -1044,7 +1091,7 @@ BOOST_AUTO_TEST_CASE(reference_positions)
 
   Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
   Eigen::VectorXd vect_ref(model_m.nq);
-  vect_ref << 0.66, 0.4;
+  vect_ref << 0.8, 0.5;
 
   BOOST_CHECK(vect_model.size() == vect_ref.size());
   BOOST_CHECK(vect_model == vect_ref);

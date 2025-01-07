@@ -526,6 +526,10 @@ namespace pinocchio
         /// @param nameOfBody Name of the body to add
         void fillModel(const std::string & nameOfBody);
 
+        /// @brief Use the reference configuration that was parsed to update the joint placements to
+        /// match this configuration when doing pin.neutral
+        void updateJointPlacementsFromReferenceConfig();
+
         /// @brief Fill the pinocchio model with all the infos from the graph
         void parseRootTree();
 
