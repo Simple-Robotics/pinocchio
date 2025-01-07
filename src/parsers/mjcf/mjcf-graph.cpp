@@ -1128,7 +1128,7 @@ namespace pinocchio
           else if (joint.jointType == "slide" || joint.jointType == "hinge")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 1);
-            referenceConfig.tail(1) << joint.posRef;
+            referenceConfig.tail(1) << -joint.posRef;
           }
         }
       }
