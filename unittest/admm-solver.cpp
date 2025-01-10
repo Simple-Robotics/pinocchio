@@ -356,13 +356,13 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   admm_solver.setAbsolutePrecision(1e-10);
   admm_solver.setRelativePrecision(1e-14);
 
-  const bool has_converged = admm_solver.solve(G_expression, g, constraint_models, dual_solution);
+  const bool has_converged = admm_solver.solve(G_expression, g, constraint_models, primal_solution);
   BOOST_CHECK(has_converged);
 
-  primal_solution = G * dual_solution + g;
+  dual_solution = G * primal_solution + g;
 
   BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
-  BOOST_CHECK(dual_solution.isZero());
+  BOOST_CHECK(primal_solution.isZero());
 
   typedef TestBoxTpl<ConstraintModel> TestBox;
 
