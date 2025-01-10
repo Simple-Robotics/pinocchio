@@ -1469,6 +1469,8 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
   pinocchio::mjcf::buildConstraintModelsFromXML(filename, model, constraint_models);
 
   BOOST_CHECK_EQUAL(constraint_models.size(), 4);
+
+  // We check that we have correctly parsed the values contained in the XML file
   BOOST_CHECK_EQUAL(
     constraint_models[0].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
@@ -1477,6 +1479,19 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
     constraint_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
     constraint_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+
+  // Next, we check if the other constraint placement has been computed correctly.
+  // If a bilateral constraint has been constructed well, then the origin of the constraint
+  // placements, expressed in the world frame, should match
+  const Eigen::VectorXd q0 = model.referenceConfigurations["home"];
+  pinocchio::Data data(model);
+  pinocchio::forwardKinematics(model, data, q0);
+  for (const auto & cm : constraint_models)
+  {
+    const pinocchio::SE3 oMc1 = data.oMi[cm.joint1_id] * cm.joint1_placement;
+    const pinocchio::SE3 oMc2 = data.oMi[cm.joint2_id] * cm.joint2_placement;
+    BOOST_CHECK(oMc1.translation().isApprox(oMc2.translation()));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_default_eulerseq)
