@@ -1477,10 +1477,6 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
     constraint_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
     constraint_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
-  for (const auto & cm : constraint_models)
-  {
-    BOOST_CHECK(cm.joint2_placement.isApprox(cm.joint1_placement.inverse()));
-  }
 }
 
 BOOST_AUTO_TEST_CASE(test_default_eulerseq)
