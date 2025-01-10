@@ -10,6 +10,7 @@
 #include "pinocchio/algorithm/contact-solver-utils.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
+#include "pinocchio/algorithm/delassus-operator-preconditionned.hpp"
 
 #include "pinocchio/tracy.hpp"
 
@@ -137,7 +138,8 @@ namespace pinocchio
   }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
 
   template<
-    template<typename T> class Holder,
+    template<typename T>
+    class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeIn>
@@ -170,7 +172,8 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
-    template<typename T> class Holder,
+    template<typename T>
+    class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeR>
@@ -179,6 +182,7 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::MatrixBase<VectorLikeR> & R,
+    const boost::optional<ConstRefVectorXs> preconditionner,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
     bool solve_ncp,
@@ -186,7 +190,6 @@ namespace pinocchio
     bool stat_record)
 
   {
-    PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve");
     // Unused for now
     PINOCCHIO_UNUSED_VARIABLE(dual_guess);
 
@@ -205,15 +208,9 @@ namespace pinocchio
 
     // First, we initialize the primal and dual variables
     int it = 0;
-    Scalar complementarity, dx_norm, dy_norm, dz_norm, //
+    Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
 
-    // we add the compliance to the delassus
-    rhs = R + VectorXs::Constant(this->problem_size, mu_prox);
-    {
-      PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve - first delassus.updateDamping");
-      delassus.updateDamping(rhs);
-    }
     // Initialize De Saxé shift to 0
     // For the CCP, there is no shift
     // For the NCP, the shift will be initialized using z
@@ -231,18 +228,33 @@ namespace pinocchio
       x_.setZero();
     }
 
-    // Init y
+    // we add the compliance to the delassus
+
+    if (preconditionner)
     {
-      PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve - first computeConeProjection");
-      computeConeProjection(constraint_models, x_, y_);
+      preconditionner_ = preconditionner.get();
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(preconditionner_.size(), problem_size);
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        preconditionner_.minCoeff() > Scalar(0),
+        "Preconditionner should be a strictly positive vector.");
     }
 
+    // Applying the preconditioner to work on a problem with a better scaling
+    DelassusOperatorPreconditionnedTpl<DelassusDerived> G_bar(_delassus, preconditionner_);
+    rhs.array() = R.array() / preconditionner_.array();
+    rhs.array() /= preconditionner_.array();
+    rhs += VectorXs::Constant(this->problem_size, mu_prox);
+    G_bar.updateDamping(rhs); // G_bar =  P*(G+R)*P + mu_prox*Id
+    scaleDualSolution(g, g_bar_);
+    scalePrimalSolution(x_, x_bar_);
+
+    // Init y
+    computeConeProjection(constraint_models, x_bar_, y_bar_);
+
     // Init z
-    {
-      PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve - first delassus.applyOnTheRight");
-      delassus.applyOnTheRight(y_, z_); // z = (G + R + mu_prox*Id)* y
-    }
-    z_.noalias() += -mu_prox * y_ + g;
+    G_bar.applyOnTheRight(y_bar_, z_bar_);
+    z_bar_.noalias() += -mu_prox * y_bar_ + g_bar_; // z_bar = P*(G + R)*P* y_bar + g_bar
+    unscaleDualSolution(z_bar_, z_);
     if (solve_ncp)
     {
       {
@@ -255,6 +267,7 @@ namespace pinocchio
 
     primal_feasibility = 0; // always feasible because y is projected
 
+    // Dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
     dual_feasibility_vector = z_;
     {
       PINOCCHIO_TRACY_ZONE_SCOPED_N(
@@ -264,8 +277,10 @@ namespace pinocchio
     dual_feasibility_vector -= z_;
 
     // Computing the convergence criterion of the initial guess
-    complementarity = computeConicComplementarity(
-      constraint_models, z_, y_); // Complementarity of the initial guess
+    // Complementarity of the initial guess
+    // NB: complementarity is computed between a force y_bar (in N) and a "position" z_ (in m or
+    // rad).
+    complementarity = computeConicComplementarity(constraint_models, z_, y_bar_);
     dual_feasibility =
       dual_feasibility_vector
         .template lpNorm<Eigen::Infinity>(); // dual feasibility of the initial guess
@@ -292,12 +307,10 @@ namespace pinocchio
         }
         z_ += s_; // Add De Saxé shift
       }
-      dual_feasibility_vector = z_;
-      {
-        PINOCCHIO_TRACY_ZONE_SCOPED_N(
-          "ADMMContactSolverTpl::solve - second computeDualConeProjection");
-        computeDualConeProjection(constraint_models, z_, z_);
-      }
+      x_bar_.setZero();
+      y_bar_.setZero();
+      scaleDualSolution(z_, z_bar_);
+      computeDualConeProjection(constraint_models, z_, z_);
       dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
       // We set the new convergence criterion
       this->absolute_residual = absolute_residual_zero_guess;
@@ -310,6 +323,7 @@ namespace pinocchio
       // Before running ADMM, we compute the largest and smallest eigenvalues of delassus in order
       // to be able to use a spectral update rule for the proximal parameter (rho) Setup ADMM update
       // rules
+      // TODO should we evaluate the eigenvalues of G or Gbar ?
       Scalar L, m, rho;
       ADMMUpdateRuleContainer admm_update_rule_container;
       switch (admm_update_rule)
@@ -319,11 +333,12 @@ namespace pinocchio
         {
           PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve - lanczos");
           m = rhs.minCoeff();
-          this->lanczos_algo.compute(delassus);
+          this->lanczos_algo.compute(G_bar);
           L = ::pinocchio::computeLargestEigenvalue(this->lanczos_algo.Ts(), 1e-8);
         }
         else
         {
+          // TODO adapt this with Gbar
           typedef Eigen::Matrix<Scalar, 1, 1> Vector1;
           const Vector1 G = delassus * Vector1::Constant(1);
           m = L = G.coeff(0);
@@ -347,12 +362,10 @@ namespace pinocchio
 
       // Update the cholesky decomposition
       Scalar prox_value = mu_prox + tau * rho;
-      rhs = R + VectorXs::Constant(this->problem_size, prox_value);
-      {
-        PINOCCHIO_TRACY_ZONE_SCOPED_N(
-          "ADMMContactSolverTpl::solve - second delassus.updateDamping (after lanczos)");
-        delassus.updateDamping(rhs);
-      }
+      rhs.array() = R.array() / preconditionner_.array();
+      rhs.array() /= preconditionner_.array();
+      rhs += VectorXs::Constant(this->problem_size, prox_value);
+      G_bar.updateDamping(rhs);
       cholesky_update_count = 1;
 
       if (stat_record)
@@ -366,11 +379,11 @@ namespace pinocchio
       abs_prec_reached = false;
       bool rel_prec_reached = false;
 
-      Scalar x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
-      Scalar y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+      Scalar x_bar_norm_inf = x_bar_.template lpNorm<Eigen::Infinity>();
+      Scalar y_bar_norm_inf = y_bar_.template lpNorm<Eigen::Infinity>();
       Scalar z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
-      Scalar x_previous_norm_inf = x_norm_inf;
-      Scalar y_previous_norm_inf = y_norm_inf;
+      Scalar x_bar_previous_norm_inf = x_bar_norm_inf;
+      Scalar y_bar_previous_norm_inf = y_bar_norm_inf;
       Scalar z_previous_norm_inf = z_norm_inf;
       it = 1;
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -379,8 +392,8 @@ namespace pinocchio
       for (; it <= Base::max_it; ++it)
       {
 
-        x_previous = x_;
-        y_previous = y_;
+        x_bar_previous = x_bar_;
+        y_bar_previous = y_bar_;
         z_previous = z_;
         complementarity = Scalar(0);
 
@@ -393,40 +406,35 @@ namespace pinocchio
         }
 
         // x-update
-        rhs = -(g + s_ - (rho * tau) * y_ - mu_prox * x_ - z_);
-        {
-          PINOCCHIO_TRACY_ZONE_SCOPED_N(
-            "ADMMContactSolverTpl::solve -  delassus.solveInPlace in loop");
-          delassus.solveInPlace(rhs);
-        }
-        x_ = rhs;
+        rhs = -(g_bar_ + s_ - (rho * tau) * y_bar_ - mu_prox * x_bar_ - z_bar_);
+        G_bar.solveInPlace(rhs);
+        x_bar_ = rhs;
 
         // y-update
-        rhs -= z_ / (tau * rho);
-        {
-          PINOCCHIO_TRACY_ZONE_SCOPED_N(
-            "ADMMContactSolverTpl::solve -  computeConeProjection in loop");
-          computeConeProjection(constraint_models, rhs, y_);
-        }
+        rhs -= z_bar_ / (tau * rho);
+        computeConeProjection(constraint_models, rhs, y_bar_);
 
         // z-update
-        z_ -= (tau * rho) * (x_ - y_);
+        z_bar_ -= (tau * rho) * (x_bar_ - y_bar_);
+        unscaleDualSolution(z_bar_, z_);
 
         // check termination criteria
-        primal_feasibility_vector = x_ - y_;
+        primal_feasibility_vector = x_bar_ - y_bar_;
 
         {
-          VectorXs & dx = rhs;
-          dx = x_ - x_previous;
-          dx_norm = dx.template lpNorm<Eigen::Infinity>(); // check relative progress on x
-          dual_feasibility_vector.noalias() = mu_prox * dx;
+          VectorXs & dx_bar = rhs;
+          dx_bar = x_bar_ - x_bar_previous;
+          dx_bar_norm =
+            dx_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on x_bar
+          dual_feasibility_vector.noalias() = mu_prox * dx_bar;
         }
 
         {
-          VectorXs & dy = rhs;
-          dy = y_ - y_previous;
-          dy_norm = dy.template lpNorm<Eigen::Infinity>(); // check relative progress on y
-          dual_feasibility_vector.noalias() += (tau * rho) * dy;
+          VectorXs & dy_bar = rhs;
+          dy_bar = y_bar_ - y_bar_previous;
+          dy_bar_norm =
+            dy_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on y_bar
+          dual_feasibility_vector.noalias() += (tau * rho) * dy_bar;
         }
 
         {
@@ -437,28 +445,21 @@ namespace pinocchio
 
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-        complementarity = computeConicComplementarity(constraint_models, z_, y_);
+        complementarity = computeConicComplementarity(constraint_models, z_, y_bar_);
 
         if (stat_record)
         {
           VectorXs tmp(rhs);
-          {
-            PINOCCHIO_TRACY_ZONE_SCOPED_N(
-              "ADMMContactSolverTpl::solve - delassus.applyOnTheRight (for stat record)");
-            delassus.applyOnTheRight(y_, rhs);
-          }
-          rhs.noalias() += g - prox_value * y_;
+          G_bar.applyOnTheRight(y_bar_, rhs);
+          rhs.noalias() += g_bar_ - prox_value * y_bar_;
+          unscaleDualSolution(rhs, tmp);
           if (solve_ncp)
           {
-            {
-              PINOCCHIO_TRACY_ZONE_SCOPED_N(
-                "ADMMContactSolverTpl::solve - computeDeSaxeCorrection (for stat record)");
-              computeDeSaxeCorrection(constraint_models, rhs, tmp);
-            }
-            rhs.noalias() += tmp;
+            computeDeSaxeCorrection(constraint_models, tmp, rhs);
+            tmp.noalias() += rhs;
           }
 
-          internal::computeDualConeProjection(constraint_models, rhs, tmp);
+          internal::computeDualConeProjection(constraint_models, tmp, rhs);
           tmp -= rhs;
 
           dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
@@ -480,14 +481,16 @@ namespace pinocchio
         else
           abs_prec_reached = false;
 
-        x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
-        y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+        x_bar_norm_inf = x_bar_.template lpNorm<Eigen::Infinity>();
+        y_bar_norm_inf = y_bar_.template lpNorm<Eigen::Infinity>();
         z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
         if (
           check_expression_if_real<Scalar, false>(
-            dx_norm <= this->relative_precision * math::max(x_norm_inf, x_previous_norm_inf))
+            dx_bar_norm
+            <= this->relative_precision * math::max(x_bar_norm_inf, x_bar_previous_norm_inf))
           && check_expression_if_real<Scalar, false>(
-            dy_norm <= this->relative_precision * math::max(y_norm_inf, y_previous_norm_inf))
+            dy_bar_norm
+            <= this->relative_precision * math::max(y_bar_norm_inf, y_bar_previous_norm_inf))
           && check_expression_if_real<Scalar, false>(
             dz_norm <= this->relative_precision * math::max(z_norm_inf, z_previous_norm_inf)))
           rel_prec_reached = true;
@@ -520,21 +523,17 @@ namespace pinocchio
         {
           prox_value = mu_prox + tau * rho;
           rhs = R + VectorXs::Constant(this->problem_size, prox_value);
-          {
-            PINOCCHIO_TRACY_ZONE_SCOPED_N(
-              "ADMMContactSolverTpl::solve - delassus.updateDamping in loop");
-            delassus.updateDamping(rhs);
-          }
+          delassus.updateDamping(rhs);
           cholesky_update_count++;
         }
 
-        x_previous_norm_inf = x_norm_inf;
-        y_previous_norm_inf = y_norm_inf;
+        x_bar_previous_norm_inf = x_bar_norm_inf;
+        y_bar_previous_norm_inf = y_bar_norm_inf;
         z_previous_norm_inf = z_norm_inf;
       } // end ADMM main for loop
       this->relative_residual = math::max(
-        dx_norm / math::max(x_norm_inf, x_previous_norm_inf),
-        dy_norm / math::max(y_norm_inf, y_previous_norm_inf));
+        dx_bar_norm / math::max(x_bar_norm_inf, x_bar_previous_norm_inf),
+        dy_bar_norm / math::max(y_bar_norm_inf, y_bar_previous_norm_inf));
       this->relative_residual =
         math::max(this->relative_residual, dz_norm / math::max(z_norm_inf, z_previous_norm_inf));
       this->absolute_residual =
@@ -558,6 +557,8 @@ namespace pinocchio
     //
 
     this->it = it;
+    unscalePrimalSolution(y_bar_, y_);
+    unscaleDualSolution(z_bar_, z_);
 
     if (abs_prec_reached)
       return true;

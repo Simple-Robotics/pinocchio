@@ -291,11 +291,15 @@ namespace pinocchio
         static_cast<Eigen::DenseIndex>(math::max(2, math::min(lanczos_size, problem_dim))))
     , x_(VectorXs::Zero(problem_dim))
     , y_(VectorXs::Zero(problem_dim))
-    , x_previous(VectorXs::Zero(problem_dim))
-    , y_previous(VectorXs::Zero(problem_dim))
+    , x_bar_(VectorXs::Zero(problem_dim))
+    , y_bar_(VectorXs::Zero(problem_dim))
+    , x_bar_previous(VectorXs::Zero(problem_dim))
+    , y_bar_previous(VectorXs::Zero(problem_dim))
     , z_previous(VectorXs::Zero(problem_dim))
     , z_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
+    , preconditionner_(VectorXs::Ones(problem_dim))
+    , g_bar_(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector(VectorXs::Zero(problem_dim))
@@ -424,6 +428,8 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
+    /// \param[in] preconditionner Precondtionner of the problem used to convert the problem to a
+    /// problem on forces (measured in Newton).
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -443,6 +449,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Eigen::MatrixBase<VectorLikeR> & R,
+      const boost::optional<ConstRefVectorXs> preconditionner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -458,6 +465,8 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
+    /// \param[in] preconditionner Precondtionner of the problem used to convert the problem to a
+    /// problem on forces (measured in Newton).
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -477,6 +486,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
       const Eigen::MatrixBase<VectorLikeR> & R,
+      const boost::optional<ConstRefVectorXs> preconditionner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -490,8 +500,8 @@ namespace pinocchio
         constraint_models.cbegin(), constraint_models.cend());
 
       return solve(
-        delassus, g, wrapped_constraint_models, R, primal_guess, dual_guess, solve_ncp,
-        admm_update_rule, stat_record);
+        delassus, g, wrapped_constraint_models, R, preconditionner, primal_guess, dual_guess,
+        solve_ncp, admm_update_rule, stat_record);
     }
 
     ///
@@ -521,7 +531,7 @@ namespace pinocchio
     {
       return solve(
         delassus.derived(), g.derived(), constraint_models, VectorXs::Zero(problem_size),
-        primal_guess.const_cast_derived(), boost::none, solve_ncp);
+        VectorXs::Ones(problem_size), primal_guess.const_cast_derived(), boost::none, solve_ncp);
     }
 
     ///
@@ -573,6 +583,36 @@ namespace pinocchio
       return s_;
     }
 
+    /// \returns use the preconditionner to scale a primal quantity x.
+    /// Typically, it allows to get x_bar from x.
+    void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
+    {
+      x_bar.array() = x.array() / preconditionner_.array();
+      return;
+    }
+
+    /// \returns use the preconditionner to unscale a primal quantity x.
+    /// Typically, it allows to get x from x_bar.
+    void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
+    {
+      x.array() = x_bar.array() * preconditionner_.array();
+      return;
+    }
+
+    /// \returns use the preconditionner to scale a dual quantity z.
+    /// Typically, it allows to get z_bar from z.
+    void scaleDualSolution(const VectorXs & z, VectorXs & z_bar) const
+    {
+      unscalePrimalSolution(z, z_bar);
+    }
+
+    /// \returns use the preconditionner to unscale a dual quantity z.
+    /// Typically, it allows to get x from z_bar.
+    void unscaleDualSolution(const VectorXs & z_bar, VectorXs & z) const
+    {
+      scalePrimalSolution(z_bar, z);
+    }
+
     SolverStats & getStats()
     {
       return stats;
@@ -605,14 +645,24 @@ namespace pinocchio
     /// \brief Lanczos decomposition algorithm.
     LanczosAlgo lanczos_algo;
 
-    /// \brief Primal variables (corresponds to the contact forces)
+    /// \brief Primal variables (corresponds to the constraint impulses)
     VectorXs x_, y_;
-    /// \brief Previous value of y.
-    VectorXs x_previous, y_previous, z_previous;
-    /// \brief Dual varible of the ADMM (corresponds to the contact velocity or acceleration).
+    /// \brief Scaled primal variables (corresponds to the contact forces)
+    VectorXs x_bar_, y_bar_;
+    /// \brief Previous values of x_bar_, y_bar_ and z_.
+    VectorXs x_bar_previous, y_bar_previous, z_previous;
+    /// \brief Dual variable of the ADMM (corresponds to the contact velocity or acceleration).
     VectorXs z_;
+    /// \brief Scaled dual variable of the ADMM (corresponds to the contact velocity or
+    /// acceleration).
+    VectorXs z_bar_;
     /// \brief De Saxé shift
     VectorXs s_;
+
+    /// \brief Preconditionner of the problem
+    VectorXs preconditionner_;
+    /// \brief Preconditionned drift term
+    VectorXs g_bar_;
 
     VectorXs rhs, primal_feasibility_vector, dual_feasibility_vector;
 
