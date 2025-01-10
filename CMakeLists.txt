@@ -284,7 +284,7 @@ elseif(PINOCCHIO_TRACY_ENABLE)
   if(NOT ${tracy_FOUND})
     message(
       FATAL_ERROR
-        "Simple support for tracy is enabled, but tracy was not found on your system."
+        "Pinocchio support for tracy is enabled, but tracy was not found on your system."
         " Install it, or set the option PINOCCHIO_DOWNLOAD_TRACY to ON so we can fetch it.")
   else()
     message(STATUS "Tracy found on your system at ${Tracy_DIR}")
