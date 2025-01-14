@@ -305,6 +305,7 @@ namespace pinocchio
       y_bar_.setZero();
       scaleDualSolution(z_, z_bar_);
       scaleDualSolution(s_, s_bar_);
+      dual_feasibility_vector = z_;
       computeDualConeProjection(constraint_models, z_, z_);
       dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
       // We set the new convergence criterion
