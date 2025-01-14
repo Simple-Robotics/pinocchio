@@ -37,9 +37,9 @@ namespace pinocchio
 
     explicit DelassusOperatorPreconditionedTpl(
       DelassusOperatorBase<DelassusOperator> & delassus, const PreconditionerType & preconditioner)
-    : m_preconditioner(preconditioner)
+    : m_delassus(delassus.derived())
+    , m_preconditioner(preconditioner)
     , m_tmp_vec(preconditioner.cols())
-    , m_delassus(delassus.derived())
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(m_delassus.rows(), m_preconditioner.cols());
       PINOCCHIO_CHECK_ARGUMENT_SIZE(m_delassus.cols(), m_preconditioner.rows());
