@@ -19,12 +19,13 @@ BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
   PreconditionerDiagonal<Eigen::VectorXd> precond(precond_vec);
   Eigen::VectorXd x = Eigen::VectorXd::Ones(n);
   Eigen::VectorXd x_scaled = x;
+  Eigen::VectorXd x_scaled_true = Eigen::VectorXd::Ones(n);
+  x_scaled_true.array() /= precond_vec.array();
   precond.scale(x, x_scaled);
-  BOOST_CHECK((x_scaled - precond_vec).isZero());
+  BOOST_CHECK((x_scaled - x_scaled_true).isZero());
   Eigen::VectorXd x_unscaled = x;
   precond.unscale(x, x_unscaled);
-  x.array() /= precond_vec.array();
-  BOOST_CHECK((x_unscaled - x).isZero());
+  BOOST_CHECK((x_unscaled - precond_vec).isZero());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
