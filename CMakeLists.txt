@@ -331,9 +331,7 @@ else()
 endif()
 
 if(BUILD_WITH_HPP_FCL_SUPPORT)
-  list(APPEND CFLAGS_DEPENDENCIES "-DPINOCCHIO_WITH_HPP_FCL")
-  list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_collision)
-  add_project_dependency(hpp-fcl 2.1.2 REQUIRED PKG_CONFIG_REQUIRES "hpp-fcl >= 2.1.2")
+  add_project_dependency(hpp-fcl 2.1.2 REQUIRED "hpp-fcl >= 2.1.2")
 endif()
 
 if(BUILD_WITH_ACCELERATE_SUPPORT)
@@ -523,17 +521,5 @@ pkg_config_append_cflags("${CFLAGS_OPTIONS}")
 
 # Install catkin package.xml
 install(FILES package.xml DESTINATION share/${PROJECT_NAME})
-# Allows Colcon to find non-Ament packages when using workspace underlays
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME} "")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packages/${PROJECT_NAME}
-        DESTINATION share/ament_index/resource_index/packages)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-     "prepend-non-duplicate;AMENT_PREFIX_PATH;")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/ament_prefix_path.dsv
-        DESTINATION share/${PROJECT_NAME}/hook)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-     "prepend-non-duplicate;PYTHONPATH;${PYTHON_SITELIB}")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/${PROJECT_NAME}/hook/python_path.dsv
-        DESTINATION share/${PROJECT_NAME}/hook)
 
 setup_project_finalize()

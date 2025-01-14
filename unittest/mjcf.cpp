@@ -8,6 +8,7 @@
 #include "pinocchio/multibody/model.hpp"
 
 #include "pinocchio/parsers/mjcf.hpp"
+#include "pinocchio/parsers/mjcf/mjcf-graph.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 
 #include "pinocchio/algorithm/joint-configuration.hpp"
@@ -924,7 +925,8 @@ BOOST_AUTO_TEST_CASE(adding_keyframes)
                     <key name="test"
                     qpos="0 0 0.596
                         0.988015 0 0.154359 0
-                        0.988015 0 0.154359 0"/>
+                        0.988015 0 0.154359 0
+                        "/>
                 </keyframe>
                 </mujoco>)");
 
@@ -1116,6 +1118,9 @@ BOOST_AUTO_TEST_CASE(adding_site)
   pinocchio::SE3 real_placement(rotation_matrix, Vector3(0.03, 0, -0.05));
 
   BOOST_CHECK(model_m.frames[model_m.getFrameId("testSite")].placement.isApprox(real_placement));
+  BOOST_CHECK(
+    model_m.frames[model_m.getFrameId("testSite")].parentJoint
+    == model_m.frames[model_m.getFrameId("body3")].parentJoint);
 }
 
 /// @brief test that a fixed model is well parsed
@@ -1427,6 +1432,104 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
   {
     BOOST_CHECK(cm.joint2_placement.isApprox(cm.joint1_placement.inverse()));
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_default_eulerseq)
+{
+  std::istringstream xmlData(R"(<mujoco model="arm">
+                                  <compiler angle="radian" />
+                                  <worldbody>
+                                    <body name="base">
+                                      <body name="body" pos="0 0 0.01" euler="1.57 0 0">
+                                      </body>
+                                    </body>
+                                  </worldbody>
+                                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
+
+  MjcfGraph graph(visitor, "fakeMjcf");
+  graph.parseGraphFromXML(namefile.name());
+  graph.parseRootTree();
+
+  pinocchio::SE3 placement(
+    Eigen::AngleAxisd(1.57, Eigen::Vector3d::UnitX()).toRotationMatrix(),
+    Eigen::Vector3d(0.0, 0.0, 0.01));
+
+  BOOST_CHECK(graph.mapOfBodies["body"].bodyPlacement.isApprox(placement));
+}
+
+/// @brief Test parsing a mesh with vertices
+/// @param
+BOOST_AUTO_TEST_CASE(parse_mesh_with_vertices)
+{
+  std::istringstream xmlDataNoStrip(R"(<mujoco model="parseVertices">
+                                    <asset>
+                                      <mesh name="chasis" scale=".01 .006 .0015"
+                                        vertex=" 9   2   0
+                                                -10  10  10
+                                                 9  -2   0
+                                                 10  3  -10
+                                                 10 -3  -10
+                                                -8   10 -10
+                                                -10 -10  10
+                                                -8  -10 -10
+                                                -5   0   20"/>
+                                    </asset>
+                                  </mujoco>)");
+
+  auto namefile = createTempFile(xmlDataNoStrip);
+
+  typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
+  pinocchio::Model model_m;
+  MjcfGraph::UrdfVisitor visitor(model_m);
+
+  MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
+  graph.parseGraphFromXML(namefile.name());
+
+  // Test Meshes
+  pinocchio::mjcf::details::MjcfMesh mesh = graph.mapOfMeshes.at("chasis");
+  BOOST_CHECK_EQUAL(mesh.scale, Eigen::Vector3d(0.01, 0.006, 0.0015));
+  Eigen::MatrixX3d vertices(9, 3);
+  vertices << 9, 2, 0, -10, 10, 10, 9, -2, 0, 10, 3, -10, 10, -3, -10, -8, 10, -10, -10, -10, 10,
+    -8, -10, -10, -5, 0, 20;
+  BOOST_CHECK_EQUAL(mesh.vertices.rows(), 9);
+  for (auto i = 0; i < mesh.vertices.rows(); ++i)
+  {
+    BOOST_CHECK(mesh.vertices.row(i) == vertices.row(i));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_get_unknown_size_vector_from_stream)
+{
+  const auto v = pinocchio::mjcf::details::internal::getUnknownSizeVectorFromStream("");
+  BOOST_CHECK(v.size() == 0);
+
+  const auto v1 = pinocchio::mjcf::details::internal::getUnknownSizeVectorFromStream("1 2 3");
+  BOOST_CHECK(v1.size() == 3);
+  Eigen::VectorXd expected(3);
+  expected << 1, 2, 3;
+  BOOST_CHECK(v1 == expected);
+
+  const auto v2 = pinocchio::mjcf::details::internal::getUnknownSizeVectorFromStream(R"(1 2 3
+                                                                                        4 5 6)");
+  BOOST_CHECK(v2.size() == 6);
+  Eigen::VectorXd expected2(6);
+  expected2 << 1, 2, 3, 4, 5, 6;
+  BOOST_CHECK(v2 == expected2);
+
+  const auto v3 = pinocchio::mjcf::details::internal::getUnknownSizeVectorFromStream(R"(1 2 3
+                                                                                        4 5 6
+                                                                                        7 8 9
+                                                                                        )");
+  BOOST_CHECK(v3.size() == 9);
+  Eigen::VectorXd expected3(9);
+  expected3 << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+  BOOST_CHECK(v3 == expected3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

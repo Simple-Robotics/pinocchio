@@ -9,12 +9,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Helpers for mapping heap allocation for Eigen::Map via alloca
 - Introduce EigenStorageTpl
+- Add parsing meshes with vertices for MJCF format ([#2537](https://github.com/stack-of-tasks/pinocchio/pull/2537))
 
 ### Changed
 - Major refactorization of ContactCholeskyDecompositionTpl to ease online resizing
 
 ### Removed
 - Remove DataTpl::lastChild field and associated methods
+
+### Fixed
+- Fix mjcf Euler angle parsing: use xyz as a default value for eulerseq compiler option ([#2526](https://github.com/stack-of-tasks/pinocchio/pull/2526))
+- Fix variable naming in Python ([#2530](https://github.com/stack-of-tasks/pinocchio/pull/2530))
+- Fix aba explicit template instantiation ([#2541](https://github.com/stack-of-tasks/pinocchio/pull/2541))
+- CMake: fix RPATH on macos ([#2546](https://github.com/stack-of-tasks/pinocchio/pull/2546))
+- Fix aba explicit template instantiation ([#2541](https://github.com/stack-of-tasks/pinocchio/pull/2541))
+- Fix mjcf parsing of keyframe qpos with newlines ([#2535](https://github.com/stack-of-tasks/pinocchio/pull/2535))
+- Fix sites parsing for MJCF format ([#2548](https://github.com/stack-of-tasks/pinocchio/pull/2548))
+
 
 ## [3.3.1] - 2024-12-13
 
@@ -31,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - On GNU/Linux and macOS, hide all symbols by default ([#2469](https://github.com/stack-of-tasks/pinocchio/pull/2469))
+- Build `pinocchio_default` with collision features ([#2517](https://github.com/stack-of-tasks/pinocchio/pull/2517))
 
 ## [3.3.0] - 2024-11-06
 
