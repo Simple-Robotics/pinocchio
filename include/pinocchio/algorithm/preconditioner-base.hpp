@@ -65,4 +65,4 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#endif // #ifndef __pinocchio_preconditioner_base_hpp__
+#endif // #ifndef __pinocchio_algorithm_preconditioner_base_hpp__
