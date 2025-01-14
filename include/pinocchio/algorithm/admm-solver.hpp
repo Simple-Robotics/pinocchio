@@ -302,6 +302,7 @@ namespace pinocchio
     , z_(VectorXs::Zero(problem_dim))
     , z_bar_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
+    , s_bar_(VectorXs::Zero(problem_dim))
     , preconditioner_(VectorXs::Ones(problem_dim))
     , g_bar_(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
@@ -587,6 +588,22 @@ namespace pinocchio
       return s_;
     }
 
+    /// \returns the scaled primal solution of the problem
+    const VectorXs & getScaledPrimalSolution() const
+    {
+      return y_bar_;
+    }
+    /// \returns the scaled dual solution of the problem
+    const VectorXs & getScaledDualSolution() const
+    {
+      return z_bar_;
+    }
+    /// \returns the scaled complementarity shift
+    const VectorXs & getScaledComplementarityShift() const
+    {
+      return s_bar_;
+    }
+
     /// \returns use the preconditionner to scale a primal quantity x.
     /// Typically, it allows to get x_bar from x.
     void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
@@ -662,6 +679,8 @@ namespace pinocchio
     VectorXs z_bar_;
     /// \brief De Saxé shift
     VectorXs s_;
+    /// \brief Scaled De Saxé shift
+    VectorXs s_bar_;
 
     /// \brief the diagonal preconditioner of the problem
     PreconditionerDiagonal preconditioner_;

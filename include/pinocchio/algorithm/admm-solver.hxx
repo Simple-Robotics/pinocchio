@@ -256,26 +256,18 @@ namespace pinocchio
     // Init z
     G_bar.applyOnTheRight(y_bar_, z_bar_);
     z_bar_.noalias() += -mu_prox * y_bar_ + g_bar_; // z_bar = P*(G + R)*P* y_bar + g_bar
-    unscaleDualSolution(z_bar_, z_);
     if (solve_ncp)
     {
-      {
-        PINOCCHIO_TRACY_ZONE_SCOPED_N(
-          "ADMMContactSolverTpl::solve - first computeDeSaxeCorrection");
-        computeDeSaxeCorrection(constraint_models, z_, s_);
-      }
-      z_ += s_; // Add De Saxé shift
+      computeDeSaxeCorrection(constraint_models, z_bar_, s_bar_);
+      z_bar_ += s_bar_; // Add De Saxé shift
     }
+    unscaleDualSolution(z_bar_, z_);
 
     primal_feasibility = 0; // always feasible because y is projected
 
     // Dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
     dual_feasibility_vector = z_;
-    {
-      PINOCCHIO_TRACY_ZONE_SCOPED_N(
-        "ADMMContactSolverTpl::solve - first computeDualConeProjection");
-      computeDualConeProjection(constraint_models, z_, z_);
-    }
+    computeDualConeProjection(constraint_models, z_, z_);
     dual_feasibility_vector -= z_;
 
     // Computing the convergence criterion of the initial guess
@@ -312,6 +304,7 @@ namespace pinocchio
       x_bar_.setZero();
       y_bar_.setZero();
       scaleDualSolution(z_, z_bar_);
+      scaleDualSolution(s_, s_bar_);
       computeDualConeProjection(constraint_models, z_, z_);
       dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
       // We set the new convergence criterion
@@ -402,13 +395,11 @@ namespace pinocchio
         if (solve_ncp)
         {
           // s-update
-          PINOCCHIO_TRACY_ZONE_SCOPED_N(
-            "ADMMContactSolverTpl::solve -  computeDeSaxeCorrection in loop");
-          computeDeSaxeCorrection(constraint_models, z_, s_);
+          computeDeSaxeCorrection(constraint_models, z_bar_, s_bar_);
         }
 
         // x-update
-        rhs = -(g_bar_ + s_ - (rho * tau) * y_bar_ - mu_prox * x_bar_ - z_bar_);
+        rhs = -(g_bar_ + s_bar_ - (rho * tau) * y_bar_ - mu_prox * x_bar_ - z_bar_);
         G_bar.solveInPlace(rhs);
         x_bar_ = rhs;
 
@@ -563,6 +554,7 @@ namespace pinocchio
     this->it = it;
     unscalePrimalSolution(y_bar_, y_);
     unscaleDualSolution(z_bar_, z_);
+    unscaleDualSolution(s_bar_, s_);
 
     if (abs_prec_reached)
       return true;
