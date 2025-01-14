@@ -438,7 +438,7 @@ namespace pinocchio
                 parentLinkPoseElem->template Get<std::string>("relative_to");
 
               // If the pMjp is not found, throw
-              PINOCCHIO_THROW(
+              PINOCCHIO_THROW_IF(
                 !parentLinkRelativeFrame.compare(parentJointName), std::logic_error,
                 parentName + " pose is not defined w.r.t. parent joint");
 
@@ -480,9 +480,8 @@ namespace pinocchio
 
           urdfVisitor << "Joint " << jointName << " connects parent " << parentName << " link"
                       << " with parent joint " << parentJointName << " to child " << childNameOrig
-                      << " link"
-                      << " with joint type " << jointElement->template Get<std::string>("type")
-                      << '\n';
+                      << " link" << " with joint type "
+                      << jointElement->template Get<std::string>("type") << '\n';
           const Scalar infty = std::numeric_limits<Scalar>::infinity();
           FrameIndex parentFrameId = urdfVisitor.getBodyId(parentName);
           Vector max_effort(Vector::Constant(1, infty)), max_velocity(Vector::Constant(1, infty)),
