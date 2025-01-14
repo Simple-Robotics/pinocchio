@@ -17,12 +17,12 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 using namespace pinocchio;
 
-BOOST_AUTO_TEST_CASE(delassus_preconditioned_applyontheright)
+BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
 {
   const Eigen::DenseIndex mat_size = 50;
   const Eigen::MatrixXd mat = Eigen::MatrixXd::Random(mat_size, mat_size);
   const Eigen::MatrixXd symmetric_mat = mat.transpose() * mat;
-  const Eigen::VectorXd diag_vec = Eigen::VectorXd::Random(mat_size);
+  const Eigen::VectorXd diag_vec = 1e-4 * Eigen::VectorXd::Ones(mat_size);
   const Eigen::MatrixXd preconditioner_matrix = diag_vec.asDiagonal();
   const Eigen::MatrixXd preconditioned_matrix =
     preconditioner_matrix * symmetric_mat * preconditioner_matrix;
@@ -37,8 +37,23 @@ BOOST_AUTO_TEST_CASE(delassus_preconditioned_applyontheright)
 
   Eigen::VectorXd res(mat_size);
   const Eigen::VectorXd rhs = Eigen::VectorXd::Random(mat_size);
+
+  // Checking apply on the right
   delassus_preconditioned.applyOnTheRight(rhs, res);
   BOOST_CHECK(res.isApprox((preconditioned_matrix * rhs).eval()));
+
+  // Checking solved
+  Eigen::VectorXd damping_vec = 5e-3 * Eigen::VectorXd::Ones(mat_size);
+  Eigen::MatrixXd damping = damping_vec.asDiagonal();
+  delassus_preconditioned.updateDamping(damping_vec);
+  delassus_preconditioned.solve(rhs, res);
+  const Eigen::MatrixXd preconditioned_matrix_inv = (preconditioned_matrix + damping).inverse();
+  Eigen::VectorXd res_solve = preconditioned_matrix_inv * rhs;
+  BOOST_CHECK(res.isApprox((res_solve).eval()));
+
+  // Checking solveInPlace
+  delassus_preconditioned.solveInPlace(rhs);
+  BOOST_CHECK(rhs.isApprox((res_solve).eval()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
