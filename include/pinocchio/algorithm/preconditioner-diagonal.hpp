@@ -76,4 +76,4 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#endif // #ifndef __pinocchio_preconditioner_diagonal_hpp__
+#endif // #ifndef __pinocchio_algorithm_preconditioner_diagonal_hpp__
