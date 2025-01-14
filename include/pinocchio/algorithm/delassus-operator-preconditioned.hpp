@@ -11,8 +11,6 @@
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 #include "pinocchio/algorithm/preconditioner-base.hpp"
 
-#include <iostream>
-
 namespace pinocchio
 {
 
