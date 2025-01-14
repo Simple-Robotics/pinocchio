@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_admm_solver_hxx__
@@ -11,7 +11,6 @@
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 #include "pinocchio/algorithm/delassus-operator-preconditioned.hpp"
-#include <boost/optional/optional_io.hpp>
 
 #include "pinocchio/tracy.hpp"
 

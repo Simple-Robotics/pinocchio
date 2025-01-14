@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_admm_solver_hpp__
@@ -18,7 +18,6 @@
 #include "pinocchio/algorithm/preconditioner-diagonal.hpp"
 
 #include <boost/optional.hpp>
-#include <iostream>
 
 namespace pinocchio
 {
