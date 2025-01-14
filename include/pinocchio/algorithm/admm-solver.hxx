@@ -525,8 +525,10 @@ namespace pinocchio
         if (update_delassus_factorization)
         {
           prox_value = mu_prox + tau * rho;
-          rhs = R + VectorXs::Constant(this->problem_size, prox_value);
-          delassus.updateDamping(rhs);
+          preconditioner_.unscale(R, rhs);
+          preconditioner_.unscaleInPlace(rhs);
+          rhs += VectorXs::Constant(this->problem_size, prox_value);
+          G_bar.updateDamping(rhs);
           cholesky_update_count++;
         }
 

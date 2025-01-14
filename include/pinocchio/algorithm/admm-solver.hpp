@@ -592,7 +592,7 @@ namespace pinocchio
     /// Typically, it allows to get x_bar from x.
     void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
     {
-      preconditioner_.unscale(x, x_bar);
+      preconditioner_.scale(x, x_bar);
       // x_bar.array() = x.array() / preconditioner_.array();
       return;
     }
@@ -601,7 +601,7 @@ namespace pinocchio
     /// Typically, it allows to get x from x_bar.
     void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
     {
-      preconditioner_.scale(x_bar, x);
+      preconditioner_.unscale(x_bar, x);
       // x.array() = x_bar.array() * preconditioner_.array();
       return;
     }

@@ -60,8 +60,8 @@ namespace pinocchio
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       // G_bar + mu * Id = P * (G + mu * P^{-2}) * P
-      m_preconditioner.unscale(vec, m_tmp_vec);
-      m_preconditioner.unscaleInPlace(m_tmp_vec);
+      m_preconditioner.scale(vec, m_tmp_vec);
+      m_preconditioner.scaleInPlace(m_tmp_vec);
       ref().updateDamping(m_tmp_vec);
     }
 
@@ -74,9 +74,9 @@ namespace pinocchio
     void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const
     {
       auto & mat_ = mat.const_cast_derived();
-      m_preconditioner.unscaleInPlace(mat_);
+      m_preconditioner.scaleInPlace(mat_);
       ref().solveInPlace(mat_);
-      m_preconditioner.unscaleInPlace(mat_);
+      m_preconditioner.scaleInPlace(mat_);
     }
 
     template<typename MatrixLike>
@@ -102,9 +102,9 @@ namespace pinocchio
       const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
     {
       auto & res_ = res.const_cast_derived();
-      m_preconditioner.scale(x, res_);
+      m_preconditioner.unscale(x, res_);
       ref().applyOnTheRight(res_, m_tmp_vec);
-      m_preconditioner.scale(m_tmp_vec, res_);
+      m_preconditioner.unscale(m_tmp_vec, res_);
     }
 
     Eigen::DenseIndex size() const

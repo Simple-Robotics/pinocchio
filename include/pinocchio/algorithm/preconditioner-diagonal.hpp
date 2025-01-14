@@ -25,14 +25,14 @@ namespace pinocchio
     scale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
     {
       auto & res_ = res.const_cast_derived();
-      res_.array() = x.array() * m_preconditioner_diagonal.array();
+      res_.array() = x.array() / m_preconditioner_diagonal.array();
     }
 
     template<typename MatrixIn>
     void scaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() = x.array() * m_preconditioner_diagonal.array();
+      x_.array() = x.array() / m_preconditioner_diagonal.array();
     }
 
     template<typename MatrixIn, typename MatrixOut>
@@ -40,14 +40,14 @@ namespace pinocchio
     unscale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
     {
       auto & res_ = res.const_cast_derived();
-      res_.array() = x.array() / m_preconditioner_diagonal.array();
+      res_.array() = x.array() * m_preconditioner_diagonal.array();
     }
 
     template<typename MatrixIn>
     void unscaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() /= m_preconditioner_diagonal.array();
+      x_.array() *= m_preconditioner_diagonal.array();
     }
 
     Eigen::DenseIndex rows() const
