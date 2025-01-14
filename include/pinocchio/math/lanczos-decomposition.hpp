@@ -84,7 +84,7 @@ namespace pinocchio
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(A.rows() == A.cols(), "The input matrix is not square.");
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        A.rows() == m_Qs.rows(), "The input matrix is of correct size.");
+        A.rows() == m_Qs.rows(), "The input matrix is not of correct size.");
 
       const Eigen::DenseIndex decomposition_size = m_Ts.cols();
       auto & alphas = m_Ts.diagonal();
