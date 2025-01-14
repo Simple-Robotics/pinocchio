@@ -22,10 +22,6 @@ namespace pinocchio
       return static_cast<const PreconditionerDerived &>(*this);
     }
 
-    explicit PreconditionerBase()
-    {
-    }
-
     /// \returns compute the preconditioned variable.
     template<typename MatrixIn, typename MatrixOut>
     void
