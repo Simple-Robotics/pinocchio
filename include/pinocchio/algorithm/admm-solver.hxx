@@ -10,7 +10,8 @@
 #include "pinocchio/algorithm/contact-solver-utils.hpp"
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
-#include "pinocchio/algorithm/delassus-operator-preconditionned.hpp"
+#include "pinocchio/algorithm/delassus-operator-preconditioned.hpp"
+#include <boost/optional/optional_io.hpp>
 
 #include "pinocchio/tracy.hpp"
 
@@ -182,7 +183,7 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::MatrixBase<VectorLikeR> & R,
-    const boost::optional<ConstRefVectorXs> preconditionner,
+    const boost::optional<ConstRefVectorXs> preconditioner,
     const boost::optional<ConstRefVectorXs> primal_guess,
     const boost::optional<ConstRefVectorXs> dual_guess,
     bool solve_ncp,
@@ -198,6 +199,9 @@ namespace pinocchio
     typedef ADMMLinearUpdateRuleTpl<Scalar> ADMMLinearUpdateRule;
 
     typedef ADMMUpdateRuleContainerTpl<Scalar> ADMMUpdateRuleContainer;
+
+    typedef DelassusOperatorPreconditionedTpl<DelassusDerived, PreconditionerDiagonal>
+      DelassusOperatorPreconditioned;
     DelassusDerived & delassus = _delassus.derived();
 
     const Scalar mu_R = R.minCoeff();
@@ -230,19 +234,18 @@ namespace pinocchio
 
     // we add the compliance to the delassus
 
-    if (preconditionner)
+    if (preconditioner)
     {
-      preconditionner_ = preconditionner.get();
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(preconditionner_.size(), problem_size);
+      preconditioner_.setDiagonal(preconditioner.get());
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(preconditioner_.rows(), problem_size);
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        preconditionner_.minCoeff() > Scalar(0),
+        preconditioner_.getDiagonal().minCoeff() > Scalar(0),
         "Preconditionner should be a strictly positive vector.");
     }
-
     // Applying the preconditioner to work on a problem with a better scaling
-    DelassusOperatorPreconditionnedTpl<DelassusDerived> G_bar(_delassus, preconditionner_);
-    rhs.array() = R.array() / preconditionner_.array();
-    rhs.array() /= preconditionner_.array();
+    DelassusOperatorPreconditioned G_bar(_delassus, preconditioner_);
+    preconditioner_.unscale(R, rhs);
+    preconditioner_.unscaleInPlace(rhs);
     rhs += VectorXs::Constant(this->problem_size, mu_prox);
     G_bar.updateDamping(rhs); // G_bar =  P*(G+R)*P + mu_prox*Id
     scaleDualSolution(g, g_bar_);
@@ -362,8 +365,8 @@ namespace pinocchio
 
       // Update the cholesky decomposition
       Scalar prox_value = mu_prox + tau * rho;
-      rhs.array() = R.array() / preconditionner_.array();
-      rhs.array() /= preconditionner_.array();
+      preconditioner_.unscale(R, rhs);
+      preconditioner_.unscaleInPlace(rhs);
       rhs += VectorXs::Constant(this->problem_size, prox_value);
       G_bar.updateDamping(rhs);
       cholesky_update_count = 1;

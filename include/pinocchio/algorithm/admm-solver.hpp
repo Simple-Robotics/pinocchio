@@ -15,7 +15,10 @@
 
 #include "pinocchio/math/lanczos-decomposition.hpp"
 
+#include "pinocchio/algorithm/preconditioner-diagonal.hpp"
+
 #include <boost/optional.hpp>
+#include <iostream>
 
 namespace pinocchio
 {
@@ -178,6 +181,7 @@ namespace pinocchio
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef LanczosDecompositionTpl<MatrixXs> LanczosAlgo;
+    typedef PreconditionerDiagonal<VectorXs> PreconditionerDiagonal;
 
     using Base::problem_size;
 
@@ -297,8 +301,9 @@ namespace pinocchio
     , y_bar_previous(VectorXs::Zero(problem_dim))
     , z_previous(VectorXs::Zero(problem_dim))
     , z_(VectorXs::Zero(problem_dim))
+    , z_bar_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
-    , preconditionner_(VectorXs::Ones(problem_dim))
+    , preconditioner_(VectorXs::Ones(problem_dim))
     , g_bar_(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
@@ -587,7 +592,8 @@ namespace pinocchio
     /// Typically, it allows to get x_bar from x.
     void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
     {
-      x_bar.array() = x.array() / preconditionner_.array();
+      preconditioner_.unscale(x, x_bar);
+      // x_bar.array() = x.array() / preconditioner_.array();
       return;
     }
 
@@ -595,7 +601,8 @@ namespace pinocchio
     /// Typically, it allows to get x from x_bar.
     void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
     {
-      x.array() = x_bar.array() * preconditionner_.array();
+      preconditioner_.scale(x_bar, x);
+      // x.array() = x_bar.array() * preconditioner_.array();
       return;
     }
 
@@ -659,9 +666,9 @@ namespace pinocchio
     /// \brief De Saxé shift
     VectorXs s_;
 
-    /// \brief Preconditionner of the problem
-    VectorXs preconditionner_;
-    /// \brief Preconditionned drift term
+    /// \brief the diagonal preconditioner of the problem
+    PreconditionerDiagonal preconditioner_;
+    /// \brief Preconditioned drift term
     VectorXs g_bar_;
 
     VectorXs rhs, primal_feasibility_vector, dual_feasibility_vector;
