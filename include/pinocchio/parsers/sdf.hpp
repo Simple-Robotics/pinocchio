@@ -9,6 +9,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/geometry.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 
 namespace pinocchio
 {
@@ -76,7 +77,7 @@ namespace pinocchio
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     GeometryModel & buildGeom(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & filename,
       const GeometryType type,
       GeometryModel & geomModel,
@@ -84,7 +85,7 @@ namespace pinocchio
       ::hpp::fcl::MeshLoaderPtr meshLoader = ::hpp::fcl::MeshLoaderPtr())
     {
       const std::vector<std::string> dirs(1, packagePath);
-      return buildGeom(model, contact_models, filename, type, geomModel, dirs, meshLoader);
+      return buildGeom(model, constraint_models, filename, type, geomModel, dirs, meshLoader);
     };
 
     /**
@@ -145,7 +146,7 @@ namespace pinocchio
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       const std::string & rootJointName,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
@@ -168,7 +169,7 @@ namespace pinocchio
       const std::string & xmlStream,
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
@@ -193,7 +194,7 @@ namespace pinocchio
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       const std::string & rootJointName,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
@@ -216,7 +217,7 @@ namespace pinocchio
       const std::string & filename,
       const typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointModel & rootJoint,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
@@ -233,7 +234,7 @@ namespace pinocchio
     ModelTpl<Scalar, Options, JointCollectionTpl> & buildModelFromXML(
       const std::string & xmlStream,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
@@ -250,7 +251,7 @@ namespace pinocchio
     ModelTpl<Scalar, Options, JointCollectionTpl> & buildModel(
       const std::string & filename,
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contact_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models,
       const std::string & rootLinkName = "",
       const std::vector<std::string> & parentGuidance = {},
       const bool verbose = false);
