@@ -26,6 +26,7 @@ namespace pinocchio
     {
     }
 
+    /// \returns compute the preconditioned variable.
     template<typename MatrixIn, typename MatrixOut>
     void
     scale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
@@ -33,12 +34,14 @@ namespace pinocchio
       derived().scale(x.derived(), res.const_cast_derived());
     }
 
+    /// \returns compute the preconditioned quantity in a inplace fashion.
     template<typename MatrixIn>
     void scaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
       derived().scaleInPlace(x.derived());
     }
 
+    /// \returns compute the unscaled variable from the preconditioned one.
     template<typename MatrixIn, typename MatrixOut>
     void
     unscale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
@@ -46,6 +49,7 @@ namespace pinocchio
       derived().unscale(x.derived(), res.const_cast_derived());
     }
 
+    /// \returns compute the unscaled variable from the preconditioned one in a inplace fashion.
     template<typename MatrixIn>
     void unscaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
