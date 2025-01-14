@@ -1,8 +1,8 @@
 //
 // Copyright (c) 2025 INRIA
 //
-#ifndef __pinocchio_preconditioner_base_hpp__
-#define __pinocchio_preconditioner_base_hpp__
+#ifndef __pinocchio_algorithm_preconditioner_base_hpp__
+#define __pinocchio_algorithm_preconditioner_base_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
 
