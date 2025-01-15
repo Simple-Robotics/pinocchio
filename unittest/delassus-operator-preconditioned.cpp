@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   const Eigen::DenseIndex mat_size = 50;
   const Eigen::MatrixXd mat = Eigen::MatrixXd::Random(mat_size, mat_size);
   const Eigen::MatrixXd symmetric_mat = mat.transpose() * mat;
-  const Eigen::VectorXd diag_vec = 1e-4 * Eigen::VectorXd::Ones(mat_size);
+  const Eigen::VectorXd diag_vec = 1e-6 * Eigen::VectorXd::Ones(mat_size);
   const Eigen::MatrixXd preconditioner_matrix = diag_vec.asDiagonal();
   const Eigen::MatrixXd preconditioned_matrix =
     preconditioner_matrix * symmetric_mat * preconditioner_matrix;
@@ -49,11 +49,11 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   delassus_preconditioned.solve(rhs, res);
   const Eigen::MatrixXd preconditioned_matrix_inv = (preconditioned_matrix + damping).inverse();
   Eigen::VectorXd res_solve = preconditioned_matrix_inv * rhs;
-  BOOST_CHECK(res.isApprox((res_solve).eval()));
+  BOOST_CHECK(res.isApprox(res_solve));
 
   // Checking solveInPlace
   delassus_preconditioned.solveInPlace(rhs);
-  BOOST_CHECK(rhs.isApprox((res_solve).eval()));
+  BOOST_CHECK(rhs.isApprox(res_solve));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
