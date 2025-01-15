@@ -288,22 +288,8 @@ BOOST_AUTO_TEST_CASE(test_delassus)
 
     LanczosDecomposition lanczos_decomposition(delassus, 10);
 
-    const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix);
-
-    const auto & Ts = lanczos_decomposition.Ts();
-    const auto & Qs = lanczos_decomposition.Qs();
-    const Eigen::MatrixXd residual_bis = matrix * Qs - Qs * Ts.matrix();
-    const Eigen::MatrixXd residual_tierce = Qs.transpose() * matrix * Qs - Ts.matrix();
-    const Eigen::MatrixXd residual_fourth = matrix - Qs * Ts.matrix() * Qs.transpose();
-    BOOST_CHECK(residual.isZero());
-
-    for (Eigen::DenseIndex col_id = 0; col_id < lanczos_decomposition.Ts().cols(); ++col_id)
-    {
-      BOOST_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
-    }
-    // Check orthonormality
-    BOOST_CHECK(lanczos_decomposition.rank() == lanczos_decomposition.Ts().cols());
-    BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, matrix);
   }
 }
 
@@ -329,24 +315,8 @@ BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
 
     LanczosDecomposition lanczos_decomposition(delassus_preconditioned, 10);
 
-    const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix_preconditioned);
-
-    const auto & Ts = lanczos_decomposition.Ts();
-    const auto & Qs = lanczos_decomposition.Qs();
-    const Eigen::MatrixXd residual_bis = matrix_preconditioned * Qs - Qs * Ts.matrix();
-    const Eigen::MatrixXd residual_tierce =
-      Qs.transpose() * matrix_preconditioned * Qs - Ts.matrix();
-    const Eigen::MatrixXd residual_fourth =
-      matrix_preconditioned - Qs * Ts.matrix() * Qs.transpose();
-    BOOST_CHECK(residual.isZero());
-
-    for (Eigen::DenseIndex col_id = 0; col_id < lanczos_decomposition.Ts().cols(); ++col_id)
-    {
-      BOOST_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
-    }
-    // Check orthonormality
-    BOOST_CHECK(lanczos_decomposition.rank() == lanczos_decomposition.Ts().cols());
-    BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, matrix_preconditioned);
   }
 }
 
