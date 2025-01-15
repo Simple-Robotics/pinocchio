@@ -274,4 +274,80 @@ BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_delassus)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  const Eigen::DenseIndex mat_size = 20;
+
+  for (int it = 0; it < 1000; ++it)
+  {
+    const Eigen::MatrixXd A = Eigen::MatrixXd::Random(mat_size, mat_size);
+    const Eigen::MatrixXd matrix = A.transpose() * A;
+
+    DelassusOperatorDense delassus(matrix);
+
+    LanczosDecomposition lanczos_decomposition(delassus, 10);
+
+    const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix);
+
+    const auto & Ts = lanczos_decomposition.Ts();
+    const auto & Qs = lanczos_decomposition.Qs();
+    const Eigen::MatrixXd residual_bis = matrix * Qs - Qs * Ts.matrix();
+    const Eigen::MatrixXd residual_tierce = Qs.transpose() * matrix * Qs - Ts.matrix();
+    const Eigen::MatrixXd residual_fourth = matrix - Qs * Ts.matrix() * Qs.transpose();
+    BOOST_CHECK(residual.isZero());
+
+    for (Eigen::DenseIndex col_id = 0; col_id < lanczos_decomposition.Ts().cols(); ++col_id)
+    {
+      BOOST_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
+    }
+    // Check orthonormality
+    BOOST_CHECK(lanczos_decomposition.rank() == lanczos_decomposition.Ts().cols());
+    BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  const Eigen::DenseIndex mat_size = 20;
+
+  for (int it = 0; it < 1000; ++it)
+  {
+    const Eigen::MatrixXd A = Eigen::MatrixXd::Random(mat_size, mat_size);
+    const Eigen::MatrixXd matrix = A.transpose() * A;
+
+    Eigen::VectorXd diag_vec = Eigen::VectorXd::Constant(mat_size, 1e-6);
+    Eigen::MatrixXd preconditioner_diag = diag_vec.asDiagonal();
+    const Eigen::MatrixXd matrix_preconditioned =
+      preconditioner_diag * matrix * preconditioner_diag;
+    DelassusOperatorDense delassus(matrix);
+    PreconditionerDiagonal<Eigen::VectorXd> diag_preconditioner(diag_vec);
+    DelassusOperatorPreconditionedTpl<
+      DelassusOperatorDense, PreconditionerDiagonal<Eigen::VectorXd>>
+      delassus_preconditioned(delassus, diag_preconditioner);
+
+    LanczosDecomposition lanczos_decomposition(delassus_preconditioned, 10);
+
+    const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix_preconditioned);
+
+    const auto & Ts = lanczos_decomposition.Ts();
+    const auto & Qs = lanczos_decomposition.Qs();
+    const Eigen::MatrixXd residual_bis = matrix_preconditioned * Qs - Qs * Ts.matrix();
+    const Eigen::MatrixXd residual_tierce =
+      Qs.transpose() * matrix_preconditioned * Qs - Ts.matrix();
+    const Eigen::MatrixXd residual_fourth =
+      matrix_preconditioned - Qs * Ts.matrix() * Qs.transpose();
+    BOOST_CHECK(residual.isZero());
+
+    for (Eigen::DenseIndex col_id = 0; col_id < lanczos_decomposition.Ts().cols(); ++col_id)
+    {
+      BOOST_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
+    }
+    // Check orthonormality
+    BOOST_CHECK(lanczos_decomposition.rank() == lanczos_decomposition.Ts().cols());
+    BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
