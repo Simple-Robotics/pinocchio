@@ -412,44 +412,7 @@ namespace pinocchio
           const JointIndex parentJointId = urdfVisitor.getParentId(parentName);
           const std::string & parentJointName = urdfVisitor.getJointName(parentJointId);
 
-          SE3 cMj(SE3::Identity()), pMjp(SE3::Identity()), oMc(SE3::Identity()),
-            pMj(SE3::Identity());
-
-          // Find pose of parent link w.r.t. parent joint.
-          if (parentJointName != urdfVisitor.root_joint_name && parentJointName != "universe")
-          {
-            const ::sdf::ElementPtr parentJointElement = mapOfJoints.find(parentJointName)->second;
-
-            const ::sdf::ElementPtr parentJointPoseElem = parentJointElement->GetElement("pose");
-
-            const ignition::math::Pose3d parentJointPoseElem_ig =
-              parentJointElement->template Get<ignition::math::Pose3d>("pose");
-
-            const std::string relativeFrame =
-              parentJointPoseElem->template Get<std::string>("relative_to");
-            const std::string parentJointParentName =
-              parentJointElement->GetElement("parent")->Get<std::string>();
-
-            if (!relativeFrame.compare(parentJointParentName))
-            { // If they are equal
-
-              // Pose is relative to Parent joint's parent. Search in parent link instead.
-              const std::string & parentLinkRelativeFrame =
-                parentLinkPoseElem->template Get<std::string>("relative_to");
-
-              // If the pMjp is not found, throw
-              PINOCCHIO_THROW_IF(
-                !parentLinkRelativeFrame.compare(parentJointName), std::logic_error,
-                parentName + " pose is not defined w.r.t. parent joint");
-
-              pMjp = parentLinkPlacement.inverse();
-            }
-            else
-            { // If the relative_to is not the parent
-              // The joint pose is defined w.r.t to the child, as per the SDF standard < 1.7
-              pMjp = ::pinocchio::sdf::details::convertFromPose3d(parentJointPoseElem_ig);
-            }
-          }
+          SE3 cMj(SE3::Identity()), oMc(SE3::Identity()), pMj(SE3::Identity());
 
           // Find Pose of current joint w.r.t. child link, e.t. cMj;
           const std::string & curJointRelativeFrame =
@@ -475,8 +438,6 @@ namespace pinocchio
             oMc = childLinkPlacement;
             pMj = parentLinkPlacement.inverse() * childLinkPlacement * cMj;
           }
-
-          // const SE3 jointPlacement = pMjp.inverse() * pMj;
 
           urdfVisitor << "Joint " << jointName << " connects parent " << parentName << " link"
                       << " with parent joint " << parentJointName << " to child " << childNameOrig
