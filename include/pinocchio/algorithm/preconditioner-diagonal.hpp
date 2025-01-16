@@ -17,7 +17,9 @@ namespace pinocchio
 
     explicit PreconditionerDiagonal(const PreconditionerVectorLike & diagonal)
     : m_preconditioner_diagonal(diagonal)
+    , m_preconditioner_square(diagonal)
     {
+      m_preconditioner_square.array() *= diagonal.array();
     }
 
     template<typename MatrixIn, typename MatrixOut>
@@ -36,6 +38,14 @@ namespace pinocchio
     }
 
     template<typename MatrixIn, typename MatrixOut>
+    void scaleSquare(
+      const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
+    {
+      auto & res_ = res.const_cast_derived();
+      res_.array() = x.array() / m_preconditioner_square.array();
+    }
+
+    template<typename MatrixIn, typename MatrixOut>
     void
     unscale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
     {
@@ -48,6 +58,14 @@ namespace pinocchio
     {
       auto & x_ = x.const_cast_derived();
       x_.array() *= m_preconditioner_diagonal.array();
+    }
+
+    template<typename MatrixIn, typename MatrixOut>
+    void unscaleSquare(
+      const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & res) const
+    {
+      auto & res_ = res.const_cast_derived();
+      res_.array() = x.array() * m_preconditioner_square.array();
     }
 
     Eigen::DenseIndex rows() const
@@ -71,6 +89,7 @@ namespace pinocchio
 
   protected:
     PreconditionerVectorLike m_preconditioner_diagonal;
+    PreconditionerVectorLike m_preconditioner_square;
 
   }; // struct PreconditionerDiagonal
 

@@ -54,7 +54,7 @@ struct TestBoxTpl
     external_forces[1] = fext;
 
     const Eigen::VectorXd v_free =
-      dt * aba(model, data, q0, v0, tau0, external_forces, Convention::WORLD);
+      v0 + dt * aba(model, data, q0, v0, tau0, external_forces, Convention::WORLD);
 
     // Cholesky of the Delassus matrix
     crba(model, data, q0, Convention::WORLD);

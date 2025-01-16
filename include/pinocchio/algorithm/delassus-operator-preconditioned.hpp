@@ -58,8 +58,7 @@ namespace pinocchio
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       // G_bar + mu * Id = P * (G + mu * P^{-2}) * P
-      m_preconditioner.scale(vec, m_tmp_vec);
-      m_preconditioner.scaleInPlace(m_tmp_vec);
+      m_preconditioner.scaleSquare(vec, m_tmp_vec);
       ref().updateDamping(m_tmp_vec);
     }
 

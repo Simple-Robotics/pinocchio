@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
 {
-  std::size_t n = 10;
+  Eigen::Index n = 10;
   Eigen::VectorXd precond_vec = Eigen::VectorXd::Ones(n);
   precond_vec.head(n / 2).setConstant(0.1);
   precond_vec.tail(n / 2).setConstant(12.4);
@@ -23,9 +23,15 @@ BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
   x_scaled_true.array() /= precond_vec.array();
   precond.scale(x, x_scaled);
   BOOST_CHECK((x_scaled - x_scaled_true).isZero());
+  precond.scaleSquare(x, x_scaled);
+  x_scaled_true.array() = x.array() / (precond_vec.array() * precond_vec.array());
+  BOOST_CHECK((x_scaled - x_scaled_true).isZero());
   Eigen::VectorXd x_unscaled = x;
   precond.unscale(x, x_unscaled);
   BOOST_CHECK((x_unscaled - precond_vec).isZero());
+  precond.unscaleSquare(x, x_unscaled);
+  x_scaled_true.array() = x.array() * (precond_vec.array() * precond_vec.array());
+  BOOST_CHECK((x_unscaled - x_scaled_true).isZero());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
