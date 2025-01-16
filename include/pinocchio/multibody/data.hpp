@@ -596,6 +596,19 @@ namespace pinocchio
     PINOCCHIO_ALIGNED_STD_VECTOR(size_t) accumulation_joints;
     PINOCCHIO_ALIGNED_STD_VECTOR(std::vector<size_t>) constraints_on_joint;
 
+    typedef std::vector<JointIndex> JointIndexVector;
+
+    /// \brief Bookkeeping neighbouring vertices during CL-CABA or proxBBO
+    std::vector<JointIndexVector> neighbour_links;
+
+    typedef std::pair<JointIndex, JointIndex> JointIndexPair;
+
+    /// \brief Stores the cross-coupling OSIM between links in CL-CABA
+    std::map<JointIndexPair, Matrix6> edges;
+
+    /// \brief Stores the elimination ordering of CL-CABA
+    std::vector<JointIndex> elimination_order;
+
     ///
     /// \brief Default constructor of pinocchio::Data from a pinocchio::Model.
     ///

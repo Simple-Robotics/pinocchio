@@ -104,6 +104,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/kinematics-derivatives.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/kinematics.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/kinematics.hxx
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/loop-constrained-aba.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/loop-constrained-aba.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/pgs-solver.hpp
