@@ -54,6 +54,15 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   // Checking solveInPlace
   delassus_preconditioned.solveInPlace(rhs);
   BOOST_CHECK(rhs.isApprox(res_solve));
+
+  // Checking updateDamping
+  const double new_damping = 1e-3;
+  const Eigen::MatrixXd damped_preconditioned_matrix =
+    preconditioned_matrix + new_damping * Eigen::MatrixXd::Identity(mat_size, mat_size);
+  delassus_preconditioned.updateDamping(new_damping);
+  delassus_preconditioned.applyOnTheRight(rhs, res);
+  Eigen::VectorXd res_apply = damped_preconditioned_matrix * rhs;
+  BOOST_CHECK(res.isApprox(res_apply));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
