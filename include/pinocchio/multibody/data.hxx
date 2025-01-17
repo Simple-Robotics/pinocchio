@@ -162,6 +162,7 @@ namespace pinocchio
   , constraints_supported_dim((std::size_t)model.njoints, 0)
   , constraints_supported((std::size_t)model.njoints)
   , constraints_on_joint((std::size_t)model.njoints)
+  , joint_cross_coupling(model.njoints, model.njoints)
   {
     typedef typename Model::JointIndex JointIndex;
 

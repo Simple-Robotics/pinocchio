@@ -18,6 +18,7 @@
 #include "pinocchio/multibody/joint/joint-generic.hpp"
 
 #include "pinocchio/container/aligned-vector.hpp"
+#include "pinocchio/container/double-entry-container.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 
 #include "pinocchio/serialization/serializable.hpp"
@@ -599,8 +600,9 @@ namespace pinocchio
 
     typedef std::pair<JointIndex, JointIndex> JointIndexPair;
 
-    /// \brief Stores the cross-coupling OSIM between links in CL-CABA
-    std::map<JointIndexPair, Matrix6> edges;
+    /// \brief Stores the cross-coupling between links in CL-CABA
+    container::DoubleEntryContainer<Matrix6, Eigen::aligned_allocator<Matrix6>>
+      joint_cross_coupling;
 
     /// \brief Stores the elimination ordering of CL-CABA
     std::vector<JointIndex> elimination_order;

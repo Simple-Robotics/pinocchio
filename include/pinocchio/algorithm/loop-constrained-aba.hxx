@@ -61,8 +61,8 @@ namespace pinocchio
         const JointPair joint_pair =
           joint1_id > joint2_id ? JointPair{joint2_id, joint1_id} : JointPair{joint1_id, joint2_id};
 
-        if (data.edges.find(joint_pair) == data.edges.end())
-          data.edges[joint_pair] = Matrix6::Zero();
+        if (!data.joint_cross_coupling.exist(joint_pair))
+          data.joint_cross_coupling[joint_pair] = Matrix6::Zero();
 
         auto & joint1_neighbours = neighbours[joint1_id];
         auto & joint2_neighbours = neighbours[joint2_id];
@@ -120,9 +120,9 @@ namespace pinocchio
           const JointPair jp_pair = neighbour_j < parent_id ? JointPair(neighbour_j, parent_id)
                                                             : JointPair(parent_id, neighbour_j);
 
-          if (data.edges.find(jp_pair) == data.edges.end())
+          if (!data.joint_cross_coupling.exist(jp_pair))
           {
-            data.edges[jp_pair] = Matrix6::Zero();
+            data.joint_cross_coupling[jp_pair] = Matrix6::Zero(); // add joint_cross_coupling
 
             if (
               std::find(parent_neighbours.begin(), parent_neighbours.end(), neighbour_j)
@@ -133,6 +133,8 @@ namespace pinocchio
             }
           }
         }
+
+        // Remove joint_id form the list of neighbours for neighbour_j_neighbours
         neighbour_j_neighbours.erase(
           std::remove(neighbour_j_neighbours.begin(), neighbour_j_neighbours.end(), joint_id),
           neighbour_j_neighbours.end());
@@ -140,16 +142,17 @@ namespace pinocchio
         for (size_t k = j + 1; k < joint_neighbours.size(); ++k)
         {
           const JointIndex neighbour_k = joint_neighbours[k];
+          auto & neighbour_k_neighbours = neighbours[neighbour_k];
           assert(neighbour_k != neighbour_j && "Must never happen!");
           const JointPair cross_coupling = neighbour_j < neighbour_k
                                              ? JointPair{neighbour_j, neighbour_k}
                                              : JointPair{neighbour_k, neighbour_j};
 
-          if (data.edges.find(cross_coupling) == data.edges.end())
+          if (!data.joint_cross_coupling.exist(cross_coupling))
           {
-            data.edges[cross_coupling] = Matrix6::Zero();
-            neighbours[neighbour_j].push_back(neighbour_k);
-            neighbours[neighbour_k].push_back(neighbour_j);
+            data.joint_cross_coupling[cross_coupling] = Matrix6::Zero(); // add edge
+            neighbour_j_neighbours.push_back(neighbour_k);
+            neighbour_k_neighbours.push_back(neighbour_j);
           }
         }
       }
@@ -240,7 +243,7 @@ namespace pinocchio
 
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
-      auto & edges = data.edges;
+      auto & joint_cross_coupling = data.joint_cross_coupling;
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
@@ -277,8 +280,9 @@ namespace pinocchio
       {
         const JointIndex vertex_j = joint_neighbours[j];
         const Matrix6 & crosscoupling_ij =
-          (i > vertex_j) ? edges[JointPair(vertex_j, i)]
-                         : edges[JointPair(i, vertex_j)].transpose(); // avoid memalloc
+          (i > vertex_j)
+            ? joint_cross_coupling[JointPair(vertex_j, i)]
+            : joint_cross_coupling[JointPair(i, vertex_j)].transpose(); // avoid memalloc
 
         auto & crosscoupling_ix_Jcols = jdata.UDinv();
         crosscoupling_ix_Jcols.noalias() =
@@ -302,13 +306,11 @@ namespace pinocchio
         {
           if (vertex_j < parent)
           {
-            const JointPair jp_pair{vertex_j, parent};
-            edges[jp_pair].noalias() += crosscoupling_ij_oL;
+            joint_cross_coupling[{vertex_j, parent}].noalias() += crosscoupling_ij_oL;
           }
           else
           {
-            const JointPair jp_pair = JointPair(parent, vertex_j);
-            edges[jp_pair].noalias() += crosscoupling_ij_oL.transpose();
+            joint_cross_coupling[{parent, vertex_j}].noalias() += crosscoupling_ij_oL.transpose();
           }
         }
 
@@ -321,25 +323,20 @@ namespace pinocchio
 
           crosscoupling_ix_Jcols.noalias() = edge_ik * Jcols;
 
+          assert(vertex_j != vertex_k && "Must never happen!");
           if (vertex_j < vertex_k)
           {
-            const JointPair cross_coupling = JointPair{vertex_j, vertex_k};
-            edges[cross_coupling].noalias() -=
+            joint_cross_coupling[{vertex_j, vertex_k}].noalias() -=
               crosscoupling_ij_Jcols_Dinv
               * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik * J_col,
                                                     // U() is edge_ij * J_col * Dinv
           }
-          else if (vertex_k < vertex_j)
+          else // if (vertex_k < vertex_j)
           {
-            const JointPair cross_coupling = JointPair{vertex_k, vertex_j};
-            edges[cross_coupling].noalias() -=
-              crosscoupling_ix_Jcols
-              * crosscoupling_ij_Jcols_Dinv.transpose(); // Warning: UDinv() is actually edge_ik *
-                                                         // J_col, U() is edge_ij * J_col * Dinv
-          }
-          else
-          {
-            assert(false && "Must never happen!");
+            joint_cross_coupling[{vertex_k, vertex_j}].transpose().noalias() -=
+              crosscoupling_ij_Jcols_Dinv
+              * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik *
+                                                    // J_col, U() is edge_ij * J_col * Dinv
           }
         }
       }
@@ -387,7 +384,7 @@ namespace pinocchio
 
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
-      auto & edges = data.edges;
+      auto & joint_cross_coupling = data.joint_cross_coupling;
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
@@ -457,8 +454,9 @@ namespace pinocchio
       Force coupling_forces = Force::Zero();
       for (JointIndex vertex_j : neighbours)
       {
-        const Matrix6 & edge_ij = (i > vertex_j) ? data.edges[JointPair(vertex_j, i)].transpose()
-                                                 : data.edges[JointPair(i, vertex_j)];
+        const Matrix6 & edge_ij = (i > vertex_j)
+                                    ? data.joint_cross_coupling[JointPair(vertex_j, i)].transpose()
+                                    : data.joint_cross_coupling[JointPair(i, vertex_j)];
         coupling_forces.toVector().noalias() += edge_ij * data.oa_gf[vertex_j].toVector();
       }
 
@@ -504,7 +502,7 @@ namespace pinocchio
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
-      const std::vector<JointIndex> & neighbours = data.neighbour_links[i];
+      const auto & neighbours = data.neighbour_links[i];
 
       data.oa_gf[i] = data.oa_gf[parent]; // does take into account the gravity field
 
@@ -512,8 +510,9 @@ namespace pinocchio
       for (JointIndex vertex_j : neighbours)
       {
 
-        const Matrix6 & edge_ij = (i > vertex_j) ? data.edges[JointPair(vertex_j, i)].transpose()
-                                                 : data.edges[JointPair(i, vertex_j)];
+        const Matrix6 & edge_ij = (i > vertex_j)
+                                    ? data.joint_cross_coupling[JointPair(vertex_j, i)].transpose()
+                                    : data.joint_cross_coupling[JointPair(i, vertex_j)];
         fi.toVector().noalias() += edge_ij * data.oa_gf[vertex_j].toVector();
       }
 
@@ -570,8 +569,8 @@ namespace pinocchio
 
     const double mu = 1 / settings.mu;
 
-    for (auto & x : data.edges)
-      x.second.setZero();
+    for (auto & coupling : data.joint_cross_coupling)
+      coupling.setZero();
 
     typedef LCABAForwardStep1<
       Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType1>
@@ -645,7 +644,7 @@ namespace pinocchio
 
           const JointPair jp =
             joint_id < joint2_id ? JointPair{joint_id, joint2_id} : JointPair{joint2_id, joint_id};
-          data.edges[jp] -= mu * A1tA1;
+          data.joint_cross_coupling[jp] -= mu * A1tA1;
         }
         else
         {
@@ -690,11 +689,11 @@ namespace pinocchio
 
           if (joint_id < joint2_id)
           {
-            data.edges[JointPair{joint_id, joint2_id}].noalias() += mu * A1.transpose() * A2;
+            data.joint_cross_coupling[{joint_id, joint2_id}].noalias() += mu * A1.transpose() * A2;
           }
           else
           {
-            data.edges[JointPair{joint2_id, joint_id}].noalias() += mu * A2.transpose() * A1;
+            data.joint_cross_coupling[{joint2_id, joint_id}].noalias() += mu * A2.transpose() * A1;
           }
         }
         else
