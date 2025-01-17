@@ -17,7 +17,7 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl,
     class Allocator>
-  inline void initLCABA(
+  inline void initLcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models)
