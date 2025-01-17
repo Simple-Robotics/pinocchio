@@ -59,6 +59,7 @@ endif(BUILD_WITH_OPENMP_SUPPORT)
 # timings
 #
 add_bench(timings-cholesky TRUE)
+add_bench(timings-loop-constrained-aba TRUE)
 
 # timings derivatives
 
