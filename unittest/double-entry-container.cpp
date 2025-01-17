@@ -66,15 +66,44 @@ BOOST_AUTO_TEST_CASE(test_all)
     }
   }
 
+  const Container copy(container);
+  BOOST_CHECK(container == copy);
+
+  // No change
+  for (Eigen::Index id = 0; id < nrows; id++)
+  {
+    container[{id, id}].setIdentity();
+  }
+  BOOST_CHECK(container == copy);
+
+  // Change values
+  for (Eigen::Index id = 0; id < nrows; id++)
+  {
+    container[{id, id}].setZero();
+    BOOST_CHECK((container[{id, id}] == Matrix6::Zero()));
+  }
+  BOOST_CHECK(container != copy);
+
+  // Restore values
+  for (Eigen::Index id = 0; id < nrows; id++)
+  {
+    container[{id, id}].setIdentity();
+  }
+  BOOST_CHECK(container == copy);
+
   // Remove elt (4,4)
-  Container copy(container);
   BOOST_CHECK(!container.remove(3, 4));
+  BOOST_CHECK(container == copy);
   BOOST_CHECK(container.find(4, 4) != container.end());
   BOOST_CHECK(container.remove(4, 4));
+  BOOST_CHECK(container != copy);
   BOOST_CHECK(container.size() == size_t(nrows - 1));
   BOOST_CHECK(container.find(4, 4) == container.end());
 
-  //
+  // Check operator[] insertion
+  container[{4, 4}] = Matrix6::Identity();
+  BOOST_CHECK(container.keys()(4, 4) == long(nrows - 1));
+  BOOST_CHECK(container != copy);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
