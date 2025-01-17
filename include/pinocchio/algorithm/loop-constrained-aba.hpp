@@ -5,6 +5,9 @@
 #ifndef __pinocchio_algorithm_loop_constrained_aba_hpp__
 #define __pinocchio_algorithm_loop_constrained_aba_hpp__
 
+#include "pinocchio/multibody/model.hpp"
+#include "pinocchio/multibody/data.hpp"
+#include "pinocchio/algorithm/check.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 
 namespace pinocchio

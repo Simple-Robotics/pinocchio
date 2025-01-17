@@ -5,14 +5,6 @@
 #ifndef __pinocchio_algorithm_loop_constrained_aba_hxx__
 #define __pinocchio_algorithm_loop_constrained_aba_hxx__
 
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/multibody/data.hpp"
-
-#include "pinocchio/algorithm/fwd.hpp"
-#include "pinocchio/algorithm/aba.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
-#include "pinocchio/utils/check.hpp"
-
 #include <algorithm>
 
 /// @cond DEV
