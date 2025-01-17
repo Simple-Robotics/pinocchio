@@ -66,7 +66,7 @@ namespace pinocchio
       typedef typename Model::Frame Frame;
 
       PINOCCHIO_THROW_IF(
-        parentFrame < model.frames.size(), std::invalid_argument,
+        parentFrame >= model.frames.size(), std::invalid_argument,
         "parentFrame is greater than the size of the frames vector.");
 
       const Frame & pframe = model.frames[parentFrame];

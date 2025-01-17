@@ -44,7 +44,7 @@ namespace pinocchio
 
         int tuple_size = PyTuple_Size(result);
         PINOCCHIO_THROW_PRETTY_IF(
-          custodian < std::size_t(tuple_size), std::runtime_error,
+          custodian >= std::size_t(tuple_size), std::runtime_error,
           "custodian is greater than tuple_size.");
 
         // keep_alive<Nurse, Patient> indicates that the argument with index Patient should be kept

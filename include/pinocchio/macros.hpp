@@ -170,7 +170,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
       throw exception_type(message);                                                               \
     }
   #define PINOCCHIO_THROW_IF(condition, exception_type, message)                                   \
-    if (!(condition))                                                                              \
+    if (condition)                                                                                 \
     {                                                                                              \
       PINOCCHIO_THROW(exception_type, message);                                                    \
     }
@@ -185,7 +185,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
       throw exception(ss.str());                                                                   \
     }
   #define PINOCCHIO_THROW_PRETTY_IF(condition, exception_type, message)                            \
-    if (!(condition))                                                                              \
+    if (condition)                                                                                 \
     {                                                                                              \
       PINOCCHIO_THROW_PRETTY(exception_type, message);                                             \
     }
@@ -200,7 +200,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
 #define _PINOCCHIO_GET_OVERRIDE_FOR_CHECK_INPUT_ARGUMENT(_1, _2, MACRO_NAME, ...) MACRO_NAME
 
 #define _PINOCCHIO_CHECK_INPUT_ARGUMENT_2(condition, message)                                      \
-  PINOCCHIO_THROW_IF(condition, std::invalid_argument, message)
+  PINOCCHIO_THROW_IF(!(condition), std::invalid_argument, message)
 
 #define _PINOCCHIO_CHECK_INPUT_ARGUMENT_1(condition)                                               \
   _PINOCCHIO_CHECK_INPUT_ARGUMENT_2(                                                               \
