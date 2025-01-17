@@ -567,7 +567,7 @@ namespace pinocchio
     data.oa[0] = data.oa_gf[0];
     data.of[0].setZero();
 
-    const double mu = 1 / settings.mu;
+    const Scalar mu = Scalar(1) / settings.mu;
 
     for (auto & coupling : data.joint_cross_coupling)
       coupling.setZero();
