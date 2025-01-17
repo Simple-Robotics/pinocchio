@@ -31,9 +31,6 @@ namespace pinocchio
       {
       }
 
-      /// \brief Copy constructor
-      DoubleEntryContainer(const DoubleEntryContainer & other) = default;
-
       /// \brief Equality comparison operator
       bool operator==(const DoubleEntryContainer & other) const
       {
