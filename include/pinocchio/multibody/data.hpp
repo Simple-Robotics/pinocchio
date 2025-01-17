@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2024 CNRS INRIA
+// Copyright (c) 2015-2025 CNRS INRIA
 // Copyright (c) 2015 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -26,9 +26,7 @@
 
 #include <Eigen/Cholesky>
 #include <Eigen/StdVector>
-#include <Eigen/src/Core/util/Constants.h>
 
-#include <cstddef>
 #include <set>
 
 namespace pinocchio
