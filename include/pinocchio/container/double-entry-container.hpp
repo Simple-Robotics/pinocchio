@@ -25,6 +25,10 @@ namespace pinocchio
       typedef typename Vector::iterator iterator;
       typedef typename Vector::const_iterator const_iterator;
 
+      /// \brief Empty constructor
+      DoubleEntryContainer()
+      {
+      }
       /// \brief Default contructor from two array dimension
       DoubleEntryContainer(const Index nrows, const Index ncols)
       : m_keys(Array::Constant(nrows, ncols, -1))
