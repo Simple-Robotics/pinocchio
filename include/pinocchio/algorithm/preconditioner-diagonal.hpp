@@ -6,7 +6,6 @@
 #define __pinocchio_algorithm_preconditioner_diagonal_hpp__
 
 #include "pinocchio/algorithm/preconditioner-base.hpp"
-
 namespace pinocchio
 {
 
@@ -80,6 +79,7 @@ namespace pinocchio
     void setDiagonal(const PreconditionerVectorLike & x)
     {
       m_preconditioner_diagonal = x;
+      m_preconditioner_square.array() = x.array() * x.array();
     }
 
     const PreconditionerVectorLike & getDiagonal() const
