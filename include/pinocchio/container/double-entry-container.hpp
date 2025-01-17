@@ -218,6 +218,28 @@ namespace pinocchio
         return m_values[size_t(index)];
       }
 
+      /// \brief Getter to access to a given value referenced by the input key without prior check.
+      T & get(const IndexPair & key)
+      {
+        assert(this->exist(key));
+        const Index entry1 = key.first;
+        const Index entry2 = key.second;
+        const long index = m_keys(entry1, entry2);
+
+        return m_values[size_t(index)];
+      }
+
+      /// \brief Getter to access to a given value referenced by the input key without prior check.
+      const T & get(const IndexPair & key) const
+      {
+        assert(this->exist(key));
+        const Index entry1 = key.first;
+        const Index entry2 = key.second;
+        const long index = m_keys(entry1, entry2);
+
+        return m_values[size_t(index)];
+      }
+
 #ifdef PINOCCHIO_WITH_CXX23_SUPPORT
       T & operator[](const Index entry1, const Index entry2)
       {
