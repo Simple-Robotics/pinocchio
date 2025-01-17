@@ -211,7 +211,7 @@ namespace pinocchio
 
     // First, we initialize the primal and dual variables
     int it = 0;
-    Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_norm, //
+    Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_bar_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
 
     // Initialize De Saxé shift to 0
@@ -239,29 +239,20 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(preconditioner_.rows(), problem_size);
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         preconditioner_.getDiagonal().minCoeff() > Scalar(0),
-        "Preconditionner should be a strictly positive vector.");
+        "Preconditioner should be a strictly positive vector.");
     }
-    // Applying the preconditioner to work on a problem with a better scaling
-    DelassusOperatorPreconditioned G_bar(_delassus, preconditioner_);
-    preconditioner_.unscale(R, rhs);
-    preconditioner_.unscaleInPlace(rhs);
-    rhs += VectorXs::Constant(this->problem_size, mu_prox);
-    G_bar.updateDamping(rhs); // G_bar =  P*(G+R)*P + mu_prox*Id
-    scaleDualSolution(g, g_bar_);
-    scalePrimalSolution(x_, x_bar_);
 
     // Init y
-    computeConeProjection(constraint_models, x_bar_, y_bar_);
+    computeConeProjection(constraint_models, x_, y_);
 
     // Init z
-    G_bar.applyOnTheRight(y_bar_, z_bar_);
-    z_bar_.noalias() += -mu_prox * y_bar_ + g_bar_; // z_bar = P*(G + R)*P* y_bar + g_bar
+    delassus.applyOnTheRight(y_, z_);
+    z_.noalias() += -mu_prox * y_ + g; // z_bar = P*(G + R)*P* y_bar + g_bar
     if (solve_ncp)
     {
-      computeDeSaxeCorrection(constraint_models, z_bar_, s_bar_);
-      z_bar_ += s_bar_; // Add De Saxé shift
+      computeDeSaxeCorrection(constraint_models, z_, s_);
+      z_ += s_; // Add De Saxé shift
     }
-    unscaleDualSolution(z_bar_, z_);
 
     primal_feasibility = 0; // always feasible because y is projected
 
@@ -274,7 +265,7 @@ namespace pinocchio
     // Complementarity of the initial guess
     // NB: complementarity is computed between a force y_bar (in N) and a "position" z_ (in m or
     // rad).
-    complementarity = computeConicComplementarity(constraint_models, z_, y_bar_);
+    complementarity = computeConicComplementarity(constraint_models, z_, y_);
     dual_feasibility =
       dual_feasibility_vector
         .template lpNorm<Eigen::Infinity>(); // dual feasibility of the initial guess
@@ -301,10 +292,6 @@ namespace pinocchio
         }
         z_ += s_; // Add De Saxé shift
       }
-      x_bar_.setZero();
-      y_bar_.setZero();
-      scaleDualSolution(z_, z_bar_);
-      scaleDualSolution(s_, s_bar_);
       dual_feasibility_vector = z_;
       computeDualConeProjection(constraint_models, z_, z_);
       dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
@@ -316,6 +303,16 @@ namespace pinocchio
 
     if (!abs_prec_reached)
     { // the initial guess is not solution of the problem so we run the ADMM algorithm
+      // Applying the preconditioner to work on a problem with a better scaling
+      DelassusOperatorPreconditioned G_bar(_delassus, preconditioner_);
+      preconditioner_.unscaleSquare(R, rhs);
+      rhs += VectorXs::Constant(this->problem_size, mu_prox);
+      G_bar.updateDamping(rhs);     // G_bar =  P*(G+R)*P + mu_prox*Id
+      scaleDualSolution(g, g_bar_); // g_bar = P * g
+      scalePrimalSolution(x_, x_bar_);
+      scalePrimalSolution(y_, y_bar_);
+      scaleDualSolution(z_, z_bar_);
+
       // Before running ADMM, we compute the largest and smallest eigenvalues of delassus in order
       // to be able to use a spectral update rule for the proximal parameter (rho) Setup ADMM update
       // rules
@@ -358,8 +355,7 @@ namespace pinocchio
 
       // Update the cholesky decomposition
       Scalar prox_value = mu_prox + tau * rho;
-      preconditioner_.unscale(R, rhs);
-      preconditioner_.unscaleInPlace(rhs);
+      preconditioner_.unscaleSquare(R, rhs);
       rhs += VectorXs::Constant(this->problem_size, prox_value);
       G_bar.updateDamping(rhs);
       cholesky_update_count = 1;
@@ -377,10 +373,10 @@ namespace pinocchio
 
       Scalar x_bar_norm_inf = x_bar_.template lpNorm<Eigen::Infinity>();
       Scalar y_bar_norm_inf = y_bar_.template lpNorm<Eigen::Infinity>();
-      Scalar z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+      Scalar z_bar_norm_inf = z_bar_.template lpNorm<Eigen::Infinity>();
       Scalar x_bar_previous_norm_inf = x_bar_norm_inf;
       Scalar y_bar_previous_norm_inf = y_bar_norm_inf;
-      Scalar z_previous_norm_inf = z_norm_inf;
+      Scalar z_bar_previous_norm_inf = z_bar_norm_inf;
       it = 1;
 #ifdef PINOCCHIO_WITH_HPP_FCL
       timer.start();
@@ -390,7 +386,7 @@ namespace pinocchio
 
         x_bar_previous = x_bar_;
         y_bar_previous = y_bar_;
-        z_previous = z_;
+        z_bar_previous = z_bar_;
         complementarity = Scalar(0);
 
         if (solve_ncp)
@@ -410,7 +406,6 @@ namespace pinocchio
 
         // z-update
         z_bar_ -= (tau * rho) * (x_bar_ - y_bar_);
-        unscaleDualSolution(z_bar_, z_);
 
         // check termination criteria
         primal_feasibility_vector = x_bar_ - y_bar_;
@@ -432,14 +427,23 @@ namespace pinocchio
         }
 
         {
-          VectorXs & dz = rhs;
-          dz = z_ - z_previous;
-          dz_norm = dz.template lpNorm<Eigen::Infinity>(); // check relative progress on z
+          VectorXs & dz_bar = rhs;
+          dz_bar = z_bar_ - z_bar_previous;
+          dz_bar_norm =
+            dz_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on z_bar
         }
 
+        // We unscale the quantities to work with stopping criterion from the original (unscaled)
+        // problem
+        unscalePrimalSolution(
+          primal_feasibility_vector, primal_feasibility_vector); // TODO check it is ok to do this
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
+        unscaleDualSolution(
+          dual_feasibility_vector, dual_feasibility_vector); // TODO check it is ok to do this
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-        complementarity = computeConicComplementarity(constraint_models, z_, y_bar_);
+        unscalePrimalSolution(y_bar_, y_);
+        unscaleDualSolution(z_bar_, z_);
+        complementarity = computeConicComplementarity(constraint_models, z_, y_);
 
         if (stat_record)
         {
@@ -477,7 +481,7 @@ namespace pinocchio
 
         x_bar_norm_inf = x_bar_.template lpNorm<Eigen::Infinity>();
         y_bar_norm_inf = y_bar_.template lpNorm<Eigen::Infinity>();
-        z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
+        z_bar_norm_inf = z_bar_.template lpNorm<Eigen::Infinity>();
         if (
           check_expression_if_real<Scalar, false>(
             dx_bar_norm
@@ -486,7 +490,8 @@ namespace pinocchio
             dy_bar_norm
             <= this->relative_precision * math::max(y_bar_norm_inf, y_bar_previous_norm_inf))
           && check_expression_if_real<Scalar, false>(
-            dz_norm <= this->relative_precision * math::max(z_norm_inf, z_previous_norm_inf)))
+            dz_bar_norm
+            <= this->relative_precision * math::max(z_bar_norm_inf, z_bar_previous_norm_inf)))
           rel_prec_reached = true;
         else
           rel_prec_reached = false;
@@ -516,8 +521,7 @@ namespace pinocchio
         if (update_delassus_factorization)
         {
           prox_value = mu_prox + tau * rho;
-          preconditioner_.unscale(R, rhs);
-          preconditioner_.unscaleInPlace(rhs);
+          preconditioner_.unscaleSquare(R, rhs);
           rhs += VectorXs::Constant(this->problem_size, prox_value);
           G_bar.updateDamping(rhs);
           cholesky_update_count++;
@@ -525,13 +529,13 @@ namespace pinocchio
 
         x_bar_previous_norm_inf = x_bar_norm_inf;
         y_bar_previous_norm_inf = y_bar_norm_inf;
-        z_previous_norm_inf = z_norm_inf;
+        z_bar_previous_norm_inf = z_bar_norm_inf;
       } // end ADMM main for loop
       this->relative_residual = math::max(
         dx_bar_norm / math::max(x_bar_norm_inf, x_bar_previous_norm_inf),
         dy_bar_norm / math::max(y_bar_norm_inf, y_bar_previous_norm_inf));
-      this->relative_residual =
-        math::max(this->relative_residual, dz_norm / math::max(z_norm_inf, z_previous_norm_inf));
+      this->relative_residual = math::max(
+        this->relative_residual, dz_bar_norm / math::max(z_bar_norm_inf, z_bar_previous_norm_inf));
       this->absolute_residual =
         math::max(primal_feasibility, math::max(complementarity, dual_feasibility));
 

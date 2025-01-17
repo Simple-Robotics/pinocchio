@@ -298,7 +298,7 @@ namespace pinocchio
     , y_bar_(VectorXs::Zero(problem_dim))
     , x_bar_previous(VectorXs::Zero(problem_dim))
     , y_bar_previous(VectorXs::Zero(problem_dim))
-    , z_previous(VectorXs::Zero(problem_dim))
+    , z_bar_previous(VectorXs::Zero(problem_dim))
     , z_(VectorXs::Zero(problem_dim))
     , z_bar_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
@@ -433,7 +433,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
-    /// \param[in] preconditionner Precondtionner of the problem used to convert the problem to a
+    /// \param[in] preconditioner Precondtionner of the problem used to convert the problem to a
     /// problem on forces (measured in Newton).
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
@@ -454,7 +454,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Eigen::MatrixBase<VectorLikeR> & R,
-      const boost::optional<ConstRefVectorXs> preconditionner = boost::none,
+      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -470,7 +470,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
-    /// \param[in] preconditionner Precondtionner of the problem used to convert the problem to a
+    /// \param[in] preconditioner Precondtionner of the problem used to convert the problem to a
     /// problem on forces (measured in Newton).
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
@@ -491,7 +491,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
       const Eigen::MatrixBase<VectorLikeR> & R,
-      const boost::optional<ConstRefVectorXs> preconditionner = boost::none,
+      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -505,7 +505,7 @@ namespace pinocchio
         constraint_models.cbegin(), constraint_models.cend());
 
       return solve(
-        delassus, g, wrapped_constraint_models, R, preconditionner, primal_guess, dual_guess,
+        delassus, g, wrapped_constraint_models, R, preconditioner, primal_guess, dual_guess,
         solve_ncp, admm_update_rule, stat_record);
     }
 
@@ -604,7 +604,7 @@ namespace pinocchio
       return s_bar_;
     }
 
-    /// \returns use the preconditionner to scale a primal quantity x.
+    /// \returns use the preconditioner to scale a primal quantity x.
     /// Typically, it allows to get x_bar from x.
     void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
     {
@@ -612,7 +612,7 @@ namespace pinocchio
       return;
     }
 
-    /// \returns use the preconditionner to unscale a primal quantity x.
+    /// \returns use the preconditioner to unscale a primal quantity x.
     /// Typically, it allows to get x from x_bar.
     void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
     {
@@ -620,14 +620,14 @@ namespace pinocchio
       return;
     }
 
-    /// \returns use the preconditionner to scale a dual quantity z.
+    /// \returns use the preconditioner to scale a dual quantity z.
     /// Typically, it allows to get z_bar from z.
     void scaleDualSolution(const VectorXs & z, VectorXs & z_bar) const
     {
       unscalePrimalSolution(z, z_bar);
     }
 
-    /// \returns use the preconditionner to unscale a dual quantity z.
+    /// \returns use the preconditioner to unscale a dual quantity z.
     /// Typically, it allows to get x from z_bar.
     void unscaleDualSolution(const VectorXs & z_bar, VectorXs & z) const
     {
@@ -670,8 +670,8 @@ namespace pinocchio
     VectorXs x_, y_;
     /// \brief Scaled primal variables (corresponds to the contact forces)
     VectorXs x_bar_, y_bar_;
-    /// \brief Previous values of x_bar_, y_bar_ and z_.
-    VectorXs x_bar_previous, y_bar_previous, z_previous;
+    /// \brief Previous values of x_bar_, y_bar_ and z_bar_.
+    VectorXs x_bar_previous, y_bar_previous, z_bar_previous;
     /// \brief Dual variable of the ADMM (corresponds to the contact velocity or acceleration).
     VectorXs z_;
     /// \brief Scaled dual variable of the ADMM (corresponds to the contact velocity or

@@ -40,7 +40,7 @@ namespace pinocchio
       const context::VectorXs & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const context::VectorXs & R,
-      const boost::optional<ConstRefVectorXs> preconditionner = boost::none,
+      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
       const boost::optional<ConstRefVectorXs> dual_solution = boost::none,
       bool solve_ncp = true,
@@ -48,7 +48,7 @@ namespace pinocchio
       bool stat_record = false)
     {
       return solver.solve(
-        delassus, g, constraint_models, R, preconditionner, primal_solution, dual_solution,
+        delassus, g, constraint_models, R, preconditioner, primal_solution, dual_solution,
         solve_ncp, admm_update_rule, stat_record);
     }
 
@@ -170,7 +170,7 @@ namespace pinocchio
               ContactCholeskyDecomposition::DelassusCholeskyExpression, ConstraintModel,
               ConstraintModelAllocator>,
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
-             bp::arg("preconditionner") = boost::none, bp::arg("primal_solution") = boost::none,
+             bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
@@ -180,7 +180,7 @@ namespace pinocchio
             solve_wrapper<
               context::DelassusOperatorDense, ConstraintModel, ConstraintModelAllocator>,
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
-             bp::arg("preconditionner") = boost::none, bp::arg("primal_solution") = boost::none,
+             bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
@@ -190,7 +190,7 @@ namespace pinocchio
             solve_wrapper<
               context::DelassusOperatorSparse, ConstraintModel, ConstraintModelAllocator>,
             (bp::args("self", "delassus", "g", "constraint_models", "R"),
-             bp::arg("preconditionner") = boost::none, bp::arg("primal_solution") = boost::none,
+             bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
