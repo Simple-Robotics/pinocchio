@@ -32,6 +32,7 @@ namespace pinocchio
     typedef DelassusOperatorPreconditionedTpl Self;
     typedef DelassusOperatorBase<Self> Base;
 
+    typedef typename traits<Self>::Matrix Matrix;
     typedef typename traits<DelassusOperator>::Vector Vector;
     typedef typename traits<DelassusOperator>::Scalar Scalar;
 
@@ -115,6 +116,12 @@ namespace pinocchio
     Eigen::DenseIndex cols() const
     {
       return ref().cols();
+    }
+
+    Matrix matrix() const
+    {
+      return m_preconditioner.getDiagonal().asDiagonal() * m_delassus.matrix()
+             * m_preconditioner.getDiagonal().asDiagonal();
     }
 
   protected:

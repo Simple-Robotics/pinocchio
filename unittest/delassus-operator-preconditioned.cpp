@@ -38,6 +38,9 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   Eigen::VectorXd res(mat_size);
   const Eigen::VectorXd rhs = Eigen::VectorXd::Random(mat_size);
 
+  // Checking matrix() method
+  BOOST_CHECK(preconditioned_matrix.isApprox(delassus_preconditioned.matrix()));
+
   // Checking apply on the right
   delassus_preconditioned.applyOnTheRight(rhs, res);
   BOOST_CHECK(res.isApprox((preconditioned_matrix * rhs).eval()));
