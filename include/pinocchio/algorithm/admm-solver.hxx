@@ -247,7 +247,7 @@ namespace pinocchio
 
     // Init z
     delassus.applyOnTheRight(y_, z_);
-    z_.noalias() += -mu_prox * y_ + g; // z_bar = P*(G + R)*P* y_bar + g_bar
+    z_.noalias() += -mu_prox * y_ + g; // z_ = (G + R)* y_ + g_
     if (solve_ncp)
     {
       computeDeSaxeCorrection(constraint_models, z_, s_);
