@@ -644,6 +644,7 @@ namespace pinocchio
 
           const JointPair jp =
             joint_id < joint2_id ? JointPair{joint_id, joint2_id} : JointPair{joint2_id, joint_id};
+          assert(data.joint_cross_coupling.exist(jp) && "Must never happen");
           data.joint_cross_coupling[jp] -= mu * A1tA1;
         }
         else
