@@ -124,6 +124,12 @@ namespace pinocchio
              * m_preconditioner.getDiagonal().asDiagonal();
     }
 
+    const Vector & getDamping() const
+    {
+      m_preconditioner.unscaleSquare(ref().getDamping(), m_tmp_vec);
+      return m_tmp_vec;
+    }
+
   protected:
     DelassusOperator & m_delassus;
     const PreconditionerType & m_preconditioner;

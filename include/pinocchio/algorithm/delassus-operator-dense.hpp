@@ -123,6 +123,11 @@ namespace pinocchio
       return mat_tmp;
     }
 
+    const Vector & getDamping() const
+    {
+      return damping;
+    }
+
     Matrix inverse() const
     {
       Matrix res = Matrix::Identity(size(), size());
