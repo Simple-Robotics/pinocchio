@@ -29,6 +29,7 @@ namespace pinocchio
       DoubleEntryContainer()
       {
       }
+
       /// \brief Default contructor from two array dimension
       DoubleEntryContainer(const Index nrows, const Index ncols)
       : m_keys(Array::Constant(nrows, ncols, -1))
@@ -113,6 +114,11 @@ namespace pinocchio
         return true;
       }
 
+      bool insert(const IndexPair & key, const T & value = T())
+      {
+        return this->insert(key.first, key.second, value);
+      }
+
       ///  \brief Returns true if the key (entry1,entry2) has been succesfully removed.
       bool remove(const Index entry1, const Index entry2)
       {
@@ -140,6 +146,11 @@ namespace pinocchio
         return true;
       }
 
+      bool remove(const IndexPair & key)
+      {
+        return this->remove(key.first, key.second);
+      }
+
       /// \brief Finds the element associated with the given input key (entry1,entry2).
       /// \returns an iterator to the element associated with the input key if it exists.
       iterator find(const Index entry1, const Index entry2)
@@ -152,6 +163,11 @@ namespace pinocchio
           return m_values.end();
 
         return std::next(m_values.begin(), index);
+      }
+
+      iterator find(const IndexPair & key)
+      {
+        return this->find(key.first, key.second);
       }
 
       /// \brief Finds the element associated with the given input key (entry1,entry2).
@@ -168,6 +184,11 @@ namespace pinocchio
         return std::next(m_values.begin(), index);
       }
 
+      const_iterator find(const IndexPair & key) const
+      {
+        return this->find(key.first, key.second);
+      }
+
       /// \brief Check whether the key (entry1,entry2) exists.
       bool exist(const Index entry1, const Index entry2) const
       {
@@ -177,6 +198,11 @@ namespace pinocchio
           return false;
 
         return true;
+      }
+
+      bool exist(const IndexPair & key) const
+      {
+        return exist(key.first, key.second);
       }
 
       T & operator[](const IndexPair & key)
