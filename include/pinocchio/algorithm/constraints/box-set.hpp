@@ -137,7 +137,7 @@ namespace pinocchio
     /// \param[in] res result of the projection.
     ///
     template<typename VectorLikeIn, typename VectorLikeIn2, typename VectorLikeOut>
-    void scaledProject(
+    void scaledProject_impl(
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeIn2> & scale,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const

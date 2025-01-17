@@ -63,14 +63,12 @@ struct TestBoxTpl
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
     auto G_expression = chol.getDelassusCholeskyExpression();
-    //    std::cout << "G:\n" << delassus_matrix_plain << std::endl;
 
     Eigen::MatrixXd constraint_jacobian(delassus_matrix_plain.rows(), model.nv);
     constraint_jacobian.setZero();
     getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
     const Eigen::VectorXd g = constraint_jacobian * v_free;
-    //    std::cout << "g: " << g.transpose() << std::endl;
 
     ADMMContactSolverTpl<double> admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-10);
@@ -83,7 +81,7 @@ struct TestBoxTpl
     const Eigen::VectorXd sol = G_expression.solve(-g);
     Eigen::VectorXd compliance = Eigen::VectorXd::Zero(g.size());
     boost::optional<const Eigen::Ref<const Eigen::VectorXd>> preconditioner_vec(
-      Eigen::VectorXd::Ones(g.size()));
+      Eigen::VectorXd::Constant(g.size(), 10.));
     boost::optional<const Eigen::Ref<const Eigen::VectorXd>> primal_solution_constref(
       primal_solution);
     has_converged = admm_solver.solve(
@@ -120,6 +118,54 @@ Eigen::Vector3d computeFtot(const Eigen::VectorXd & contact_forces)
     f_tot += contact_forces.segment(3 * k, 3);
   }
   return f_tot;
+}
+
+BOOST_AUTO_TEST_CASE(ball)
+{
+  Model model;
+  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
+
+  const double ball_dim = 1;
+  const double ball_mass = 10;
+  const Inertia ball_inertia = Inertia::FromSphere(ball_mass, ball_dim);
+
+  model.appendBodyToJoint(1, ball_inertia);
+
+  BOOST_CHECK(model.check(model.createData()));
+
+  Eigen::VectorXd q0 = neutral(model);
+  q0.const_cast_derived()[2] += ball_dim / 2;
+  const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
+
+  const double dt = 1e-3;
+
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
+
+  const double friction_value = 0.4;
+  {
+    const SE3 local_placement_ball(SE3::Matrix3::Identity(), SE3::Vector3(0, 0, -ball_dim));
+    ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement_ball);
+    cm.set() = CoulombFrictionCone(friction_value);
+    constraint_models.push_back(cm);
+  }
+
+  // Test static motion with zero external force
+  {
+    const Force fext = Force::Zero();
+
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, fext, dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    const Force::Vector3 f_tot_ref = (-ball_mass * Model::gravity981 - fext.linear()) * dt;
+    // std::cout << " f_tot_ref:   " << f_tot_ref.transpose() << std::endl;
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-8));
+    BOOST_CHECK(test.v_next.isZero(2e-10));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(box)

@@ -628,7 +628,7 @@ namespace pinocchio
     }
 
     /// \returns use the preconditioner to unscale a dual quantity z.
-    /// Typically, it allows to get x from z_bar.
+    /// Typically, it allows to get z from z_bar.
     void unscaleDualSolution(const VectorXs & z_bar, VectorXs & z) const
     {
       scalePrimalSolution(z_bar, z);
