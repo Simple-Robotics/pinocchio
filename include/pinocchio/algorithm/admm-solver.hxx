@@ -402,7 +402,7 @@ namespace pinocchio
 
         // y-update
         rhs -= z_bar_ / (tau * rho);
-        computeConeProjection(constraint_models, rhs, y_bar_);
+        computeScaledConeProjection(constraint_models, rhs, preconditioner_.getDiagonal(), y_bar_);
 
         // z-update
         z_bar_ -= (tau * rho) * (x_bar_ - y_bar_);

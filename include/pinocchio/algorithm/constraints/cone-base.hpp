@@ -29,6 +29,21 @@ namespace pinocchio
       return derived().dual();
     }
 
+    template<typename VectorLikeIn, typename VectorLikeIn2, typename VectorLikeOut>
+    typename PINOCCHIO_EIGEN_PLAIN_TYPE(VectorLikeIn) scaledProject(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeIn2> & scale,
+      const Eigen::MatrixBase<VectorLikeOut> & x_proj) const
+    {
+      assert(x.size() == scale.size() && " x and scale should have the same size.");
+      assert(
+        scale.isApprox(scale(0) * VectorLikeIn2::Ones(scale.size()))
+        && "Only scalar scaling are supported.");
+      PINOCCHIO_UNUSED_VARIABLE(scale); // the cone is preserved when scaled by a scalar
+      derived().project(x, x_proj);
+      return x_proj;
+    }
+
   }; // struct ConeBase
 
 } // namespace pinocchio

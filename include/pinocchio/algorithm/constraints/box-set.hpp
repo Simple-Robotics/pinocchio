@@ -51,6 +51,8 @@ namespace pinocchio
     explicit BoxSetTpl(const Eigen::DenseIndex size)
     : m_lb(Vector::Constant(size, -std::numeric_limits<Scalar>::infinity()))
     , m_ub(Vector::Constant(size, +std::numeric_limits<Scalar>::infinity()))
+    , m_lb_scaled(Vector::Constant(size, -std::numeric_limits<Scalar>::infinity()))
+    , m_ub_scaled(Vector::Constant(size, +std::numeric_limits<Scalar>::infinity()))
     {
     }
 
@@ -58,6 +60,8 @@ namespace pinocchio
     BoxSetTpl(const Eigen::MatrixBase<V1> & lb, const Eigen::MatrixBase<V2> & ub)
     : m_lb(lb)
     , m_ub(ub)
+    , m_lb_scaled(lb)
+    , m_ub_scaled(ub)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         (m_lb.array() <= m_ub.array()).all(), "Some components of lb are greater than ub");
@@ -117,7 +121,7 @@ namespace pinocchio
 
     using Base::project;
 
-    /// \brief Project a vector x into orthant.
+    /// \brief Project a vector x into the box.
     ///
     /// \param[in] x a vector to project.
     /// \param[in] res result of the projection.
@@ -127,6 +131,24 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
+      res_.const_cast_derived() = x.array().max(m_lb.array()).min(m_ub.array());
+    }
+
+    /// \brief Project a vector x such that scale * res is in the box.
+    ///
+    /// \param[in] x a vector to project.
+    /// \param[in] scale the scaling vector.
+    /// \param[in] res result of the projection.
+    ///
+    template<typename VectorLikeIn, typename VectorLikeIn2, typename VectorLikeOut>
+    void scaledProject(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeIn2> & scale,
+      const Eigen::MatrixBase<VectorLikeOut> & res_) const
+    {
+      assert((scale.array() > 0).all() && "scale vector should be positive");
+      m_lb_scaled.array() = m_lb.array() / scale.array();
+      m_ub_scaled.array() = m_ub.array() / scale.array();
       res_.const_cast_derived() = x.array().max(m_lb.array()).min(m_ub.array());
     }
 
@@ -173,7 +195,7 @@ namespace pinocchio
     }
 
   protected:
-    Vector m_lb, m_ub;
+    Vector m_lb, m_ub, m_lb_scaled, m_ub_scaled;
   }; // BoxSetTpl
 
 } // namespace pinocchio

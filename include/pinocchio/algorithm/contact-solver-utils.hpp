@@ -118,6 +118,120 @@ namespace pinocchio
       computeConeProjection(wrapped_constraint_models, x.derived(), x_proj.const_cast_derived());
     }
 
+    template<typename ForceVectorLike, typename ScaleVectorLike, typename ResultVectorLike>
+    struct ScaledProjectionVisitor
+    : visitors::ConstraintUnaryVisitorBase<
+        ScaledProjectionVisitor<ForceVectorLike, ScaleVectorLike, ResultVectorLike>>
+    {
+
+      typedef boost::fusion::
+        vector<const ForceVectorLike &, const ScaleVectorLike &, ResultVectorLike &>
+          ArgsType;
+
+      typedef visitors::ConstraintUnaryVisitorBase<
+        ScaledProjectionVisitor<ForceVectorLike, ScaleVectorLike, ResultVectorLike>>
+        Base;
+
+      template<typename ConstraintModel>
+      static void algo(
+        const ConstraintModelBase<ConstraintModel> & cmodel,
+        const ForceVectorLike & force,
+        const ScaleVectorLike & scale,
+        ResultVectorLike & result)
+      {
+        cmodel.set().scaledProject(force, scale, result);
+        //        assert(set.dual().isInside(result, Scalar(1e-12)));
+      }
+
+      using Base::run;
+
+      template<typename ConstraintModel>
+      static void run(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const ForceVectorLike & force,
+        const ScaleVectorLike & scale,
+        ResultVectorLike & result)
+      {
+        algo(cmodel.derived(), force, scale, result);
+      }
+
+      template<
+        typename Scalar,
+        int Options,
+        template<typename S, int O> class ConstraintCollectionTpl>
+      static void run(
+        const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+        const ForceVectorLike & force,
+        const ScaleVectorLike & scale,
+        ResultVectorLike & result)
+      {
+        //        typedef boost::fusion::vector<const ForceVectorLike &> ArgsType1;
+        //        ArgsType args(force.derived(), result.const_cast_derived());
+        ArgsType args(force, scale, result); //, result.const_cast_derived());
+        run(cmodel, args);
+      }
+    };
+
+    /// \brief Project a vector x on the vector of cones.
+    template<
+      template<typename T> class Holder,
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn,
+      typename VectorLikeIn2,
+      typename VectorLikeOut>
+    void computeScaledConeProjection(
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & x,
+      const Eigen::DenseBase<VectorLikeIn2> & scale,
+      const Eigen::DenseBase<VectorLikeOut> & x_proj_)
+    {
+      assert(x.size() == x_proj_.size());
+      Eigen::DenseIndex index = 0;
+      VectorLikeOut & x_proj = x_proj_.const_cast_derived();
+
+      typedef typename VectorLikeIn::ConstSegmentReturnType SegmentType1;
+      typedef typename VectorLikeIn2::ConstSegmentReturnType SegmentType2;
+      typedef typename VectorLikeOut::SegmentReturnType SegmentType3;
+
+      for (const ConstraintModel & cmodel : constraint_models)
+      {
+        const auto size = cmodel.size();
+        SegmentType1 force_segment = x.derived().segment(index, size);
+        SegmentType2 scale_segment = scale.derived().segment(index, size);
+        SegmentType3 res = x_proj.segment(index, size);
+
+        typedef ScaledProjectionVisitor<SegmentType1, SegmentType2, SegmentType3> Algo;
+        Algo::run(cmodel, force_segment, scale_segment, res);
+
+        index += size;
+      }
+    }
+
+    /// \brief Project a vector x on the vector of cones.
+    template<
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeIn,
+      typename VectorLikeIn2,
+      typename VectorLikeOut>
+    void computeScaledConeProjection(
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const Eigen::DenseBase<VectorLikeIn> & x,
+      const Eigen::DenseBase<VectorLikeIn2> & scale,
+      const Eigen::DenseBase<VectorLikeOut> & x_proj)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+
+      computeScaledConeProjection(
+        wrapped_constraint_models, x.derived(), scale.derived(), x_proj.const_cast_derived());
+    }
+
     template<typename VelocityVectorLike, typename ResultVectorLike>
     struct DualProjectionVisitor
     : visitors::ConstraintUnaryVisitorBase<
