@@ -146,6 +146,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/codegen/cppadcg.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/container/aligned-vector.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/container/boost-container-limits.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/container/double-entry-container.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/container/storage.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/context/casadi.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/context/cppad.hpp
