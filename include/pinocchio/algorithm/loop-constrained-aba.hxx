@@ -281,8 +281,8 @@ namespace pinocchio
         const JointIndex vertex_j = joint_neighbours[j];
         const Matrix6 & crosscoupling_ij =
           (i > vertex_j)
-            ? joint_cross_coupling[JointPair(vertex_j, i)]
-            : joint_cross_coupling[JointPair(i, vertex_j)].transpose(); // avoid memalloc
+            ? joint_cross_coupling.get(JointPair(vertex_j, i))
+            : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose(); // avoid memalloc
 
         auto & crosscoupling_ix_Jcols = jdata.UDinv();
         crosscoupling_ix_Jcols.noalias() =
@@ -306,11 +306,12 @@ namespace pinocchio
         {
           if (vertex_j < parent)
           {
-            joint_cross_coupling[{vertex_j, parent}].noalias() += crosscoupling_ij_oL;
+            joint_cross_coupling.get({vertex_j, parent}).noalias() += crosscoupling_ij_oL;
           }
           else
           {
-            joint_cross_coupling[{parent, vertex_j}].noalias() += crosscoupling_ij_oL.transpose();
+            joint_cross_coupling.get({parent, vertex_j}).noalias() +=
+              crosscoupling_ij_oL.transpose();
           }
         }
 
@@ -318,22 +319,23 @@ namespace pinocchio
         {
           const JointIndex vertex_k = joint_neighbours[k];
 
-          const Matrix6 & edge_ik = (i > vertex_k) ? edges[JointPair(vertex_k, i)]
-                                                   : edges[JointPair(i, vertex_k)].transpose();
+          const Matrix6 & edge_ik =
+            (i > vertex_k) ? joint_cross_coupling.get(JointPair(vertex_k, i))
+                           : joint_cross_coupling.get(JointPair(i, vertex_k)).transpose();
 
           crosscoupling_ix_Jcols.noalias() = edge_ik * Jcols;
 
           assert(vertex_j != vertex_k && "Must never happen!");
           if (vertex_j < vertex_k)
           {
-            joint_cross_coupling[{vertex_j, vertex_k}].noalias() -=
+            joint_cross_coupling.get({vertex_j, vertex_k}).noalias() -=
               crosscoupling_ij_Jcols_Dinv
               * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik * J_col,
                                                     // U() is edge_ij * J_col * Dinv
           }
           else // if (vertex_k < vertex_j)
           {
-            joint_cross_coupling[{vertex_k, vertex_j}].transpose().noalias() -=
+            joint_cross_coupling.get({vertex_k, vertex_j}).transpose().noalias() -=
               crosscoupling_ij_Jcols_Dinv
               * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik *
                                                     // J_col, U() is edge_ij * J_col * Dinv
@@ -407,8 +409,9 @@ namespace pinocchio
 
       for (JointIndex vertex_j : neighbours[i])
       {
-        const Matrix6 & edge_ij = (i > vertex_j) ? edges[JointPair(vertex_j, i)]
-                                                 : edges[JointPair(i, vertex_j)].transpose();
+        const Matrix6 & edge_ij = (i > vertex_j)
+                                    ? joint_cross_coupling.get(JointPair(vertex_j, i))
+                                    : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose();
         data.of[vertex_j].toVector().noalias() += edge_ij * a_tmp;
       }
 
@@ -454,9 +457,9 @@ namespace pinocchio
       Force coupling_forces = Force::Zero();
       for (JointIndex vertex_j : neighbours)
       {
-        const Matrix6 & edge_ij = (i > vertex_j)
-                                    ? data.joint_cross_coupling[JointPair(vertex_j, i)].transpose()
-                                    : data.joint_cross_coupling[JointPair(i, vertex_j)];
+        const Matrix6 & edge_ij =
+          (i > vertex_j) ? data.joint_cross_coupling.get(JointPair(vertex_j, i)).transpose()
+                         : data.joint_cross_coupling.get(JointPair(i, vertex_j));
         coupling_forces.toVector().noalias() += edge_ij * data.oa_gf[vertex_j].toVector();
       }
 
@@ -510,9 +513,9 @@ namespace pinocchio
       for (JointIndex vertex_j : neighbours)
       {
 
-        const Matrix6 & edge_ij = (i > vertex_j)
-                                    ? data.joint_cross_coupling[JointPair(vertex_j, i)].transpose()
-                                    : data.joint_cross_coupling[JointPair(i, vertex_j)];
+        const Matrix6 & edge_ij =
+          (i > vertex_j) ? data.joint_cross_coupling.get(JointPair(vertex_j, i)).transpose()
+                         : data.joint_cross_coupling.get(JointPair(i, vertex_j));
         fi.toVector().noalias() += edge_ij * data.oa_gf[vertex_j].toVector();
       }
 
@@ -645,7 +648,7 @@ namespace pinocchio
           const JointPair jp =
             joint_id < joint2_id ? JointPair{joint_id, joint2_id} : JointPair{joint2_id, joint_id};
           assert(data.joint_cross_coupling.exist(jp) && "Must never happen");
-          data.joint_cross_coupling[jp] -= mu * A1tA1;
+          data.joint_cross_coupling.get(jp) -= mu * A1tA1;
         }
         else
         {
@@ -690,11 +693,13 @@ namespace pinocchio
 
           if (joint_id < joint2_id)
           {
-            data.joint_cross_coupling[{joint_id, joint2_id}].noalias() += mu * A1.transpose() * A2;
+            data.joint_cross_coupling.get({joint_id, joint2_id}).noalias() +=
+              mu * A1.transpose() * A2;
           }
           else
           {
-            data.joint_cross_coupling[{joint2_id, joint_id}].noalias() += mu * A2.transpose() * A1;
+            data.joint_cross_coupling.get({joint2_id, joint_id}).noalias() +=
+              mu * A2.transpose() * A1;
           }
         }
         else
