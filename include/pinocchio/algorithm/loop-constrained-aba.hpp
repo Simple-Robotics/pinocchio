@@ -16,9 +16,6 @@ namespace pinocchio
   /// \brief Init the data according to the contact information contained in contact_models.
   ///
   /// \tparam JointCollection Collection of Joint types.
-  /// \tparam ConfigVectorType Type of the joint configuration vector.
-  /// \tparam TangentVectorType1 Type of the joint velocity vector.
-  /// \tparam TangentVectorType2 Type of the joint torque vector.
   /// \tparam Allocator Allocator class for the std::vector.
   ///
   /// \param[in] model The model structure of the rigid body system.
@@ -30,7 +27,7 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl,
     class Allocator>
-  inline void initClCaba(
+  inline void initLcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models);
@@ -71,8 +68,7 @@ namespace pinocchio
     typename TangentVectorType2,
     class ContactModelAllocator,
     class ContactDataAllocator>
-  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  closedLoopCaba(
+  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & lcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<ConfigVectorType> & q,

@@ -17,7 +17,7 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl,
     class Allocator>
-  inline void initClCaba(
+  inline void initLCABA(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models)
@@ -162,9 +162,9 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentVectorType>
-  struct clCabaForwardStep1
+  struct LCABAForwardStep1
   : public fusion::JointUnaryVisitorBase<
-      clCabaForwardStep1<Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType>>
+      LCABAForwardStep1<Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -215,8 +215,8 @@ namespace pinocchio
   };
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  struct clCAbaBackwardStep
-  : public fusion::JointUnaryVisitorBase<clCAbaBackwardStep<Scalar, Options, JointCollectionTpl>>
+  struct LCABABackwardStep
+  : public fusion::JointUnaryVisitorBase<LCABABackwardStep<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -360,9 +360,9 @@ namespace pinocchio
 
   // A reduced backward sweep that only propagates the affine terms
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  struct clCabaBackwardStepReduced
+  struct LCABABackwardStepReduced
   : public fusion::JointUnaryVisitorBase<
-      clCabaBackwardStepReduced<Scalar, Options, JointCollectionTpl>>
+      LCABABackwardStepReduced<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -424,8 +424,8 @@ namespace pinocchio
   };
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  struct clCabaForwardStep2
-  : public fusion::JointUnaryVisitorBase<clCabaForwardStep2<Scalar, Options, JointCollectionTpl>>
+  struct LCABAForwardStep2
+  : public fusion::JointUnaryVisitorBase<LCABAForwardStep2<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -477,9 +477,9 @@ namespace pinocchio
   };
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  struct clCabaReducedForwardStep
+  struct LCABAReducedForwardStep
   : public fusion::JointUnaryVisitorBase<
-      clCabaReducedForwardStep<Scalar, Options, JointCollectionTpl>>
+      LCABAReducedForwardStep<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -538,8 +538,7 @@ namespace pinocchio
     typename TangentVectorType2,
     class ContactModelAllocator,
     class ContactDataAllocator>
-  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
-  closedLoopCaba(
+  inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & lcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<ConfigVectorType> & q,
@@ -574,7 +573,7 @@ namespace pinocchio
     for (auto & x : data.edges)
       x.second.setZero();
 
-    typedef clCabaForwardStep1<
+    typedef LCABAForwardStep1<
       Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType1>
       Pass1;
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
@@ -713,7 +712,7 @@ namespace pinocchio
       }
     }
 
-    typedef clCAbaBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
+    typedef LCABABackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
 
     const std::vector<JointIndex> elim_order = data.elimination_order;
 
@@ -724,7 +723,7 @@ namespace pinocchio
 
     assert(settings.mu > 0 && "constrainedABA requires mu > 0.");
 
-    typedef clCabaForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
+    typedef LCABAForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
 
     for (int it = int(elim_order.size()) - 1; it >= 0; --it)
     {
@@ -733,8 +732,8 @@ namespace pinocchio
         Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
     }
 
-    typedef clCabaBackwardStepReduced<Scalar, Options, JointCollectionTpl> ReducedPass2;
-    typedef clCabaReducedForwardStep<Scalar, Options, JointCollectionTpl> ReducedPass3;
+    typedef LCABABackwardStepReduced<Scalar, Options, JointCollectionTpl> ReducedPass2;
+    typedef LCABAReducedForwardStep<Scalar, Options, JointCollectionTpl> ReducedPass3;
     data.g.setZero();
     int iter = 0;
     for (iter = 1; iter < settings.max_iter; iter++)

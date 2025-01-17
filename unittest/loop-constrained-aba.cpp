@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_CASE(test_6D_unconstrained)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
 
@@ -139,8 +139,8 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
   std::cout << "data.ddq: " << data.ddq.transpose() << std::endl;
@@ -177,8 +177,8 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -220,8 +220,8 @@ BOOST_AUTO_TEST_CASE(test_12D_descendants_redundant_reversed)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
 
@@ -255,8 +255,8 @@ BOOST_AUTO_TEST_CASE(test_6D_different_branches)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -298,8 +298,8 @@ BOOST_AUTO_TEST_CASE(test_12D_coupled_loop_common_link)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -355,8 +355,8 @@ BOOST_AUTO_TEST_CASE(test_24D_coupling_with_double_ground)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -390,8 +390,8 @@ BOOST_AUTO_TEST_CASE(test_6D_consecutive_links)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -433,8 +433,8 @@ BOOST_AUTO_TEST_CASE(test_12D_coupled_on_a_chain)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -476,8 +476,8 @@ BOOST_AUTO_TEST_CASE(test_12D_cross_coupled_on_a_chain)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -535,8 +535,8 @@ BOOST_AUTO_TEST_CASE(test_24D_cross_coupling)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -601,8 +601,8 @@ BOOST_AUTO_TEST_CASE(test_6D_cons_baumgarte)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -667,8 +667,8 @@ BOOST_AUTO_TEST_CASE(test_3D_cons_baumgarte)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
 
@@ -709,8 +709,8 @@ BOOST_AUTO_TEST_CASE(test_loop_con_and_ground_con)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -752,8 +752,8 @@ BOOST_AUTO_TEST_CASE(test_loop_con_and_ground_con3D)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -795,8 +795,8 @@ BOOST_AUTO_TEST_CASE(test_loop_con3D_ground_con3D)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -840,8 +840,8 @@ BOOST_AUTO_TEST_CASE(test_coupled_3D_6D_loops)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  initClCaba(model, data, contact_models);
-  closedLoopCaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
+  initLcaba(model, data, contact_models);
+  lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
