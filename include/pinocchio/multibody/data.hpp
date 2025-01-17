@@ -6,7 +6,6 @@
 #ifndef __pinocchio_multibody_data_hpp__
 #define __pinocchio_multibody_data_hpp__
 
-#include "pinocchio/spatial/fwd.hpp"
 #include "pinocchio/math/tensor.hpp"
 
 #include "pinocchio/spatial/se3.hpp"
@@ -16,7 +15,6 @@
 
 #include "pinocchio/common/data-entity.hpp"
 
-#include "pinocchio/multibody/fwd.hpp"
 #include "pinocchio/multibody/joint/joint-generic.hpp"
 
 #include "pinocchio/container/aligned-vector.hpp"
