@@ -21,6 +21,7 @@ namespace pinocchio
       typedef Eigen::Array<long, Eigen::Dynamic, Eigen::Dynamic> Array;
       typedef std::vector<T, Allocator> Vector;
       typedef Eigen::Index Index;
+      typedef std::pair<Index, Index> IndexPair;
       typedef typename Vector::iterator iterator;
       typedef typename Vector::const_iterator const_iterator;
 
@@ -32,6 +33,17 @@ namespace pinocchio
 
       /// \brief Copy constructor
       DoubleEntryContainer(const DoubleEntryContainer & other) = default;
+
+      /// \brief Equality comparison operator
+      bool operator==(const DoubleEntryContainer & other) const
+      {
+        return (m_keys == other.m_keys).all() && m_values == other.m_values;
+      }
+
+      bool operator!=(const DoubleEntryContainer & other) const
+      {
+        return !(*this == other);
+      }
 
       /// \brief Returns the number of rows of the double entry table.
       Eigen::Index rows() const
@@ -155,15 +167,34 @@ namespace pinocchio
         return std::next(m_values.begin(), index);
       }
 
-#ifdef PINOCCHIO_WITH_CXX23_SUPPORT
-      iterator operator[](const Index entry1, const Index entry2)
+      /// \brief Check whether the key (entry1,entry2) exists.
+      bool exist(const Index entry1, const Index entry2) const
       {
-        return this->find(entry1, entry2);
+        if (!(entry1 >= 0 && entry1 < rows()) || !(entry2 >= 0 && entry2 < cols()))
+          return false;
+        if (m_keys(entry1, entry2) < 0)
+          return false;
+
+        return true;
       }
 
-      const_iterator operator[](const Index entry1, const Index entry2) const
+      T & operator[](const IndexPair & key)
       {
-        return this->find(entry1, entry2);
+        const Index entry1 = key.first;
+        const Index entry2 = key.second;
+
+        if (!this->exist(entry1, entry2))
+          this->insert(entry1, entry2);
+
+        const long index = m_keys(entry1, entry2);
+
+        return m_values[size_t(index)];
+      }
+
+#ifdef PINOCCHIO_WITH_CXX23_SUPPORT
+      T & operator[](const Index entry1, const Index entry2)
+      {
+        return this->operator[]({entry1, entry2});
       }
 #endif
 
