@@ -139,6 +139,7 @@ find_package(Boost COMPONENTS unit_test_framework)
 add_pinocchio_unit_test(macros HEADER_ONLY)
 add_pinocchio_unit_test(alloca HEADER_ONLY)
 add_pinocchio_unit_test(storage HEADER_ONLY)
+add_pinocchio_unit_test(double-entry-container HEADER_ONLY)
 
 # Math components
 add_pinocchio_unit_test(eigen-basic-op)
