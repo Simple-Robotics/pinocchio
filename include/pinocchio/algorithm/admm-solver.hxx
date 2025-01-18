@@ -231,8 +231,10 @@ namespace pinocchio
       x_.setZero();
     }
 
-    // we add the compliance to the delassus
-
+    // Retrieve the pre-conditioner
+    // TODO: if input precontioner is none, should we re-use the internal one or
+    // reset the internal one?
+    // For now, we are re-using it.
     if (preconditioner)
     {
       preconditioner_.setDiagonal(preconditioner.get());
@@ -254,32 +256,30 @@ namespace pinocchio
       z_ += s_; // Add De Saxé shift
     }
 
+    // Computing the convergence criterion of the initial guess
     primal_feasibility = 0; // always feasible because y is projected
 
-    // Dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
+    // dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
     dual_feasibility_vector = z_;
     computeDualConeProjection(constraint_models, z_, z_);
     dual_feasibility_vector -= z_;
+    dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
 
-    // Computing the convergence criterion of the initial guess
-    // Complementarity of the initial guess
-    // NB: complementarity is computed between a force y_bar (in N) and a "position" z_ (in m or
-    // rad).
+    // complementarity of the initial guess
+    // NB: complementarity is computed between a force y_ (in N) and a "position" z_ (in m or rad).
     complementarity = computeConicComplementarity(constraint_models, z_, y_);
-    dual_feasibility =
-      dual_feasibility_vector
-        .template lpNorm<Eigen::Infinity>(); // dual feasibility of the initial guess
     this->absolute_residual = math::max(complementarity, dual_feasibility);
+
     // Checking if the initial guess is better than 0.
-    // we compute the convergence criterion of the 0 guess
+    // if instead of the x_ initial guess, x_ is set to 0, then z_ = g.
+    // -> we check how much constraints violation is induced by using g as the dual variable.
     const Scalar absolute_residual_zero_guess =
       computeZeroInitialGuessMaxConstraintViolation(constraint_models, g);
 
     if (absolute_residual_zero_guess < this->absolute_residual)
     { // If true, this means that the zero value initial guess leads a better feasibility in the
-      // sense of the contact complementarity
-      // So we set the primal variables to the 0 initial guess and the dual variables accordingly to
-      // g
+      // sense of the constraints satisfaction.
+      // So we set the primal variables to the 0 initial guess and the dual variable to g.
       x_.setZero();
       y_.setZero();
       z_ = g;
@@ -306,6 +306,7 @@ namespace pinocchio
       // Applying the preconditioner to work on a problem with a better scaling
       DelassusOperatorPreconditioned G_bar(_delassus, preconditioner_);
       preconditioner_.unscaleSquare(R, rhs);
+      // we add the compliance to the delassus
       rhs += VectorXs::Constant(this->problem_size, mu_prox);
       G_bar.updateDamping(rhs);     // G_bar =  P*(G+R)*P + mu_prox*Id
       scaleDualSolution(g, g_bar_); // g_bar = P * g
@@ -313,9 +314,9 @@ namespace pinocchio
       scalePrimalSolution(y_, y_bar_);
       scaleDualSolution(z_, z_bar_);
 
+      // Setup ADMM update rules:
       // Before running ADMM, we compute the largest and smallest eigenvalues of delassus in order
-      // to be able to use a spectral update rule for the proximal parameter (rho) Setup ADMM update
-      // rules
+      // to be able to use a spectral update rule for the proximal parameter (rho)
       // TODO should we evaluate the eigenvalues of G or Gbar ?
       Scalar L, m, rho;
       ADMMUpdateRuleContainer admm_update_rule_container;
@@ -435,11 +436,9 @@ namespace pinocchio
 
         // We unscale the quantities to work with stopping criterion from the original (unscaled)
         // problem
-        unscalePrimalSolution(
-          primal_feasibility_vector, primal_feasibility_vector); // TODO check it is ok to do this
+        unscalePrimalSolution(primal_feasibility_vector, primal_feasibility_vector);
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
-        unscaleDualSolution(
-          dual_feasibility_vector, dual_feasibility_vector); // TODO check it is ok to do this
+        unscaleDualSolution(dual_feasibility_vector, dual_feasibility_vector);
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscalePrimalSolution(y_bar_, y_);
         unscaleDualSolution(z_bar_, z_);
@@ -557,6 +556,7 @@ namespace pinocchio
     //
 
     this->it = it;
+    unscalePrimalSolution(x_bar_, x_); // only for debug purposes
     unscalePrimalSolution(y_bar_, y_);
     unscaleDualSolution(z_bar_, z_);
     unscaleDualSolution(s_bar_, s_);

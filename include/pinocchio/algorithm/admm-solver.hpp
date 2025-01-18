@@ -433,8 +433,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
-    /// \param[in] preconditioner Precondtionner of the problem used to convert the problem to a
-    /// problem on forces (measured in Newton).
+    /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -470,8 +469,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
-    /// \param[in] preconditioner Precondtionner of the problem used to convert the problem to a
-    /// problem on forces (measured in Newton).
+    /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -609,7 +607,6 @@ namespace pinocchio
     void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
     {
       preconditioner_.scale(x, x_bar);
-      return;
     }
 
     /// \returns use the preconditioner to unscale a primal quantity x.
@@ -617,21 +614,20 @@ namespace pinocchio
     void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
     {
       preconditioner_.unscale(x_bar, x);
-      return;
     }
 
     /// \returns use the preconditioner to scale a dual quantity z.
     /// Typically, it allows to get z_bar from z.
     void scaleDualSolution(const VectorXs & z, VectorXs & z_bar) const
     {
-      unscalePrimalSolution(z, z_bar);
+      preconditioner_.unscale(z, z_bar);
     }
 
     /// \returns use the preconditioner to unscale a dual quantity z.
     /// Typically, it allows to get z from z_bar.
     void unscaleDualSolution(const VectorXs & z_bar, VectorXs & z) const
     {
-      scalePrimalSolution(z_bar, z);
+      preconditioner_.scale(z_bar, z);
     }
 
     SolverStats & getStats()
