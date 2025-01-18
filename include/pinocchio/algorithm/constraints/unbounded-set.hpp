@@ -74,7 +74,8 @@ namespace pinocchio
       return !(*this == other);
     }
 
-    /// \brief Check whether a vector x lies within the box.
+    /// \brief Check whether a vector x lies within the set.
+    /// Any vector x always belong the the unbounded set.
     ///
     /// \param[in] f vector to check (assimilated to a  force vector).
     ///
@@ -89,7 +90,7 @@ namespace pinocchio
 
     using Base::project;
 
-    /// \brief Project a vector x into orthant.
+    /// \brief Project a vector x into the set.
     ///
     /// \param[in] x a vector to project.
     /// \param[in] res result of the projection.
