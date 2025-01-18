@@ -13,25 +13,28 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
 {
   Eigen::Index n = 10;
-  Eigen::VectorXd precond_vec = Eigen::VectorXd::Ones(n);
-  precond_vec.head(n / 2).setConstant(0.1);
-  precond_vec.tail(n / 2).setConstant(12.4);
+  Eigen::VectorXd precond_vec = Eigen::VectorXd::Random(n);
   PreconditionerDiagonal<Eigen::VectorXd> precond(precond_vec);
-  Eigen::VectorXd x = Eigen::VectorXd::Ones(n);
-  Eigen::VectorXd x_scaled = x;
-  Eigen::VectorXd x_scaled_true = Eigen::VectorXd::Ones(n);
-  x_scaled_true.array() /= precond_vec.array();
+
+  Eigen::VectorXd x = Eigen::VectorXd::Random(n);
+  Eigen::VectorXd x_scaled;
+
   precond.scale(x, x_scaled);
-  BOOST_CHECK((x_scaled - x_scaled_true).isZero());
+  Eigen::VectorXd x_scaled_true = x.array() / precond_vec.array();
+  BOOST_CHECK(x_scaled.isApprox(x_scaled_true));
+
   precond.scaleSquare(x, x_scaled);
   x_scaled_true.array() = x.array() / (precond_vec.array() * precond_vec.array());
-  BOOST_CHECK((x_scaled - x_scaled_true).isZero());
-  Eigen::VectorXd x_unscaled = x;
+  BOOST_CHECK(x_scaled.isApprox(x_scaled_true));
+
+  Eigen::VectorXd x_unscaled;
   precond.unscale(x, x_unscaled);
-  BOOST_CHECK((x_unscaled - precond_vec).isZero());
+  Eigen::VectorXd x_unscaled_true = x.array() * precond_vec.array();
+  BOOST_CHECK(x_unscaled.isApprox(x_unscaled_true));
+
   precond.unscaleSquare(x, x_unscaled);
-  x_scaled_true.array() = x.array() * (precond_vec.array() * precond_vec.array());
-  BOOST_CHECK((x_unscaled - x_scaled_true).isZero());
+  x_unscaled_true = x.array() * (precond_vec.array() * precond_vec.array());
+  BOOST_CHECK(x_unscaled.isApprox(x_unscaled_true));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
