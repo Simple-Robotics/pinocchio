@@ -245,9 +245,9 @@ namespace pinocchio
     // Init y
     computeConeProjection(constraint_models, x_, y_);
 
-    // Init z
+    // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
-    z_.noalias() += -mu_prox * y_ + g; // z_ = (G + R)* y_ + g_
+    z_ += (R.cwiseProduct(y_)) + g;
     if (solve_ncp)
     {
       computeDeSaxeCorrection(constraint_models, z_, s_);
