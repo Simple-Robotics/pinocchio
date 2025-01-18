@@ -313,6 +313,7 @@ add_pinocchio_unit_test(classic-acceleration)
 add_pinocchio_unit_test(coulomb-friction-cone)
 add_pinocchio_unit_test(box-set)
 add_pinocchio_unit_test(unbounded-set)
+add_pinocchio_unit_test(null-set)
 add_pinocchio_unit_test(orthant-cone)
 
 # Solvers

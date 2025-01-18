@@ -10,6 +10,7 @@
 // Sets
 #include "pinocchio/algorithm/constraints/box-set.hpp"
 #include "pinocchio/algorithm/constraints/unbounded-set.hpp"
+#include "pinocchio/algorithm/constraints/null-set.hpp"
 
 // Cones
 #include "pinocchio/algorithm/constraints/coulomb-friction-cone.hpp"
