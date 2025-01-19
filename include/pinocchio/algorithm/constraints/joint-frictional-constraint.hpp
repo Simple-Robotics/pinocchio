@@ -29,6 +29,10 @@ namespace pinocchio
     {
       Options = _Options
     };
+
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::VELOCITY_LEVEL;
+
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;

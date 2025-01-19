@@ -12,6 +12,13 @@
 namespace pinocchio
 {
 
+  enum struct ConstraintFormulationLevel
+  {
+    POSITION_LEVEL,    // scaling dt^2
+    VELOCITY_LEVEL,    // scaling dt
+    ACCELERATION_LEVEL // scaling 1
+  };
+
   template<class Derived>
   struct ConstraintModelBase
   : NumericalBase<Derived>

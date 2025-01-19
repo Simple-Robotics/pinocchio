@@ -181,6 +181,7 @@ namespace pinocchio
     DelassusOperatorBase<DelassusDerived> & _delassus,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
+    const Scalar dt,
     const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<ConstRefVectorXs> preconditioner,
     const boost::optional<ConstRefVectorXs> primal_guess,
@@ -204,6 +205,7 @@ namespace pinocchio
     DelassusDerived & delassus = _delassus.derived();
 
     const Scalar mu_R = R.minCoeff();
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(dt >= Scalar(0), "dt should be positive.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(tau <= Scalar(1) && tau > Scalar(0), "tau should lie in ]0,1].");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(mu_prox >= 0, "mu_prox should be positive.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(mu_R >= Scalar(0), "R should be a positive vector.");
@@ -213,6 +215,19 @@ namespace pinocchio
     int it = 0;
     Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_bar_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
+
+    // Then, we get the time_scaling T from the constraints to construct gs, which is g time-scaled
+    // depending on the formulation of each constraint: gs = T^{-1} * g.
+    // The idea is that if we formulate a given constraint at the position/velocity/acceleration
+    // level, we want to measure constraint satisfaction for this constraint at the same
+    // position/velocity/acceleration level.
+    // However, to take admm steps, we work at the (force, acceleration) level for all constraints.
+    // In short:
+    // -> gs is used to perform optimization steps (we typically work on min_x x^TGx + gs^Tx).
+    // -> time_scaling is used to check for constraint satisfaction (we typically want TGx + g = 0).
+    // Warning: this constraints time-scaling has (a priori) nothing to do with the pre-conditioner.
+    getTimeScalingFromConstraints(constraint_models, dt, time_scaling);
+    gs = g.array() / time_scaling.array();
 
     // Initialize De Saxé shift to 0
     // For the CCP, there is no shift
@@ -249,7 +264,7 @@ namespace pinocchio
 
     // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
-    z_ += (R.cwiseProduct(y_)) + g;
+    z_ += (R.cwiseProduct(y_)) + gs;
     if (solve_ncp)
     {
       computeDeSaxeCorrection(constraint_models, z_, s_);
@@ -259,20 +274,25 @@ namespace pinocchio
     // Computing the convergence criterion of the initial guess
     primal_feasibility = 0; // always feasible because y is projected
 
+    // complementarity of the initial guess
+    // NB: complementarity is computed between a force y_ (in N) and z_ which unit is that of the
+    // constraint formulation level.
+    rhs = z_.array() * time_scaling.array(); // back to constraint formulation level
+    complementarity = computeConicComplementarity(constraint_models, rhs, y_);
+
     // dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
-    dual_feasibility_vector = z_;
-    computeDualConeProjection(constraint_models, z_, z_);
-    dual_feasibility_vector -= z_;
+    dual_feasibility_vector = rhs;
+    computeDualConeProjection(constraint_models, rhs, rhs);
+    dual_feasibility_vector -= rhs;
     dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
 
-    // complementarity of the initial guess
-    // NB: complementarity is computed between a force y_ (in N) and a "position" z_ (in m or rad).
-    complementarity = computeConicComplementarity(constraint_models, z_, y_);
     this->absolute_residual = math::max(complementarity, dual_feasibility);
 
     // Checking if the initial guess is better than 0.
     // if instead of the x_ initial guess, x_ is set to 0, then z_ = g.
     // -> we check how much constraints violation is induced by using g as the dual variable.
+    // note: here we work with g and not gs, because we check for constraints violation at the
+    // formulation level of each constraints.
     const Scalar absolute_residual_zero_guess =
       computeZeroInitialGuessMaxConstraintViolation(constraint_models, g);
 
@@ -282,7 +302,7 @@ namespace pinocchio
       // So we set the primal variables to the 0 initial guess and the dual variable to g.
       x_.setZero();
       y_.setZero();
-      z_ = g;
+      z_ = gs;
       if (solve_ncp)
       {
         {
@@ -292,9 +312,10 @@ namespace pinocchio
         }
         z_ += s_; // Add De Saxé shift
       }
-      dual_feasibility_vector = z_;
-      computeDualConeProjection(constraint_models, z_, z_);
-      dual_feasibility_vector -= z_; // Dual feasibility vector for the new null guess
+      rhs = z_.array() * time_scaling.array();
+      dual_feasibility_vector = rhs;
+      computeDualConeProjection(constraint_models, rhs, rhs);
+      dual_feasibility_vector -= rhs; // Dual feasibility vector for the new null guess
       // We set the new convergence criterion
       this->absolute_residual = absolute_residual_zero_guess;
     }
@@ -308,8 +329,8 @@ namespace pinocchio
       preconditioner_.unscaleSquare(R, rhs);
       // we add the compliance to the delassus
       rhs += VectorXs::Constant(this->problem_size, mu_prox);
-      G_bar.updateDamping(rhs);     // G_bar =  P*(G+R)*P + mu_prox*Id
-      scaleDualSolution(g, g_bar_); // g_bar = P * g
+      G_bar.updateDamping(rhs);      // G_bar =  P*(G+R)*P + mu_prox*Id
+      scaleDualSolution(gs, g_bar_); // g_bar = P * gs
       scalePrimalSolution(x_, x_bar_);
       scalePrimalSolution(y_, y_bar_);
       scaleDualSolution(z_, z_bar_);
@@ -427,6 +448,8 @@ namespace pinocchio
           dual_feasibility_vector.noalias() += (tau * rho) * dy_bar;
         }
 
+        dual_feasibility_vector.array() *= time_scaling.array();
+
         {
           VectorXs & dz_bar = rhs;
           dz_bar = z_bar_ - z_bar_previous;
@@ -442,7 +465,8 @@ namespace pinocchio
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscalePrimalSolution(y_bar_, y_);
         unscaleDualSolution(z_bar_, z_);
-        complementarity = computeConicComplementarity(constraint_models, z_, y_);
+        rhs = z_.array() * time_scaling.array();
+        complementarity = computeConicComplementarity(constraint_models, rhs, y_);
 
         if (stat_record)
         {
@@ -456,7 +480,9 @@ namespace pinocchio
             tmp.noalias() += rhs;
           }
 
-          internal::computeDualConeProjection(constraint_models, tmp, rhs);
+          tmp.array() *= time_scaling.array(); // back to constraint formulation level
+          rhs = tmp;
+          internal::computeDualConeProjection(constraint_models, rhs, rhs);
           tmp -= rhs;
 
           dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
@@ -558,6 +584,8 @@ namespace pinocchio
     this->it = it;
     unscalePrimalSolution(x_bar_, x_); // only for debug purposes
     unscalePrimalSolution(y_bar_, y_);
+    // TODO: should we time-rescale dual solution and desaxe correction?
+    // so that z_ and s_ are back at the constraints formulations levels
     unscaleDualSolution(z_bar_, z_);
     unscaleDualSolution(s_bar_, s_);
 

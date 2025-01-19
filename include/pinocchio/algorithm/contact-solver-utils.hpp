@@ -705,6 +705,123 @@ namespace pinocchio
     //   return norm;
     // }
 
+    template<typename Scalar, typename ResultVectorLike>
+    struct GetTimeScalingFromConstraint
+    : visitors::ConstraintUnaryVisitorBase<GetTimeScalingFromConstraint<Scalar, ResultVectorLike>>
+    {
+      using ArgsType = boost::fusion::vector<Scalar, ResultVectorLike &>;
+      using Base = visitors::ConstraintUnaryVisitorBase<
+        GetTimeScalingFromConstraint<Scalar, ResultVectorLike>>;
+
+      template<typename ConstraintModel>
+      static void
+      algo(const ConstraintModelBase<ConstraintModel> &, Scalar dt, ResultVectorLike & res)
+      {
+        if (
+          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
+          == ::pinocchio::ConstraintFormulationLevel::POSITION_LEVEL)
+        {
+          res.setConstant(Scalar(dt * dt));
+        }
+        if (
+          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
+          == ::pinocchio::ConstraintFormulationLevel::VELOCITY_LEVEL)
+        {
+          res.setConstant(Scalar(dt));
+        }
+        if (
+          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
+          == ::pinocchio::ConstraintFormulationLevel::ACCELERATION_LEVEL)
+        {
+          res.setOnes();
+        }
+      }
+
+      /// ::run for individual constraints
+      template<typename ConstraintModel>
+      static void run(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        Scalar dt,
+        ResultVectorLike & res)
+      {
+        algo(cmodel.derived(), dt, res);
+      }
+
+      /// ::run for constraints variant
+      template<int Options, template<typename S, int O> class ConstraintCollectionTpl>
+      static void run(
+        const pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+        Scalar dt,
+        ResultVectorLike & res)
+      {
+        ArgsType args(dt, res);
+        // Note: Base::run will call `algo` of this visitor
+        Base::run(cmodel.derived(), args);
+      }
+    }; // struct GetTimeScalingFromConstraint
+
+    ///
+    /// \brief Retrieve a vector of time scaling factors from a vector of constraints.
+    /// Depending on the constraint formulation level, the time scaling factor is:
+    /// - position level -> dt * dt
+    /// - velocity level -> dt
+    /// - acceleration level -> 1
+    /// Consequently, if z is a vector of constraint residuals, where each component of z is
+    /// expressed at each constraint formulation level, then the vector z / time_scaling is an
+    /// acceleration level vector.
+    /// Conversly, if z is an acceleration vector, then z * time_scaling brings the vector back to
+    /// the constraints formulation levels.
+    ///
+    /// \param[in] constraint_models Vector of constraints
+    /// \param[in] dt the time step used to linearize the constraints
+    /// \param[out] time_scaling the vector of time scaling factors
+    ///
+    template<
+      template<typename T> class Holder,
+      typename ConstraintModel,
+      typename ConstraintModelAllocator,
+      typename VectorLikeOut>
+    void getTimeScalingFromConstraints(
+      const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
+        constraint_models,
+      const typename ConstraintModel::Scalar dt,
+      const Eigen::DenseBase<VectorLikeOut> & time_scaling_)
+    {
+      using Scalar = typename ConstraintModel::Scalar;
+      using SegmentType = typename VectorLikeOut::SegmentReturnType;
+      VectorLikeOut & time_scaling = time_scaling_.const_cast_derived();
+
+      Eigen::DenseIndex cindex = 0;
+      for (const ConstraintModel & cmodel : constraint_models)
+      {
+        const auto csize = cmodel.size();
+
+        SegmentType time_scaling_segment = time_scaling.segment(cindex, csize);
+        typedef GetTimeScalingFromConstraint<Scalar, SegmentType> Algo;
+
+        Algo::run(cmodel, dt, time_scaling_segment);
+
+        cindex += csize;
+      }
+    }
+
+    ///
+    /// \brief see \ref getTimeScalingFromConstraints
+    ///
+    template<typename ConstraintModel, typename ConstraintModelAllocator, typename VectorLikeOut>
+    void getTimeScalingFromConstraints(
+      const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const typename ConstraintModel::Scalar dt,
+      const Eigen::DenseBase<VectorLikeOut> & time_scaling)
+    {
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+      WrappedConstraintModelVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+      getTimeScalingFromConstraints(wrapped_constraint_models, dt, time_scaling);
+    }
+
   } // namespace internal
 
 } // namespace pinocchio

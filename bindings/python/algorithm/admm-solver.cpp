@@ -39,6 +39,7 @@ namespace pinocchio
       DelassusDerived & delassus,
       const context::VectorXs & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const context::Scalar dt,
       const context::VectorXs & R,
       const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
@@ -48,7 +49,7 @@ namespace pinocchio
       bool stat_record = false)
     {
       return solver.solve(
-        delassus, g, constraint_models, R, preconditioner, primal_solution, dual_solution,
+        delassus, g, constraint_models, dt, R, preconditioner, primal_solution, dual_solution,
         solve_ncp, admm_update_rule, stat_record);
     }
 

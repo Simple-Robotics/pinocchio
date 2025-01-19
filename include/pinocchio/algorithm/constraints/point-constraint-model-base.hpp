@@ -44,6 +44,9 @@ namespace pinocchio
         InputMatrixPlain::Options>
         type;
     };
+
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::VELOCITY_LEVEL;
   };
 
   ///
