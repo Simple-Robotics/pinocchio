@@ -448,8 +448,6 @@ namespace pinocchio
           dual_feasibility_vector.noalias() += (tau * rho) * dy_bar;
         }
 
-        dual_feasibility_vector.array() *= time_scaling.array();
-
         {
           VectorXs & dz_bar = rhs;
           dz_bar = z_bar_ - z_bar_previous;
@@ -462,6 +460,9 @@ namespace pinocchio
         unscalePrimalSolution(primal_feasibility_vector, primal_feasibility_vector);
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscaleDualSolution(dual_feasibility_vector, dual_feasibility_vector);
+        const Scalar admm_dual_feasibility =
+          dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
+        dual_feasibility_vector.array() *= time_scaling.array();
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscalePrimalSolution(y_bar_, y_);
         unscaleDualSolution(z_bar_, z_);
@@ -530,11 +531,11 @@ namespace pinocchio
         {
         case (ADMMUpdateRule::SPECTRAL):
           update_delassus_factorization = admm_update_rule_container.spectral_rule.eval(
-            primal_feasibility, dual_feasibility, rho);
+            primal_feasibility, admm_dual_feasibility, rho);
           break;
         case (ADMMUpdateRule::LINEAR):
-          update_delassus_factorization =
-            admm_update_rule_container.linear_rule.eval(primal_feasibility, dual_feasibility, rho);
+          update_delassus_factorization = admm_update_rule_container.linear_rule.eval(
+            primal_feasibility, admm_dual_feasibility, rho);
           ;
           break;
         }
