@@ -310,6 +310,8 @@ namespace pinocchio
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector(VectorXs::Zero(problem_dim))
+    , primal_feasibility_vector_bar(VectorXs::Zero(problem_dim))
+    , dual_feasibility_vector_bar(VectorXs::Zero(problem_dim))
     , stats(Base::max_it)
     {
     }
@@ -694,7 +696,8 @@ namespace pinocchio
     /// \brief Vector g divided by time scaling (g / time_scaling)
     VectorXs gs;
 
-    VectorXs rhs, primal_feasibility_vector, dual_feasibility_vector;
+    VectorXs rhs, primal_feasibility_vector, primal_feasibility_vector_bar, dual_feasibility_vector,
+      dual_feasibility_vector_bar;
 
     int cholesky_update_count;
 

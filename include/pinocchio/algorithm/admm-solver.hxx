@@ -430,14 +430,14 @@ namespace pinocchio
         z_bar_ -= (tau * rho) * (x_bar_ - y_bar_);
 
         // check termination criteria
-        primal_feasibility_vector = x_bar_ - y_bar_;
+        primal_feasibility_vector_bar = x_bar_ - y_bar_;
 
         {
           VectorXs & dx_bar = rhs;
           dx_bar = x_bar_ - x_bar_previous;
           dx_bar_norm =
             dx_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on x_bar
-          dual_feasibility_vector.noalias() = mu_prox * dx_bar;
+          dual_feasibility_vector_bar.noalias() = mu_prox * dx_bar;
         }
 
         {
@@ -445,7 +445,7 @@ namespace pinocchio
           dy_bar = y_bar_ - y_bar_previous;
           dy_bar_norm =
             dy_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on y_bar
-          dual_feasibility_vector.noalias() += (tau * rho) * dy_bar;
+          dual_feasibility_vector_bar.noalias() += (tau * rho) * dy_bar;
         }
 
         {
@@ -457,9 +457,9 @@ namespace pinocchio
 
         // We unscale the quantities to work with stopping criterion from the original (unscaled)
         // problem
-        unscalePrimalSolution(primal_feasibility_vector, primal_feasibility_vector);
+        unscalePrimalSolution(primal_feasibility_vector_bar, primal_feasibility_vector);
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
-        unscaleDualSolution(dual_feasibility_vector, dual_feasibility_vector);
+        unscaleDualSolution(dual_feasibility_vector_bar, dual_feasibility_vector);
         const Scalar admm_dual_feasibility =
           dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         dual_feasibility_vector.array() *= time_scaling.array();
