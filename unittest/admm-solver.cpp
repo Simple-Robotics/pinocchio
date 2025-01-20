@@ -531,7 +531,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
   model.appendBodyToJoint(1, box_inertia);
   Data data(model);
 
-  Eigen::VectorXd q0 = Eigen::VectorXd::Zero(model.nq);
+  Eigen::VectorXd q0 = neutral(model);
   const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
   Eigen::VectorXd tau_gravity = Eigen::VectorXd::Zero(model.nv);
   tau_gravity(2) = 9.81 * box_mass;
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
   joint.addJoint(JointModelRX());
   joint.addJoint(JointModelRY());
   Model model;
-  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "composite");
+  model.addJoint(0, joint, SE3::Identity(), "composite");
   model.lowerPositionLimit = Eigen::VectorXd::Ones(model.nq) * -10000;
   model.lowerPositionLimit[1] = 0;
   model.upperPositionLimit = Eigen::VectorXd::Ones(model.nq) * 10000;
