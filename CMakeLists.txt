@@ -164,8 +164,6 @@ option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at r
 
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 
-option(PINOCCHIO_DOWNLOAD_TRACY "Use FetchContent to install Tracy." OFF)
-
 # Variable containing all the cflags definition, options and libraries to setup pkg-config.
 set(CFLAGS_OPTIONS)
 set(CFLAGS_DEPENDENCIES)
@@ -248,36 +246,7 @@ if(BUILD_WITH_PARSERS_SUPPORT)
 endif()
 
 # -- tracy (optional)
-if(PINOCCHIO_TRACY_ENABLE AND PINOCCHIO_DOWNLOAD_TRACY)
-  # We use FetchContent_Populate because we need EXCLUDE_FROM_ALL to avoid installing Tracy with
-  # pinocchio. We can directly use EXCLUDE_FROM_ALL in FetchContent_Declare when CMake minimum
-  # version will be 3.28.
-  if(POLICY CMP0169)
-    cmake_policy(SET CMP0169 OLD)
-  endif()
-  FetchContent_Declare(
-    tracy
-    GIT_REPOSITORY https://github.com/Simple-Robotics/tracy.git
-    GIT_TAG patches
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE)
-  FetchContent_GetProperties(tracy)
-  if(NOT tracy_POPULATED)
-    FetchContent_Populate(tracy)
-    set(TRACY_STATIC
-        ON
-        CACHE INTERNAL "")
-    set(TRACY_ENABLE
-        ${PINOCCHIO_TRACY_ENABLE}
-        CACHE INTERNAL "")
-    add_subdirectory(${tracy_SOURCE_DIR} ${tracy_BINARY_DIR} EXCLUDE_FROM_ALL)
-    # Extract the target include directories, set as system
-    get_target_property(tracy_INCLUDE_DIR TracyClient INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(
-      TracyClient PROPERTIES POSITION_INDEPENDENT_CODE True INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
-                                                            "${tracy_INCLUDE_DIR}")
-  endif()
-elseif(PINOCCHIO_TRACY_ENABLE)
+if(PINOCCHIO_TRACY_ENABLE)
   # assume it is installed somewhere
   add_project_dependency(Tracy REQUIRED)
   set_target_properties(Tracy::TracyClient PROPERTIES POSITION_INDEPENDENT_CODE True)

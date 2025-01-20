@@ -37,6 +37,7 @@ modernize_target_link_libraries(
   TARGETS Boost::boost Boost::serialization
   LIBRARIES ${Boost_SERIALIZATION_LIBRARY}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+
 # (optional) enable tracy profiling
 if(PINOCCHIO_TRACY_ENABLE)
   modernize_target_link_libraries(
