@@ -781,7 +781,7 @@ namespace pinocchio
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeOut>
-    void getTimeScalingFromConstraints(
+    void getTimeScalingFromAccelerationToConstraints(
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
       const typename ConstraintModel::Scalar dt,
@@ -809,7 +809,7 @@ namespace pinocchio
     /// \brief see \ref getTimeScalingFromConstraints
     ///
     template<typename ConstraintModel, typename ConstraintModelAllocator, typename VectorLikeOut>
-    void getTimeScalingFromConstraints(
+    void getTimeScalingFromAccelerationToConstraints(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const typename ConstraintModel::Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & time_scaling)
@@ -819,7 +819,28 @@ namespace pinocchio
 
       WrappedConstraintModelVector wrapped_constraint_models(
         constraint_models.cbegin(), constraint_models.cend());
-      getTimeScalingFromConstraints(wrapped_constraint_models, dt, time_scaling);
+      getTimeScalingFromAccelerationToConstraints(wrapped_constraint_models, dt, time_scaling);
+    }
+
+    ///
+    /// \brief
+    ///
+    /// \param[in] time_scaling_acc_to_constraints Vector of time scaling that scale accelerations
+    /// to the units of constraints
+    /// \param[in] dt the time step used to linearize the constraints
+    /// \param[out] time_scaling_constraints_to_pos the vector of time scaling that scales
+    /// constraints units to position.
+    ///
+    template<typename VectorLikeIn, typename Scalar, typename VectorLikeOut>
+    void getTimeScalingFromConstraintsToPosition(
+      const Eigen::MatrixBase<VectorLikeIn> & time_scaling_acc_to_constraints,
+      const Scalar dt,
+      const Eigen::DenseBase<VectorLikeOut> & time_scaling_constraints_to_pos_)
+    {
+      VectorLikeOut & time_scaling_constraints_to_pos =
+        time_scaling_constraints_to_pos_.const_cast_derived();
+      time_scaling_constraints_to_pos = time_scaling_acc_to_constraints.array().inverse();
+      time_scaling_constraints_to_pos *= dt * dt;
     }
 
   } // namespace internal

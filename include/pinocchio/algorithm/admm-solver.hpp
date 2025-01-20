@@ -305,7 +305,8 @@ namespace pinocchio
     , s_bar_(VectorXs::Zero(problem_dim))
     , preconditioner_(VectorXs::Ones(problem_dim))
     , g_bar_(VectorXs::Zero(problem_dim))
-    , time_scaling(VectorXs::Zero(problem_dim))
+    , time_scaling_acc_to_constraints(VectorXs::Zero(problem_dim))
+    , time_scaling_constraints_to_pos(VectorXs::Zero(problem_dim))
     , gs(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
@@ -692,8 +693,8 @@ namespace pinocchio
     VectorXs g_bar_;
 
     /// \brief Time scaling vector for constraints
-    VectorXs time_scaling;
-    /// \brief Vector g divided by time scaling (g / time_scaling)
+    VectorXs time_scaling_acc_to_constraints, time_scaling_constraints_to_pos;
+    /// \brief Vector g divided by time scaling (g / time_scaling_acc_to_constraints)
     VectorXs gs;
 
     VectorXs rhs, primal_feasibility_vector, primal_feasibility_vector_bar, dual_feasibility_vector,

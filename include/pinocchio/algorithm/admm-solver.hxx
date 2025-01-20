@@ -216,18 +216,25 @@ namespace pinocchio
     Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_bar_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
 
-    // Then, we get the time_scaling T from the constraints to construct gs, which is g time-scaled
-    // depending on the formulation of each constraint: gs = T^{-1} * g.
-    // The idea is that if we formulate a given constraint at the position/velocity/acceleration
-    // level, we want to measure constraint satisfaction for this constraint at the same
+    // Then, we get the time_scaling_acc_to_constraints T from the constraints to construct gs,
+    // which is g time-scaled depending on the formulation of each constraint: gs = T^{-1} * g. The
+    // idea is that if we formulate a given constraint at the position/velocity/acceleration level,
+    // we want to measure constraint satisfaction for this constraint at the same
     // position/velocity/acceleration level.
     // However, to take admm steps, we work at the (force, acceleration) level for all constraints.
     // In short:
     // -> gs is used to perform optimization steps (we typically work on min_x x^TGx + gs^Tx).
-    // -> time_scaling is used to check for constraint satisfaction (we typically want TGx + g = 0).
-    // Warning: this constraints time-scaling has (a priori) nothing to do with the pre-conditioner.
-    getTimeScalingFromConstraints(constraint_models, dt, time_scaling);
-    gs = g.array() / time_scaling.array();
+    // -> time_scaling_acc_to_constraints is used to check for constraint satisfaction (we typically
+    // want TGx + g = 0). It allows to go from accelerations to the units of each constraints. This
+    // way, x and y are always forces expressed in N.
+    // -> time_scaling_constraints_to_pos similarly allows to go from the units of the constraints
+    // to positions in m. Warning: this constraints time-scaling has (a priori) nothing to do with
+    // the pre-conditioner.
+    getTimeScalingFromAccelerationToConstraints(
+      constraint_models, dt, time_scaling_acc_to_constraints);
+    getTimeScalingFromConstraintsToPosition(
+      time_scaling_acc_to_constraints, dt, time_scaling_constraints_to_pos);
+    gs = g.array() / time_scaling_acc_to_constraints.array();
 
     // Initialize De Saxé shift to 0
     // For the CCP, there is no shift
@@ -277,13 +284,15 @@ namespace pinocchio
     // complementarity of the initial guess
     // NB: complementarity is computed between a force y_ (in N) and z_ which unit is that of the
     // constraint formulation level.
-    rhs = z_.array() * time_scaling.array(); // back to constraint formulation level
+    rhs =
+      z_.array() * time_scaling_acc_to_constraints.array(); // back to constraint formulation level
     complementarity = computeConicComplementarity(constraint_models, rhs, y_);
 
     // dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
     dual_feasibility_vector = rhs;
     computeDualConeProjection(constraint_models, rhs, rhs);
     dual_feasibility_vector -= rhs;
+    dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
     dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
 
     this->absolute_residual = math::max(complementarity, dual_feasibility);
@@ -312,10 +321,11 @@ namespace pinocchio
         }
         z_ += s_; // Add De Saxé shift
       }
-      rhs = z_.array() * time_scaling.array();
+      rhs = z_.array() * time_scaling_acc_to_constraints.array();
       dual_feasibility_vector = rhs;
       computeDualConeProjection(constraint_models, rhs, rhs);
       dual_feasibility_vector -= rhs; // Dual feasibility vector for the new null guess
+      dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
       // We set the new convergence criterion
       this->absolute_residual = absolute_residual_zero_guess;
     }
@@ -462,11 +472,12 @@ namespace pinocchio
         unscaleDualSolution(dual_feasibility_vector_bar, dual_feasibility_vector);
         const Scalar admm_dual_feasibility =
           dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-        dual_feasibility_vector.array() *= time_scaling.array();
+        dual_feasibility_vector.array() *= time_scaling_acc_to_constraints.array();
+        dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscalePrimalSolution(y_bar_, y_);
         unscaleDualSolution(z_bar_, z_);
-        rhs = z_.array() * time_scaling.array();
+        rhs = z_.array() * time_scaling_acc_to_constraints.array();
         complementarity = computeConicComplementarity(constraint_models, rhs, y_);
 
         if (stat_record)
@@ -481,7 +492,8 @@ namespace pinocchio
             tmp.noalias() += rhs;
           }
 
-          tmp.array() *= time_scaling.array(); // back to constraint formulation level
+          tmp.array() *=
+            time_scaling_acc_to_constraints.array(); // back to constraint formulation level
           rhs = tmp;
           internal::computeDualConeProjection(constraint_models, rhs, rhs);
           tmp -= rhs;
