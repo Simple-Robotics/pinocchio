@@ -14,9 +14,9 @@ namespace pinocchio
 {
 
   template<typename DelassusOperator, typename ConfigVectorType>
-  struct DelassusOperatorRigidBodyTplComputeForwardPass
+  struct DelassusOperatorRigidBodySystemsComputeForwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodyTplComputeForwardPass<DelassusOperator, ConfigVectorType>>
+      DelassusOperatorRigidBodySystemsComputeForwardPass<DelassusOperator, ConfigVectorType>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::CustomData Data;
@@ -46,9 +46,9 @@ namespace pinocchio
   };
 
   template<typename DelassusOperator>
-  struct DelassusOperatorRigidBodyTplComputeBackwardPass
+  struct DelassusOperatorRigidBodySystemsComputeBackwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperator>>
+      DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperator>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::CustomData Data;
@@ -92,12 +92,10 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
   template<typename ConfigVectorType>
-  void DelassusOperatorRigidBodyTpl<Scalar, Options, JointCollectionTpl, Holder>::compute(
+  void DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::compute(
     const Eigen::MatrixBase<ConfigVectorType> & q)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
@@ -105,8 +103,8 @@ namespace pinocchio
 
     const Model & model_ref = model();
 
-    typedef DelassusOperatorRigidBodyTplComputeForwardPass<
-      DelassusOperatorRigidBodyTpl, ConfigVectorType>
+    typedef DelassusOperatorRigidBodySystemsComputeForwardPass<
+      DelassusOperatorRigidBodySystemsTpl, ConfigVectorType>
       Pass1;
     for (JointIndex i = 1; i < (JointIndex)model_ref.njoints; ++i)
     {
@@ -120,11 +118,9 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
-  void DelassusOperatorRigidBodyTpl<Scalar, Options, JointCollectionTpl, Holder>::compute()
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
+  void DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::compute()
   {
     const Model & model_ref = model();
     Data & data_ref = data();
@@ -148,11 +144,11 @@ namespace pinocchio
         this->m_damping_inverse.template segment<3>(Eigen::DenseIndex(ee_id * 3));
 
       cmodel.appendConstraintDiagonalInertiaToJointInertias(
-        model_ref, data_ref, cdata, constraint_diagonal_inertia,
-        custom_data.Yaba_augmented);
+        model_ref, data_ref, cdata, constraint_diagonal_inertia, custom_data.Yaba_augmented);
     }
 
-    typedef DelassusOperatorRigidBodyTplComputeBackwardPass<DelassusOperatorRigidBodyTpl> Pass2;
+    typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperatorRigidBodySystemsTpl>
+      Pass2;
     for (JointIndex i = JointIndex(model_ref.njoints - 1); i > 0; --i)
     {
       typename Pass2::ArgsType args(model_ref, this->m_custom_data);
@@ -169,9 +165,9 @@ namespace pinocchio
   }
 
   template<typename DelassusOperator>
-  struct DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass
+  struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperator>>
+      DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<DelassusOperator>>
   {
     typedef typename DelassusOperator::Model Model;
     //    typedef typename DelassusOperator::Data Data;
@@ -213,9 +209,9 @@ namespace pinocchio
   };
 
   template<typename DelassusOperator>
-  struct DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass
+  struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperator>>
+      DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass<DelassusOperator>>
   {
     typedef typename DelassusOperator::Model Model;
     //    typedef typename DelassusOperator::Data Data;
@@ -256,17 +252,16 @@ namespace pinocchio
       }
     }
 
-  }; // struct DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass
+  }; // struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass
 
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
   template<typename MatrixIn, typename MatrixOut>
-  void DelassusOperatorRigidBodyTpl<Scalar, Options, JointCollectionTpl, Holder>::applyOnTheRight(
+  void
+  DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::applyOnTheRight(
     const Eigen::MatrixBase<MatrixIn> & rhs, const Eigen::MatrixBase<MatrixOut> & res_) const
   {
     MatrixOut & res = res_.const_cast_derived();
@@ -283,7 +278,8 @@ namespace pinocchio
 
     // Backward sweep: propagate joint force contributions
     {
-      typedef DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperatorRigidBodyTpl>
+      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
+        DelassusOperatorRigidBodySystemsTpl>
         Pass1;
       typename Pass1::ArgsType args1(model_ref, this->m_custom_data);
       for (JointIndex i = JointIndex(model_ref.njoints - 1); i > 0; --i)
@@ -294,7 +290,8 @@ namespace pinocchio
 
     // Forward sweep: compute joint accelerations
     {
-      typedef DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperatorRigidBodyTpl>
+      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass<
+        DelassusOperatorRigidBodySystemsTpl>
         Pass2;
       for (auto & motion : m_custom_data.a)
         motion.setZero();
@@ -315,9 +312,9 @@ namespace pinocchio
   }
 
   //  template<typename DelassusOperator>
-  //  struct DelassusOperatorRigidBodyTplSolveInPlaceBackwardPass
+  //  struct DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass
   //  : public fusion::JointUnaryVisitorBase<
-  //  DelassusOperatorRigidBodyTplSolveInPlaceBackwardPass<DelassusOperator> >
+  //  DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<DelassusOperator> >
   //  {
   //    typedef typename DelassusOperator::Model Model;
   //      //    typedef typename DelassusOperator::Data Data;
@@ -358,12 +355,11 @@ namespace pinocchio
   template<
     typename Scalar,
     int Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
   template<typename MatrixLike>
-  void DelassusOperatorRigidBodyTpl<Scalar, Options, JointCollectionTpl, Holder>::solveInPlace(
+  void
+  DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::solveInPlace(
     const Eigen::MatrixBase<MatrixLike> & mat_) const
   {
     MatrixLike & mat = mat_.const_cast_derived();
@@ -383,7 +379,8 @@ namespace pinocchio
 
     // Backward sweep: propagate joint force contributions
     {
-      typedef DelassusOperatorRigidBodyTplApplyOnTheRightBackwardPass<DelassusOperatorRigidBodyTpl>
+      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
+        DelassusOperatorRigidBodySystemsTpl>
         Pass1;
       typename Pass1::ArgsType args1(model_ref, this->m_custom_data);
       for (JointIndex i = JointIndex(model_ref.njoints - 1); i > 0; --i)
@@ -394,7 +391,8 @@ namespace pinocchio
 
     // Forward sweep: compute joint accelerations
     {
-      typedef DelassusOperatorRigidBodyTplApplyOnTheRightForwardPass<DelassusOperatorRigidBodyTpl>
+      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass<
+        DelassusOperatorRigidBodySystemsTpl>
         Pass2;
       for (auto & motion : m_custom_data.a)
         motion.setZero();

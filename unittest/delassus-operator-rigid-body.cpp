@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(default_constructor_shared_ptr)
 {
-  typedef DelassusOperatorRigidBodyTpl<double, 0, JointCollectionDefaultTpl, std::shared_ptr>
+  typedef DelassusOperatorRigidBodySystemsTpl<double, 0, JointCollectionDefaultTpl, std::shared_ptr>
     DelassusOperatorRigidBodySharedPtr;
   typedef typename DelassusOperatorRigidBodySharedPtr::ConstraintModelVector ConstraintModelVector;
   typedef typename DelassusOperatorRigidBodySharedPtr::ConstraintDataVector ConstraintDataVector;
@@ -58,7 +58,8 @@ BOOST_AUTO_TEST_CASE(default_constructor_shared_ptr)
 
 BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
 {
-  typedef DelassusOperatorRigidBodyTpl<double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
     DelassusOperatorRigidBodyReferenceWrapper;
   typedef
     typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintModelVector ConstraintModelVector;
@@ -89,7 +90,8 @@ BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
 
 BOOST_AUTO_TEST_CASE(test_compute)
 {
-  typedef DelassusOperatorRigidBodyTpl<double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
     DelassusOperatorRigidBodyReferenceWrapper;
   typedef DelassusOperatorRigidBodyReferenceWrapper::CustomData CustomData;
   typedef

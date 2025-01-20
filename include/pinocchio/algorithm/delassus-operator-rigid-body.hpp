@@ -15,19 +15,16 @@ namespace pinocchio
   template<
     typename _Scalar,
     int _Options,
-    template<typename, int>
-    class JointCollectionTpl,
+    template<typename, int> class JointCollectionTpl,
     template<typename T> class Holder = std::reference_wrapper>
-  struct DelassusOperatorRigidBodyTpl;
+  struct DelassusOperatorRigidBodySystemsTpl;
 
   template<
     typename _Scalar,
     int _Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
-  struct traits<DelassusOperatorRigidBodyTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
+  struct traits<DelassusOperatorRigidBodySystemsTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
   {
     typedef _Scalar Scalar;
 
@@ -54,17 +51,15 @@ namespace pinocchio
   template<
     typename _Scalar,
     int _Options,
-    template<typename, int>
-    class JointCollectionTpl,
-    template<typename T>
-    class Holder>
-  struct DelassusOperatorRigidBodyTpl
+    template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder>
+  struct DelassusOperatorRigidBodySystemsTpl
   : DelassusOperatorBase<
-      DelassusOperatorRigidBodyTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
+      DelassusOperatorRigidBodySystemsTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef DelassusOperatorRigidBodyTpl Self;
+    typedef DelassusOperatorRigidBodySystemsTpl Self;
     typedef DelassusOperatorBase<Self> Base;
 
     typedef typename traits<Self>::Scalar Scalar;
@@ -93,7 +88,7 @@ namespace pinocchio
     typedef typename traits<Self>::ConstraintDataVector ConstraintDataVector;
     typedef Holder<ConstraintDataVector> ConstraintDataVectorHolder;
 
-    DelassusOperatorRigidBodyTpl(
+    DelassusOperatorRigidBodySystemsTpl(
       const ModelHolder & model_ref,
       const DataHolder & data_ref,
       const ConstraintModelVectorHolder & constraint_models_ref,
