@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023-2024 INRIA
+// Copyright (c) 2023-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_constraint_model_visitor_hpp__
@@ -486,6 +486,67 @@ namespace pinocchio
     {
       typedef ConstraintModelGetRowSparsityPatternVisitor<Scalar, Options> Algo;
       return Algo::run(cmodel, typename Algo::ArgsType(row_id));
+    }
+
+    /**
+     * @brief      ConstraintModelJacobianVisitor fusion visitor
+     */
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      typename InputMatrix,
+      typename OutputMatrix>
+    struct ConstraintModelJacobianMatrixProductVisitor
+    : visitors::ConstraintUnaryVisitorBase<ConstraintModelJacobianMatrixProductVisitor<
+        Scalar,
+        Options,
+        JointCollectionTpl,
+        InputMatrix,
+        OutputMatrix>>
+    {
+      typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef boost::fusion::
+        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &>
+          ArgsType;
+
+      template<typename ConstraintModel>
+      static void algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        typename ConstraintModel::ConstraintData & cdata,
+        const Model & model,
+        const Data & data,
+        const Eigen::MatrixBase<InputMatrix> & input_matrix,
+        const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+      {
+        cmodel.jacobianMatrixProduct(
+          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived());
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
+      typename InputMatrix,
+      typename OutputMatrix>
+    void jacobianMatrixProduct(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+      const Eigen::MatrixBase<InputMatrix> & input_matrix,
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+    {
+      typedef ConstraintModelJacobianMatrixProductVisitor<
+        Scalar, Options, JointCollectionTpl, InputMatrix, OutputMatrix>
+        Algo;
+
+      typename Algo::ArgsType args(
+        model, data, input_matrix.derived(), result_matrix.const_cast_derived());
+      Algo::run(cmodel, cdata, args);
     }
 
   } // namespace visitors

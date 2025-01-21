@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023-2024 INRIA
+// Copyright (c) 2023-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraint_model_generic_hpp__
@@ -136,6 +136,22 @@ namespace pinocchio
     const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       return ::pinocchio::visitors::getRowSparsityPattern(*this, row_id);
+    }
+
+    /// \brief Returns the sparsity pattern associated with a given row
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename InputMatrix,
+      typename OutputMatrix>
+    void jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & input_matrix,
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
+    {
+      ::pinocchio::visitors::jacobianMatrixProduct(
+        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
     }
 
     /// \brief Returns the size of the constraint
