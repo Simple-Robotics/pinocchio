@@ -597,10 +597,12 @@ namespace pinocchio
     this->it = it;
     unscalePrimalSolution(x_bar_, x_); // only for debug purposes
     unscalePrimalSolution(y_bar_, y_);
-    // TODO: should we time-rescale dual solution and desaxe correction?
+    // we time-rescale dual solution and desaxe correction
     // so that z_ and s_ are back at the constraints formulations levels
     unscaleDualSolution(z_bar_, z_);
+    z_.array() *= time_scaling_acc_to_constraints.array();
     unscaleDualSolution(s_bar_, s_);
+    s_.array() *= time_scaling_acc_to_constraints.array();
 
     if (abs_prec_reached)
       return true;
