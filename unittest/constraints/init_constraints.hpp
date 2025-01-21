@@ -35,7 +35,7 @@ namespace pinocchio
     template<typename S, int O, template<typename, int> class JointCollectionTpl>
     static ConstraintModel run(const ModelTpl<S, O, JointCollectionTpl> & model)
     {
-      return FrictionalPointConstraintModelTpl(model, 0, SE3::Random());
+      return ConstraintModel(model, 0, SE3::Random());
     }
   };
 
@@ -43,8 +43,7 @@ namespace pinocchio
     class ConstraintModel,
     typename S,
     int O,
-    template<typename, int>
-    class JointCollectionTpl>
+    template<typename, int> class JointCollectionTpl>
   ConstraintModel init_constraint(const ModelTpl<S, O, JointCollectionTpl> & model)
   {
     return init_constraint_default<ConstraintModel>::run(model);
