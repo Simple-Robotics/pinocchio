@@ -721,6 +721,9 @@ namespace pinocchio
           ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
           == ::pinocchio::ConstraintFormulationLevel::POSITION_LEVEL)
         {
+          assert(
+            dt * dt > Eigen::NumTraits<Scalar>::dummy_precision()
+            && "Numerical loss due to a small dt.");
           res.setConstant(Scalar(dt * dt));
         }
         if (
@@ -837,6 +840,9 @@ namespace pinocchio
       const Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & time_scaling_constraints_to_pos_)
     {
+      assert(
+        dt * dt > Eigen::NumTraits<Scalar>::dummy_precision()
+        && "Numerical loss due to a small dt.");
       VectorLikeOut & time_scaling_constraints_to_pos =
         time_scaling_constraints_to_pos_.const_cast_derived();
       time_scaling_constraints_to_pos = time_scaling_acc_to_constraints.array().inverse();
