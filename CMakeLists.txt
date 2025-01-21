@@ -164,6 +164,8 @@ option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at r
 
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
 
+option(PINOCCHIO_BUILD_WITH_TRACY "Build with tracy profiler for performance analysis" OFF)
+
 # Variable containing all the cflags definition, options and libraries to setup pkg-config.
 set(CFLAGS_OPTIONS)
 set(CFLAGS_DEPENDENCIES)
@@ -246,19 +248,19 @@ if(BUILD_WITH_PARSERS_SUPPORT)
 endif()
 
 # -- tracy (optional)
-if(PINOCCHIO_TRACY_ENABLE)
+if(PINOCCHIO_BUILD_WITH_TRACY)
   # assume it is installed somewhere
   add_project_dependency(Tracy REQUIRED)
   set_target_properties(Tracy::TracyClient PROPERTIES POSITION_INDEPENDENT_CODE True)
-  if(NOT ${tracy_FOUND})
+  if(${Tracy_FOUND})
+    message(STATUS "Tracy found on your system at ${Tracy_DIR}")
+  else()
     message(
       FATAL_ERROR
         "Pinocchio support for tracy is enabled, but tracy was not found on your system."
         " Install it, or set the option PINOCCHIO_DOWNLOAD_TRACY to ON so we can fetch it.")
-  else()
-    message(STATUS "Tracy found on your system at ${Tracy_DIR}")
   endif()
-endif()
+endif(PINOCCHIO_BUILD_WITH_TRACY)
 
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   # Check first CppADCodeGen
@@ -493,6 +495,10 @@ endmacro(
   var_name
   var_value)
 
+if(PINOCCHIO_BUILD_WITH_TRACY)
+  export_variable(PINOCCHIO_USE_TRACY ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_TRACY \"\")")
+endif()
 if(BUILD_WITH_URDF_SUPPORT)
   export_variable(PINOCCHIO_USE_URDFDOM ON)
   set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_URDFDOM \"\")")

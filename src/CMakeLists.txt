@@ -38,14 +38,6 @@ modernize_target_link_libraries(
   LIBRARIES ${Boost_SERIALIZATION_LIBRARY}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
-# (optional) enable tracy profiling
-if(PINOCCHIO_TRACY_ENABLE)
-  modernize_target_link_libraries(
-    ${PROJECT_NAME}_headers
-    SCOPE INTERFACE
-    TARGETS Tracy::TracyClient)
-endif()
-
 target_include_directories(
   ${PROJECT_NAME}_headers
   INTERFACE $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
@@ -188,10 +180,26 @@ add_header_group(${PROJECT_NAME}_COLLISION_PUBLIC_HEADERS)
 add_header_group(${PROJECT_NAME}_EXTRA_PUBLIC_HEADERS)
 add_header_group(${PROJECT_NAME}_CORE_GENERATED_PUBLIC_HEADERS)
 
+# (optional) define profiling target (tracy) on which downstream targets will depend
+if(PINOCCHIO_BUILD_WITH_TRACY)
+  set(PROFILING_LIB_NAME "${PROJECT_NAME}_tracy")
+  # No scalar or sources for this target
+  pinocchio_target(${PROFILING_LIB_NAME} INTERFACE)
+  # The main CMakeLists file imports cmake/tracy.cmake, which always generates a pinocchio/tracy.hpp
+  # header file with macros. If PINOCCHIO_TRACY_ENABLE is not defined, the macros do nothing,
+  # otherwise, the tracy macros are activated. Finally, we set INTERFACE here because the definition
+  # is only needed by downstream targets consuming this pinocchio profiling target.
+  target_compile_definitions(${PROFILING_LIB_NAME} INTERFACE PINOCCHIO_TRACY_ENABLE)
+  target_link_libraries(${PROFILING_LIB_NAME} INTERFACE Tracy::TracyClient)
+endif(PINOCCHIO_BUILD_WITH_TRACY)
+
 # Define the default target (double).
 #
 # This target will also have hpp-fcl and workspace module in it.
 pinocchio_specific_type(default DEFAULT_SCOPE)
+if(PINOCCHIO_BUILD_WITH_TRACY)
+  target_link_libraries(${PROJECT_NAME}_default INTERFACE ${PROFILING_LIB_NAME})
+endif(PINOCCHIO_BUILD_WITH_TRACY)
 
 # Some core library algorithms have different behavior if PINOCCHIO_WITH_HPP_FCL is defined. Since
 # some are template instantiated, or some user can link only on pinocchio_default, we muste define
