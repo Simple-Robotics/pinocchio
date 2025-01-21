@@ -88,6 +88,7 @@ include("${JRL_CMAKE_MODULES}/base.cmake")
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
+include("${JRL_CMAKE_MODULES}/tracy.cmake")
 include("${JRL_CMAKE_MODULES}/python.cmake")
 include("${JRL_CMAKE_MODULES}/boost.cmake")
 include("${JRL_CMAKE_MODULES}/ide.cmake")
@@ -162,6 +163,8 @@ option(INITIALIZE_WITH_NAN "Initialize Eigen entries with NaN" OFF)
 option(CHECK_RUNTIME_MALLOC "Check if some memory allocations are performed at runtime" OFF)
 
 option(ENABLE_TEMPLATE_INSTANTIATION "Template instantiation of the main library" ON)
+
+option(PINOCCHIO_BUILD_WITH_TRACY "Build with tracy profiler for performance analysis" OFF)
 
 # Variable containing all the cflags definition, options and libraries to setup pkg-config.
 set(CFLAGS_OPTIONS)
@@ -243,6 +246,21 @@ set(BUILD_WITH_PARSERS_SUPPORT BUILD_WITH_URDF_SUPPORT OR BUILD_WITH_SDF_SUPPORT
 if(BUILD_WITH_PARSERS_SUPPORT)
   list(APPEND LIBRARIES_DEPENDENCIES ${PROJECT_NAME}_parsers)
 endif()
+
+# -- tracy (optional)
+if(PINOCCHIO_BUILD_WITH_TRACY)
+  # assume it is installed somewhere
+  add_project_dependency(Tracy REQUIRED)
+  set_target_properties(Tracy::TracyClient PROPERTIES POSITION_INDEPENDENT_CODE True)
+  if(${Tracy_FOUND})
+    message(STATUS "Tracy found on your system at ${Tracy_DIR}")
+  else()
+    message(
+      FATAL_ERROR
+        "Pinocchio support for tracy is enabled, but tracy was not found on your system."
+        " Install it, or set the option PINOCCHIO_DOWNLOAD_TRACY to ON so we can fetch it.")
+  endif()
+endif(PINOCCHIO_BUILD_WITH_TRACY)
 
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   # Check first CppADCodeGen
@@ -477,6 +495,10 @@ endmacro(
   var_name
   var_value)
 
+if(PINOCCHIO_BUILD_WITH_TRACY)
+  export_variable(PINOCCHIO_USE_TRACY ON)
+  set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_TRACY \"\")")
+endif()
 if(BUILD_WITH_URDF_SUPPORT)
   export_variable(PINOCCHIO_USE_URDFDOM ON)
   set(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nset(PINOCCHIO_USE_URDFDOM \"\")")
