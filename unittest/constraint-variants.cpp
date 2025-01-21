@@ -76,9 +76,9 @@ BOOST_AUTO_TEST_CASE(constraint_visitors)
   // Test jacobian visitor
   {
     ConstraintData constraint_data(rcm.createData());
-    Data::MatrixXs jacobian_matrix1 = Data::Matrix6x::Zero(6, model.nv),
-                   jacobian_matrix2 = Data::Matrix6x::Zero(6, model.nv),
-                   jacobian_matrix_ref = Data::Matrix6x::Zero(6, model.nv);
+    Data::MatrixXs jacobian_matrix1 = Data::MatrixXs::Zero(rcm.size(), model.nv),
+                   jacobian_matrix2 = Data::MatrixXs::Zero(rcm.size(), model.nv),
+                   jacobian_matrix_ref = Data::MatrixXs::Zero(rcm.size(), model.nv);
     rcm.jacobian(model, data, rcd, jacobian_matrix_ref);
     visitors::jacobian(constraint_model, model, data, constraint_data, jacobian_matrix1);
     BOOST_CHECK(jacobian_matrix1 == jacobian_matrix_ref);
