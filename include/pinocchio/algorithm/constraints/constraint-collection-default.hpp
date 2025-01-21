@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_constraint_collection_default_hpp__
@@ -33,13 +33,17 @@ namespace pinocchio
     typedef JointLimitConstraintModelTpl<Scalar, Options> JointLimitConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> JointLimitConstraintData;
 
+    typedef WeldConstraintModelTpl<Scalar, Options> WeldConstraintModel;
+    typedef WeldConstraintDataTpl<Scalar, Options> WeldConstraintData;
+
     typedef boost::variant<
       boost::blank,
       //      FictiousConstraintModel,
       BilateralPointConstraintModel,
       FrictionalPointConstraintModel,
       FrictionalJointConstraintModel,
-      JointLimitConstraintModel>
+      JointLimitConstraintModel,
+      WeldConstraintModel>
       ConstraintModelVariant;
 
     typedef boost::variant<
@@ -48,7 +52,8 @@ namespace pinocchio
       BilateralPointConstraintData,
       FrictionalPointConstraintData,
       FrictionalJointConstraintData,
-      JointLimitConstraintData>
+      JointLimitConstraintData,
+      WeldConstraintData>
       ConstraintDataVariant;
   }; // struct ConstraintCollectionDefaultTpl
 
