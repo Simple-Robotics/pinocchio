@@ -62,6 +62,10 @@ namespace pinocchio
     {
       Options = traits<Derived>::Options
     };
+
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<PointConstraintModelBase>::constraint_formulation_level;
+
     typedef ConstraintModelBase<Derived> Base;
     typedef typename traits<Derived>::ConstraintModel ConstraintModel;
     typedef typename traits<Derived>::ConstraintData ConstraintData;

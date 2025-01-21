@@ -717,26 +717,20 @@ namespace pinocchio
       static void
       algo(const ConstraintModelBase<ConstraintModel> &, Scalar dt, ResultVectorLike & res)
       {
-        if (
-          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
-          == ::pinocchio::ConstraintFormulationLevel::POSITION_LEVEL)
+        switch (ConstraintModel::constraint_formulation_level)
         {
+        case ::pinocchio::ConstraintFormulationLevel::POSITION_LEVEL:
           assert(
             dt * dt > Eigen::NumTraits<Scalar>::dummy_precision()
             && "Numerical loss due to a small dt.");
           res.setConstant(Scalar(dt * dt));
-        }
-        if (
-          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
-          == ::pinocchio::ConstraintFormulationLevel::VELOCITY_LEVEL)
-        {
+          break;
+        case ::pinocchio::ConstraintFormulationLevel::VELOCITY_LEVEL:
           res.setConstant(Scalar(dt));
-        }
-        if (
-          ::pinocchio::traits<ConstraintModel>::constraint_formulation_level
-          == ::pinocchio::ConstraintFormulationLevel::ACCELERATION_LEVEL)
-        {
+          break;
+        case ::pinocchio::ConstraintFormulationLevel::ACCELERATION_LEVEL:
           res.setOnes();
+          break;
         }
       }
 

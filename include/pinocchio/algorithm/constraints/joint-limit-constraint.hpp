@@ -95,6 +95,9 @@ namespace pinocchio
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs ComplianceVectorType;
 
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
+
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 

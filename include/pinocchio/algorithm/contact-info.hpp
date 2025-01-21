@@ -69,6 +69,10 @@ namespace pinocchio
     {
       Options = _Options
     };
+
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::VELOCITY_LEVEL;
+
     typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef boost::blank ConstraintSet;
