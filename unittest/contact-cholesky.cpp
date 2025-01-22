@@ -434,6 +434,8 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_contact6D_LOCAL)
     BOOST_CHECK(osim.isApprox(JMinvJt.inverse()));
 
     const MatrixXd rhs = MatrixXd::Random(12, 12);
+    BOOST_CHECK(contact_chol_decomposition.getDelassusCholeskyExpression().getDamping().isApprox(
+      Eigen::VectorXd::Zero(12)));
     const MatrixXd res_delassus = contact_chol_decomposition.getDelassusCholeskyExpression() * rhs;
     const MatrixXd res_delassus_ref = iosim * rhs;
 
