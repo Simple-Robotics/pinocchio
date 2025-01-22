@@ -271,7 +271,8 @@ namespace pinocchio
 
     // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
-    z_ += (R.cwiseProduct(y_)) + gs;
+    z_ += R.cwiseProduct(y_) + gs;
+    z_ -=  y_.cwiseProduct(delassus.getDamping());
     if (solve_ncp)
     {
       computeDeSaxeCorrection(constraint_models, z_, s_);
