@@ -118,6 +118,22 @@ BOOST_AUTO_TEST_CASE(constraint_visitors)
       model, data, constraint_data, input_matrix, output_matrix2);
     BOOST_CHECK(output_matrix2 == output_matrix_ref);
   }
+
+  // Test jacobianTransposeMatrixProduct
+  {
+    const Eigen::Index num_cols = 20;
+    ConstraintData constraint_data(rcm.createData());
+    const Data::MatrixXs input_matrix = Data::MatrixXs::Random(rcm.size(), num_cols);
+    Data::MatrixXs output_matrix1(model.nv, num_cols), output_matrix2(model.nv, num_cols),
+      output_matrix_ref(model.nv, num_cols);
+    rcm.jacobianTransposeMatrixProduct(model, data, rcd, input_matrix, output_matrix_ref);
+    visitors::jacobianTransposeMatrixProduct(
+      constraint_model, model, data, constraint_data, input_matrix, output_matrix1);
+    BOOST_CHECK(output_matrix1 == output_matrix_ref);
+    constraint_model.jacobianTransposeMatrixProduct(
+      model, data, constraint_data, input_matrix, output_matrix2);
+    BOOST_CHECK(output_matrix2 == output_matrix_ref);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
