@@ -34,6 +34,7 @@ namespace pinocchio
     typedef typename ContactCholeskyDecomposition::RowMatrix RowMatrix;
     typedef DelassusCholeskyExpressionTpl<_ContactCholeskyDecomposition> Self;
     typedef DelassusOperatorBase<Self> Base;
+    typedef typename ContactCholeskyDecomposition::EigenStorageVector EigenStorageVector;
 
     typedef
       typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::Type RowMatrixBlockXpr;
@@ -142,7 +143,7 @@ namespace pinocchio
     ///
     /// \brief Returns the current damping vector.
     ///
-    const Vector & getDamping() const
+    const typename EigenStorageVector::MapType getDamping() const
     {
       return self.getDamping();
     }
