@@ -48,7 +48,8 @@ struct TestBoxTpl
     const Eigen::VectorXd & v0,
     const Eigen::VectorXd & tau0,
     const Force & fext,
-    const double dt)
+    const double dt,
+    const bool test_warmstart = false)
   {
     std::vector<Force> external_forces(size_t(model.njoints), Force::Zero());
     external_forces[1] = fext;
@@ -89,7 +90,20 @@ struct TestBoxTpl
       G_expression, g, constraint_models, dt, compliance, preconditioner_vec,
       primal_solution_constref);
     primal_solution = admm_solver.getPrimalSolution();
+
+    if (test_warmstart)
+    {
+      boost::optional<const Eigen::Ref<const Eigen::VectorXd>> primal_solution_warmstart(
+        primal_solution);
+      has_converged = has_converged
+                      && admm_solver.solve(
+                        G_expression, g, constraint_models, dt, compliance, preconditioner_vec,
+                        primal_solution_warmstart);
+      primal_solution = admm_solver.getPrimalSolution();
+    }
+
     dual_solution = admm_solver.getDualSolution();
+    n_iter = admm_solver.getIterationCount();
     const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * primal_solution;
 
     v_next =
@@ -106,6 +120,7 @@ struct TestBoxTpl
 
   Eigen::VectorXd primal_solution, dual_solution, dual_solution_sparse;
   bool has_converged;
+  int n_iter;
 };
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
@@ -164,6 +179,14 @@ BOOST_AUTO_TEST_CASE(ball)
     const Force::Vector3 f_tot_ref = -ball_mass * Model::gravity981 - fext.linear();
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
+
+    // Test warmstart
+    test(q0, v0, tau0, fext, dt, true);
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-8));
+    BOOST_CHECK(test.v_next.isZero(2e-10));
+    BOOST_CHECK(test.n_iter == 0);
   }
 }
 
