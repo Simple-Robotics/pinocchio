@@ -310,8 +310,8 @@ namespace pinocchio
     , gs(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
-    , dual_feasibility_vector(VectorXs::Zero(problem_dim))
     , primal_feasibility_vector_bar(VectorXs::Zero(problem_dim))
+    , dual_feasibility_vector(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector_bar(VectorXs::Zero(problem_dim))
     , stats(Base::max_it)
     {
