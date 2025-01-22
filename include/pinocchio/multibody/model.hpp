@@ -273,11 +273,12 @@ namespace pinocchio
     }
 
     ///
-    /// \brief Copy constructor by casting
+    /// \brief Copy constructor from another collection
     ///
     /// \param[in] other model to copy to *this
     ///
-    ModelTpl(const ModelTpl & other)
+    template<template<typename, int> class OtherJointCollectionTpl>
+    ModelTpl(const ModelTpl<Scalar, Options, OtherJointCollectionTpl> & other)
     : friction(upperDryFrictionLimit)
     , effortLimit(upperEffortLimit)
     , velocityLimit(upperVelocityLimit)
@@ -297,10 +298,21 @@ namespace pinocchio
     bool operator==(const ModelTpl & other) const;
 
     ///
+    /// \brief Assignment operator from another collection.
+    ///
+    ///
+    template<template<typename, int> class OtherJointCollectionTpl>
+    ModelTpl & operator=(const ModelTpl<Scalar, Options, OtherJointCollectionTpl> & other);
+
+    ///
     /// \brief Assignment operator.
     ///
     ///
-    ModelTpl & operator=(const ModelTpl & other);
+    ModelTpl & operator=(const ModelTpl & other)
+    {
+      (*this).template operator= <JointCollectionTpl>(other);
+      return *this;
+    }
 
     ///
     /// \returns true if *this is NOT equal to other.

@@ -211,6 +211,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-free-flyer.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-generic.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-generic.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-helical.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-helical-unaligned.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-mimic.hpp
