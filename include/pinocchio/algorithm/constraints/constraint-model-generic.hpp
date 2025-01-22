@@ -138,7 +138,7 @@ namespace pinocchio
       return ::pinocchio::visitors::getRowSparsityPattern(*this, row_id);
     }
 
-    /// \brief Returns the sparsity pattern associated with a given row
+    /// \brief Runs the underlying jacobian multiplication with a matrix.
     template<
       template<typename, int> class JointCollectionTpl,
       typename InputMatrix,
@@ -151,6 +151,22 @@ namespace pinocchio
       const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
     {
       ::pinocchio::visitors::jacobianMatrixProduct(
+        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
+    }
+
+    /// \brief Runs the underlying jacobian transpose multiplication with a matrix.
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename InputMatrix,
+      typename OutputMatrix>
+    void jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & input_matrix,
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
+    {
+      ::pinocchio::visitors::jacobianTransposeMatrixProduct(
         *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
     }
 
