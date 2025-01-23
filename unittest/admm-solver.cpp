@@ -190,10 +190,55 @@ BOOST_AUTO_TEST_CASE(ball)
   }
 }
 
+void buildStackOfCubeModel(
+  std::vector<double> masses,
+  ::pinocchio::Model & model,
+  std::vector<FrictionalPointConstraintModel> & constraint_models)
+{
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
+  const int n_cubes = (int)masses.size();
+
+  for (int i = 0; i < n_cubes; i++)
+  {
+    const double box_mass = masses[(std::size_t)i];
+    const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+    JointIndex joint_id = model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
+    model.appendBodyToJoint(joint_id, box_inertia);
+  }
+
+  const double friction_value = 0.4;
+  for (int i = 0; i < n_cubes; i++)
+  {
+    const SE3 local_placement_box_1(
+      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], box_dims[2]));
+    const SE3 local_placement_box_2(
+      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
+    SE3::Matrix3 rot = SE3::Matrix3::Identity();
+    for (int j = 0; j < 4; ++j)
+    {
+      const SE3 local_placement_1(
+        SE3::Matrix3::Identity(), rot * local_placement_box_1.translation());
+      const SE3 local_placement_2(
+        SE3::Matrix3::Identity(), rot * local_placement_box_2.translation());
+      FrictionalPointConstraintModel cm(
+        model, (JointIndex)i, local_placement_1, (JointIndex)i + 1, local_placement_2);
+      cm.set() = CoulombFrictionCone(friction_value);
+      constraint_models.push_back(cm);
+      rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
+    }
+  }
+}
+
 BOOST_AUTO_TEST_CASE(box)
 {
   Model model;
-  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
+  const double box_mass = 1e-3;
+  const std::vector<double> masses = {box_mass};
+
+  buildStackOfCubeModel(masses, model, constraint_models);
 
   const int num_tests =
 #ifdef NDEBUG
@@ -218,25 +263,6 @@ BOOST_AUTO_TEST_CASE(box)
 
   const double dt = 1e-3;
 
-  typedef FrictionalPointConstraintModel ConstraintModel;
-  typedef TestBoxTpl<ConstraintModel> TestBox;
-  std::vector<ConstraintModel> constraint_models;
-
-  const double friction_value = 0.4;
-  {
-    const SE3 local_placement_box(
-      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
-    SE3::Matrix3 rot = SE3::Matrix3::Identity();
-    for (int i = 0; i < 4; ++i)
-    {
-      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
-      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
-      cm.set() = CoulombFrictionCone(friction_value);
-      constraint_models.push_back(cm);
-      rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
-    }
-  }
-
   // Test static motion with zero external force
   {
     const Force fext = Force::Zero();
@@ -251,6 +277,7 @@ BOOST_AUTO_TEST_CASE(box)
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
+  const double friction_value = 0.4;
   const double f_sliding = friction_value * Model::gravity981.norm() * box_mass;
 
   // Test static motion with small external force
@@ -291,50 +318,38 @@ BOOST_AUTO_TEST_CASE(box)
   }
 }
 
-BOOST_AUTO_TEST_CASE(bilateral_box)
+BOOST_AUTO_TEST_CASE(stack_of_boxes)
 {
+  const int n_cubes = 10;
+  const double conditionning = 1e6;
+  const double mass_factor = std::pow(conditionning, 1./conditionning);
+  std::vector<double> masses;
+  double mass_tot = 0;
+  for (int i = 0; i < n_cubes; i++){
+    const double box_mass = 1e-3 * std::pow(mass_factor, i);
+    masses.push_back(box_mass);
+    mass_tot += box_mass;
+  }
+
   Model model;
-  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
 
-  const int num_tests =
-#ifdef NDEBUG
-    100000
-#else
-    100
-#endif
-    ;
-
-  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const double box_mass = 10;
-  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-
-  model.appendBodyToJoint(1, box_inertia);
-
+  buildStackOfCubeModel(masses, model, constraint_models);
   BOOST_CHECK(model.check(model.createData()));
 
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
+
   Eigen::VectorXd q0 = neutral(model);
-  q0.const_cast_derived()[2] += box_dims[2] / 2;
+  for (int i = 0; i < n_cubes; i++){
+    q0[7 * i + 2] = i * box_dims[2];
+    q0[7 * i + 2] += box_dims[2] / 2;
+  }
   const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
   const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
 
   const double dt = 1e-3;
-
-  typedef BilateralPointConstraintModel ConstraintModel;
-  typedef TestBoxTpl<ConstraintModel> TestBox;
-  std::vector<ConstraintModel> constraint_models;
-
-  {
-    const SE3 local_placement_box(
-      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
-    SE3::Matrix3 rot = SE3::Matrix3::Identity();
-    for (int i = 0; i < 4; ++i)
-    {
-      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
-      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
-      constraint_models.push_back(cm);
-      rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
-    }
-  }
 
   // Test static motion with zero external force
   {
@@ -345,14 +360,11 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
 
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(test.dual_solution.isZero(2e-10));
-    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981, 1e-8));
+    const Force::Vector3 f_tot_ref = -mass_tot * Model::gravity981;
+    BOOST_CHECK(computeFtot(test.primal_solution).head(3).isApprox(f_tot_ref, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
-
-  for (int k = 0; k < num_tests; ++k)
-  {
-    Force fext = Force::Zero();
-    fext.linear().setRandom();
+}
 
     TestBox test(model, constraint_models);
     test(q0, v0, tau0, fext, dt);
