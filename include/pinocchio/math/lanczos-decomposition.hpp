@@ -110,7 +110,7 @@ namespace pinocchio
 
           // Perform Gram-Schmidt orthogonalization procedure.
           if (k > 0)
-            orthonormalisation(m_Qs.leftCols(k), m_A_times_q);
+            orthonormalisation(m_Qs.leftCols(k + 1), m_A_times_q);
 
           // Compute beta
           betas[k] = m_A_times_q.norm();
