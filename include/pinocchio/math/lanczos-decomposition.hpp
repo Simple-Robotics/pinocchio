@@ -114,7 +114,7 @@ namespace pinocchio
 
           // Compute beta
           betas[k] = m_A_times_q.norm();
-          if (betas[k] <= 1e2 * Eigen::NumTraits<Scalar>::epsilon())
+          if (betas[k] <= 2 * Eigen::NumTraits<Scalar>::epsilon())
           {
             break;
           }
