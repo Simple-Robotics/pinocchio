@@ -91,6 +91,7 @@ namespace pinocchio
       auto & betas = m_Ts.subDiagonal();
 
       m_Qs.col(0).fill(Scalar(1) / math::sqrt(Scalar(m_Qs.rows())));
+
       m_Ts.setZero();
       m_rank = 1;
       for (Eigen::DenseIndex k = 0; k < decomposition_size; ++k)
@@ -125,6 +126,8 @@ namespace pinocchio
           }
         }
       }
+
+      m_Qs.rightCols(decomposition_size - m_rank).setZero();
     }
 
     ///
