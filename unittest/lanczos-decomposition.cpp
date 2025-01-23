@@ -320,50 +320,116 @@ BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_delassus_cube)
+void buildStackOfCubeModel(
+  std::vector<double> masses,
+  ::pinocchio::Model & model,
+  std::vector<FrictionalPointConstraintModel> & constraint_models)
 {
-  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
-  ::pinocchio::Model model;
-  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
-
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const double box_mass = 10;
-  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+  const int n_cubes = (int)masses.size();
 
-  model.appendBodyToJoint(1, box_inertia);
-
-  BOOST_CHECK(model.check(model.createData()));
-  Data data(model);
-
-  Eigen::VectorXd q0 = neutral(model);
-  typedef FrictionalPointConstraintModel ConstraintModel;
-  typedef typename ConstraintModel::ConstraintData ConstraintData;
-  typedef typename ConstraintModel::ConstraintSet ConstraintSet;
-  std::vector<ConstraintModel> constraint_models;
+  for (int i = 0; i < n_cubes; i++)
+  {
+    const double box_mass = masses[(std::size_t)i];
+    const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+    model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
+    model.appendBodyToJoint(1, box_inertia);
+  }
 
   const double friction_value = 0.4;
+  for (int i = 0; i < n_cubes; i++)
   {
-    const SE3 local_placement_box(
+    const SE3 local_placement_box_1(
+      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], box_dims[2]));
+    const SE3 local_placement_box_2(
       SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
     SE3::Matrix3 rot = SE3::Matrix3::Identity();
-    for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
     {
-      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
-      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
+      const SE3 local_placement_1(
+        SE3::Matrix3::Identity(), rot * local_placement_box_1.translation());
+      const SE3 local_placement_2(
+        SE3::Matrix3::Identity(), rot * local_placement_box_2.translation());
+      FrictionalPointConstraintModel cm(
+        model, (JointIndex)i, local_placement_1, (JointIndex)i + 1, local_placement_2);
       cm.set() = CoulombFrictionCone(friction_value);
       constraint_models.push_back(cm);
       rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_delassus_cube)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  ::pinocchio::Model model;
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef typename ConstraintModel::ConstraintData ConstraintData;
+  std::vector<ConstraintModel> constraint_models;
+
+  const double box_mass = 10;
+  std::vector<double> masses = {box_mass};
+
+  buildStackOfCubeModel(masses, model, constraint_models);
+
+  BOOST_CHECK(model.check(model.createData()));
+
+  Data data(model);
+
+  Eigen::VectorXd q0 = neutral(model);
 
   crba(model, data, q0, Convention::WORLD);
   ContactCholeskyDecomposition chol(model, constraint_models);
   std::vector<ConstraintData> constraint_datas;
-  std::vector<ConstraintSet> constraint_sets;
   for (const auto & cm : constraint_models)
   {
     constraint_datas.push_back(cm.createData());
-    constraint_sets.push_back(cm.set());
+  }
+  chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
+
+  const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
+  auto G_expression = chol.getDelassusCholeskyExpression();
+
+  BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 1e-12));
+
+  {
+    LanczosDecomposition lanczos_decomposition(G_expression, 3);
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
+  }
+
+  {
+    LanczosDecomposition lanczos_decomposition(G_expression, 4);
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  ::pinocchio::Model model;
+  typedef FrictionalPointConstraintModel ConstraintModel;
+  typedef typename ConstraintModel::ConstraintData ConstraintData;
+  std::vector<ConstraintModel> constraint_models;
+
+  const double box_mass = 1e-3;
+  std::vector<double> masses = {box_mass};
+
+  buildStackOfCubeModel(masses, model, constraint_models);
+
+  BOOST_CHECK(model.check(model.createData()));
+
+  Data data(model);
+
+  Eigen::VectorXd q0 = neutral(model);
+
+  crba(model, data, q0, Convention::WORLD);
+  ContactCholeskyDecomposition chol(model, constraint_models);
+  std::vector<ConstraintData> constraint_datas;
+  for (const auto & cm : constraint_models)
+  {
+    constraint_datas.push_back(cm.createData());
   }
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
