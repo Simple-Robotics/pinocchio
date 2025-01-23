@@ -212,60 +212,17 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
-    typename ResultMatrixType>
-  struct EvalConstraintJacobianTransposeProductBackwardPass
-  : public fusion::JointUnaryVisitorBase<EvalConstraintJacobianTransposeProductBackwardPass<
-      Scalar,
-      Options,
-      JointCollectionTpl,
-      ResultMatrixType>>
-  {
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-    typedef typename Data::Force Force;
-    typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
-
-    typedef boost::fusion::vector<const Model &, const Data &, ForceVector &, ResultMatrixType &>
-      ArgsType;
-
-    template<typename JointModel>
-    static void algo(
-      const pinocchio::JointModelBase<JointModel> & jmodel,
-      const pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
-      const Model & model,
-      const Data & data,
-      ForceVector & f,
-      const Eigen::MatrixBase<ResultMatrixType> & res_)
-    {
-      typedef typename Model::JointIndex JointIndex;
-
-      const JointIndex i = jmodel.id();
-      const JointIndex parent = model.parents[i];
-
-      jmodel.jointVelocitySelector(res_.const_cast_derived()) = jdata.S().transpose() * f[i];
-
-      if (parent > 0)
-        f[parent] += data.liMi[i].act(f[i]);
-    }
-
-  }; // struct EvalConstraintJacobianTransposeProductBackwardPass
-
-  template<
-    typename Scalar,
-    int Options,
-    template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     class ConstraintModelAllocator,
     class ConstraintData,
     class ConstraintDataAllocator,
     typename RhsMatrixType,
     typename ResultMatrixType>
-  void evalConstraintJacobianTransposeProduct(
+  void evalConstraintJacobianTransposeMatrixProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<RhsMatrixType> & rhs,
     const Eigen::MatrixBase<ResultMatrixType> & res_)
   {
@@ -277,31 +234,18 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res_.rows(), model.nv);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res_.cols(), rhs.cols());
 
-    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-    typedef typename Data::Force Force;
-    typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
-
-    // Temporary memory variable
-    // TODO(jcarpent): remove memory allocation here
-    ForceVector joint_forces(size_t(model.njoints), Force::Zero());
-
-    for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
-    {
-      const ConstraintModel & cmodel = constraint_models[ee_id];
-      const ConstraintData & cdata = constraint_datas[ee_id];
-
-      const auto constraint_force = rhs.template middleRows<3>(Eigen::DenseIndex(ee_id * 3));
-      cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
-    }
-
+    Eigen::Index row_id = 0;
     res.setZero();
-    typedef EvalConstraintJacobianTransposeProductBackwardPass<
-      Scalar, Options, JointCollectionTpl, ResultMatrixType>
-      Pass;
-    for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
+    for (size_t constraint_id = 0; constraint_id < constraint_models.size(); ++constraint_id)
     {
-      typename Pass::ArgsType arg(model, data, joint_forces, res);
-      Pass::run(model.joints[i], data.joints[i], arg);
+      const ConstraintModel & cmodel = constraint_models[constraint_id];
+      ConstraintData & cdata = constraint_datas[constraint_id];
+      const auto constraint_size = cmodel.size();
+
+      const auto rhs_block = rhs.middleRows(row_id, constraint_size);
+      cmodel.jacobianTransposeMatrixProduct(model, data, cdata, rhs_block, res, AddTo());
+
+      row_id += constraint_size;
     }
   }
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024 INRIA
+// Copyright (c) 2021-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_jacobian_hpp__
@@ -206,11 +206,11 @@ namespace pinocchio
     class ConstraintDataAllocator,
     typename RhsMatrixType,
     typename ResultMatrixType>
-  void evalConstraintJacobianTransposeProduct(
+  void evalConstraintJacobianTransposeMatrixProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<RhsMatrixType> & rhs,
     const Eigen::MatrixBase<ResultMatrixType> & res);
 
