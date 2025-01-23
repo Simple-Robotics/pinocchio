@@ -74,7 +74,9 @@ BOOST_AUTO_TEST_CASE(test_diagonal_matrix)
 }
 
 void checkDecomposition(
-  LanczosDecompositionTpl<Eigen::MatrixXd> & lanczos_decomposition, const Eigen::MatrixXd & matrix)
+  const LanczosDecompositionTpl<Eigen::MatrixXd> & lanczos_decomposition,
+  const Eigen::MatrixXd & matrix,
+  const bool full_rank = true)
 {
   const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix);
 
@@ -85,13 +87,22 @@ void checkDecomposition(
   const Eigen::MatrixXd residual_fourth = matrix - Qs * Ts.matrix() * Qs.transpose();
   PINOCCHIO_CHECK(residual.isZero(1e-10));
 
-  for (Eigen::DenseIndex col_id = 0; col_id < lanczos_decomposition.Ts().cols(); ++col_id)
+  const auto rank = lanczos_decomposition.rank();
+  if (full_rank)
+    PINOCCHIO_CHECK_EQUAL(rank, lanczos_decomposition.Ts().cols());
+
+  for (Eigen::DenseIndex col_id = 0; col_id < rank; ++col_id)
   {
     PINOCCHIO_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
   }
-  PINOCCHIO_CHECK_EQUAL(lanczos_decomposition.rank(), lanczos_decomposition.Ts().cols());
-  PINOCCHIO_CHECK(
-    (lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
+
+  for (Eigen::DenseIndex col_id = rank; lanczos_decomposition.decompositionSize() < rank; ++col_id)
+  {
+    PINOCCHIO_CHECK(lanczos_decomposition.Qs().col(col_id).isZero(0));
+  }
+
+  const auto Qs_rank = lanczos_decomposition.Qs().leftCols(rank);
+  PINOCCHIO_CHECK((Qs_rank.transpose() * Qs_rank).isIdentity());
 }
 
 BOOST_AUTO_TEST_CASE(test_random)
