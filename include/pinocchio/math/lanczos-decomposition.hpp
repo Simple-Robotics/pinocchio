@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_math_lanczos_decomposition_hpp__
@@ -92,8 +92,8 @@ namespace pinocchio
 
       m_Qs.col(0).fill(Scalar(1) / math::sqrt(Scalar(m_Qs.rows())));
       m_Ts.setZero();
-      Eigen::DenseIndex k;
-      for (k = 0; k < decomposition_size; ++k)
+      m_rank = 1;
+      for (Eigen::DenseIndex k = 0; k < decomposition_size; ++k)
       {
         const auto q = m_Qs.col(k);
         m_A_times_q.noalias() = A * q;
@@ -121,10 +121,10 @@ namespace pinocchio
           else
           {
             q_next.noalias() = m_A_times_q / betas[k];
+            m_rank++;
           }
         }
       }
-      m_rank = math::max(Eigen::DenseIndex(1), k);
     }
 
     ///
