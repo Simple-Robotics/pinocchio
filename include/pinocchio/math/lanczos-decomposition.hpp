@@ -145,7 +145,7 @@ namespace pinocchio
       PlainMatrix residual = A * m_Qs;
       residual -= (m_Qs * m_Ts).eval();
 
-      const auto & q = m_Qs.col(last_col_id);
+      const auto q = m_Qs.col(last_col_id);
 
       auto & tmp_vec = m_A_times_q; // use m_A_times_q as a temporary vector
       tmp_vec.noalias() = A * q;
