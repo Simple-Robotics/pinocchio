@@ -61,8 +61,10 @@ struct TestBoxTpl
     crba(model, data, q0, Convention::WORLD);
     ContactCholeskyDecomposition chol(model, constraint_models);
     chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
+    // std::cout << "chol.getDamping() :   " << chol.getDamping().transpose() << std::endl;
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
+    // std::cout << "delassus_matrix_plain:    " << delassus_matrix_plain << std::endl;
     auto G_expression = chol.getDelassusCholeskyExpression();
 
     Eigen::MatrixXd constraint_jacobian(delassus_matrix_plain.rows(), model.nv);
@@ -90,6 +92,16 @@ struct TestBoxTpl
       G_expression, g, constraint_models, dt, compliance, preconditioner_vec,
       primal_solution_constref);
     primal_solution = admm_solver.getPrimalSolution();
+    // std::cout << "primal_solution :   " << (primal_solution).transpose() << std::endl;
+    // std::cout << "g :   " << (g).transpose() << std::endl;
+    // std::cout << "delassus_matrix_plain :   " << (delassus_matrix_plain).transpose() <<
+    // std::endl; std::cout << "delassus_matrix_plain * primal_solution :   " <<
+    // (delassus_matrix_plain * primal_solution).transpose() << std::endl; std::cout <<
+    // "time_scaling.asDiagonal()* delassus_matrix_plain * primal_solution :   " <<
+    // (time_scaling.asDiagonal()*delassus_matrix_plain * primal_solution).transpose() << std::endl;
+    // std::cout << "time_scaling.asDiagonal()* delassus_matrix_plain * primal_solution + g :   " <<
+    // (time_scaling.asDiagonal()*delassus_matrix_plain * primal_solution + g).transpose() <<
+    // std::endl;
 
     if (test_warmstart)
     {
@@ -202,7 +214,8 @@ void buildStackOfCubeModel(
   {
     const double box_mass = masses[(std::size_t)i];
     const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-    JointIndex joint_id = model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
+    JointIndex joint_id =
+      model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
     model.appendBodyToJoint(joint_id, box_inertia);
   }
 
@@ -322,10 +335,11 @@ BOOST_AUTO_TEST_CASE(stack_of_boxes)
 {
   const int n_cubes = 10;
   const double conditionning = 1e6;
-  const double mass_factor = std::pow(conditionning, 1./conditionning);
+  const double mass_factor = std::pow(conditionning, 1. / conditionning);
   std::vector<double> masses;
   double mass_tot = 0;
-  for (int i = 0; i < n_cubes; i++){
+  for (int i = 0; i < n_cubes; i++)
+  {
     const double box_mass = 1e-3 * std::pow(mass_factor, i);
     masses.push_back(box_mass);
     mass_tot += box_mass;
@@ -342,7 +356,8 @@ BOOST_AUTO_TEST_CASE(stack_of_boxes)
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
 
   Eigen::VectorXd q0 = neutral(model);
-  for (int i = 0; i < n_cubes; i++){
+  for (int i = 0; i < n_cubes; i++)
+  {
     q0[7 * i + 2] = i * box_dims[2];
     q0[7 * i + 2] += box_dims[2] / 2;
   }
@@ -365,6 +380,69 @@ BOOST_AUTO_TEST_CASE(stack_of_boxes)
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 }
+
+BOOST_AUTO_TEST_CASE(bilateral_box)
+{
+  Model model;
+  model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer");
+
+  const int num_tests =
+#ifdef NDEBUG
+    100000
+#else
+    100
+#endif
+    ;
+
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
+  const double box_mass = 10;
+  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+
+  model.appendBodyToJoint(1, box_inertia);
+
+  BOOST_CHECK(model.check(model.createData()));
+
+  Eigen::VectorXd q0 = neutral(model);
+  q0.const_cast_derived()[2] += box_dims[2] / 2;
+  const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
+
+  const double dt = 1e-3;
+
+  typedef BilateralPointConstraintModel ConstraintModel;
+  typedef TestBoxTpl<ConstraintModel> TestBox;
+  std::vector<ConstraintModel> constraint_models;
+
+  {
+    const SE3 local_placement_box(
+      SE3::Matrix3::Identity(), 0.5 * SE3::Vector3(box_dims[0], box_dims[1], -box_dims[2]));
+    SE3::Matrix3 rot = SE3::Matrix3::Identity();
+    for (int i = 0; i < 4; ++i)
+    {
+      const SE3 local_placement(SE3::Matrix3::Identity(), rot * local_placement_box.translation());
+      ConstraintModel cm(model, 0, SE3::Identity(), 1, local_placement);
+      constraint_models.push_back(cm);
+      rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix() * rot;
+    }
+  }
+
+  // Test static motion with zero external force
+  {
+    const Force fext = Force::Zero();
+
+    TestBox test(model, constraint_models);
+    test(q0, v0, tau0, fext, dt);
+
+    BOOST_CHECK(test.has_converged == true);
+    BOOST_CHECK(test.dual_solution.isZero(2e-10));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981, 1e-8));
+    BOOST_CHECK(test.v_next.isZero(2e-10));
+  }
+
+  for (int k = 0; k < num_tests; ++k)
+  {
+    Force fext = Force::Zero();
+    fext.linear().setRandom();
 
     TestBox test(model, constraint_models);
     test(q0, v0, tau0, fext, dt);
