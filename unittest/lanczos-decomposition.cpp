@@ -111,6 +111,19 @@ BOOST_AUTO_TEST_CASE(test_random)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_low_rank)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  const Eigen::DenseIndex mat_size = 20;
+  Eigen::MatrixXd A = Eigen::MatrixXd::Identity(mat_size, mat_size);
+  A.row(mat_size - 1).setZero();
+  A.col(mat_size - 1).setZero();
+
+  LanczosDecomposition lanczos_decomposition_10(A, 10);
+  SET_LINE;
+  checkDecomposition(lanczos_decomposition_10, A, false);
+}
+
 BOOST_AUTO_TEST_CASE(test_delassus)
 {
   typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
