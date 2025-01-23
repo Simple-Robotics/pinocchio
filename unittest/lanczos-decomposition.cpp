@@ -332,8 +332,9 @@ void buildStackOfCubeModel(
   {
     const double box_mass = masses[(std::size_t)i];
     const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-    model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
-    model.appendBodyToJoint(1, box_inertia);
+    JointIndex joint_id =
+      model.addJoint(0, JointModelFreeFlyer(), SE3::Identity(), "free_flyer_" + std::to_string(i));
+    model.appendBodyToJoint(joint_id, box_inertia);
   }
 
   const double friction_value = 0.4;
