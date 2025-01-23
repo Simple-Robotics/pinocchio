@@ -1,8 +1,6 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
-
-#include <iostream>
 
 #include <pinocchio/math/lanczos-decomposition.hpp>
 
