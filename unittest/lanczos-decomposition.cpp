@@ -1,9 +1,9 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
-#include <pinocchio/math/lanczos-decomposition.hpp>
-#include <pinocchio/algorithm/delassus-operator-dense.hpp>
+#include "pinocchio/math/lanczos-decomposition.hpp"
+#include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/crba.hpp"
 
