@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024 INRIA
+// Copyright (c) 2021-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_jacobian_hxx__
@@ -64,14 +64,17 @@ namespace pinocchio
     for (auto & force : joint_forces)
       force.setZero();
 
+    Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
       const ConstraintModel & cmodel = constraint_models[ee_id];
+      const auto constraint_size = cmodel.size();
       const ConstraintData & cdata = constraint_datas[ee_id];
 
-      const auto constraint_force =
-        constraint_forces.template segment<3>(Eigen::DenseIndex(ee_id * 3));
+      const auto constraint_force = constraint_forces.segment(row_id, constraint_size);
       cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
+
+      row_id += constraint_size;
     }
   }
 
