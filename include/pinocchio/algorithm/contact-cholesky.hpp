@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2024 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_cholesky_hpp__
@@ -290,15 +290,16 @@ namespace pinocchio
     /// \brief Returns the Inverse of the Operational Space Inertia Matrix resulting from the
     /// decomposition.
     ///
-    Matrix getInverseOperationalSpaceInertiaMatrix() const
+    Matrix getInverseOperationalSpaceInertiaMatrix(bool enforce_symmetry = false) const
     {
       Matrix res(constraintDim(), constraintDim());
-      getInverseOperationalSpaceInertiaMatrix(res);
+      getInverseOperationalSpaceInertiaMatrix(res, enforce_symmetry);
       return res;
     }
 
     template<typename MatrixType>
-    void getInverseOperationalSpaceInertiaMatrix(const Eigen::MatrixBase<MatrixType> & res) const
+    void getInverseOperationalSpaceInertiaMatrix(
+      const Eigen::MatrixBase<MatrixType> & res, bool enforce_symmetry = false) const
     {
       const auto U1 = U.topLeftCorner(constraintDim(), constraintDim());
 
@@ -310,6 +311,8 @@ namespace pinocchio
       MatrixType & res_ = res.const_cast_derived();
       OSIMinv.noalias() = D.head(dim).asDiagonal() * U1.adjoint();
       res_.noalias() = -U1 * OSIMinv;
+      if (enforce_symmetry)
+        enforceSymmetry(res_);
       PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
