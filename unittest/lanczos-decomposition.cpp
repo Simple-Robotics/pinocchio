@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
   }
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
-  const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
+  const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix(true);
   auto G_expression = chol.getDelassusCholeskyExpression();
 
-  BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 1e-12));
+  BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 0));
 
   {
     LanczosDecomposition lanczos_decomposition(G_expression, 3);
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
   }
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
-  const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
+  const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix(true);
   auto G_expression = chol.getDelassusCholeskyExpression();
 
   BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 1e-12));
@@ -278,6 +278,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
   }
+  BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 0));
 
   {
     LanczosDecomposition lanczos_decomposition(G_expression, 4);
