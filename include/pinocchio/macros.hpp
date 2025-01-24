@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2017-2024 CNRS INRIA
+// Copyright (c) 2018-2025 INRIA
+// Copyright (c) 2017-2018 CNRS
 //
 
 #ifndef __pinocchio_macros_hpp__
@@ -245,6 +246,16 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_VARIADIC_MACROS
     std::ostringstream oss;                                                                        \
     oss << "wrong matrix size: expected (" << mat1.rows() << ", " << mat1.cols() << "), got ("     \
         << mat2.rows() << ", " << mat2.cols() << ")" << std::endl;                                 \
+    PINOCCHIO_THROW_PRETTY(std::invalid_argument, oss.str());                                      \
+  }
+
+/// \brief Macro to check whether a given matrix is square
+#define PINOCCHIO_CHECK_SQUARE_MATRIX(mat)                                                         \
+  if (mat.rows() != mat.cols())                                                                    \
+  {                                                                                                \
+    std::ostringstream oss;                                                                        \
+    oss << "the matrix is not square: expected (" << mat.rows() << " == " << mat.cols()            \
+        << "), got (" << mat.rows() << " != " << mat.cols() << ")" << std::endl;                   \
     PINOCCHIO_THROW_PRETTY(std::invalid_argument, oss.str());                                      \
   }
 

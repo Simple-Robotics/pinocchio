@@ -128,16 +128,17 @@ namespace pinocchio
       return self;
     }
 
-    Matrix matrix() const
+    Matrix matrix(bool enforce_symmetry = false) const
     {
-      return self.getInverseOperationalSpaceInertiaMatrix();
+      return self.getInverseOperationalSpaceInertiaMatrix(enforce_symmetry);
     }
 
     /// \brief Fill the input matrix with the matrix resulting from the decomposition
     template<typename MatrixType>
-    void matrix(const Eigen::MatrixBase<MatrixType> & mat) const
+    void matrix(const Eigen::MatrixBase<MatrixType> & mat, bool enforce_symmetry = false) const
     {
-      return self.getInverseOperationalSpaceInertiaMatrix(mat.const_cast_derived());
+      return self.getInverseOperationalSpaceInertiaMatrix(
+        mat.const_cast_derived(), enforce_symmetry);
     }
 
     ///

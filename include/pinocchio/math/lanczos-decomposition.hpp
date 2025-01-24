@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_math_lanczos_decomposition_hpp__
@@ -90,10 +90,13 @@ namespace pinocchio
       auto & alphas = m_Ts.diagonal();
       auto & betas = m_Ts.subDiagonal();
 
-      m_Qs.col(0).fill(Scalar(1) / math::sqrt(Scalar(m_Qs.rows())));
+      const Scalar prec = 2 * Eigen::NumTraits<Scalar>::epsilon();
+
+      m_Qs.setIdentity();
+
       m_Ts.setZero();
-      Eigen::DenseIndex k;
-      for (k = 0; k < decomposition_size; ++k)
+      m_rank = 1;
+      for (Eigen::DenseIndex k = 0; k < decomposition_size; ++k)
       {
         const auto q = m_Qs.col(k);
         m_A_times_q.noalias() = A * q;
@@ -105,26 +108,37 @@ namespace pinocchio
           m_A_times_q -= alphas[k] * q;
           if (k > 0)
           {
-            m_A_times_q -= betas[k - 1] * m_Qs.col(k - 1);
+            const auto q_previous = m_Qs.col(k - 1);
+            m_A_times_q -= betas[k - 1] * q_previous;
           }
 
           // Perform Gram-Schmidt orthogonalization procedure.
           if (k > 0)
-            orthonormalisation(m_Qs.leftCols(k), m_A_times_q);
+            orthonormalisation(m_Qs.leftCols(k + 1), m_A_times_q);
+          assert(m_Qs.leftCols(k + 1).cols() == k + 1);
 
           // Compute beta
           betas[k] = m_A_times_q.norm();
-          if (betas[k] <= 1e2 * Eigen::NumTraits<Scalar>::epsilon())
+          if (betas[k] <= prec)
           {
-            break;
+            // Pick a new arbitrary vector
+            orthonormalisation(m_Qs.leftCols(k + 1), q_next);
+
+            const Scalar q_next_norm = q_next.norm();
+            assert(q_next_norm > prec && "Issue with picking a new arbitrary vector.");
+            q_next /= q_next_norm;
+            betas[k] = 0.;
+            m_rank++;
           }
           else
           {
             q_next.noalias() = m_A_times_q / betas[k];
+            m_rank++;
           }
         }
       }
-      m_rank = math::max(Eigen::DenseIndex(1), k);
+
+      m_Qs.rightCols(decomposition_size - m_rank).setZero();
     }
 
     ///
@@ -145,7 +159,7 @@ namespace pinocchio
       PlainMatrix residual = A * m_Qs;
       residual -= (m_Qs * m_Ts).eval();
 
-      const auto & q = m_Qs.col(last_col_id);
+      const auto q = m_Qs.col(last_col_id);
 
       auto & tmp_vec = m_A_times_q; // use m_A_times_q as a temporary vector
       tmp_vec.noalias() = A * q;
@@ -178,12 +192,6 @@ namespace pinocchio
     PlainMatrix & Qs()
     {
       return m_Qs;
-    }
-
-    /// \brief Returns the rank of the decomposition
-    Eigen::DenseIndex rank() const
-    {
-      return m_rank;
     }
 
     /// \brief Returns the size

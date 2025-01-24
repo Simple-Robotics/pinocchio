@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #include <pinocchio/math/matrix.hpp>
@@ -11,11 +11,12 @@
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
+using namespace pinocchio;
+
 BOOST_AUTO_TEST_CASE(test_isSymmetric)
 {
   srand(0);
 
-  using namespace pinocchio;
   typedef Eigen::MatrixXd Matrix;
 
 #ifdef NDEBUG
@@ -41,6 +42,30 @@ BOOST_AUTO_TEST_CASE(test_isSymmetric)
     BOOST_CHECK(isSymmetric(Matrix::Zero(rows, rows)));
     // Specific check for the Identity matrix
     BOOST_CHECK(isSymmetric(Matrix::Identity(rows, rows)));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_enforceSymmetry)
+{
+  srand(0);
+
+  typedef Eigen::MatrixXd Matrix;
+
+#ifdef NDEBUG
+  const int max_test = 1e3;
+  const int max_size = 200;
+#else
+  const int max_test = 1e2;
+  const int max_size = 100;
+#endif
+  for (int i = 0; i < max_test; ++i)
+  {
+    const Eigen::DenseIndex rows = rand() % max_size + 3; // random row number
+
+    Matrix random_matrix = Matrix::Random(rows, rows);
+    BOOST_CHECK(!isSymmetric(random_matrix));
+    enforceSymmetry(random_matrix);
+    BOOST_CHECK(isSymmetric(random_matrix, 0));
   }
 }
 

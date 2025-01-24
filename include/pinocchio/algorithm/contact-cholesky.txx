@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_cholesky_txx__
@@ -36,7 +36,7 @@ namespace pinocchio
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   ContactCholeskyDecompositionTpl<context::Scalar, context::Options>::
     getInverseOperationalSpaceInertiaMatrix<context::MatrixXs>(
-      const Eigen::MatrixBase<context::MatrixXs> &) const;
+      const Eigen::MatrixBase<context::MatrixXs> &, bool) const;
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   ContactCholeskyDecompositionTpl<context::Scalar, context::Options>::

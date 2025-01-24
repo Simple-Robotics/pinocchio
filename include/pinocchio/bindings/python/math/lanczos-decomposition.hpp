@@ -52,10 +52,6 @@ namespace pinocchio
             bp::return_internal_reference<>())
 
           .def(
-            "rank", &LanczosDecomposition::rank, bp::arg("self"),
-            "Returns the rank of the decomposition.")
-
-          .def(
             "computeDecompositionResidual",
             &LanczosDecomposition::template computeDecompositionResidual<context::MatrixXs>,
             bp::args("self", "mat"),
