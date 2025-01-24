@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2016-2024 CNRS INRIA
+// Copyright (c) 2018-2025 INRIA
+// Copyright (c) 2016-2018 CNRS INRIA
 //
 
 #ifndef __pinocchio_math_matrix_hpp__
@@ -394,6 +395,25 @@ namespace pinocchio
       mat.const_cast_derived().template triangularView<Eigen::StrictlyUpper>() =
         mat.transpose().template triangularView<Eigen::StrictlyUpper>();
     }
+  }
+
+  /// \brief Enforce the symmetry of the input matrix
+  template<typename Matrix>
+  void enforceSymmetry(const Eigen::MatrixBase<Matrix> & mat_)
+  {
+    PINOCCHIO_CHECK_SQUARE_MATRIX(mat_);
+
+    typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Matrix) PlainMatrix;
+    typedef typename Matrix::Scalar Scalar;
+    typedef Eigen::Map<PlainMatrix> MapMatrix;
+
+    auto & mat = mat_.const_cast_derived();
+    MapMatrix tmp = MapMatrix(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, mat.rows(), mat.rows()));
+
+    tmp = 0.5 * (mat + mat.transpose());
+    mat = tmp;
+
+    assert(mat == mat.transpose());
   }
 
   template<typename Matrix>
