@@ -6,7 +6,6 @@
 #define __pinocchio_algorithm_delassus_operator_preconditioned_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
-#include "pinocchio/math/eigenvalues.hpp"
 #include "pinocchio/math/arithmetic-operators.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 #include "pinocchio/algorithm/preconditioner-base.hpp"
