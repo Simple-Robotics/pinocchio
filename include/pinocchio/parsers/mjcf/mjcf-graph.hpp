@@ -10,6 +10,8 @@
 #include "pinocchio/multibody/joint/joints.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
+#include "pinocchio/multibody/liegroup/liegroup.hpp"
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
@@ -58,12 +60,14 @@ namespace pinocchio
           if (root_joint.has_value())
           {
             // update the reference_config with the size of the root joint
-            // TODO: use what's inside ::pinocchio::neutral
-            Model tmp_model;
-            tmp_model.addJoint(0, root_joint.get(), ::pinocchio::SE3::Identity(), "root_joint");
-            Eigen::VectorXd qroot = ::pinocchio::neutral(tmp_model);
-            assert(qroot.size() == tmp_model.nq);
-            assert(tmp_model.nq == root_joint->nq());
+            Eigen::VectorXd qroot(root_joint->nq());
+
+            typedef Eigen::VectorXd ReturnType;
+            typename NeutralStep<LieGroupMap, ReturnType>::ArgsType args(qroot.derived());
+            JointModel root_joint_copy = root_joint.get();
+            root_joint_copy.setIndexes(0, 0, 0);
+            NeutralStep<LieGroupMap, ReturnType>::run(root_joint_copy, args);
+
             reference_config.conservativeResize(qroot.size() + reference_config.size());
             reference_config.tail(qroot.size()) = qroot;
           }
