@@ -2,6 +2,8 @@
 // Copyright (c) 2024-2025 INRIA
 //
 
+#include <iostream>
+
 #include "pinocchio/math/lanczos-decomposition.hpp"
 #include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
@@ -46,10 +48,7 @@ BOOST_AUTO_TEST_CASE(test_identity)
   const auto residual = lanczos_decomposition.computeDecompositionResidual(identity_matrix);
   BOOST_CHECK(residual.isZero());
 
-  BOOST_CHECK(lanczos_decomposition.rank() == 1);
-  BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs())
-                .topLeftCorner(lanczos_decomposition.rank(), lanczos_decomposition.rank())
-                .isIdentity());
+  BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
 }
 
 BOOST_AUTO_TEST_CASE(test_diagonal_matrix)
@@ -69,14 +68,12 @@ BOOST_AUTO_TEST_CASE(test_diagonal_matrix)
     BOOST_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
   }
 
-  BOOST_CHECK(lanczos_decomposition.rank() == lanczos_decomposition.Ts().cols());
   BOOST_CHECK((lanczos_decomposition.Qs().transpose() * lanczos_decomposition.Qs()).isIdentity());
 }
 
 void checkDecomposition(
   const LanczosDecompositionTpl<Eigen::MatrixXd> & lanczos_decomposition,
-  const Eigen::MatrixXd & matrix,
-  const bool full_rank = true)
+  const Eigen::MatrixXd & matrix)
 {
   const auto residual = lanczos_decomposition.computeDecompositionResidual(matrix);
 
@@ -87,22 +84,14 @@ void checkDecomposition(
   const Eigen::MatrixXd residual_fourth = matrix - Qs * Ts.matrix() * Qs.transpose();
   PINOCCHIO_CHECK(residual.isZero(1e-10));
 
-  const auto rank = lanczos_decomposition.rank();
-  if (full_rank)
-    PINOCCHIO_CHECK_EQUAL(rank, lanczos_decomposition.Ts().cols());
+  const auto size = lanczos_decomposition.decompositionSize();
 
-  for (Eigen::DenseIndex col_id = 0; col_id < rank; ++col_id)
+  for (Eigen::DenseIndex col_id = 0; col_id < size; ++col_id)
   {
     PINOCCHIO_CHECK(math::fabs(lanczos_decomposition.Qs().col(col_id).norm() - 1.) <= 1e-12);
   }
 
-  for (Eigen::DenseIndex col_id = rank; lanczos_decomposition.decompositionSize() < rank; ++col_id)
-  {
-    PINOCCHIO_CHECK(lanczos_decomposition.Qs().col(col_id).isZero(0));
-  }
-
-  const auto Qs_rank = lanczos_decomposition.Qs().leftCols(rank);
-  PINOCCHIO_CHECK((Qs_rank.transpose() * Qs_rank).isIdentity());
+  PINOCCHIO_CHECK((Qs.transpose() * Qs).isIdentity());
 }
 
 BOOST_AUTO_TEST_CASE(test_random)
@@ -132,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_low_rank)
 
   LanczosDecomposition lanczos_decomposition_10(A, 10);
   SET_LINE;
-  checkDecomposition(lanczos_decomposition_10, A, false);
+  checkDecomposition(lanczos_decomposition_10, A);
 }
 
 BOOST_AUTO_TEST_CASE(test_delassus)
@@ -227,15 +216,19 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
 
   BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 0));
 
+  //  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(delassus_matrix_plain);
+  //  std::cout << "The eigenvalues of delassus_matrix_plain are:\n" <<
+  //  eigensolver.eigenvalues().transpose() << std::endl;
+
+  for (int decomposition_size = 3; decomposition_size <= 6; ++decomposition_size)
   {
-    LanczosDecomposition lanczos_decomposition(G_expression, 3);
+    LanczosDecomposition lanczos_decomposition(G_expression, decomposition_size);
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
   }
 
   {
-    LanczosDecomposition lanczos_decomposition(G_expression, 4);
-    SET_LINE;
+    LanczosDecomposition lanczos_decomposition(G_expression, 7);
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
   }
 }
@@ -271,17 +264,11 @@ BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix(true);
   auto G_expression = chol.getDelassusCholeskyExpression();
 
-  BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 1e-12));
-
-  {
-    LanczosDecomposition lanczos_decomposition(G_expression, 3);
-    SET_LINE;
-    checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
-  }
   BOOST_CHECK(delassus_matrix_plain.isApprox(delassus_matrix_plain.transpose(), 0));
 
+  for (int decomposition_size = 3; decomposition_size <= 6; ++decomposition_size)
   {
-    LanczosDecomposition lanczos_decomposition(G_expression, 4);
+    LanczosDecomposition lanczos_decomposition(G_expression, decomposition_size);
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
   }
