@@ -183,12 +183,6 @@ namespace pinocchio
       return m_Qs;
     }
 
-    /// \brief Returns the rank of the decomposition
-    Eigen::DenseIndex rank() const
-    {
-      return m_rank;
-    }
-
     /// \brief Returns the size
     Eigen::DenseIndex size() const
     {
