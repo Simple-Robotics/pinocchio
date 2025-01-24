@@ -90,7 +90,9 @@ namespace pinocchio
       auto & alphas = m_Ts.diagonal();
       auto & betas = m_Ts.subDiagonal();
 
-      m_Qs.col(0).fill(Scalar(1) / math::sqrt(Scalar(m_Qs.rows())));
+      const Scalar prec = 2 * Eigen::NumTraits<Scalar>::epsilon();
+
+      m_Qs.setIdentity();
 
       m_Ts.setZero();
       m_rank = 1;
@@ -106,18 +108,27 @@ namespace pinocchio
           m_A_times_q -= alphas[k] * q;
           if (k > 0)
           {
-            m_A_times_q -= betas[k - 1] * m_Qs.col(k - 1);
+            const auto q_previous = m_Qs.col(k - 1);
+            m_A_times_q -= betas[k - 1] * q_previous;
           }
 
           // Perform Gram-Schmidt orthogonalization procedure.
           if (k > 0)
             orthonormalisation(m_Qs.leftCols(k + 1), m_A_times_q);
+          assert(m_Qs.leftCols(k + 1).cols() == k + 1);
 
           // Compute beta
           betas[k] = m_A_times_q.norm();
-          if (betas[k] <= 2 * Eigen::NumTraits<Scalar>::epsilon())
+          if (betas[k] <= prec)
           {
-            break;
+            // Pick a new arbitrary vector
+            orthonormalisation(m_Qs.leftCols(k + 1), q_next);
+
+            const Scalar q_next_norm = q_next.norm();
+            assert(q_next_norm > prec && "Issue with picking a new arbitrary vector.");
+            q_next /= q_next_norm;
+            betas[k] = 0.;
+            m_rank++;
           }
           else
           {
