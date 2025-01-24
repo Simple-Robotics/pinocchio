@@ -33,7 +33,7 @@ namespace pinocchio
     };
 
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
-      ConstraintFormulationLevel::VELOCITY_LEVEL;
+      ConstraintFormulationLevel::POSITION_LEVEL;
 
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
