@@ -157,6 +157,13 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintData)
         BilateralPointConstraintDataVector;
 
+      typedef WeldConstraintModelTpl<Scalar, Options> WeldConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
+        WeldConstraintModelVector;
+      typedef WeldConstraintDataTpl<Scalar, Options> WeldConstraintDataTpl;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintData)
+        WeldConstraintDataVector;
+
       typedef FrictionalPointConstraintModelTpl<Scalar, Options> FrictionalPointConstraintModel;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
         FrictionalPointConstraintModelVector;
