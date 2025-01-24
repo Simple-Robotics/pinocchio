@@ -142,9 +142,11 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn2> & scale,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
+      PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
       assert((scale.array() > 0).all() && "scale vector should be positive");
       res_.const_cast_derived() =
         x.array().max(m_lb.array() / scale.array()).min(m_ub.array() / scale.array());
+      PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
     /// \brief Returns the dimension of the box.
