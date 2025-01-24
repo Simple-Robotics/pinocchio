@@ -5,8 +5,7 @@
 #ifndef __pinocchio_parser_srdf_hpp__
 #define __pinocchio_parser_srdf_hpp__
 
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/multibody/geometry.hpp"
+#include "pinocchio/parsers/fwd.hpp"
 
 namespace pinocchio
 {

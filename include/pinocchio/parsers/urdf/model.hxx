@@ -12,8 +12,12 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
+#include <urdf_model/model.h>
+#include <urdf_parser/urdf_parser.h>
+
 #include <sstream>
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 #include <limits>
 #include <iostream>
 
@@ -25,8 +29,7 @@ namespace pinocchio
     {
       typedef double urdf_scalar_type;
 
-      template<typename _Scalar, int Options>
-      class UrdfVisitorBaseTpl
+      class UrdfVisitor
       {
       public:
         enum JointType
@@ -39,141 +42,37 @@ namespace pinocchio
           SPHERICAL
         };
 
-        typedef enum ::pinocchio::FrameType FrameType;
-        typedef _Scalar Scalar;
-        typedef SE3Tpl<Scalar, Options> SE3;
-        typedef InertiaTpl<Scalar, Options> Inertia;
+        typedef UrdfVisitor Self;
+
+        typedef urdf_scalar_type Scalar;
+        typedef SE3Tpl<Scalar, 0> SE3;
+        typedef InertiaTpl<Scalar, 0> Inertia;
 
         typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
         typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> Vector;
         typedef Eigen::Ref<Vector> VectorRef;
         typedef Eigen::Ref<const Vector> VectorConstRef;
 
-        virtual void setName(const std::string & name) = 0;
-
-        virtual void addRootJoint(const Inertia & Y, const std::string & body_name) = 0;
-
-        virtual void preambleFillModel(Eigen::VectorXd & reference_config) = 0;
-
-        virtual void addJointAndBody(
-          JointType type,
-          const Vector3 & axis,
-          const FrameIndex & parentFrameId,
-          const SE3 & placement,
-          const std::string & joint_name,
-          const Inertia & Y,
-          const std::string & body_name,
-          const VectorConstRef & max_effort,
-          const VectorConstRef & max_velocity,
-          const VectorConstRef & min_config,
-          const VectorConstRef & max_config,
-          const VectorConstRef & friction,
-          const VectorConstRef & damping) = 0;
-
-        virtual void addJointAndBody(
-          JointType type,
-          const Vector3 & axis,
-          const FrameIndex & parentFrameId,
-          const SE3 & placement,
-          const std::string & joint_name,
-          const Inertia & Y,
-          const SE3 & frame_placement,
-          const std::string & body_name,
-          const VectorConstRef & max_effort,
-          const VectorConstRef & max_velocity,
-          const VectorConstRef & min_config,
-          const VectorConstRef & max_config,
-          const VectorConstRef & friction,
-          const VectorConstRef & damping) = 0;
-
-        virtual void addJointAndBody(
-          JointType type,
-          const Vector3 & axis,
-          const FrameIndex & parentFrameId,
-          const SE3 & placement,
-          const std::string & joint_name,
-          const Inertia & Y,
-          const SE3 & frame_placement,
-          const std::string & body_name,
-          const VectorConstRef & min_effort,
-          const VectorConstRef & max_effort,
-          const VectorConstRef & min_velocity,
-          const VectorConstRef & max_velocity,
-          const VectorConstRef & min_config,
-          const VectorConstRef & max_config,
-          const VectorConstRef & min_dry_friction,
-          const VectorConstRef & max_dry_friction,
-          const VectorConstRef & damping) = 0;
-
-        virtual void addFixedJointAndBody(
-          const FrameIndex & parentFrameId,
-          const SE3 & joint_placement,
-          const std::string & joint_name,
-          const Inertia & Y,
-          const std::string & body_name) = 0;
-
-        virtual void appendBodyToJoint(
-          const FrameIndex fid,
-          const Inertia & Y,
-          const SE3 & placement,
-          const std::string & body_name) = 0;
-
-        virtual FrameIndex getBodyId(const std::string & frame_name) const = 0;
-
-        virtual JointIndex getJointId(const std::string & joint_name) const = 0;
-
-        virtual const std::string & getJointName(const JointIndex jointId) const = 0;
-
-        virtual Frame getBodyFrame(const std::string & frame_name) const = 0;
-
-        virtual JointIndex getParentId(const std::string & frame_name) const = 0;
-
-        virtual bool existFrame(const std::string & frame_name, const FrameType type) const = 0;
-
-        UrdfVisitorBaseTpl()
-        : log(NULL)
-        {
-        }
-
-        template<typename T>
-        UrdfVisitorBaseTpl & operator<<(const T & t)
-        {
-          if (log != NULL)
-            *log << t;
-          return *this;
-        }
-
-        std::ostream * log;
-      };
-
-      template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-      class UrdfVisitor : public UrdfVisitorBaseTpl<Scalar, Options>
-      {
-      public:
-        typedef UrdfVisitorBaseTpl<Scalar, Options> Base;
-        typedef typename Base::JointType JointType;
-        typedef typename Base::Vector3 Vector3;
-        typedef typename Base::VectorConstRef VectorConstRef;
-        typedef typename Base::SE3 SE3;
-        typedef typename Base::Inertia Inertia;
-
-        typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+        typedef ::pinocchio::parsers::Model Model;
         typedef typename Model::JointCollection JointCollection;
         typedef typename Model::JointModel JointModel;
         typedef typename Model::Frame Frame;
 
         Model & model;
-        std::string root_joint_name;
+        std::ostream * log;
 
         UrdfVisitor(Model & model)
         : model(model)
+        , log(nullptr)
         {
         }
 
-        UrdfVisitor(Model & model, const std::string & rjn)
-        : model(model)
-        , root_joint_name(rjn)
+        template<typename T>
+        UrdfVisitor & operator<<(const T & t)
         {
+          if (log != nullptr)
+            *log << t;
+          return *this;
         }
 
         void setName(const std::string & name)
@@ -181,17 +80,38 @@ namespace pinocchio
           model.name = name;
         }
 
-        virtual void addRootJoint(const Inertia & Y, const std::string & body_name)
+        void addRootJoint(
+          const Inertia & Y,
+          const std::string & body_name,
+          const boost::optional<const JointModel &> root_joint,
+          const boost::optional<const std::string &> root_joint_name)
         {
           const Frame & parent_frame = model.frames[0];
+          if (root_joint.has_value())
+          {
+            PINOCCHIO_THROW_IF(
+              !root_joint_name.has_value(), std::invalid_argument,
+              "if root_joint is provided, root_joint_name must be also be provided.");
+            PINOCCHIO_THROW_IF(
+              model.existJointName(root_joint_name.get()), std::invalid_argument,
+              "root_joint already exists as a joint in the kinematic tree.");
 
+            const Frame & frame = model.frames[0];
+
+            JointIndex idx = model.addJoint(
+              frame.parentJoint, root_joint.get(), SE3::Identity(), root_joint_name.get()
+              // TODO ,max_effort,max_velocity,min_config,max_config
+            );
+
+            FrameIndex jointFrameId = model.addJointFrame(idx, 0);
+            appendBodyToJoint(jointFrameId, Y, SE3::Identity(), body_name);
+            return;
+          }
+
+          // If a root joint has not been provided, we simply add a frame that represents
+          // the body (which inertia and name are given as input to this method)
           model.addFrame(
             Frame(body_name, parent_frame.parentJoint, 0, parent_frame.placement, BODY, Y));
-        }
-
-        virtual void preambleFillModel(Eigen::VectorXd & reference_config)
-        {
-          PINOCCHIO_UNUSED_VARIABLE(reference_config);
           return;
         }
 
@@ -260,13 +180,13 @@ namespace pinocchio
           const Frame & frame = model.frames[parentFrameId];
           switch (type)
           {
-          case Base::FLOATING:
+          case Self::FLOATING:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelFreeFlyer(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
             break;
-          case Base::REVOLUTE:
+          case Self::REVOLUTE:
             joint_id = addJoint<
               typename JointCollection::JointModelRX, typename JointCollection::JointModelRY,
               typename JointCollection::JointModelRZ,
@@ -274,7 +194,7 @@ namespace pinocchio
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
             break;
-          case Base::CONTINUOUS:
+          case Self::CONTINUOUS:
             joint_id = addJoint<
               typename JointCollection::JointModelRUBX, typename JointCollection::JointModelRUBY,
               typename JointCollection::JointModelRUBZ,
@@ -282,7 +202,7 @@ namespace pinocchio
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
             break;
-          case Base::PRISMATIC:
+          case Self::PRISMATIC:
             joint_id = addJoint<
               typename JointCollection::JointModelPX, typename JointCollection::JointModelPY,
               typename JointCollection::JointModelPZ,
@@ -290,13 +210,13 @@ namespace pinocchio
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
             break;
-          case Base::PLANAR:
+          case Self::PLANAR:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelPlanar(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
             break;
-          case Base::SPHERICAL:
+          case Self::SPHERICAL:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelSpherical(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
@@ -426,7 +346,7 @@ namespace pinocchio
           const VectorConstRef & friction,
           const VectorConstRef & damping)
         {
-          addJoint(
+          return addJoint<TypeX, TypeY, TypeZ, TypeUnaligned>(
             axis, frame, placement, joint_name, -max_effort, max_effort, -max_velocity,
             max_velocity, min_config, max_config, -friction, friction, damping);
         }
@@ -515,70 +435,23 @@ namespace pinocchio
         }
       };
 
-      template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-      class UrdfVisitorWithRootJoint : public UrdfVisitor<Scalar, Options, JointCollectionTpl>
-      {
-      public:
-        typedef UrdfVisitor<Scalar, Options, JointCollectionTpl> Base;
-        typedef typename Base::Inertia Inertia;
-        using Base::appendBodyToJoint;
-        using Base::model;
+      PINOCCHIO_PARSERS_DLLAPI void parseRootTree(
+        const ::urdf::ModelInterface * urdfTree,
+        UrdfVisitor & model,
+        const boost::optional<const ::pinocchio::parsers::JointModel &> rootJoint = boost::none,
+        const boost::optional<const std::string &> rootJointName = boost::none);
 
-        typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-        typedef typename Model::JointCollection JointCollection;
-        typedef typename Model::JointModel JointModel;
+      PINOCCHIO_PARSERS_DLLAPI void parseRootTree(
+        const std::string & filename,
+        UrdfVisitor & model,
+        const boost::optional<const ::pinocchio::parsers::JointModel &> rootJoint = boost::none,
+        const boost::optional<const std::string &> rootJointName = boost::none);
 
-        JointModel root_joint;
-
-        UrdfVisitorWithRootJoint(
-          Model & model,
-          const JointModelBase<JointModel> & root_joint,
-          const std::string & rjn = "root_joint")
-        : Base(model, rjn)
-        , root_joint(root_joint.derived())
-        {
-        }
-
-        void addRootJoint(const Inertia & Y, const std::string & body_name)
-        {
-          const Frame & frame = model.frames[0];
-
-          PINOCCHIO_THROW_IF(
-            model.existJointName(this->root_joint_name), std::invalid_argument,
-            "root_joint already exists as a joint in the kinematic tree.");
-
-          JointIndex idx = model.addJoint(
-            frame.parentJoint, root_joint, SE3::Identity(), this->root_joint_name
-            // TODO ,max_effort,max_velocity,min_config,max_config
-          );
-
-          FrameIndex jointFrameId = model.addJointFrame(idx, 0);
-          appendBodyToJoint(jointFrameId, Y, SE3::Identity(), body_name);
-        }
-
-        virtual void preambleFillModel(Eigen::VectorXd & reference_config)
-        {
-          Model tmp_model;
-          tmp_model.addJoint(0, root_joint, ::pinocchio::SE3::Identity(), "root_joint");
-          Eigen::VectorXd qroot = ::pinocchio::neutral(tmp_model);
-          assert(qroot.size() == tmp_model.nq);
-          assert(tmp_model.nq == root_joint.nq());
-          reference_config.conservativeResize(qroot.size() + reference_config.size());
-          reference_config.tail(qroot.size()) = qroot;
-          return;
-        }
-      };
-
-      typedef UrdfVisitorBaseTpl<double, 0> UrdfVisitorBase;
-
-      PINOCCHIO_PARSERS_DLLAPI void
-      parseRootTree(const ::urdf::ModelInterface * urdfTree, UrdfVisitorBase & model);
-
-      PINOCCHIO_PARSERS_DLLAPI void
-      parseRootTree(const std::string & filename, UrdfVisitorBase & model);
-
-      PINOCCHIO_PARSERS_DLLAPI void
-      parseRootTreeFromXML(const std::string & xmlString, UrdfVisitorBase & model);
+      PINOCCHIO_PARSERS_DLLAPI void parseRootTreeFromXML(
+        const std::string & xmlString,
+        UrdfVisitor & model,
+        const boost::optional<const ::pinocchio::parsers::JointModel &> rootJoint = boost::none,
+        const boost::optional<const std::string &> rootJointName = boost::none);
     } // namespace details
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
@@ -589,15 +462,26 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument root_joint_name");
 
-      details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl> visitor(
-        model, rootJoint, rootJointName);
+      // copy in case incoming model is not empty
+      Model urdf_model = model;
+      JointModel root_joint = rootJoint;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTree(filename, visitor);
+
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      details::parseRootTree(filename, visitor, root_joint_opt, root_joint_name_opt);
+
+      // cast back to the input model's joint collection
+      model = visitor.model;
       return model;
     }
 
@@ -617,10 +501,15 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      typedef ::pinocchio::parsers::Model Model;
+      Model urdf_model = model;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
       details::parseRootTree(filename, visitor);
+
+      model = visitor.model;
       return model;
     }
 
@@ -632,15 +521,24 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
 
-      details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl> visitor(
-        model, rootJoint, rootJointName);
+      Model urdf_model = model;
+      JointModel root_joint = rootJoint;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTreeFromXML(xmlStream, visitor);
+
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      details::parseRootTreeFromXML(xmlStream, visitor, root_joint_opt, root_joint_name_opt);
+
+      model = visitor.model;
       return model;
     }
 
@@ -660,10 +558,15 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      typedef ::pinocchio::parsers::Model Model;
+      Model urdf_model = model;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
       details::parseRootTreeFromXML(xmlStream, visitor);
+
+      model = visitor.model;
       return model;
     }
 
@@ -675,16 +578,26 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
 
       PINOCCHIO_CHECK_INPUT_ARGUMENT(urdfTree != NULL);
-      details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl> visitor(
-        model, rootJoint, rootJointName);
+
+      Model urdf_model = model;
+      JointModel root_joint = rootJoint;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTree(urdfTree.get(), visitor);
+
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      details::parseRootTree(urdfTree.get(), visitor, root_joint_opt, root_joint_name_opt);
+
+      model = visitor.model;
       return model;
     }
 
@@ -704,11 +617,16 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
       PINOCCHIO_CHECK_INPUT_ARGUMENT(urdfTree != NULL);
-      details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      Model urdf_model = model;
+
+      details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
       details::parseRootTree(urdfTree.get(), visitor);
+
+      model = visitor.model;
       return model;
     }
 

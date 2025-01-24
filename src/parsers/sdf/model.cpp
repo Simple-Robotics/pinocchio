@@ -46,7 +46,7 @@ namespace pinocchio
 
       void parseContactInformation(
         const SdfGraph & graph,
-        const urdf::details::UrdfVisitorBase & visitor,
+        const urdf::details::UrdfVisitor & visitor,
         const Model & model,
         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
           & constraint_models)
@@ -66,13 +66,18 @@ namespace pinocchio
         }
       }
 
-      void parseRootTree(SdfGraph & graph, const std::string & rootLinkName)
+      void parseRootTree(
+        SdfGraph & graph,
+        const std::string & rootLinkName,
+        const boost::optional<const ::pinocchio::parsers::JointModel &> rootJoint,
+        const boost::optional<const std::string &> rootJointName)
       {
         // First joint connecting universe
         const ::sdf::ElementPtr rootLinkElement = graph.mapOfLinks.find(rootLinkName)->second;
         const ::sdf::ElementPtr inertialElem = rootLinkElement->GetElement("inertial");
 
-        graph.urdfVisitor.addRootJoint(convertInertiaFromSdf(inertialElem), rootLinkName);
+        graph.urdfVisitor.addRootJoint(
+          convertInertiaFromSdf(inertialElem), rootLinkName, rootJoint, rootJointName);
         const std::vector<std::string> & childrenOfLink =
           graph.childrenOfLinks.find(rootLinkName)->second;
         for (std::vector<std::string>::const_iterator childOfChild = std::begin(childrenOfLink);

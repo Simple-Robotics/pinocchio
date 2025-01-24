@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(convert_inertia_fullinertia)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(convert_inertia_diaginertia)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(geoms_construction)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(inertia_from_geom)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(convert_orientation)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(merge_default)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseDefault(ptr.get_child("default"), ptr, "default");
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());
@@ -541,7 +541,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_strippath)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());
@@ -573,7 +573,7 @@ BOOST_AUTO_TEST_CASE(parse_RX)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelRX;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(parse_PX)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPX;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -647,7 +647,7 @@ BOOST_AUTO_TEST_CASE(parse_Sphere)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelS;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -684,7 +684,7 @@ BOOST_AUTO_TEST_CASE(parse_Free)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelF;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -722,7 +722,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_RXRY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelRXRY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -764,7 +764,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXPY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXPY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -806,7 +806,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXRY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXRY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -848,7 +848,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXSphere)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXSphere;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -1050,7 +1050,7 @@ BOOST_AUTO_TEST_CASE(armature)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -1510,7 +1510,7 @@ BOOST_AUTO_TEST_CASE(test_default_eulerseq)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -1546,7 +1546,7 @@ BOOST_AUTO_TEST_CASE(parse_mesh_with_vertices)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());

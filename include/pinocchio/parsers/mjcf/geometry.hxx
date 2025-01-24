@@ -20,7 +20,9 @@ namespace pinocchio
       GeometryModel & geomModel,
       ::hpp::fcl::MeshLoaderPtr meshLoader)
     {
-      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      typedef ::pinocchio::parsers::Model Model;
+      Model urdf_model = model;
+      ::pinocchio::mjcf::details::MjcfVisitor visitor(urdf_model);
 
       typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
 

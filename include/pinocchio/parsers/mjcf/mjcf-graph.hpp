@@ -35,6 +35,41 @@ namespace pinocchio
       struct MjcfGeom;
       struct MjcfSite;
 
+      class PINOCCHIO_PARSERS_DLLAPI MjcfVisitor : public ::pinocchio::urdf::details::UrdfVisitor
+      {
+      public:
+        typedef ::pinocchio::urdf::details::UrdfVisitor Base;
+        typedef Base::Model Model;
+
+        MjcfVisitor(Model & model)
+        : Base(model)
+        {
+        }
+
+        void addRootJoint(
+          const Inertia & Y,
+          const std::string & body_name,
+          Eigen::VectorXd & reference_config,
+          const boost::optional<const JointModel &> root_joint,
+          const boost::optional<const std::string &> root_joint_name)
+        {
+          Base::addRootJoint(Y, body_name, root_joint, root_joint_name);
+
+          if (root_joint.has_value())
+          {
+            // update the reference_config with the size of the root joint
+            // TODO: use what's inside ::pinocchio::neutral
+            Model tmp_model;
+            tmp_model.addJoint(0, root_joint.get(), ::pinocchio::SE3::Identity(), "root_joint");
+            Eigen::VectorXd qroot = ::pinocchio::neutral(tmp_model);
+            assert(qroot.size() == tmp_model.nq);
+            assert(tmp_model.nq == root_joint->nq());
+            reference_config.conservativeResize(qroot.size() + reference_config.size());
+            reference_config.tail(qroot.size()) = qroot;
+          }
+        }
+      };
+
       /// @brief Informations that are stocked in the XML tag compile.
       ///
       struct PINOCCHIO_PARSERS_DLLAPI MjcfCompiler
@@ -431,17 +466,17 @@ namespace pinocchio
         std::string modelName;
         std::string modelPath;
 
-        // Urdf Visitor to add joint and body
-        typedef pinocchio::urdf::details::
-          UrdfVisitor<double, 0, ::pinocchio::JointCollectionDefaultTpl>
-            UrdfVisitor;
-        UrdfVisitor & urdfVisitor;
+        // Mjcf Visitor to add joint and body
+        MjcfVisitor & mjcfVisitor;
+        typedef MjcfVisitor MjcfVisitor;
+        typedef MjcfVisitor::Model Model;
+        typedef MjcfVisitor::JointModel JointModel;
 
         /// @brief graph constructor
-        /// @param urdfVisitor
-        MjcfGraph(UrdfVisitor & urdfVisitor, const std::string & modelPath)
+        /// @param mjcfVisitor
+        MjcfGraph(MjcfVisitor & mjcfVisitor, const std::string & modelPath)
         : modelPath(modelPath)
-        , urdfVisitor(urdfVisitor)
+        , mjcfVisitor(mjcfVisitor)
         {
         }
 
@@ -531,7 +566,16 @@ namespace pinocchio
         void updateJointPlacementsFromReferenceConfig();
 
         /// @brief Fill the pinocchio model with all the infos from the graph
-        void parseRootTree();
+        /// @param rootJoint optional root joint to add to the base of the model. The root joint
+        /// will be ignored if the model doesn't have a fixed base.
+        /// @param rootJointName name of the optional root joint.
+        /// @note If a root joint provided and the graph has a fixed base, this root joint will be
+        /// added at the base of the model.
+        /// If the graph doesn't have a fixed base (the first body has one or more child joints),
+        /// this root joint will be ignored.
+        void parseRootTree(
+          const boost::optional<const JointModel &> rootJoint = boost::none,
+          const boost::optional<const std::string &> rootJointName = boost::none);
 
         /// @brief Fill reference configuration for a body and all it's associated dof
         /// @param currentBody body to check

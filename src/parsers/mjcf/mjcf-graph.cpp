@@ -14,9 +14,6 @@ namespace pinocchio
     namespace details
     {
       typedef boost::property_tree::ptree ptree;
-      typedef pinocchio::urdf::details::
-        UrdfVisitor<double, 0, ::pinocchio::JointCollectionDefaultTpl>
-          UrdfVisitor;
 
       // supported elements from mjcf
       static const std::array<std::string, 3> ELEMENTS = {"joint", "geom", "site"};
@@ -120,7 +117,7 @@ namespace pinocchio
       template<int Nq, int Nv>
       RangeJoint RangeJoint::setDimension() const
       {
-        typedef UrdfVisitor::Vector Vector;
+        typedef MjcfVisitor::Vector Vector;
         const double infty = std::numeric_limits<double>::infinity();
 
         RangeJoint ret;
@@ -933,71 +930,71 @@ namespace pinocchio
 
         FrameIndex parentFrameId = 0;
         if (!currentBody.bodyParent.empty())
-          parentFrameId = urdfVisitor.getBodyId(currentBody.bodyParent);
+          parentFrameId = mjcfVisitor.getBodyId(currentBody.bodyParent);
 
         // get body pose in body parent
         const SE3 bodyPose = currentBody.bodyPlacement;
         Inertia inert = currentBody.bodyInertia;
         SE3 jointInParent = bodyPose * joint.jointPlacement;
         bodyInJoint = joint.jointPlacement.inverse();
-        UrdfVisitor::JointType jType;
+        MjcfVisitor::JointType jType;
 
         RangeJoint range;
         if (joint.jointType == "free")
         {
-          urdfVisitor << "Free Joint " << '\n';
+          mjcfVisitor << "Free Joint " << '\n';
           range = joint.range.setDimension<7, 6>();
-          jType = UrdfVisitor::FLOATING;
+          jType = MjcfVisitor::FLOATING;
         }
         else if (joint.jointType == "slide")
         {
-          urdfVisitor << "joint prismatic with axis " << joint.axis << '\n';
+          mjcfVisitor << "joint prismatic with axis " << joint.axis << '\n';
           range = joint.range;
-          jType = UrdfVisitor::PRISMATIC;
+          jType = MjcfVisitor::PRISMATIC;
         }
         else if (joint.jointType == "ball")
         {
-          urdfVisitor << "Sphere Joint " << '\n';
+          mjcfVisitor << "Sphere Joint " << '\n';
           range = joint.range.setDimension<4, 3>();
-          jType = UrdfVisitor::SPHERICAL;
+          jType = MjcfVisitor::SPHERICAL;
         }
         else if (joint.jointType == "hinge")
         {
-          urdfVisitor << "joint revolute with axis " << joint.axis << '\n';
+          mjcfVisitor << "joint revolute with axis " << joint.axis << '\n';
           range = joint.range;
-          jType = UrdfVisitor::REVOLUTE;
+          jType = MjcfVisitor::REVOLUTE;
         }
         else
           PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Unknown joint type");
 
-        urdfVisitor.addJointAndBody(
+        mjcfVisitor.addJointAndBody(
           jType, joint.axis, parentFrameId, jointInParent, joint.jointName, inert, bodyInJoint,
           currentBody.bodyName, range.minEffort, range.maxEffort, range.minVel, range.maxVel,
           range.minConfig, range.maxConfig, range.minDryFriction, range.maxDryFriction,
           range.damping);
 
         // Add armature info
-        JointIndex j_id = urdfVisitor.getJointId(joint.jointName);
-        urdfVisitor.model.armature.segment(
-          urdfVisitor.model.joints[j_id].idx_v(), urdfVisitor.model.joints[j_id].nv()) =
+        JointIndex j_id = mjcfVisitor.getJointId(joint.jointName);
+        mjcfVisitor.model.armature.segment(
+          mjcfVisitor.model.joints[j_id].idx_v(), mjcfVisitor.model.joints[j_id].nv()) =
           range.armature;
       }
 
       void MjcfGraph::fillModel(const std::string & nameOfBody)
       {
-        typedef UrdfVisitor::SE3 SE3;
+        typedef MjcfVisitor::SE3 SE3;
 
         MjcfBody currentBody = mapOfBodies.at(nameOfBody);
 
         // get parent body frame
         FrameIndex parentFrameId = 0;
         if (!currentBody.bodyParent.empty())
-          parentFrameId = urdfVisitor.getBodyId(currentBody.bodyParent);
+          parentFrameId = mjcfVisitor.getBodyId(currentBody.bodyParent);
 
-        Frame frame = urdfVisitor.model.frames[parentFrameId];
+        Frame frame = mjcfVisitor.model.frames[parentFrameId];
         // get body pose in body parent
         const SE3 bodyPose = currentBody.bodyPlacement;
-        Inertia inert = currentBody.bodyInertia;
+        Inertia inertia = currentBody.bodyInertia;
 
         // Fixed Joint
         if (currentBody.jointChildren.size() == 0)
@@ -1006,9 +1003,9 @@ namespace pinocchio
             return;
 
           std::string jointName = nameOfBody + "_fixed";
-          urdfVisitor << jointName << " being parsed." << '\n';
+          mjcfVisitor << jointName << " being parsed." << '\n';
 
-          urdfVisitor.addFixedJointAndBody(parentFrameId, bodyPose, jointName, inert, nameOfBody);
+          mjcfVisitor.addFixedJointAndBody(parentFrameId, bodyPose, jointName, inertia, nameOfBody);
           return;
         }
 
@@ -1084,25 +1081,25 @@ namespace pinocchio
           }
           JointIndex joint_id;
 
-          joint_id = urdfVisitor.model.addJoint(
+          joint_id = mjcfVisitor.model.addJoint(
             frame.parentJoint, jointM, frame.placement * firstJointPlacement, jointName,
             rangeCompo.minEffort, rangeCompo.maxEffort, rangeCompo.minVel, rangeCompo.maxVel,
             rangeCompo.minConfig, rangeCompo.maxConfig, rangeCompo.minDryFriction,
             rangeCompo.maxDryFriction, rangeCompo.damping);
-          FrameIndex jointFrameId = urdfVisitor.model.addJointFrame(joint_id, (int)parentFrameId);
-          urdfVisitor.appendBodyToJoint(jointFrameId, inert, bodyInJoint, nameOfBody);
+          FrameIndex jointFrameId = mjcfVisitor.model.addJointFrame(joint_id, (int)parentFrameId);
+          mjcfVisitor.appendBodyToJoint(jointFrameId, inertia, bodyInJoint, nameOfBody);
 
-          urdfVisitor.model.armature.segment(
-            urdfVisitor.model.joints[joint_id].idx_v(), urdfVisitor.model.joints[joint_id].nv()) =
+          mjcfVisitor.model.armature.segment(
+            mjcfVisitor.model.joints[joint_id].idx_v(), mjcfVisitor.model.joints[joint_id].nv()) =
             rangeCompo.armature;
         }
 
-        FrameIndex bodyId = urdfVisitor.model.getFrameId(nameOfBody, BODY);
-        frame = urdfVisitor.model.frames[bodyId];
+        FrameIndex bodyId = mjcfVisitor.model.getFrameId(nameOfBody, BODY);
+        frame = mjcfVisitor.model.frames[bodyId];
         for (const auto & site : currentBody.siteChildren)
         {
           SE3 placement = bodyInJoint * site.sitePlacement;
-          urdfVisitor.model.addFrame(
+          mjcfVisitor.model.addFrame(
             Frame(site.siteName, frame.parentJoint, bodyId, placement, OP_FRAME));
         }
       }
@@ -1136,13 +1133,13 @@ namespace pinocchio
       void MjcfGraph::addKeyFrame(const Eigen::VectorXd & keyframe, const std::string & keyName)
       {
         // Check config vectors and add them if size is right
-        const int model_nq = urdfVisitor.model.nq;
+        const int model_nq = mjcfVisitor.model.nq;
         if (keyframe.size() == model_nq)
         {
           Eigen::VectorXd qpos(model_nq);
-          for (std::size_t i = 1; i < urdfVisitor.model.joints.size(); i++)
+          for (std::size_t i = 1; i < mjcfVisitor.model.joints.size(); i++)
           {
-            const auto & joint = urdfVisitor.model.joints[i];
+            const auto & joint = mjcfVisitor.model.joints[i];
             int idx_q = joint.idx_q();
             int nq = joint.nq();
 
@@ -1173,7 +1170,7 @@ namespace pinocchio
             }
             qpos.segment(idx_q, nq) = qpos_j;
           }
-          urdfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
+          mjcfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
         }
         else
           PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Keyframe size does not match model size");
@@ -1204,7 +1201,7 @@ namespace pinocchio
           jointPlacement.translation() = eq.anchor;
 
           // Get Joint Indices from the model
-          const JointIndex body1 = urdfVisitor.getParentId(eq.body1);
+          const JointIndex body1 = mjcfVisitor.getParentId(eq.body1);
           const SE3 & oMi1 = data.oMi[body1];
           const SE3 oMc1 = oMi1 * jointPlacement;
 
@@ -1219,7 +1216,7 @@ namespace pinocchio
             // We compute the placement of the point constraint with respect to the 2nd joint
             // This is similar to what is done in
             // https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect
-            const JointIndex body2 = urdfVisitor.getParentId(eq.body2);
+            const JointIndex body2 = mjcfVisitor.getParentId(eq.body2);
             const SE3 & oMi2 = data.oMi[body2];
             const SE3 i2Mc2 = oMi2.inverse() * oMc1;
             BilateralPointConstraintModel bpcm(model, body1, jointPlacement, body2, i2Mc2);
@@ -1230,42 +1227,59 @@ namespace pinocchio
 
       void MjcfGraph::updateJointPlacementsFromReferenceConfig()
       {
-        Data data(urdfVisitor.model);
-        ::pinocchio::forwardKinematics(urdfVisitor.model, data, referenceConfig);
-        for (std::size_t i = 1; i < urdfVisitor.model.joints.size(); i++)
+        Data data(mjcfVisitor.model);
+        ::pinocchio::forwardKinematics(mjcfVisitor.model, data, referenceConfig);
+        for (std::size_t i = 1; i < mjcfVisitor.model.joints.size(); i++)
         {
-          auto & joint = urdfVisitor.model.joints[i];
+          auto & joint = mjcfVisitor.model.joints[i];
           if (joint.shortname() == "JointModelComposite")
           {
-            JointModelComposite & joint_composite =
-              boost::get<JointModelComposite>(joint.toVariant());
-            for (std::size_t j = 1; j < joint_composite.joints.size(); j++)
+            JointModelComposite & jmodel = boost::get<JointModelComposite>(joint.toVariant());
+            JointDataComposite & jdata = boost::get<JointDataComposite>(data.joints[i]);
+            for (std::size_t j = 1; j < jmodel.joints.size(); j++)
             {
-              joint_composite.jointPlacements[j] =
-                boost::get<JointDataComposite>(data.joints[i]).pjMi[j];
+              jmodel.jointPlacements[j] = jdata.pjMi[j];
             }
           }
           else
           {
-            const std::size_t parenti = urdfVisitor.model.parents[i];
+            const std::size_t parenti = mjcfVisitor.model.parents[i];
             const ::pinocchio::SE3 oMparenti = data.oMi[parenti];
             const ::pinocchio::SE3 oMi = data.oMi[i];
-            urdfVisitor.model.jointPlacements[i] = oMparenti.inverse() * oMi;
+            mjcfVisitor.model.jointPlacements[i] = oMparenti.inverse() * oMi;
           }
         }
       }
 
-      void MjcfGraph::parseRootTree()
+      void MjcfGraph::parseRootTree(
+        const boost::optional<const JointModel &> rootJoint,
+        const boost::optional<const std::string &> rootJointName)
       {
-        urdfVisitor.setName(modelName);
+        mjcfVisitor.setName(modelName);
         // get name and inertia of first root link
         std::string rootLinkName = bodiesList.at(0);
         MjcfBody rootBody = mapOfBodies.find(rootLinkName)->second;
         if (rootBody.jointChildren.size() == 0)
-          urdfVisitor.addRootJoint(rootBody.bodyInertia, rootLinkName);
+        {
+          // We only add the root joint if we have a fixed base
+          // (first body doesn't have any joint). Otherwise, the root joint is ignored.
+          mjcfVisitor.addRootJoint(
+            rootBody.bodyInertia, rootLinkName, referenceConfig, rootJoint, rootJointName);
+        }
+        else
+        {
+          if (rootJoint.has_value())
+          {
+            PINOCCHIO_THROW_IF(
+              !rootJointName.has_value(), std::invalid_argument,
+              "if root_joint is provided, root_joint_name must be also be provided.");
 
-        // in the case with a root joint provided from pinocchio, we extend the referenceConfig
-        urdfVisitor.preambleFillModel(referenceConfig);
+            mjcfVisitor << "WARNING: trying to add root joint '" << rootJointName.get()
+                        << "' to a model which doesn't have a fixed base."
+                        << " The provided root joint is therefore ignored.\n";
+          }
+        }
+
         for (const auto & entry : bodiesList)
         {
           fillModel(entry);

@@ -5,10 +5,7 @@
 #ifndef __pinocchio_parsers_mjcf_hpp__
 #define __pinocchio_parsers_mjcf_hpp__
 
-#include "pinocchio/multibody/model.hpp"
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/multibody/geometry.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 
 namespace pinocchio

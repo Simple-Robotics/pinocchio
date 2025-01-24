@@ -162,8 +162,8 @@ namespace pinocchio
         const GeometryType & type)
       {
         const std::string & bodyName = currentBody.bodyName;
-        FrameIndex frame_id = currentGraph.urdfVisitor.getBodyId(bodyName);
-        Frame frame = currentGraph.urdfVisitor.getBodyFrame(bodyName);
+        FrameIndex frame_id = currentGraph.mjcfVisitor.getBodyId(bodyName);
+        Frame frame = currentGraph.mjcfVisitor.getBodyFrame(bodyName);
 
         const SE3 & bodyPlacement = frame.placement;
 

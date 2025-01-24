@@ -6,8 +6,6 @@
 #define __pinocchio_parsers_sdf_hpp__
 
 #include "pinocchio/parsers/urdf.hpp"
-#include "pinocchio/multibody/model.hpp"
-#include "pinocchio/multibody/geometry.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 

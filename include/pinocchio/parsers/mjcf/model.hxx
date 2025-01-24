@@ -29,7 +29,10 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
-      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      typedef ::pinocchio::parsers::Model Model;
+
+      Model mjcf_model = model;
+      ::pinocchio::mjcf::details::MjcfVisitor visitor(mjcf_model);
 
       typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
 
@@ -42,6 +45,7 @@ namespace pinocchio
       // Use the Mjcf graph to create the model
       graph.parseRootTree();
 
+      model = visitor.model;
       return model;
     }
 
@@ -54,7 +58,11 @@ namespace pinocchio
           & constraint_models,
         const bool verbose)
     {
-      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      typedef ::pinocchio::parsers::Model Model;
+
+      Model mjcf_model = model;
+
+      ::pinocchio::mjcf::details::MjcfVisitor visitor(mjcf_model);
 
       typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
 
@@ -65,7 +73,7 @@ namespace pinocchio
       graph.parseGraphFromXML(xmlStream);
 
       // Use the Mjcf graph to create the model
-      graph.parseContactInformation(model, constraint_models);
+      graph.parseContactInformation(mjcf_model, constraint_models);
 
       return constraint_models;
     }
@@ -109,12 +117,16 @@ namespace pinocchio
       ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
 
-      ::pinocchio::urdf::details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl>
-        visitor(model, rootJoint, rootJointName);
+      Model mjcf_model = model;
+      JointModel root_joint = rootJoint;
+
+      ::pinocchio::mjcf::details::MjcfVisitor visitor(mjcf_model);
 
       typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
 
@@ -125,8 +137,11 @@ namespace pinocchio
       graph.parseGraphFromXML(xmlStream);
 
       // Use the Mjcf graph to create the model
-      graph.parseRootTree();
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      graph.parseRootTree(root_joint_opt, root_joint_name_opt);
 
+      model = visitor.model;
       return model;
     }
 
