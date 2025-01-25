@@ -262,7 +262,6 @@ BOOST_AUTO_TEST_CASE(box)
     ;
 
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const double box_mass = 1e-3;
   const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
 
   model.appendBodyToJoint(1, box_inertia);
