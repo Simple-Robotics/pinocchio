@@ -35,7 +35,7 @@ namespace pinocchio
     typedef typename traits<DelassusOperator>::Vector Vector;
     typedef typename traits<DelassusOperator>::Scalar Scalar;
 
-    explicit DelassusOperatorPreconditionedTpl(
+    DelassusOperatorPreconditionedTpl(
       DelassusOperatorBase<DelassusOperator> & delassus, const PreconditionerType & preconditioner)
     : m_delassus(delassus.derived())
     , m_preconditioner(preconditioner)
