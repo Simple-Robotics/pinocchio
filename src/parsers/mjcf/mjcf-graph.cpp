@@ -1134,46 +1134,46 @@ namespace pinocchio
       {
         // Check config vectors and add them if size is right
         const int model_nq = mjcfVisitor.model.nq;
-        if (keyframe.size() == model_nq)
-        {
-          Eigen::VectorXd qpos(model_nq);
-          for (std::size_t i = 1; i < mjcfVisitor.model.joints.size(); i++)
-          {
-            const auto & joint = mjcfVisitor.model.joints[i];
-            int idx_q = joint.idx_q();
-            int nq = joint.nq();
 
-            Eigen::VectorXd qpos_j = keyframe.segment(idx_q, nq);
-            if (joint.shortname() == "JointModelFreeFlyer")
+        PINOCCHIO_CHECK_INPUT_ARGUMENT(
+          keyframe.size() == model_nq, "Keyframe size does not match model size");
+
+        Eigen::VectorXd qpos(model_nq);
+        for (std::size_t i = 1; i < mjcfVisitor.model.joints.size(); i++)
+        {
+          const auto & joint = mjcfVisitor.model.joints[i];
+          int idx_q = joint.idx_q();
+          int nq = joint.nq();
+
+          Eigen::VectorXd qpos_j = keyframe.segment(idx_q, nq);
+          if (joint.shortname() == "JointModelFreeFlyer")
+          {
+            Eigen::Vector4d new_quat(qpos_j(4), qpos_j(5), qpos_j(6), qpos_j(3));
+            qpos_j.tail(4) = new_quat;
+          }
+          else if (joint.shortname() == "JointModelSpherical")
+          {
+            Eigen::Vector4d new_quat(qpos_j(1), qpos_j(2), qpos_j(3), qpos_j(0));
+            qpos_j = new_quat;
+          }
+          else if (joint.shortname() == "JointModelComposite")
+          {
+            for (const auto & joint_ : boost::get<JointModelComposite>(joint.toVariant()).joints)
             {
-              Eigen::Vector4d new_quat(qpos_j(4), qpos_j(5), qpos_j(6), qpos_j(3));
-              qpos_j.tail(4) = new_quat;
-            }
-            else if (joint.shortname() == "JointModelSpherical")
-            {
-              Eigen::Vector4d new_quat(qpos_j(1), qpos_j(2), qpos_j(3), qpos_j(0));
-              qpos_j = new_quat;
-            }
-            else if (joint.shortname() == "JointModelComposite")
-            {
-              for (const auto & joint_ : boost::get<JointModelComposite>(joint.toVariant()).joints)
+              int idx_q_ = joint_.idx_q() - idx_q;
+              int nq_ = joint_.nq();
+              if (joint_.shortname() == "JointModelSpherical")
               {
-                int idx_q_ = joint_.idx_q() - idx_q;
-                int nq_ = joint_.nq();
-                if (joint_.shortname() == "JointModelSpherical")
-                {
-                  Eigen::Vector4d new_quat(
-                    qpos_j(idx_q_ + 1), qpos_j(idx_q_ + 2), qpos_j(idx_q_ + 3), qpos_j(idx_q_));
-                  qpos_j.segment(idx_q_, nq_) = new_quat;
-                }
+                Eigen::Vector4d new_quat(
+                  qpos_j(idx_q_ + 1), qpos_j(idx_q_ + 2), qpos_j(idx_q_ + 3), qpos_j(idx_q_));
+                qpos_j.segment(idx_q_, nq_) = new_quat;
               }
             }
-            qpos.segment(idx_q, nq) = qpos_j;
           }
-          mjcfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
+          qpos.segment(idx_q, nq) = qpos_j;
         }
-        else
-          PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Keyframe size does not match model size");
+
+        mjcfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
       }
 
       void MjcfGraph::parseContactInformation(
