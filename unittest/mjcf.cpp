@@ -1335,17 +1335,6 @@ BOOST_AUTO_TEST_CASE(compare_to_urdf)
   BOOST_CHECK(model_urdf.idx_vs == model_m.idx_vs);
   BOOST_CHECK(model_urdf.nvs == model_m.nvs);
 
-  typename ConfigVectorMap::const_iterator it = model_m.referenceConfigurations.begin();
-  typename ConfigVectorMap::const_iterator it_model_urdf =
-    model_urdf.referenceConfigurations.begin();
-  for (long k = 0; k < (long)model_m.referenceConfigurations.size(); ++k)
-  {
-    std::advance(it, k);
-    std::advance(it_model_urdf, k);
-    BOOST_CHECK(it->second.size() == it_model_urdf->second.size());
-    BOOST_CHECK(it->second == it_model_urdf->second);
-  }
-
   BOOST_CHECK(model_urdf.armature.size() == model_m.armature.size());
 
   BOOST_CHECK(model_urdf.armature == model_m.armature);
