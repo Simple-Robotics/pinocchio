@@ -940,6 +940,7 @@ BOOST_AUTO_TEST_CASE(adding_keyframes)
 
   Eigen::VectorXd vect_ref(model_m.nq);
   vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+  ::pinocchio::normalize(model_m, vect_ref);
 
   BOOST_CHECK(vect_model.size() == vect_ref.size());
   BOOST_CHECK(vect_model == vect_ref);
@@ -987,6 +988,7 @@ BOOST_AUTO_TEST_CASE(adding_keyframes_with_ref_and_freejoint)
 
   Eigen::VectorXd vect_ref(model_m.nq);
   vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+  ::pinocchio::normalize(model_m, vect_ref);
 
   BOOST_CHECK(vect_model.size() == vect_ref.size());
   BOOST_CHECK(vect_model == vect_ref);
