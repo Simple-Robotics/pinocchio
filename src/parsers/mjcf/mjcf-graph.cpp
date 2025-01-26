@@ -1108,24 +1108,46 @@ namespace pinocchio
       {
         for (const auto & joint : currentBody.jointChildren)
         {
+          assert(qpos0.size() == referenceConfig.size());
           if (joint.jointType == "free")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 7);
-            // referenceConfig.tail(7) << Eigen::Matrix<double, 7, 1>(0, 0, 0, 0, 0, 0, 1);
+            // In FK of mujoco, the placement of a freeflyer w.r.t its parent is ignored.
+            // Instead, the freeflyer's components of the configuration vector are used directly in
+            // the FK. For other joints, the placement w.r.t the parent is taken into consideration.
+            // In pinocchio, the placement w.r.t the parent is always taken into consideration.
+            // So for the special case of freeflyers, we apply the opposite transformation
+            // of the mujoco's freeflyer.
+            // Consequently, when we adjust the joint placements (see @ref
+            // updateJointPlacementsFromReferenceConfig), we obtain the same result given a mujoco
+            // configuration vector.
             const SE3::Quaternion q(currentBody.bodyPlacement.rotation());
             const SE3::Quaternion qinv = q.inverse();
             const Eigen::Vector3d t(-currentBody.bodyPlacement.translation());
             referenceConfig.tail(7) << t(0), t(1), t(2), qinv.x(), qinv.y(), qinv.z(), qinv.w();
+
+            // We store qpos0 in the convention of mujoco.
+            // The function `addKeyFrame` will convert this qpos0 to the pinocchio's convention.
+            // The `addKeyFrame` function also deals with composite joints, which is something we
+            // can't do in this function.
+            qpos0.conservativeResize(qpos0.size() + 7);
+            qpos0.tail(7) << -t(0), -t(1), -t(2), q.w(), q.x(), q.y(), q.z();
           }
           else if (joint.jointType == "ball")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 4);
             referenceConfig.tail(4) << Eigen::Vector4d(0, 0, 0, 1);
+
+            qpos0.conservativeResize(qpos0.size() + 4);
+            qpos0.tail(4) << Eigen::Vector4d(1, 0, 0, 0);
           }
           else if (joint.jointType == "slide" || joint.jointType == "hinge")
           {
             referenceConfig.conservativeResize(referenceConfig.size() + 1);
             referenceConfig.tail(1) << -joint.posRef;
+
+            qpos0.conservativeResize(qpos0.size() + 1);
+            qpos0.tail(1) << joint.posRef;
           }
         }
       }
@@ -1173,6 +1195,8 @@ namespace pinocchio
           qpos.segment(idx_q, nq) = qpos_j;
         }
 
+        // we normalize in case parsed qpos has numerical errors
+        ::pinocchio::normalize(mjcfVisitor.model, qpos);
         mjcfVisitor.model.referenceConfigurations.insert(std::make_pair(keyName, qpos));
       }
 
@@ -1185,10 +1209,29 @@ namespace pinocchio
         Eigen::VectorXd qref;
         if (!model.referenceConfigurations.empty())
         {
-          qref = model.referenceConfigurations.begin()->second;
+          // If possible, it's always preferable to select qpos0 to construct the bilateral
+          // constraints as the mujoco equality constraints are defined w.r.t the default
+          // configuration of the model (qpos0).
+          if (model.referenceConfigurations.find("qpos0") != model.referenceConfigurations.end())
+          {
+            mjcfVisitor << "Using qpos0 (default configuration defined by the XML file) to "
+                           "construct bilateral constraints.\n";
+            qref = model.referenceConfigurations.at("qpos0");
+          }
+          else
+          {
+            mjcfVisitor << "Could not find qpos0 in referenceConfigurations. Using keyframe "
+                        << model.referenceConfigurations.begin()->first
+                        << " to construct bilateral constraints.\n";
+            qref = model.referenceConfigurations.begin()->second;
+          }
         }
         else
         {
+          mjcfVisitor << "WARNING: Could not find qpos0 nor other keyframes in "
+                         "referenceConfigurations.\n"
+                      << "This is unexpected and may lead to issues for bilateral constraints.\n"
+                      << "Using ::pinocchio::neutral to construct bilateral constraints.\n";
           qref = ::pinocchio::neutral(model);
         }
         ::pinocchio::forwardKinematics(model, data, qref);
@@ -1264,7 +1307,7 @@ namespace pinocchio
           // We only add the root joint if we have a fixed base
           // (first body doesn't have any joint). Otherwise, the root joint is ignored.
           mjcfVisitor.addRootJoint(
-            rootBody.bodyInertia, rootLinkName, referenceConfig, rootJoint, rootJointName);
+            rootBody.bodyInertia, rootLinkName, referenceConfig, qpos0, rootJoint, rootJointName);
         }
         else
         {
@@ -1284,6 +1327,10 @@ namespace pinocchio
         {
           fillModel(entry);
         }
+
+        // We store the default configuration, obtained by parsing the <worldbody/>.
+        // Equality constraints are typically defined w.r.t this default configuration qpos0.
+        mapOfConfigs.insert(std::make_pair("qpos0", qpos0));
 
         // We update the joint placements so their base placement is matching with the
         // referenceConfig
