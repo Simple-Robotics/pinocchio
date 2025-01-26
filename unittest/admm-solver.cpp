@@ -251,6 +251,7 @@ BOOST_AUTO_TEST_CASE(box)
   const double box_mass = 1e1;
   const std::vector<double> masses = {box_mass};
 
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
   buildStackOfCubeModel(masses, model, constraint_models);
 
   const int num_tests =
@@ -260,11 +261,6 @@ BOOST_AUTO_TEST_CASE(box)
     100
 #endif
     ;
-
-  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-
-  model.appendBodyToJoint(1, box_inertia);
 
   BOOST_CHECK(model.check(model.createData()));
 
