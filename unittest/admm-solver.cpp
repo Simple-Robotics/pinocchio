@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(box)
   typedef FrictionalPointConstraintModel ConstraintModel;
   typedef TestBoxTpl<ConstraintModel> TestBox;
   std::vector<ConstraintModel> constraint_models;
-  const double box_mass = 1e-3;
+  const double box_mass = 1e1;
   const std::vector<double> masses = {box_mass};
 
   buildStackOfCubeModel(masses, model, constraint_models);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(box)
   BOOST_CHECK(model.check(model.createData()));
 
   Eigen::VectorXd q0 = neutral(model);
-  q0.const_cast_derived()[2] += box_dims[2] / 2;
+  q0[2] += box_dims[2] / 2;
   const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
   const Eigen::VectorXd tau0 = Eigen::VectorXd::Zero(model.nv);
 
@@ -286,6 +286,10 @@ BOOST_AUTO_TEST_CASE(box)
     BOOST_CHECK(test.dual_solution.isZero(2e-10));
     const Force::Vector3 f_tot_ref = -box_mass * Model::gravity981 - fext.linear();
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-8));
+    std::cout << "test.primal_solution: " << test.primal_solution.transpose() << std::endl;
+    std::cout << "computeFtot(test.primal_solution): "
+              << computeFtot(test.primal_solution).transpose() << std::endl;
+    std::cout << "f_tot_ref: " << f_tot_ref.transpose() << std::endl;
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
