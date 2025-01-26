@@ -1483,7 +1483,7 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
   // Next, we check if the other constraint placement has been computed correctly.
   // If a bilateral constraint has been constructed well, then the origin of the constraint
   // placements, expressed in the world frame, should match
-  const Eigen::VectorXd q0 = model.referenceConfigurations["home"];
+  const Eigen::VectorXd q0 = model.referenceConfigurations["qpos0"];
   pinocchio::Data data(model);
   pinocchio::forwardKinematics(model, data, q0);
   for (const auto & cm : constraint_models)
