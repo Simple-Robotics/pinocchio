@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(ball)
   }
 }
 
-void buildStackOfCubeModel(
+void buildStackOfCubesModel(
   std::vector<double> masses,
   ::pinocchio::Model & model,
   std::vector<FrictionalPointConstraintModel> & constraint_models)
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(box)
   const std::vector<double> masses = {box_mass};
 
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  buildStackOfCubeModel(masses, model, constraint_models);
+  buildStackOfCubesModel(masses, model, constraint_models);
 
   const int num_tests =
 #ifdef NDEBUG
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(stack_of_boxes)
   typedef TestBoxTpl<ConstraintModel> TestBox;
   std::vector<ConstraintModel> constraint_models;
 
-  buildStackOfCubeModel(masses, model, constraint_models);
+  buildStackOfCubesModel(masses, model, constraint_models);
   BOOST_CHECK(model.check(model.createData()));
 
   const SE3::Vector3 box_dims = SE3::Vector3::Ones();
