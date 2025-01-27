@@ -73,7 +73,7 @@ namespace pinocchio
     }
 
     PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-    buildConstraintModelsFromMJCF(const bp::object & filename, Model & model)
+    buildConstraintModelsFromMJCF(Model & model, const bp::object & filename)
     {
       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       ::pinocchio::mjcf::buildConstraintModelsFromXML(path(filename), model, constraint_models);
@@ -82,8 +82,8 @@ namespace pinocchio
 
     PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
     &buildConstraintModelsFromMJCF(
-      const bp::object & filename,
       Model & model,
+      const bp::object & filename,
       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models)
     {
       ::pinocchio::mjcf::buildConstraintModelsFromXML(path(filename), model, constraint_models);
@@ -148,16 +148,17 @@ namespace pinocchio
       bp::def(
         "buildConstraintModelsFromMJCF",
         static_cast<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) (*)(
-          const bp::object &, Model &)>(pinocchio::python::buildConstraintModelsFromMJCF),
+          Model &, const bp::object &)>(pinocchio::python::buildConstraintModelsFromMJCF),
         bp::args("mjcf_filename", "model"),
         "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.");
 
       bp::def(
         "buildConstraintModelsFromMJCF",
-        static_cast < PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-          & (*)(const bp::object &, Model &,
-                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)
-              > (pinocchio::python::buildConstraintModelsFromMJCF),
+        static_cast<
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+          & (*)(Model &, const bp::object &,
+                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)>(
+          pinocchio::python::buildConstraintModelsFromMJCF),
         bp::args("mjcf_filename", "model", "constraint_models"),
         "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.",
         bp::return_internal_reference<3>());
