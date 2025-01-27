@@ -39,6 +39,8 @@ namespace pinocchio
 
       StdVectorPythonVisitor<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(
         context::BilateralPointConstraintModel)>::expose("StdVec_BilateralPointConstraintModel");
+      StdVectorPythonVisitor<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(
+        context::BilateralPointConstraintData)>::expose("StdVec_BilateralPointConstraintData");
 #endif
     }
 

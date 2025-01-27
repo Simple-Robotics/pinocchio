@@ -45,7 +45,9 @@ namespace pinocchio
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
             "Contructor from given joint index and placement for the two joints "
             "implied in the constraint."))
-
+          .def(
+            "createData", &Self::createData, bp::arg("self"),
+            "Create a Data object for the given constraint model.")
           .PINOCCHIO_ADD_PROPERTY(Self, joint1_id, "Index of first parent joint in the model tree.")
           .PINOCCHIO_ADD_PROPERTY(
             Self, joint2_id, "Index of second parent joint in the model tree.")
