@@ -62,8 +62,29 @@ namespace pinocchio
         ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
         ArgsTmp args)
       {
-        InternalVisitorModelAndData<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(
-          cdata, args);
+        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
+        typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
+
+        ModelAndDataVisitor<ConstraintModel, ConstraintData, ArgsTmp> visitor(cdata, args);
+
+        return boost::apply_visitor(visitor, cmodel);
+      }
+
+      template<
+        typename Scalar,
+        int Options,
+        template<typename, int> class ConstraintCollectionTpl,
+        typename ArgsTmp>
+      static ReturnType run(
+        const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+        const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+        ArgsTmp args)
+      {
+        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
+        typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
+
+        ModelAndDataVisitor<ConstraintModel, const ConstraintData, ArgsTmp> visitor(cdata, args);
+
         return boost::apply_visitor(visitor, cmodel);
       }
 
@@ -75,7 +96,7 @@ namespace pinocchio
       static ReturnType
       run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel, ArgsTmp args)
       {
-        InternalVisitorModel<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(args);
+        ModelVisitor<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(args);
         return boost::apply_visitor(visitor, cmodel);
       }
 
@@ -83,7 +104,7 @@ namespace pinocchio
       static ReturnType
       run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
       {
-        InternalVisitorModel<Scalar, Options, ConstraintCollectionTpl, NoArg> visitor;
+        ModelVisitor<Scalar, Options, ConstraintCollectionTpl, NoArg> visitor;
         return boost::apply_visitor(visitor, cmodel);
       }
 
@@ -93,12 +114,12 @@ namespace pinocchio
         int Options,
         template<typename, int> class ConstraintCollectionTpl,
         typename ArgsTmp>
-      struct InternalVisitorModel : public boost::static_visitor<ReturnType>
+      struct ModelVisitor : public boost::static_visitor<ReturnType>
       {
         typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
         typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
 
-        InternalVisitorModel(ArgsTmp args)
+        ModelVisitor(ArgsTmp args)
         : args(args)
         {
         }
@@ -146,13 +167,13 @@ namespace pinocchio
       };
 
       template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
-      struct InternalVisitorModel<Scalar, Options, ConstraintCollectionTpl, NoArg>
+      struct ModelVisitor<Scalar, Options, ConstraintCollectionTpl, NoArg>
       : public boost::static_visitor<ReturnType>
       {
         typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
         typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
 
-        InternalVisitorModel()
+        ModelVisitor()
         {
         }
 
@@ -192,19 +213,13 @@ namespace pinocchio
             std::invalid_argument, "The constraint data is of type FictiousConstraintDataTpl.");
           return internal::NoRun<ReturnType>::run();
         }
-      };
+      }; // struct ModelVisitor
 
-      template<
-        typename Scalar,
-        int Options,
-        template<typename, int> class ConstraintCollectionTpl,
-        typename ArgsTmp>
-      struct InternalVisitorModelAndData : public boost::static_visitor<ReturnType>
+      template<typename ConstraintModel, typename ConstraintData, typename ArgsTmp>
+      struct ModelAndDataVisitor : public boost::static_visitor<ReturnType>
       {
-        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
-        typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
 
-        InternalVisitorModelAndData(ConstraintData & cdata, ArgsTmp args)
+        ModelAndDataVisitor(ConstraintData & cdata, ArgsTmp args)
         : cdata(cdata)
         , args(args)
         {
@@ -213,13 +228,16 @@ namespace pinocchio
         template<typename ConstraintModelDerived>
         ReturnType operator()(const ConstraintModelBase<ConstraintModelDerived> & cmodel) const
         {
+          typedef typename ConstraintModelBase<ConstraintModelDerived>::ConstraintData
+            ConstraintDataDerived;
+          using ConstraintDataGet = typename std::conditional<
+            std::is_const<ConstraintData>::value, const ConstraintDataDerived,
+            ConstraintDataDerived>::type;
+
           return bf::invoke(
             &ConstraintModelVisitorDerived::template algo<ConstraintModelDerived>,
             bf::append(
-              boost::ref(cmodel.derived()),
-              boost::ref(
-                boost::get<typename ConstraintModelBase<ConstraintModelDerived>::ConstraintData>(
-                  cdata)),
+              boost::ref(cmodel.derived()), boost::ref(boost::get<ConstraintDataGet>(cdata)),
               args));
         }
 
@@ -240,7 +258,7 @@ namespace pinocchio
 
         ConstraintData & cdata;
         ArgsTmp args;
-      };
+      }; // struct ModelAndDataVisitor
     };
 
     /**
