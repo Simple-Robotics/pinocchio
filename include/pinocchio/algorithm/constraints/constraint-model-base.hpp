@@ -82,7 +82,7 @@ namespace pinocchio
     jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat) const
     {
       return derived().jacobianMatrixProduct(model, data, cdata, mat.derived());
@@ -96,7 +96,7 @@ namespace pinocchio
     void jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat,
       const Eigen::MatrixBase<OutputMatrix> & res,
       AssignmentOperatorTag<op> aot = SetTo()) const
@@ -110,7 +110,7 @@ namespace pinocchio
     jacobianTransposeMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat) const
     {
       return derived().jacobianTransposeMatrixProduct(model, data, cdata, mat.derived());
@@ -124,7 +124,7 @@ namespace pinocchio
     void jacobianTransposeMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & mat,
       const Eigen::MatrixBase<OutputMatrix> & res,
       AssignmentOperatorTag<op> aot = SetTo()) const

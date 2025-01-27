@@ -533,7 +533,7 @@ namespace pinocchio
       template<typename ConstraintModel>
       static void algo(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        typename ConstraintModel::ConstraintData & cdata,
+        const typename ConstraintModel::ConstraintData & cdata,
         const Model & model,
         const Data & data,
         const Eigen::MatrixBase<InputMatrix> & input_matrix,
@@ -555,7 +555,7 @@ namespace pinocchio
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+      const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
       const Eigen::MatrixBase<OutputMatrix> & result_matrix)
     {
@@ -594,7 +594,7 @@ namespace pinocchio
       template<typename ConstraintModel>
       static void algo(
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
-        typename ConstraintModel::ConstraintData & cdata,
+        const typename ConstraintModel::ConstraintData & cdata,
         const Model & model,
         const Data & data,
         const Eigen::MatrixBase<InputMatrix> & input_matrix,
@@ -616,7 +616,7 @@ namespace pinocchio
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+      const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
       const Eigen::MatrixBase<OutputMatrix> & result_matrix)
     {

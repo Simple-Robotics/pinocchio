@@ -222,7 +222,7 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<RhsMatrixType> & rhs,
     const Eigen::MatrixBase<ResultMatrixType> & res_)
   {
@@ -239,7 +239,7 @@ namespace pinocchio
     for (size_t constraint_id = 0; constraint_id < constraint_models.size(); ++constraint_id)
     {
       const ConstraintModel & cmodel = constraint_models[constraint_id];
-      ConstraintData & cdata = constraint_datas[constraint_id];
+      const ConstraintData & cdata = constraint_datas[constraint_id];
       const auto constraint_size = cmodel.size();
 
       const auto rhs_block = rhs.middleRows(row_id, constraint_size);

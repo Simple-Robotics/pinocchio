@@ -262,7 +262,7 @@ namespace pinocchio
   void JointLimitConstraintModelTpl<Scalar, Options>::jacobianMatrixProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    ConstraintData & cdata,
+    const ConstraintData & cdata,
     const Eigen::MatrixBase<InputMatrix> & mat,
     const Eigen::MatrixBase<OutputMatrix> & _res,
     AssignmentOperatorTag<op> aot) const
@@ -311,7 +311,7 @@ namespace pinocchio
   void JointLimitConstraintModelTpl<Scalar, Options>::jacobianTransposeMatrixProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    ConstraintData & cdata,
+    const ConstraintData & cdata,
     const Eigen::MatrixBase<InputMatrix> & mat,
     const Eigen::MatrixBase<OutputMatrix> & _res,
     AssignmentOperatorTag<op> aot) const

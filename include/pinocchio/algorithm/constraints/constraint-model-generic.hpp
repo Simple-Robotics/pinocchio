@@ -146,7 +146,7 @@ namespace pinocchio
     void jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
       const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
     {
@@ -162,7 +162,7 @@ namespace pinocchio
     void jacobianTransposeMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      ConstraintData & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
       const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
     {
