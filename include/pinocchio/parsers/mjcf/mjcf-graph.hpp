@@ -516,6 +516,9 @@ namespace pinocchio
         // property tree where xml file is stored
         ptree pt;
 
+        // World body, mainly used to store geoms that are outside the body hierarchy
+        MjcfBody worldBody;
+
         // Ordered list of bodies
         VectorOfStrings bodiesList;
 
@@ -551,6 +554,11 @@ namespace pinocchio
         /// mapOfDefault for later use.
         /// @param el ptree element. Root of the default
         void parseDefault(ptree & el, const ptree & parent, const std::string & parentTag);
+
+        /// @brief Inspect the worlbody tag to retrieve potential geoms that are not attached
+        /// to any bodies.
+        /// @param el root of the tree
+        void parseWorldBodyGeoms(const ptree & el);
 
         /// @brief Go through the main body of the mjcf file "worldbody" to get all the info ready
         /// to create the model.

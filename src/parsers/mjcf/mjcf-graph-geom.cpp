@@ -135,7 +135,12 @@ namespace pinocchio
           return std::make_shared<fcl::Capsule>(radius, height);
         }
         else
-          throw std::invalid_argument("Unknown geometry type :"); // Missing plane, hfield and sdf
+        {
+          // Missing plane, hfield and sdf
+          std::stringstream ss;
+          ss << "Unknown geometry type: " << geom.geomType << "\n";
+          PINOCCHIO_THROW(std::invalid_argument, ss.str());
+        }
       }
 #else
       static std::shared_ptr<fcl::CollisionGeometry> retrieveCollisionGeometry(
@@ -159,11 +164,24 @@ namespace pinocchio
         const MjcfGraph & currentGraph,
         GeometryModel & geomModel,
         ::hpp::fcl::MeshLoaderPtr & meshLoader,
-        const GeometryType & type)
+        const GeometryType & type,
+        bool isWorldBody = false)
       {
         const std::string & bodyName = currentBody.bodyName;
-        FrameIndex frame_id = currentGraph.mjcfVisitor.getBodyId(bodyName);
-        Frame frame = currentGraph.mjcfVisitor.getBodyFrame(bodyName);
+        FrameIndex frame_id;
+        Frame frame;
+        if (isWorldBody)
+        {
+          frame_id = 0;
+          // "universe" frame should be of index 0
+          assert(frame_id == currentGraph.mjcfVisitor.model.getFrameId(bodyName));
+          frame = currentGraph.mjcfVisitor.model.frames[frame_id];
+        }
+        else
+        {
+          frame_id = currentGraph.mjcfVisitor.getBodyId(bodyName);
+          frame = currentGraph.mjcfVisitor.getBodyFrame(bodyName);
+        }
 
         const SE3 & bodyPlacement = frame.placement;
 
@@ -532,6 +550,7 @@ namespace pinocchio
           meshLoader = std::make_shared<fcl::MeshLoader>(fcl::MeshLoader());
 #endif // ifdef PINOCCHIO_WITH_HPP_FCL
 
+        addLinksToGeomModel(worldBody, *this, geomModel, meshLoader, type, true);
         for (const auto & entry : bodiesList)
         {
           const MjcfBody & currentBody = mapOfBodies.at(entry);

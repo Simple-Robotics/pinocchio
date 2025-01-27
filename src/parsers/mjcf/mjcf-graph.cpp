@@ -895,12 +895,28 @@ namespace pinocchio
           if (v.first == "worldbody")
           {
             boost::optional<std::string> childClass;
+            parseWorldBodyGeoms(el.get_child("worldbody"));
             parseJointAndBody(el.get_child("worldbody").get_child("body"), childClass);
           }
 
           if (v.first == "equality")
           {
             parseEquality(el.get_child("equality"));
+          }
+        }
+      }
+
+      void MjcfGraph::parseWorldBodyGeoms(const ptree & el)
+      {
+        // in pinocchio, the worldbody is called "universe"
+        worldBody.bodyName = "universe";
+        for (const ptree::value_type & v : el)
+        {
+          if (v.first == "geom")
+          {
+            MjcfGeom currentGeom;
+            currentGeom.fill(v.second, worldBody, *this);
+            worldBody.geomChildren.push_back(currentGeom);
           }
         }
       }
