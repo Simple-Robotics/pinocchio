@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(stack_of_boxes)
 {
   const int n_cubes = 10;
   const double conditionning = 1e6;
-  const double mass_factor = std::pow(conditionning, 1. / n_cubes);
+  const double mass_factor = std::pow(conditionning, 1. / (n_cubes - 1));
   std::vector<double> masses;
   double mass_tot = 0;
   for (int i = 0; i < n_cubes; i++)
