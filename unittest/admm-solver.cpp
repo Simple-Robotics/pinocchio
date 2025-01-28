@@ -84,8 +84,11 @@ struct TestBoxTpl
     pgs_solver.setRelativePrecision(1e-14);
 
     Eigen::VectorXd compliance = Eigen::VectorXd::Zero(g.size());
+    Eigen::VectorXd mean_inertia = Eigen::VectorXd::Constant(g.size(), data.M.diagonal().trace());
+    mean_inertia /= g.size();
+    mean_inertia = mean_inertia.array().sqrt();
     boost::optional<const Eigen::Ref<const Eigen::VectorXd>> preconditioner_vec(
-      Eigen::VectorXd::Constant(g.size(), 10.));
+      mean_inertia);
     boost::optional<const Eigen::Ref<const Eigen::VectorXd>> primal_solution_constref(
       primal_solution);
     has_converged = admm_solver.solve(
