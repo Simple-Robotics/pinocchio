@@ -1,13 +1,13 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
 
 #include <iostream>
 
@@ -37,14 +37,14 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian_operations)
 
   // 3D - LOCAL
   {
-    RigidConstraintModel cm_RF_LOCAL(CONTACT_3D, model, model.getJointId(RF), SE3::Random(), LOCAL);
-    RigidConstraintData cd_RF_LOCAL(cm_RF_LOCAL);
-    RigidConstraintModel cm_LF_LOCAL(CONTACT_3D, model, model.getJointId(LF), SE3::Random(), LOCAL);
-    RigidConstraintData cd_LF_LOCAL(cm_LF_LOCAL);
+    BilateralPointConstraintModel cm_RF_LOCAL(model, model.getJointId(RF), SE3::Random());
+    BilateralPointConstraintData cd_RF_LOCAL(cm_RF_LOCAL);
+    BilateralPointConstraintModel cm_LF_LOCAL(model, model.getJointId(LF), SE3::Random());
+    BilateralPointConstraintData cd_LF_LOCAL(cm_LF_LOCAL);
 
-    const std::vector<RigidConstraintModel> constraints_models{cm_RF_LOCAL, cm_LF_LOCAL};
-    std::vector<RigidConstraintData> constraints_datas{cd_RF_LOCAL, cd_LF_LOCAL};
-    std::vector<RigidConstraintData> constraints_datas_ref{cd_RF_LOCAL, cd_LF_LOCAL};
+    const std::vector<BilateralPointConstraintModel> constraints_models{cm_RF_LOCAL, cm_LF_LOCAL};
+    std::vector<BilateralPointConstraintData> constraints_datas{cd_RF_LOCAL, cd_LF_LOCAL};
+    std::vector<BilateralPointConstraintData> constraints_datas_ref{cd_RF_LOCAL, cd_LF_LOCAL};
 
     const Eigen::DenseIndex m = getTotalConstraintSize(constraints_models);
 
@@ -82,34 +82,34 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian_operations)
       BOOST_CHECK(res.isApprox(res_ref));
     }
 
-    // TODO(jcarpent): fix test
-    // // Check that getConstraintJacobian works with Matrix3Xs
-    // {
-    //   using Matrix3Xs = Eigen::Matrix<Data::Scalar, 3, Eigen::Dynamic, Data::Options>;
-    //   Matrix3Xs J_RF_LOCAL_sparse_3xs(3, model.nv);
-    //   J_RF_LOCAL_sparse_3xs.setZero();
-    //   getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_3xs);
+    // Check that getConstraintJacobian works with Matrix3Xs
+    {
+      using Matrix3Xs = Eigen::Matrix<Data::Scalar, 3, Eigen::Dynamic, Data::Options>;
+      Matrix3Xs J_RF_LOCAL_sparse_3xs(3, model.nv);
+      J_RF_LOCAL_sparse_3xs.setZero();
+      getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_3xs);
 
-    //   Data::MatrixXs J_RF_LOCAL_sparse_xs(3, model.nv);
-    //   J_RF_LOCAL_sparse_xs.setZero();
-    //   getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_xs);
+      Data::MatrixXs J_RF_LOCAL_sparse_xs(3, model.nv);
+      J_RF_LOCAL_sparse_xs.setZero();
+      getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_xs);
 
-    //   BOOST_CHECK(J_RF_LOCAL_sparse_3xs.isApprox(J_RF_LOCAL_sparse_xs));
-    // }
+      BOOST_CHECK(J_RF_LOCAL_sparse_3xs.isApprox(J_RF_LOCAL_sparse_xs));
+    }
 
-    // // Check that getConstraintJacobian works with Matrix6Xs
-    // {
-    //   using Matrix6Xs = Eigen::Matrix<Data::Scalar, 6, Eigen::Dynamic, Data::Options>;
-    //   Matrix6Xs J_RF_LOCAL_sparse_6xs(6, model.nv);
-    //   J_RF_LOCAL_sparse_6xs.setZero();
-    //   getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_6xs);
+    // Check that getConstraintJacobian works with Matrix6Xs
+    {
+      using Matrix6Xs = Eigen::Matrix<Data::Scalar, 6, Eigen::Dynamic, Data::Options>;
+      Matrix6Xs J_RF_LOCAL_sparse_6xs(6, model.nv);
+      J_RF_LOCAL_sparse_6xs.setZero();
+      getConstraintJacobian(
+        model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_6xs.topRows(3));
 
-    //   Data::MatrixXs J_RF_LOCAL_sparse_xs(6, model.nv);
-    //   J_RF_LOCAL_sparse_xs.setZero();
-    //   getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_xs);
+      Data::MatrixXs J_RF_LOCAL_sparse_xs(6, model.nv);
+      J_RF_LOCAL_sparse_xs.setZero();
+      getConstraintJacobian(model, data, cm_RF_LOCAL, cd_RF_LOCAL, J_RF_LOCAL_sparse_xs.topRows(3));
 
-    //   BOOST_CHECK(J_RF_LOCAL_sparse_6xs.isApprox(J_RF_LOCAL_sparse_xs));
-    // }
+      BOOST_CHECK(J_RF_LOCAL_sparse_6xs.isApprox(J_RF_LOCAL_sparse_xs));
+    }
   }
 }
 
