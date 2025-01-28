@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_compute)
     Eigen::VectorXd Jt_rhs(model.nv);
 
     evalConstraints(model, data, constraint_models, constraint_datas);
-    evalConstraintJacobianTransposeProduct(
+    evalConstraintJacobianTransposeMatrixProduct(
       model, data, constraint_models, constraint_datas, rhs, Jt_rhs);
 
     BOOST_CHECK(Jt_rhs.isApprox(Jt_rhs_gt));
