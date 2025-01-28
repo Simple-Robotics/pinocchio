@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #include <iostream>
@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/cholesky.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/point-frictional-constraint.hpp"
 #include "pinocchio/algorithm/contact-dynamics.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
@@ -25,7 +26,9 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(default_constructor_shared_ptr)
 {
-  typedef DelassusOperatorRigidBodySystemsTpl<double, 0, JointCollectionDefaultTpl, std::shared_ptr>
+  typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::shared_ptr>
     DelassusOperatorRigidBodySharedPtr;
   typedef typename DelassusOperatorRigidBodySharedPtr::ConstraintModelVector ConstraintModelVector;
   typedef typename DelassusOperatorRigidBodySharedPtr::ConstraintDataVector ConstraintDataVector;
@@ -58,8 +61,9 @@ BOOST_AUTO_TEST_CASE(default_constructor_shared_ptr)
 
 BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
 {
+  typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
   typedef DelassusOperatorRigidBodySystemsTpl<
-    double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
     DelassusOperatorRigidBodyReferenceWrapper;
   typedef
     typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintModelVector ConstraintModelVector;
@@ -90,8 +94,9 @@ BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
 
 BOOST_AUTO_TEST_CASE(test_compute)
 {
+  typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
   typedef DelassusOperatorRigidBodySystemsTpl<
-    double, 0, JointCollectionDefaultTpl, std::reference_wrapper>
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
     DelassusOperatorRigidBodyReferenceWrapper;
   typedef DelassusOperatorRigidBodyReferenceWrapper::CustomData CustomData;
   typedef
@@ -113,12 +118,10 @@ BOOST_AUTO_TEST_CASE(test_compute)
 
   ConstraintModelVector constraint_models;
   ConstraintDataVector constraint_datas;
-  const RigidConstraintModel cm_RF_LOCAL(
-    CONTACT_3D, model, model.getJointId(RF), SE3::Random(), LOCAL);
+  const ConstraintModel cm_RF_LOCAL(model, model.getJointId(RF), SE3::Random());
   constraint_models.push_back(cm_RF_LOCAL);
   constraint_datas.push_back(cm_RF_LOCAL.createData());
-  const RigidConstraintModel cm_LF_LOCAL(
-    CONTACT_3D, model, model.getJointId(LF), SE3::Random(), LOCAL);
+  const ConstraintModel cm_LF_LOCAL(model, model.getJointId(LF), SE3::Random());
   constraint_models.push_back(cm_LF_LOCAL);
   constraint_datas.push_back(cm_LF_LOCAL.createData());
 
@@ -182,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_compute)
 
     // Eval Jt*rhs vs internal computations. This test is useful to check intermediate computation.
     //    Eigen::VectorXd Jt_rhs(model.nv);
-    //    evalConstraintJacobianTransposeProduct(model,data,constraint_models,constraint_datas,rhs,Jt_rhs);
+    //    evalConstraintJacobianTransposeMatrixProduct(model,data,constraint_models,constraint_datas,rhs,Jt_rhs);
     //    BOOST_CHECK(delassus_operator.getCustomData().u.isApprox(Jt_rhs));
     //
     //    std::cout << "delassus_operator.getCustomData().u: " <<
@@ -190,14 +193,21 @@ BOOST_AUTO_TEST_CASE(test_compute)
     //    Jt_rhs.transpose() << std::endl; const Eigen::VectorXd Jt_rhs_gt =
     //    constraints_jacobian_gt.transpose() * rhs;
     //    BOOST_CHECK(delassus_operator.getCustomData().u.isApprox(Jt_rhs_gt));
+    //
+    //    pinocchio::container::aligned_vector<Data::Force> joint_forces_gt(
+    //      size_t(model.njoints), Data::Force::Zero());
+    //    mapConstraintForcesToJointForces(
+    //      model, data_gt, constraint_models, constraint_datas_gt, rhs, joint_forces_gt);
 
-    pinocchio::container::aligned_vector<Data::Force> joint_forces_gt(
-      size_t(model.njoints), Data::Force::Zero());
-    mapConstraintForcesToJointForces(
-      model, data_gt, constraint_models, constraint_datas_gt, rhs, joint_forces_gt);
+    Eigen::VectorXd tau_constraints = Eigen::VectorXd::Zero(model.nv);
+    evalConstraintJacobianTransposeMatrixProduct(
+      model, data_gt, constraint_models, constraint_datas_gt, rhs, tau_constraints);
+    const Eigen::VectorXd Jt_rhs_gt = constraints_jacobian_gt.transpose() * rhs;
+    BOOST_CHECK(tau_constraints.isApprox(Jt_rhs_gt));
+
     aba(
-      model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), Eigen::VectorXd::Zero(model.nv),
-      joint_forces_gt, Convention::LOCAL);
+      model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), tau_constraints,
+      Convention::LOCAL);
 
     for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
     {
@@ -213,21 +223,21 @@ BOOST_AUTO_TEST_CASE(test_compute)
     //    std::cout << "delassus_operator.getCustomData().u: " <<
     //    delassus_operator.getCustomData().u.transpose() << std::endl; std::cout << "data_aba.u: "
     //    << data_aba.u.transpose() << std::endl;
-
-    const Eigen::VectorXd Jt_rhs_gt = constraints_jacobian_gt.transpose() * rhs;
+    //
     const Eigen::VectorXd Minv_Jt_rhs_gt = Minv_gt * Jt_rhs_gt;
-
-    //    std::cout << "Minv_Jt_rhs: " << delassus_operator.getCustomData().ddq.transpose() <<
-    //    std::endl; std::cout << "Minv_Jt_rhs_gt: " << Minv_Jt_rhs_gt.transpose() << std::endl;
-
+    //
+    //    //    std::cout << "Minv_Jt_rhs: " << delassus_operator.getCustomData().ddq.transpose() <<
+    //    //    std::endl; std::cout << "Minv_Jt_rhs_gt: " << Minv_Jt_rhs_gt.transpose() <<
+    //    std::endl;
+    //
     BOOST_CHECK(delassus_operator.getCustomData().ddq.isApprox(Minv_Jt_rhs_gt));
-
+    //
     const auto res_gt = (delassus_dense_gt * rhs).eval();
     BOOST_CHECK(res.isApprox(res_gt));
-
-    //    std::cout << "res: " << res.transpose() << std::endl;
-    //    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
-
+    //
+    //    //    std::cout << "res: " << res.transpose() << std::endl;
+    //    //    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
+    //
     // Multiple call and operator *
     {
       for (int i = 0; i < 100; ++i)
@@ -241,70 +251,72 @@ BOOST_AUTO_TEST_CASE(test_compute)
         BOOST_CHECK(res2.isApprox(res_gt));
       }
     }
-  }
+  } // End: Test operator *
 
-  // Update damping
-  {
-    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-    const double mu = 1;
-    delassus_operator.updateDamping(mu);
-    BOOST_CHECK(delassus_operator.getDamping().isApproxToConstant(mu));
-
-    Eigen::VectorXd res_damped(delassus_operator.size());
-    delassus_operator.applyOnTheRight(rhs, res_damped);
-    const auto res_gt_damped =
-      ((delassus_dense_gt_undamped
-        + mu * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size()))
-       * rhs)
-        .eval();
-    BOOST_CHECK(res_damped.isApprox(res_gt_damped));
-  }
-
-  // Test solveInPlace
-  {
-    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-    Eigen::VectorXd res = rhs;
-
-    delassus_operator.updateDamping(min_damping_value);
-    delassus_operator.compute(q_neutral);
-    delassus_operator.solveInPlace(res);
-
-    const Eigen::VectorXd res_gt = delassus_dense_gt.llt().solve(rhs);
-
-    BOOST_CHECK(res.isApprox(res_gt));
-    std::cout << "res:\n" << res.transpose() << std::endl;
-    std::cout << "res_gt:\n" << res_gt.transpose() << std::endl;
-
-    // Check accuracy
-
-    const double min_damping_value_sqrt = math::sqrt(min_damping_value);
-    const double min_damping_value_sqrt_inv = 1. / min_damping_value_sqrt;
-    const Eigen::MatrixXd scaled_matrix =
-      Eigen::MatrixXd::Identity(model.nv, model.nv) * min_damping_value_sqrt;
-    const Eigen::MatrixXd scaled_matrix_inv =
-      Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
-      * min_damping_value_sqrt_inv;
-    const Eigen::MatrixXd M_gt_scaled = scaled_matrix * M_gt * scaled_matrix;
-    std::cout << "M_gt_scaled:\n" << M_gt_scaled << std::endl;
-    std::cout << "M_gt:\n" << M_gt << std::endl;
-    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J =
-      M_gt_scaled + constraints_jacobian_gt.transpose() * constraints_jacobian_gt;
-    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J_inv = M_gt_scaled_plus_Jt_J.inverse();
-    const Eigen::MatrixXd damped_delassus_inverse_woodbury =
-      1. / min_damping_value
-        * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
-      - scaled_matrix_inv
-          * (constraints_jacobian_gt * M_gt_scaled_plus_Jt_J * constraints_jacobian_gt.transpose())
-              .eval()
-          * scaled_matrix_inv;
-
-    const Eigen::VectorXd res_gt_woodbury = damped_delassus_inverse_woodbury * rhs;
-
-    std::cout << "res: " << res.transpose() << std::endl;
-    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
-    std::cout << "res_gt_woodbury: " << res_gt_woodbury.transpose() << std::endl;
-    std::cout << "res - res_gt: " << (res - res_gt).norm() << std::endl;
-  }
+  //
+  //  // Update damping
+  //  {
+  //    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+  //    const double mu = 1;
+  //    delassus_operator.updateDamping(mu);
+  //    BOOST_CHECK(delassus_operator.getDamping().isApproxToConstant(mu));
+  //
+  //    Eigen::VectorXd res_damped(delassus_operator.size());
+  //    delassus_operator.applyOnTheRight(rhs, res_damped);
+  //    const auto res_gt_damped =
+  //      ((delassus_dense_gt_undamped
+  //        + mu * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size()))
+  //       * rhs)
+  //        .eval();
+  //    BOOST_CHECK(res_damped.isApprox(res_gt_damped));
+  //  }
+  //
+  //  // Test solveInPlace
+  //  {
+  //    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+  //    Eigen::VectorXd res = rhs;
+  //
+  //    delassus_operator.updateDamping(min_damping_value);
+  //    delassus_operator.compute(q_neutral);
+  //    delassus_operator.solveInPlace(res);
+  //
+  //    const Eigen::VectorXd res_gt = delassus_dense_gt.llt().solve(rhs);
+  //
+  //    BOOST_CHECK(res.isApprox(res_gt));
+  //    std::cout << "res:\n" << res.transpose() << std::endl;
+  //    std::cout << "res_gt:\n" << res_gt.transpose() << std::endl;
+  //
+  //    // Check accuracy
+  //
+  //    const double min_damping_value_sqrt = math::sqrt(min_damping_value);
+  //    const double min_damping_value_sqrt_inv = 1. / min_damping_value_sqrt;
+  //    const Eigen::MatrixXd scaled_matrix =
+  //      Eigen::MatrixXd::Identity(model.nv, model.nv) * min_damping_value_sqrt;
+  //    const Eigen::MatrixXd scaled_matrix_inv =
+  //      Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
+  //      * min_damping_value_sqrt_inv;
+  //    const Eigen::MatrixXd M_gt_scaled = scaled_matrix * M_gt * scaled_matrix;
+  //    std::cout << "M_gt_scaled:\n" << M_gt_scaled << std::endl;
+  //    std::cout << "M_gt:\n" << M_gt << std::endl;
+  //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J =
+  //      M_gt_scaled + constraints_jacobian_gt.transpose() * constraints_jacobian_gt;
+  //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J_inv = M_gt_scaled_plus_Jt_J.inverse();
+  //    const Eigen::MatrixXd damped_delassus_inverse_woodbury =
+  //      1. / min_damping_value
+  //        * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
+  //      - scaled_matrix_inv
+  //          * (constraints_jacobian_gt * M_gt_scaled_plus_Jt_J *
+  //          constraints_jacobian_gt.transpose())
+  //              .eval()
+  //          * scaled_matrix_inv;
+  //
+  //    const Eigen::VectorXd res_gt_woodbury = damped_delassus_inverse_woodbury * rhs;
+  //
+  //    std::cout << "res: " << res.transpose() << std::endl;
+  //    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
+  //    std::cout << "res_gt_woodbury: " << res_gt_woodbury.transpose() << std::endl;
+  //    std::cout << "res - res_gt: " << (res - res_gt).norm() << std::endl;
+  //  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

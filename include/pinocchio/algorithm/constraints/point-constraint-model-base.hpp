@@ -771,34 +771,28 @@ namespace pinocchio
       }
     }
 
-    //      /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
-    //      /// supported by the joints.
-    //    template<
-    //    template<typename, int>
-    //    class JointCollectionTpl,
-    //    typename ForceLike,
-    //    typename ForceAllocator>
-    //    void mapConstraintForceToJointForces(
-    //                                         const ModelTpl<Scalar, Options, JointCollectionTpl> &
-    //                                         model, const DataTpl<Scalar, Options,
-    //                                         JointCollectionTpl> & data, const
-    //                                         BilateralPointConstraintDataTpl<Scalar, Options> &
-    //                                         cdata, const Eigen::MatrixBase<ForceLike> &
-    //                                         constraint_forces, std::vector<ForceTpl<Scalar,
-    //                                         Options>, ForceAllocator> & joint_forces) const
-    //    {
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
-    //      PINOCCHIO_UNUSED_VARIABLE(data);
-    //
-    //      assert(this->type == CONTACT_3D);
-    //
-    //        // Todo: optimize code
-    //      const Matrix36 A1 = getA1(cdata, LocalFrame()), A2 = getA2(cdata, LocalFrame());
-    //      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() *
-    //      constraint_forces; joint_forces[this->joint2_id].toVector().noalias() += A2.transpose()
-    //      * constraint_forces;
-    //    }
+    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
+    /// supported by the joints.
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ForceLike,
+      typename ForceAllocator>
+    void mapConstraintForceToJointForces(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const Eigen::MatrixBase<ForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+
+      // Todo: optimize code
+      const Matrix36 A1 = getA1(cdata, LocalFrame()), A2 = getA2(cdata, LocalFrame());
+      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
+      joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
+    }
 
     //      /// \brief Map the joint accelerations to constraint value
     //    template<
