@@ -26,7 +26,8 @@ namespace pinocchio
   {
 
     /// \brief Default constructor takes a vector.
-    explicit DiagonalPreconditioner(const Eigen::MatrixBase<VectorLike> & diagonal)
+    template<typename InputVector>
+    explicit DiagonalPreconditioner(const Eigen::MatrixBase<InputVector> & diagonal)
     : m_diagonal(diagonal)
     , m_squared_diagonal(diagonal)
     {
