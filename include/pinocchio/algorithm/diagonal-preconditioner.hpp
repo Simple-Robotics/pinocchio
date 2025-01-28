@@ -32,6 +32,8 @@ namespace pinocchio
     : m_diagonal(diagonal)
     , m_squared_diagonal(diagonal)
     {
+      typedef typename VectorLike::Scalar Scalar;
+      PINOCCHIO_CHECK_INPUT_ARGUMENT((diagonal.array() >= Scalar(0)).all());
       m_squared_diagonal.array() *= diagonal.array();
     }
 
