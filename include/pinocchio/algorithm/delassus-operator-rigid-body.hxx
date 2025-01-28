@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_linear_complexity_hxx__
@@ -93,10 +93,15 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
     template<typename T> class Holder>
   template<typename ConfigVectorType>
-  void DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::compute(
-    const Eigen::MatrixBase<ConfigVectorType> & q)
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::compute(const Eigen::MatrixBase<ConfigVectorType> & q)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model().nq, "The joint configuration vector is not of right size");
@@ -119,8 +124,14 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
     template<typename T> class Holder>
-  void DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::compute()
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::compute()
   {
     const Model & model_ref = model();
     Data & data_ref = data();
@@ -129,22 +140,27 @@ namespace pinocchio
     ConstraintDataVector & constraint_datas_ref = constraint_datas();
     typedef typename Data::Vector3 Vector3;
 
-    for (JointIndex i = 1; i < (JointIndex)model_ref.njoints; ++i)
+    for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
       custom_data.Yaba[i] = custom_data.Yaba_augmented[i] = model_ref.inertias[i].matrix();
     }
 
     // Append constraint inertia to Yaba_augmented
+    Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
     {
-      const RigidConstraintModel & cmodel = constraint_models_ref[ee_id];
-      RigidConstraintData & cdata = constraint_datas_ref[ee_id];
+      const ConstraintModel & cmodel = constraint_models_ref[ee_id];
+      ConstraintData & cdata = constraint_datas_ref[ee_id];
 
-      const Vector3 constraint_diagonal_inertia =
-        this->m_damping_inverse.template segment<3>(Eigen::DenseIndex(ee_id * 3));
+      const auto constraint_size = cmodel.size();
+
+      const auto constraint_diagonal_inertia =
+        this->m_damping_inverse.segment(row_id, constraint_size);
 
       cmodel.appendConstraintDiagonalInertiaToJointInertias(
         model_ref, data_ref, cdata, constraint_diagonal_inertia, custom_data.Yaba_augmented);
+
+      row_id += constraint_size;
     }
 
     typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperatorRigidBodySystemsTpl>
@@ -171,21 +187,16 @@ namespace pinocchio
   {
     typedef typename DelassusOperator::Model Model;
     //    typedef typename DelassusOperator::Data Data;
-    typedef typename DelassusOperator::CustomData Data;
+    typedef typename DelassusOperator::CustomData CustomData;
 
-    typedef boost::fusion::vector<
-      const Model &,
-      //    Data &,
-      Data &>
-      ArgsType;
+    typedef boost::fusion::vector<const Model &, CustomData &> ArgsType;
 
     template<typename JointModel>
     static void algo(
       const pinocchio::JointModelBase<JointModel> & jmodel,
       pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
       const Model & model,
-      //                     Data & data
-      Data & data)
+      CustomData & data)
     {
       typedef typename Model::JointIndex JointIndex;
       typedef typename Data::Force Force;
@@ -193,16 +204,12 @@ namespace pinocchio
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
-      jmodel.jointVelocitySelector(data.u) =
-        jdata.S().transpose() * data.f[i]; // The sign is switched compare to ABA
+      jmodel.jointVelocitySelector(data.u) -= jdata.S().transpose() * data.f[i];
 
       if (parent > 0)
       {
         Force & pa = data.f[i];
-        pa.toVector().noalias() -=
-          jdata.UDinv()
-          * jmodel.jointVelocitySelector(
-            data.u); // The sign is switched compare to ABA as the sign of data.f[i] is switched too
+        pa.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
         data.f[parent] += data.liMi[i].act(pa);
       }
     }
@@ -215,12 +222,12 @@ namespace pinocchio
   {
     typedef typename DelassusOperator::Model Model;
     //    typedef typename DelassusOperator::Data Data;
-    typedef typename DelassusOperator::CustomData Data;
+    typedef typename DelassusOperator::CustomData CustomData;
 
     typedef boost::fusion::vector<
       const Model &,
       //    Data &,
-      Data &>
+      CustomData &>
       ArgsType;
 
     template<typename JointModel>
@@ -229,7 +236,7 @@ namespace pinocchio
       pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
       const Model & model,
       //                     Data & data
-      Data & data)
+      CustomData & data)
     {
       typedef typename Model::JointIndex JointIndex;
 
@@ -258,11 +265,17 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
     template<typename T> class Holder>
   template<typename MatrixIn, typename MatrixOut>
-  void
-  DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::applyOnTheRight(
-    const Eigen::MatrixBase<MatrixIn> & rhs, const Eigen::MatrixBase<MatrixOut> & res_) const
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::
+    applyOnTheRight(
+      const Eigen::MatrixBase<MatrixIn> & rhs, const Eigen::MatrixBase<MatrixOut> & res_) const
   {
     MatrixOut & res = res_.const_cast_derived();
     PINOCCHIO_CHECK_SAME_MATRIX_SIZE(rhs, res);
@@ -273,10 +286,28 @@ namespace pinocchio
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
-    mapConstraintForcesToJointForces(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f);
+    // mapConstraintForcesToJointForces(
+    //   model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f);
+    // TODO(jcarpent): extend the code to operator on matrices
+    {
+      auto & u = this->m_custom_data.u;
+      u.setZero();
+      Eigen::Index row_id = 0;
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const ConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const ConstraintData & cdata = constraint_datas_ref[ee_id];
+        const auto csize = cmodel.size();
+
+        cmodel.jacobianTransposeMatrixProduct(
+          model_ref, data_ref, cdata, rhs.middleRows(row_id, csize), u, AddTo());
+
+        row_id += csize;
+      }
+    }
 
     // Backward sweep: propagate joint force contributions
+    std::fill(this->m_custom_data.f.begin(), this->m_custom_data.f.end(), Force::Zero());
     {
       typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
         DelassusOperatorRigidBodySystemsTpl>
@@ -304,8 +335,26 @@ namespace pinocchio
 
     // Make a pass over the whole set of constraints to project back the accelerations onto the
     // joint
-    mapJointMotionsToConstraintMotions(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, this->m_custom_data.a, res);
+    //    mapJointMotionsToConstraintMotions(
+    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, this->m_custom_data.a,
+    //      res);
+
+    // TODO(jcarpent): extend the code to operator on matrices
+    {
+      const auto & ddq = this->m_custom_data.ddq;
+      Eigen::Index row_id = 0;
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const ConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const ConstraintData & cdata = constraint_datas_ref[ee_id];
+        const auto csize = cmodel.size();
+
+        cmodel.jacobianMatrixProduct(
+          model_ref, data_ref, cdata, ddq, res.middleRows(row_id, csize));
+
+        row_id += csize;
+      }
+    }
 
     // Add damping contribution
     res.array() += m_damping.array() * rhs.array();
@@ -356,11 +405,15 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
     template<typename T> class Holder>
   template<typename MatrixLike>
-  void
-  DelassusOperatorRigidBodySystemsTpl<Scalar, Options, JointCollectionTpl, Holder>::solveInPlace(
-    const Eigen::MatrixBase<MatrixLike> & mat_) const
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat_) const
   {
     MatrixLike & mat = mat_.const_cast_derived();
     PINOCCHIO_CHECK_ARGUMENT_SIZE(

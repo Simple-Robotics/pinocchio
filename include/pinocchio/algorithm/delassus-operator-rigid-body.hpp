@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_linear_complexity_hpp__
@@ -9,13 +9,18 @@
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 #include "pinocchio/utils/reference.hpp"
 
+#include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
+#include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
+
 namespace pinocchio
 {
 
   template<
-    typename _Scalar,
-    int _Options,
+    typename Scalar,
+    int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
     template<typename T> class Holder = std::reference_wrapper>
   struct DelassusOperatorRigidBodySystemsTpl;
 
@@ -23,8 +28,14 @@ namespace pinocchio
     typename _Scalar,
     int _Options,
     template<typename, int> class JointCollectionTpl,
+    class _ConstraintModel,
     template<typename T> class Holder>
-  struct traits<DelassusOperatorRigidBodySystemsTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
+  struct traits<DelassusOperatorRigidBodySystemsTpl<
+    _Scalar,
+    _Options,
+    JointCollectionTpl,
+    _ConstraintModel,
+    Holder>>
   {
     typedef _Scalar Scalar;
 
@@ -41,7 +52,7 @@ namespace pinocchio
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::Data Data;
 
-    typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
+    typedef _ConstraintModel ConstraintModel;
     typedef typename ConstraintModel::ConstraintData ConstraintData;
 
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
@@ -51,11 +62,16 @@ namespace pinocchio
   template<
     typename _Scalar,
     int _Options,
-    template<typename, int> class JointCollectionTpl,
+    template<typename, int> class _JointCollectionTpl,
+    class _ConstraintModel,
     template<typename T> class Holder>
   struct DelassusOperatorRigidBodySystemsTpl
-  : DelassusOperatorBase<
-      DelassusOperatorRigidBodySystemsTpl<_Scalar, _Options, JointCollectionTpl, Holder>>
+  : DelassusOperatorBase<DelassusOperatorRigidBodySystemsTpl<
+      _Scalar,
+      _Options,
+      _JointCollectionTpl,
+      _ConstraintModel,
+      Holder>>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
