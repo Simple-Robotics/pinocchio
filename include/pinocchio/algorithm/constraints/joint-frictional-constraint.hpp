@@ -29,6 +29,10 @@ namespace pinocchio
     {
       Options = _Options
     };
+
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::VELOCITY_LEVEL;
+
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
@@ -88,6 +92,9 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs ComplianceVectorType;
+
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<FrictionalJointConstraintModelTpl>::constraint_formulation_level;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;

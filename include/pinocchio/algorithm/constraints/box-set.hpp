@@ -117,7 +117,7 @@ namespace pinocchio
 
     using Base::project;
 
-    /// \brief Project a vector x into orthant.
+    /// \brief Project a vector x into the box.
     ///
     /// \param[in] x a vector to project.
     /// \param[in] res result of the projection.
@@ -128,6 +128,25 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
       res_.const_cast_derived() = x.array().max(m_lb.array()).min(m_ub.array());
+    }
+
+    /// \brief Project a vector x such that scale * res is in the box.
+    ///
+    /// \param[in] x a vector to project.
+    /// \param[in] scale the scaling vector.
+    /// \param[in] res result of the projection.
+    ///
+    template<typename VectorLikeIn, typename VectorLikeIn2, typename VectorLikeOut>
+    void scaledProject_impl(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeIn2> & scale,
+      const Eigen::MatrixBase<VectorLikeOut> & res_) const
+    {
+      PINOCCHIO_EIGEN_MALLOC_NOT_ALLOWED();
+      assert((scale.array() > 0).all() && "scale vector should be positive");
+      res_.const_cast_derived() =
+        x.array().max(m_lb.array() / scale.array()).min(m_ub.array() / scale.array());
+      PINOCCHIO_EIGEN_MALLOC_ALLOWED();
     }
 
     /// \brief Returns the dimension of the box.

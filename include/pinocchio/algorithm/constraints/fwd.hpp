@@ -89,6 +89,10 @@ namespace pinocchio
   struct UnboundedSetTpl;
   typedef UnboundedSetTpl<context::Scalar> UnboundedSet;
 
+  template<typename Scalar, int Options = 0>
+  struct NullSetTpl;
+  typedef NullSetTpl<context::Scalar> NullSet;
+
   // Convex sets
   template<typename Scalar>
   struct CoulombFrictionConeTpl;

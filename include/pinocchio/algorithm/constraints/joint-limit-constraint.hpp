@@ -31,6 +31,10 @@ namespace pinocchio
     {
       Options = _Options
     };
+
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::POSITION_LEVEL;
+
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
@@ -90,6 +94,9 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs ComplianceVectorType;
+
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;

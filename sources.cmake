@@ -57,6 +57,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/sets.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/set-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/unbounded-set.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/null-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/contact-cholesky.hxx
@@ -79,6 +80,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-ref.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-base.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-preconditioned.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-cholesky-expression.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-dense.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-rigid-body.hpp
@@ -109,6 +111,8 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/loop-constrained-aba.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hxx
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/preconditioner-base.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/diagonal-preconditioner.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/pgs-solver.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/pgs-solver.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/proximal.hpp

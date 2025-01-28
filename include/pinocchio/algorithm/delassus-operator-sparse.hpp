@@ -229,6 +229,11 @@ namespace pinocchio
       return delassus_matrix_plus_damping;
     }
 
+    const Vector & getDamping() const
+    {
+      return damping;
+    }
+
     SparseMatrix inverse() const
     {
       SparseMatrix identity_matrix(size(), size());

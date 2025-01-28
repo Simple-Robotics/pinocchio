@@ -129,8 +129,8 @@ namespace pinocchio
 
           .def(
             "getInverseOperationalSpaceInertiaMatrix",
-            (Matrix(Self::*)(void) const)&Self::getInverseOperationalSpaceInertiaMatrix,
-            bp::arg("self"),
+            (Matrix(Self::*)(bool) const)&Self::getInverseOperationalSpaceInertiaMatrix,
+            (bp::arg("self"), bp::arg("enforce_symmetry") = false),
             "Returns the Inverse of the Operational Space Inertia Matrix resulting from the "
             "decomposition.",
             bp::return_value_policy<bp::return_by_value>())

@@ -8,6 +8,8 @@
 #include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/crba.hpp"
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
+#include "pinocchio/algorithm/delassus-operator-preconditioned.hpp"
 
 #include <boost/variant.hpp> // to avoid C99 warnings
 
@@ -271,6 +273,34 @@ BOOST_AUTO_TEST_CASE(test_delassus_light_cube)
     LanczosDecomposition lanczos_decomposition(G_expression, decomposition_size);
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
+{
+  typedef LanczosDecompositionTpl<Eigen::MatrixXd> LanczosDecomposition;
+  const Eigen::DenseIndex mat_size = 20;
+
+  for (int it = 0; it < 1000; ++it)
+  {
+    const Eigen::MatrixXd A = Eigen::MatrixXd::Random(mat_size, mat_size);
+    const Eigen::MatrixXd matrix = A.transpose() * A;
+
+    Eigen::VectorXd diag_vec = Eigen::VectorXd::Constant(mat_size, 1e-6);
+    Eigen::MatrixXd preconditioner_diag = diag_vec.asDiagonal();
+    const Eigen::MatrixXd matrix_preconditioned =
+      preconditioner_diag * matrix * preconditioner_diag;
+
+    DelassusOperatorDense delassus(matrix);
+    typedef DiagonalPreconditioner<Eigen::VectorXd> Preconditionner;
+    Preconditionner diag_preconditioner(diag_vec);
+    DelassusOperatorPreconditionedTpl<DelassusOperatorDense, Preconditionner>
+      delassus_preconditioned(delassus, diag_preconditioner);
+
+    LanczosDecomposition lanczos_decomposition(delassus_preconditioned, 10);
+
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, matrix_preconditioned);
   }
 }
 

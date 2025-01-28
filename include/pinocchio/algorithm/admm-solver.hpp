@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_admm_solver_hpp__
@@ -14,6 +14,8 @@
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
 
 #include "pinocchio/math/lanczos-decomposition.hpp"
+
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
 
 #include <boost/optional.hpp>
 
@@ -178,6 +180,7 @@ namespace pinocchio
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef LanczosDecompositionTpl<MatrixXs> LanczosAlgo;
+    typedef DiagonalPreconditioner<VectorXs> DiagonalPreconditioner;
 
     using Base::problem_size;
 
@@ -291,14 +294,25 @@ namespace pinocchio
         static_cast<Eigen::DenseIndex>(math::max(2, math::min(lanczos_size, problem_dim))))
     , x_(VectorXs::Zero(problem_dim))
     , y_(VectorXs::Zero(problem_dim))
-    , x_previous(VectorXs::Zero(problem_dim))
-    , y_previous(VectorXs::Zero(problem_dim))
-    , z_previous(VectorXs::Zero(problem_dim))
+    , x_bar_(VectorXs::Zero(problem_dim))
+    , y_bar_(VectorXs::Zero(problem_dim))
+    , x_bar_previous(VectorXs::Zero(problem_dim))
+    , y_bar_previous(VectorXs::Zero(problem_dim))
+    , z_bar_previous(VectorXs::Zero(problem_dim))
     , z_(VectorXs::Zero(problem_dim))
+    , z_bar_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
+    , s_bar_(VectorXs::Zero(problem_dim))
+    , preconditioner_(VectorXs::Ones(problem_dim))
+    , g_bar_(VectorXs::Zero(problem_dim))
+    , time_scaling_acc_to_constraints(VectorXs::Zero(problem_dim))
+    , time_scaling_constraints_to_pos(VectorXs::Zero(problem_dim))
+    , gs(VectorXs::Zero(problem_dim))
     , rhs(problem_dim)
     , primal_feasibility_vector(VectorXs::Zero(problem_dim))
+    , primal_feasibility_vector_bar(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector(VectorXs::Zero(problem_dim))
+    , dual_feasibility_vector_bar(VectorXs::Zero(problem_dim))
     , stats(Base::max_it)
     {
     }
@@ -424,6 +438,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
+    /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -442,7 +457,9 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
+      const Scalar dt,
       const Eigen::MatrixBase<VectorLikeR> & R,
+      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -458,6 +475,7 @@ namespace pinocchio
     /// \param[in] constraint_models Vector of constraints.
     /// \param[in] R Proximal regularization value associated to the compliant constraints
     /// (corresponds to the lowest non-zero).
+    /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
@@ -476,7 +494,9 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
+      const Scalar dt,
       const Eigen::MatrixBase<VectorLikeR> & R,
+      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
       const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
       const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
@@ -490,8 +510,8 @@ namespace pinocchio
         constraint_models.cbegin(), constraint_models.cend());
 
       return solve(
-        delassus, g, wrapped_constraint_models, R, primal_guess, dual_guess, solve_ncp,
-        admm_update_rule, stat_record);
+        delassus, g, wrapped_constraint_models, dt, R, preconditioner, primal_guess, dual_guess,
+        solve_ncp, admm_update_rule, stat_record);
     }
 
     ///
@@ -516,12 +536,13 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
+      const Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
       bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), constraint_models, VectorXs::Zero(problem_size),
-        primal_guess.const_cast_derived(), boost::none, solve_ncp);
+        delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(problem_size),
+        VectorXs::Ones(problem_size), primal_guess.const_cast_derived(), boost::none, solve_ncp);
     }
 
     ///
@@ -545,6 +566,7 @@ namespace pinocchio
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
+      const Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
       bool solve_ncp = true)
     {
@@ -554,7 +576,13 @@ namespace pinocchio
       WrappedConstraintModelVector wrapped_constraint_models(
         constraint_models.cbegin(), constraint_models.cend());
 
-      return solve(delassus, g, wrapped_constraint_models, primal_guess, solve_ncp);
+      return solve(delassus, g, wrapped_constraint_models, dt, primal_guess, solve_ncp);
+    }
+
+    /// \returns the primal solution of the problem
+    const VectorXs & getTimeScalingFromAccToConstraints() const
+    {
+      return time_scaling_acc_to_constraints;
     }
 
     /// \returns the primal solution of the problem
@@ -571,6 +599,50 @@ namespace pinocchio
     const VectorXs & getComplementarityShift() const
     {
       return s_;
+    }
+
+    /// \returns the scaled primal solution of the problem
+    const VectorXs & getScaledPrimalSolution() const
+    {
+      return y_bar_;
+    }
+    /// \returns the scaled dual solution of the problem
+    const VectorXs & getScaledDualSolution() const
+    {
+      return z_bar_;
+    }
+    /// \returns the scaled complementarity shift
+    const VectorXs & getScaledComplementarityShift() const
+    {
+      return s_bar_;
+    }
+
+    /// \returns use the preconditioner to scale a primal quantity x.
+    /// Typically, it allows to get x_bar from x.
+    void scalePrimalSolution(const VectorXs & x, VectorXs & x_bar) const
+    {
+      preconditioner_.scale(x, x_bar);
+    }
+
+    /// \returns use the preconditioner to unscale a primal quantity x.
+    /// Typically, it allows to get x from x_bar.
+    void unscalePrimalSolution(const VectorXs & x_bar, VectorXs & x) const
+    {
+      preconditioner_.unscale(x_bar, x);
+    }
+
+    /// \returns use the preconditioner to scale a dual quantity z.
+    /// Typically, it allows to get z_bar from z.
+    void scaleDualSolution(const VectorXs & z, VectorXs & z_bar) const
+    {
+      preconditioner_.unscale(z, z_bar);
+    }
+
+    /// \returns use the preconditioner to unscale a dual quantity z.
+    /// Typically, it allows to get z from z_bar.
+    void unscaleDualSolution(const VectorXs & z_bar, VectorXs & z) const
+    {
+      preconditioner_.scale(z_bar, z);
     }
 
     SolverStats & getStats()
@@ -605,16 +677,34 @@ namespace pinocchio
     /// \brief Lanczos decomposition algorithm.
     LanczosAlgo lanczos_algo;
 
-    /// \brief Primal variables (corresponds to the contact forces)
+    /// \brief Primal variables (corresponds to the constraint impulses)
     VectorXs x_, y_;
-    /// \brief Previous value of y.
-    VectorXs x_previous, y_previous, z_previous;
-    /// \brief Dual varible of the ADMM (corresponds to the contact velocity or acceleration).
+    /// \brief Scaled primal variables (corresponds to the contact forces)
+    VectorXs x_bar_, y_bar_;
+    /// \brief Previous values of x_bar_, y_bar_ and z_bar_.
+    VectorXs x_bar_previous, y_bar_previous, z_bar_previous;
+    /// \brief Dual variable of the ADMM (corresponds to the contact velocity or acceleration).
     VectorXs z_;
+    /// \brief Scaled dual variable of the ADMM (corresponds to the contact velocity or
+    /// acceleration).
+    VectorXs z_bar_;
     /// \brief De Saxé shift
     VectorXs s_;
+    /// \brief Scaled De Saxé shift
+    VectorXs s_bar_;
 
-    VectorXs rhs, primal_feasibility_vector, dual_feasibility_vector;
+    /// \brief the diagonal preconditioner of the problem
+    DiagonalPreconditioner preconditioner_;
+    /// \brief Preconditioned drift term
+    VectorXs g_bar_;
+
+    /// \brief Time scaling vector for constraints
+    VectorXs time_scaling_acc_to_constraints, time_scaling_constraints_to_pos;
+    /// \brief Vector g divided by time scaling (g / time_scaling_acc_to_constraints)
+    VectorXs gs;
+
+    VectorXs rhs, primal_feasibility_vector, primal_feasibility_vector_bar, dual_feasibility_vector,
+      dual_feasibility_vector_bar;
 
     int cholesky_update_count;
 
@@ -625,6 +715,7 @@ namespace pinocchio
     using Base::timer;
 #endif // PINOCCHIO_WITH_HPP_FCL
   }; // struct ADMMContactSolverTpl
+
 } // namespace pinocchio
 
 #include "pinocchio/algorithm/admm-solver.hxx"

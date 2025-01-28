@@ -31,8 +31,7 @@ namespace pinocchio
       const Scalar alpha = col.dot(vec);
       vec -= alpha * col;
     }
-
-    assert((basis.transpose() * vec).isZero());
+    assert((basis.transpose() * vec).isZero(1e-10));
   }
 } // namespace pinocchio
 

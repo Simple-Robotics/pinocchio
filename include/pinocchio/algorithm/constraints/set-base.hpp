@@ -45,7 +45,18 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeOut> & x_proj) const
     {
-      return derived().projec(x.derived(), x_proj.const_cast_derived());
+      return derived().project(x.derived(), x_proj.const_cast_derived());
+    }
+
+    template<typename VectorLikeIn, typename VectorLikeIn2, typename VectorLikeOut>
+    void scaledProject(
+      const Eigen::MatrixBase<VectorLikeIn> & x,
+      const Eigen::MatrixBase<VectorLikeIn2> & scale,
+      const Eigen::MatrixBase<VectorLikeOut> & x_proj) const
+    {
+      // project x such that scale * x_proj is in the set.
+      return derived().scaledProject_impl(
+        x.derived(), scale.derived(), x_proj.const_cast_derived());
     }
 
     template<typename Vector>

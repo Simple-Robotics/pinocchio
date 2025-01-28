@@ -1,8 +1,8 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2025 INRIA
 //
 
-#include "pinocchio/algorithm/constraints/unbounded-set.hpp"
+#include "pinocchio/algorithm/constraints/null-set.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -13,19 +13,23 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(test_proj)
 {
-  const int num_tests = int(1e6);
+  const int num_tests = int(1000);
   const int dim = 10;
 
-  const UnboundedSet set(dim);
+  const NullSet set(dim);
 
   BOOST_CHECK(set.dim() == dim);
 
-  BOOST_CHECK(set.isInside(UnboundedSet::Vector::Zero(dim)));
-  BOOST_CHECK(set.project(UnboundedSet::Vector::Zero(dim)) == UnboundedSet::Vector::Zero(dim));
+  BOOST_CHECK(set.isInside(NullSet::Vector::Zero(dim)));
+  BOOST_CHECK(!set.isInside(NullSet::Vector::Ones(dim)));
+  BOOST_CHECK(set.project(NullSet::Vector::Zero(dim)) == NullSet::Vector::Zero(dim));
+  BOOST_CHECK(set.project(NullSet::Vector::Ones(dim)) == NullSet::Vector::Zero(dim));
 
   for (int k = 0; k < num_tests; ++k)
   {
-    const UnboundedSet::Vector x = UnboundedSet::Vector::Random(dim);
+    const NullSet::Vector x = NullSet::Vector::Random(dim);
+    if (!x.isZero())
+      BOOST_CHECK(!set.isInside(x));
 
     const auto proj_x = set.project(x);
     const auto proj_proj_x = set.project(proj_x);

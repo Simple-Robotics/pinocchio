@@ -202,7 +202,9 @@ add_pinocchio_unit_test(sample-models COLLISION_OPTIONAL)
 add_pinocchio_unit_test(kinematics)
 add_pinocchio_unit_test(delassus)
 add_pinocchio_unit_test(delassus-operator-dense)
+add_pinocchio_unit_test(delassus-operator-preconditioned)
 add_pinocchio_unit_test(delassus-operator-rigid-body)
+add_pinocchio_unit_test(preconditioner)
 add_pinocchio_unit_test(pv-solver)
 add_pinocchio_parallel_unit_test(openmp-exception)
 
@@ -311,6 +313,7 @@ add_pinocchio_unit_test(classic-acceleration)
 add_pinocchio_unit_test(coulomb-friction-cone)
 add_pinocchio_unit_test(box-set)
 add_pinocchio_unit_test(unbounded-set)
+add_pinocchio_unit_test(null-set)
 add_pinocchio_unit_test(orthant-cone)
 
 # Solvers
