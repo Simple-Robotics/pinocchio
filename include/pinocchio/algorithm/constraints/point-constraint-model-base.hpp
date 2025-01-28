@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2025 INRIA CNRS
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_point_constraint_model_hpp__
@@ -498,82 +498,75 @@ namespace pinocchio
       return res;
     }
 
-    //      ///
-    //      /// @brief This function computes the spatial inertia associated with the constraint.
-    //      /// This function is useful to express the constraint inertia associated with the
-    //      constraint for
-    //      /// AL settings.
-    //      ///
-    //    template<typename Vector3Like>
-    //    Matrix6 computeConstraintSpatialInertia(
-    //                                            const SE3Tpl<Scalar, Options> & placement,
-    //                                            const Eigen::MatrixBase<Vector3Like> &
-    //                                            diagonal_constraint_inertia) const
-    //    {
-    //      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like, Vector3);
-    //      Matrix6 res;
-    //
-    //      const auto & R = placement.rotation();
-    //      const auto & t = placement.translation();
-    //
-    //      typedef Eigen::Matrix<Scalar, 3, 3, Options> Matrix3;
-    //      const Matrix3 R_Sigma = R * diagonal_constraint_inertia.asDiagonal();
-    //      const Matrix3 t_skew = skew(t);
-    //
-    //      auto block_LL = res.template block<3, 3>(SE3::LINEAR, SE3::LINEAR);
-    //      auto block_LA = res.template block<3, 3>(SE3::LINEAR, SE3::ANGULAR);
-    //      auto block_AL = res.template block<3, 3>(SE3::ANGULAR, SE3::LINEAR);
-    //      auto block_AA = res.template block<3, 3>(SE3::ANGULAR, SE3::ANGULAR);
-    //
-    //      block_LL.noalias() = R_Sigma * R.transpose();
-    //      block_LA.noalias() = -block_LL * t_skew;
-    //      block_AL.noalias() = block_LA.transpose();
-    //      block_AA.noalias() = t_skew * block_LA;
-    //
-    //      return res;
-    //    }
+    ///
+    /// @brief This function computes the spatial inertia associated with the constraint.
+    /// This function is useful to express the constraint inertia associated with the constraint for
+    /// AL-based approaches.
+    ///
+    template<typename Vector3Like>
+    Matrix6 computeConstraintSpatialInertia(
+      const SE3Tpl<Scalar, Options> & placement,
+      const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia) const
+    {
+      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like, Vector3);
+      Matrix6 res;
 
-    //    template<
-    //    template<typename, int>
-    //    class JointCollectionTpl,
-    //    typename Vector3Like,
-    //    typename Matrix6Like,
-    //    typename Matrix6LikeAllocator>
-    //    void appendConstraintDiagonalInertiaToJointInertias(
-    //                                                        const ModelTpl<Scalar, Options,
-    //                                                        JointCollectionTpl> & model, const
-    //                                                        DataTpl<Scalar, Options,
-    //                                                        JointCollectionTpl> & data, const
-    //                                                        BilateralPointConstraintDataTpl<Scalar,
-    //                                                        Options> & cdata, const
-    //                                                        Eigen::MatrixBase<Vector3Like> &
-    //                                                        diagonal_constraint_inertia,
-    //                                                        std::vector<Matrix6Like,
-    //                                                        Matrix6LikeAllocator> & inertias)
-    //                                                        const
-    //    {
-    //      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like, Vector3);
-    //      PINOCCHIO_UNUSED_VARIABLE(data);
-    //      PINOCCHIO_UNUSED_VARIABLE(cdata);
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(inertias.size(), size_t(model.njoints));
-    //      assert(
-    //             ((joint1_id > 0 && joint2_id == 0) || (joint1_id == 0 && joint2_id > 0))
-    //             && "The behavior is only defined for this context");
-    //
-    //      if (this->joint1_id != 0)
-    //      {
-    //        const SE3 & placement = this->joint1_placement;
-    //        inertias[this->joint1_id] +=
-    //        computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
-    //      }
-    //
-    //      if (this->joint2_id != 0)
-    //      {
-    //        const SE3 & placement = this->joint2_placement;
-    //        inertias[this->joint2_id] +=
-    //        computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
-    //      }
-    //    }
+      const auto & R = placement.rotation();
+      const auto & t = placement.translation();
+
+      typedef Eigen::Matrix<Scalar, 3, 3, Options> Matrix3;
+      const Matrix3 R_Sigma = R * diagonal_constraint_inertia.asDiagonal();
+      const Matrix3 t_skew = skew(t);
+
+      auto block_LL = res.template block<3, 3>(SE3::LINEAR, SE3::LINEAR);
+      auto block_LA = res.template block<3, 3>(SE3::LINEAR, SE3::ANGULAR);
+      auto block_AL = res.template block<3, 3>(SE3::ANGULAR, SE3::LINEAR);
+      auto block_AA = res.template block<3, 3>(SE3::ANGULAR, SE3::ANGULAR);
+
+      block_LL.noalias() = R_Sigma * R.transpose();
+      block_LA.noalias() = -block_LL * t_skew;
+      block_AL.noalias() = block_LA.transpose();
+      block_AA.noalias() = t_skew * block_LA;
+
+      return res;
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename Vector3Like,
+      typename Matrix6Like,
+      typename Matrix6LikeAllocator>
+    void appendConstraintDiagonalInertiaToJointInertias(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia,
+      std::vector<Matrix6Like, Matrix6LikeAllocator> & inertias) const
+    {
+      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like, Vector3);
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(cdata);
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(inertias.size(), size_t(model.njoints));
+      assert(
+        ((joint1_id > 0 && joint2_id == 0) || (joint1_id == 0 && joint2_id > 0))
+        && "The behavior is only defined for this context");
+
+      if (this->joint1_id != 0)
+      {
+        SE3 placement_with_correction = this->joint1_placement;
+        placement_with_correction.translation().noalias() -=
+          placement_with_correction.rotation() * cdata.constraint_position_error;
+        inertias[this->joint1_id] +=
+          computeConstraintSpatialInertia(placement_with_correction, diagonal_constraint_inertia);
+      }
+
+      if (this->joint2_id != 0)
+      {
+        const SE3 & placement = this->joint2_placement;
+        inertias[this->joint2_id] +=
+          computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
+      }
+    }
 
     template<typename InputMatrix, template<typename, int> class JointCollectionTpl>
     typename traits<Derived>::template JacobianMatrixProductReturnType<InputMatrix>::type
