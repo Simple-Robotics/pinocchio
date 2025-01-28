@@ -16,7 +16,7 @@ class TestMJCFBindings(unittest.TestCase):
         model_dir = current_dir / "../models/"
         model_path = model_dir / "closed_chain.xml"
         model = pin.buildModelFromMJCF(model_path, model)
-        constraint_models = pin.buildConstraintModelsFromMJCF(model_path, model)
+        constraint_models = pin.buildConstraintModelsFromMJCF(model, model_path)
         self.assertEqual(len(constraint_models), 4)
 
 
@@ -31,7 +31,7 @@ class TestMJCFBindingsWithMujoco(unittest.TestCase):
         model_dir = current_dir / "../models/"
         model_path = model_dir / "closed_chain.xml"
         model_pin = pin.buildModelFromMJCF(model_path, model_pin)
-        constraint_models_pin = pin.buildConstraintModelsFromMJCF(model_path, model_pin)
+        constraint_models_pin = pin.buildConstraintModelsFromMJCF(model_pin, model_path)
         data_pin = model_pin.createData()
         q0_pin = model_pin.referenceConfigurations["home"]
         pin.forwardKinematics(model_pin, data_pin, q0_pin)
