@@ -71,6 +71,7 @@ namespace pinocchio
     {
       m_diagonal = other.m_diagonal;
       m_squared_diagonal = other.m_squared_diagonal;
+      return *this;
     }
 
     bool operator==(const DiagonalPreconditioner & other) const
