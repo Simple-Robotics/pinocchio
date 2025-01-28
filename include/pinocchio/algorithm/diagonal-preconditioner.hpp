@@ -37,6 +37,26 @@ namespace pinocchio
       m_squared_diagonal.array() *= diagonal.array();
     }
 
+    /// @brief Default constructor from a given size.
+    /// @param size Size of the preconditioner
+    explicit DiagonalPreconditioner(const Eigen::Index size)
+    : m_diagonal(VectorLike::Ones(size))
+    , m_squared_diagonal(VectorLike::Ones(size))
+    {
+    }
+
+    /// \brief Construct an identity preconditioner
+    /// @param size Size of the preconditioner
+    static DiagonalPreconditioner
+    Identity(const Eigen::Index size){return DiagonalPreconditioner(size)}
+
+    /// \brief Move constructor
+    DiagonalPreconditioner(DiagonalPreconditioner && other)
+    : m_diagonal(std::move(other.m_diagonal))
+    , m_squared_diagonal(std::move(other.m_squared_diagonal))
+    {
+    }
+
     /// \brief Performs the scale operation to go from x to x_bar: x_bar = P^{-1} * x.
     template<typename MatrixIn, typename MatrixOut>
     void
