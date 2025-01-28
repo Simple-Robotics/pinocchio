@@ -445,6 +445,10 @@ namespace pinocchio
           res.template rightCols<3>().col(i) +=
             cdata.constraint_position_error.cross(iM1.rotation().transpose().col(i));
         }
+        else
+        {
+          assert(false && "Should never happened");
+        }
 
 #undef INTERNAL_LOOP
       }
@@ -493,6 +497,10 @@ namespace pinocchio
         INTERNAL_LOOP(2, j2Mc2.translation(), res.template rightCols<3>());
 
 #undef INTERNAL_LOOP
+      }
+      else
+      {
+        assert(false && "Should never happened");
       }
 
       return res;
