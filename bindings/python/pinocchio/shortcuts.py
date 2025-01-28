@@ -302,7 +302,7 @@ def _buildModelsFromMJCF(
 
     lst = [model]
     if constraints:
-        constraint_models = pin.buildConstraintModelsFromMJCF(filename, model)
+        constraint_models = pin.buildConstraintModelsFromMJCF(model, filename)
         lst.append(constraint_models)
 
     if not hasattr(geometry_types, "__iter__"):
