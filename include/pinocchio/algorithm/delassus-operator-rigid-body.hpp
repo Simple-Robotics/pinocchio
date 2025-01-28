@@ -220,7 +220,7 @@ namespace pinocchio
       typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Motion) MotionVector;
       typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Matrix6Vector;
 
-      explicit CustomData(const Model & model, const Data & data, const Eigen::DenseIndex size)
+      CustomData(const Model & model, const Data & data, const Eigen::DenseIndex size)
       : liMi(size_t(model.njoints), SE3::Identity())
       , oMi(size_t(model.njoints), SE3::Identity())
       , a(size_t(model.njoints), Motion::Zero())
