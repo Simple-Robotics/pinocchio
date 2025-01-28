@@ -57,6 +57,16 @@ namespace pinocchio
     {
     }
 
+    bool operator==(const DiagonalPreconditioner & other) const
+    {
+      return m_diagonal == other.m_diagonal && m_squared_diagonal == other.m_squared_diagonal;
+    }
+
+    bool operator!=(const DiagonalPreconditioner & other) const
+    {
+      return !(*this == other);
+    }
+
     /// \brief Performs the scale operation to go from x to x_bar: x_bar = P^{-1} * x.
     template<typename MatrixIn, typename MatrixOut>
     void
