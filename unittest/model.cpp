@@ -134,6 +134,70 @@ BOOST_AUTO_TEST_CASE(cast)
   BOOST_CHECK(model2 == model.cast<long double>());
 }
 
+// This is the minimal collection to build the `buildModels::manipulator` model
+template<typename _Scalar, int _Options>
+struct ManipulatorJointCollectionNoThrow
+{
+  typedef _Scalar Scalar;
+  enum
+  {
+    Options = _Options
+  };
+
+  // Joint Revolute
+  typedef ::pinocchio::JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
+  typedef ::pinocchio::JointModelRevoluteTpl<Scalar, Options, 1> JointModelRY;
+  typedef ::pinocchio::JointModelRevoluteTpl<Scalar, Options, 2> JointModelRZ;
+
+  typedef boost::variant<JointModelRX, JointModelRY, JointModelRZ> JointModelVariant;
+
+  // Joint Revolute
+  typedef ::pinocchio::JointDataRevoluteTpl<Scalar, Options, 0> JointDataRX;
+  typedef ::pinocchio::JointDataRevoluteTpl<Scalar, Options, 1> JointDataRY;
+  typedef ::pinocchio::JointDataRevoluteTpl<Scalar, Options, 2> JointDataRZ;
+
+  typedef boost::variant<JointDataRX, JointDataRY, JointDataRZ> JointDataVariant;
+};
+
+template<typename _Scalar, int _Options>
+struct ManipulatorJointCollectionThrow
+{
+  typedef _Scalar Scalar;
+  enum
+  {
+    Options = _Options
+  };
+
+  // Joint Revolute
+  typedef ::pinocchio::JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
+  typedef ::pinocchio::JointModelRevoluteTpl<Scalar, Options, 1> JointModelRY;
+
+  typedef boost::variant<JointModelRX, JointModelRY> JointModelVariant;
+
+  // Joint Revolute
+  typedef ::pinocchio::JointDataRevoluteTpl<Scalar, Options, 0> JointDataRX;
+  typedef ::pinocchio::JointDataRevoluteTpl<Scalar, Options, 1> JointDataRY;
+
+  typedef boost::variant<JointDataRX, JointDataRY> JointDataVariant;
+};
+
+BOOST_AUTO_TEST_CASE(cast_collection)
+{
+  typedef ::pinocchio::ModelTpl<double, 0, JointCollectionDefaultTpl> Model;
+  typedef ::pinocchio::ModelTpl<double, 0, ManipulatorJointCollectionNoThrow> MinimalModelNoThrow;
+  typedef ::pinocchio::ModelTpl<double, 0, ManipulatorJointCollectionThrow> MinimalModelThrow;
+
+  Model model_full;
+  buildModels::manipulator(model_full);
+
+  Model model_full_copy(model_full);
+  BOOST_CHECK(model_full == model_full_copy);
+
+  BOOST_CHECK_NO_THROW({ MinimalModelNoThrow model_no_throw = model_full; });
+
+  BOOST_CHECK_THROW({ MinimalModelThrow model_throw = model_full; }, std::invalid_argument);
+}
+
 BOOST_AUTO_TEST_CASE(test_std_vector_of_Model)
 {
   Model model;

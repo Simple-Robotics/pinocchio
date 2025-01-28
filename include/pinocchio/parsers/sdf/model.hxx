@@ -139,9 +139,7 @@ namespace pinocchio
         ChildPoseMap childPoseMap;
         std::string modelName;
 
-        typedef pinocchio::urdf::details::
-          UrdfVisitor<double, 0, ::pinocchio::JointCollectionDefaultTpl>
-            UrdfVisitor;
+        typedef pinocchio::urdf::details::UrdfVisitor UrdfVisitor;
         UrdfVisitor & urdfVisitor;
         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ContactDetails) contact_details;
 
@@ -412,44 +410,7 @@ namespace pinocchio
           const JointIndex parentJointId = urdfVisitor.getParentId(parentName);
           const std::string & parentJointName = urdfVisitor.getJointName(parentJointId);
 
-          SE3 cMj(SE3::Identity()), pMjp(SE3::Identity()), oMc(SE3::Identity()),
-            pMj(SE3::Identity());
-
-          // Find pose of parent link w.r.t. parent joint.
-          if (parentJointName != urdfVisitor.root_joint_name && parentJointName != "universe")
-          {
-            const ::sdf::ElementPtr parentJointElement = mapOfJoints.find(parentJointName)->second;
-
-            const ::sdf::ElementPtr parentJointPoseElem = parentJointElement->GetElement("pose");
-
-            const ignition::math::Pose3d parentJointPoseElem_ig =
-              parentJointElement->template Get<ignition::math::Pose3d>("pose");
-
-            const std::string relativeFrame =
-              parentJointPoseElem->template Get<std::string>("relative_to");
-            const std::string parentJointParentName =
-              parentJointElement->GetElement("parent")->Get<std::string>();
-
-            if (!relativeFrame.compare(parentJointParentName))
-            { // If they are equal
-
-              // Pose is relative to Parent joint's parent. Search in parent link instead.
-              const std::string & parentLinkRelativeFrame =
-                parentLinkPoseElem->template Get<std::string>("relative_to");
-
-              // If the pMjp is not found, throw
-              PINOCCHIO_THROW(
-                !parentLinkRelativeFrame.compare(parentJointName), std::logic_error,
-                parentName + " pose is not defined w.r.t. parent joint");
-
-              pMjp = parentLinkPlacement.inverse();
-            }
-            else
-            { // If the relative_to is not the parent
-              // The joint pose is defined w.r.t to the child, as per the SDF standard < 1.7
-              pMjp = ::pinocchio::sdf::details::convertFromPose3d(parentJointPoseElem_ig);
-            }
-          }
+          SE3 cMj(SE3::Identity()), oMc(SE3::Identity()), pMj(SE3::Identity());
 
           // Find Pose of current joint w.r.t. child link, e.t. cMj;
           const std::string & curJointRelativeFrame =
@@ -476,13 +437,10 @@ namespace pinocchio
             pMj = parentLinkPlacement.inverse() * childLinkPlacement * cMj;
           }
 
-          // const SE3 jointPlacement = pMjp.inverse() * pMj;
-
           urdfVisitor << "Joint " << jointName << " connects parent " << parentName << " link"
                       << " with parent joint " << parentJointName << " to child " << childNameOrig
-                      << " link"
-                      << " with joint type " << jointElement->template Get<std::string>("type")
-                      << '\n';
+                      << " link" << " with joint type "
+                      << jointElement->template Get<std::string>("type") << '\n';
           const Scalar infty = std::numeric_limits<Scalar>::infinity();
           FrameIndex parentFrameId = urdfVisitor.getBodyId(parentName);
           Vector max_effort(Vector::Constant(1, infty)), max_velocity(Vector::Constant(1, infty)),
@@ -665,11 +623,14 @@ namespace pinocchio
         }
       }; // Struct sdfGraph
 
-      PINOCCHIO_PARSERS_DLLAPI void
-      parseRootTree(SdfGraph & graph, const std::string & rootLinkName);
+      PINOCCHIO_PARSERS_DLLAPI void parseRootTree(
+        SdfGraph & graph,
+        const std::string & rootLinkName,
+        const boost::optional<const ::pinocchio::parsers::JointModel &> rootJoint = boost::none,
+        const boost::optional<const std::string &> rootJointName = boost::none);
       PINOCCHIO_PARSERS_DLLAPI void parseContactInformation(
         const SdfGraph & graph,
-        const urdf::details::UrdfVisitorBase & visitor,
+        const urdf::details::UrdfVisitor & visitor,
         const Model & model,
         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
           & constraint_models);
@@ -695,12 +656,15 @@ namespace pinocchio
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
 
-      ::pinocchio::urdf::details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl>
-        visitor(model, rootJoint, rootJointName);
+      Model sdf_model = model;
+      JointModel root_joint = rootJoint;
+      ::pinocchio::urdf::details::UrdfVisitor visitor(sdf_model);
 
       typedef ::pinocchio::sdf::details::SdfGraph SdfGraph;
 
@@ -719,9 +683,12 @@ namespace pinocchio
       }
 
       // Use the SDF graph to create the model
-      details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, constraint_models);
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      details::parseRootTree(graph, rootLinkName, root_joint_opt, root_joint_name_opt);
+      details::parseContactInformation(graph, visitor, sdf_model, constraint_models);
 
+      model = visitor.model;
       return model;
     }
 
@@ -751,12 +718,16 @@ namespace pinocchio
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
+      typedef ::pinocchio::parsers::JointModel JointModel;
       if (rootJointName.empty())
         throw std::invalid_argument(
           "rootJoint was given without a name. Please fill the argument rootJointName");
 
-      ::pinocchio::urdf::details::UrdfVisitorWithRootJoint<Scalar, Options, JointCollectionTpl>
-        visitor(model, rootJoint, rootJointName);
+      Model sdf_model = model;
+      JointModel root_joint = rootJoint;
+
+      ::pinocchio::urdf::details::UrdfVisitor visitor(sdf_model);
 
       typedef ::pinocchio::sdf::details::SdfGraph SdfGraph;
 
@@ -775,9 +746,12 @@ namespace pinocchio
       }
 
       // Use the SDF graph to create the model
-      details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, constraint_models);
+      boost::optional<const JointModel &> root_joint_opt(root_joint);
+      boost::optional<const std::string &> root_joint_name_opt(rootJointName);
+      details::parseRootTree(graph, rootLinkName, root_joint_opt, root_joint_name_opt);
+      details::parseContactInformation(graph, visitor, sdf_model, constraint_models);
 
+      model = visitor.model;
       return model;
     }
 
@@ -805,9 +779,11 @@ namespace pinocchio
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
       typedef ::pinocchio::sdf::details::SdfGraph SdfGraph;
 
-      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      Model sdf_model = model;
+      ::pinocchio::urdf::details::UrdfVisitor visitor(sdf_model);
       SdfGraph graph(visitor);
 
       graph.setParentGuidance(parentGuidance);
@@ -825,8 +801,9 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, constraint_models);
+      details::parseContactInformation(graph, visitor, sdf_model, constraint_models);
 
+      model = visitor.model;
       return model;
     }
 
@@ -839,9 +816,11 @@ namespace pinocchio
       const std::vector<std::string> & parentGuidance,
       const bool verbose)
     {
+      typedef ::pinocchio::parsers::Model Model;
       typedef ::pinocchio::sdf::details::SdfGraph SdfGraph;
 
-      ::pinocchio::urdf::details::UrdfVisitor<Scalar, Options, JointCollectionTpl> visitor(model);
+      Model sdf_model = model;
+      ::pinocchio::urdf::details::UrdfVisitor visitor(sdf_model);
       SdfGraph graph(visitor);
 
       graph.setParentGuidance(parentGuidance);
@@ -859,8 +838,9 @@ namespace pinocchio
 
       // Use the SDF graph to create the model
       details::parseRootTree(graph, rootLinkName);
-      details::parseContactInformation(graph, visitor, model, constraint_models);
+      details::parseContactInformation(graph, visitor, sdf_model, constraint_models);
 
+      model = visitor.model;
       return model;
     }
   } // namespace sdf

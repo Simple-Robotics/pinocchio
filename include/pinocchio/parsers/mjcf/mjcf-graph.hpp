@@ -10,6 +10,8 @@
 #include "pinocchio/multibody/joint/joints.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
+#include "pinocchio/multibody/liegroup/liegroup.hpp"
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
@@ -34,6 +36,74 @@ namespace pinocchio
       struct MjcfJoint;
       struct MjcfGeom;
       struct MjcfSite;
+
+      class PINOCCHIO_PARSERS_DLLAPI MjcfVisitor : public ::pinocchio::urdf::details::UrdfVisitor
+      {
+      public:
+        typedef ::pinocchio::urdf::details::UrdfVisitor Base;
+        typedef Base::Model Model;
+
+        MjcfVisitor(Model & model)
+        : Base(model)
+        {
+        }
+
+        void addRootJoint(
+          const Inertia & Y,
+          const std::string & body_name,
+          Eigen::VectorXd & reference_config,
+          Eigen::VectorXd & qpos0,
+          const boost::optional<const JointModel &> root_joint,
+          const boost::optional<const std::string &> root_joint_name)
+        {
+          Base::addRootJoint(Y, body_name, root_joint, root_joint_name);
+
+          if (root_joint.has_value())
+          {
+            // update the reference_config with the size of the root joint
+            Eigen::VectorXd qroot(root_joint->nq());
+
+            typedef Eigen::VectorXd ReturnType;
+            typename NeutralStep<LieGroupMap, ReturnType>::ArgsType args(qroot.derived());
+            JointModel root_joint_copy = root_joint.get();
+            root_joint_copy.setIndexes(0, 0, 0);
+            NeutralStep<LieGroupMap, ReturnType>::run(root_joint_copy, args);
+
+            reference_config.conservativeResize(qroot.size() + reference_config.size());
+            reference_config.tail(qroot.size()) = qroot;
+
+            // convert qroot to mujoco's convention
+            qpos0.conservativeResize(qroot.size() + qpos0.size());
+            if (root_joint->shortname() == "JointModelFreeFlyer")
+            {
+              qpos0.tail(4) << qroot(6), qroot(3), qroot(4), qroot(5);
+            }
+            else if (root_joint->shortname() == "JointModelSpherical")
+            {
+              qpos0.tail(4) << qroot(3), qroot(0), qroot(1), qroot(2);
+            }
+            else if (root_joint->shortname() == "JointModelComposite")
+            {
+              for (const auto & joint_ :
+                   boost::get<JointModelComposite>(root_joint_copy.toVariant()).joints)
+              {
+                int idx_q_ = joint_.idx_q();
+                int nq_ = joint_.nq();
+                if (joint_.shortname() == "JointModelSpherical")
+                {
+                  Eigen::Vector4d new_quat(
+                    qroot(idx_q_ + 3), qroot(idx_q_ + 0), qroot(idx_q_ + 1), qroot(idx_q_ + 2));
+                  qpos0.segment(idx_q_, nq_) = new_quat;
+                }
+              }
+            }
+            else
+            {
+              qpos0.tail(qroot.size()) = qroot;
+            }
+          }
+        }
+      };
 
       /// @brief Informations that are stocked in the XML tag compile.
       ///
@@ -418,11 +488,36 @@ namespace pinocchio
         // Map of equality constraints
         EqualityMap_t mapOfEqualities;
 
-        // reference configuration
+        // @brief Reference configuration that allows pinocchio's FK to match mujoco's FK.
+        // When doing a FK in mujoco, there are two differences with pinocchio's FK:
+        // 1) In mujoco, a freeflyer's placement w.r.t its parent is never taken into consideration.
+        //    Only the freeflyer's component of the configuration vector are used for the FK.
+        //    For all other joints, the joints' components AND their placement w.r.t their parents
+        //    are taken into consideration.
+        //    In pinocchio, the placements w.r.t parents are always taken into consideration.
+        // 2) In mujoco, for hinge and slide joints, a reference can be used to offset the "zero" of
+        //    these joints.
+        //
+        // If we were to simply parse an MJCF file to construct a pinocchio model, we would find
+        // that FK(mujoco, q) = FK(pinocchio, q - qref).
+        // However, to make it easier to switch between mujoco and pinocchio, it's handy to use the
+        // same q in both frameworks. Therefore, after parsing the model, we update the placement of
+        // each pinocchio joint such that FK(mujoco, q) = FK(pinocchio, q).
+        // Therefore, the `referenceConfig` vector is used to perform this update.
         Eigen::VectorXd referenceConfig;
+
+        /// @brief Default configuration obtained when parsing an MJCF file.
+        /// This configuration is not a keyframe and is only obtained by parsing the succession of
+        /// <body><joint>...</body> inside <worldbody>
+        /// It is handy to store this default configuration as it is typically used to define
+        /// equality constraints in a MJCF file.
+        Eigen::VectorXd qpos0;
 
         // property tree where xml file is stored
         ptree pt;
+
+        // World body, mainly used to store geoms that are outside the body hierarchy
+        MjcfBody worldBody;
 
         // Ordered list of bodies
         VectorOfStrings bodiesList;
@@ -431,17 +526,17 @@ namespace pinocchio
         std::string modelName;
         std::string modelPath;
 
-        // Urdf Visitor to add joint and body
-        typedef pinocchio::urdf::details::
-          UrdfVisitor<double, 0, ::pinocchio::JointCollectionDefaultTpl>
-            UrdfVisitor;
-        UrdfVisitor & urdfVisitor;
+        // Mjcf Visitor to add joint and body
+        MjcfVisitor & mjcfVisitor;
+        typedef MjcfVisitor MjcfVisitor;
+        typedef MjcfVisitor::Model Model;
+        typedef MjcfVisitor::JointModel JointModel;
 
         /// @brief graph constructor
-        /// @param urdfVisitor
-        MjcfGraph(UrdfVisitor & urdfVisitor, const std::string & modelPath)
+        /// @param mjcfVisitor
+        MjcfGraph(MjcfVisitor & mjcfVisitor, const std::string & modelPath)
         : modelPath(modelPath)
-        , urdfVisitor(urdfVisitor)
+        , mjcfVisitor(mjcfVisitor)
         {
         }
 
@@ -459,6 +554,11 @@ namespace pinocchio
         /// mapOfDefault for later use.
         /// @param el ptree element. Root of the default
         void parseDefault(ptree & el, const ptree & parent, const std::string & parentTag);
+
+        /// @brief Inspect the worlbody tag to retrieve potential geoms that are not attached
+        /// to any bodies.
+        /// @param el root of the tree
+        void parseWorldBodyGeoms(const ptree & el);
 
         /// @brief Go through the main body of the mjcf file "worldbody" to get all the info ready
         /// to create the model.
@@ -526,8 +626,22 @@ namespace pinocchio
         /// @param nameOfBody Name of the body to add
         void fillModel(const std::string & nameOfBody);
 
+        /// @brief Use the reference configuration that was parsed to update the joint placements so
+        /// that pinocchio and mujoco forward kinematics match given the same configuration vector.
+        /// See @ref referenceConfig for more information.
+        void updateJointPlacementsFromReferenceConfig();
+
         /// @brief Fill the pinocchio model with all the infos from the graph
-        void parseRootTree();
+        /// @param rootJoint optional root joint to add to the base of the model. The root joint
+        /// will be ignored if the model doesn't have a fixed base.
+        /// @param rootJointName name of the optional root joint.
+        /// @note If a root joint provided and the graph has a fixed base, this root joint will be
+        /// added at the base of the model.
+        /// If the graph doesn't have a fixed base (the first body has one or more child joints),
+        /// this root joint will be ignored.
+        void parseRootTree(
+          const boost::optional<const JointModel &> rootJoint = boost::none,
+          const boost::optional<const std::string &> rootJointName = boost::none);
 
         /// @brief Fill reference configuration for a body and all it's associated dof
         /// @param currentBody body to check

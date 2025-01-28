@@ -270,6 +270,7 @@ namespace pinocchio
     typedef ModelTpl<NewScalar, Options, JointCollectionTpl> ReturnType;
 
     ReturnType res;
+
     res.nq = nq;
     res.nv = nv;
     res.njoints = njoints;
@@ -332,7 +333,10 @@ namespace pinocchio
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  ModelTpl<Scalar, Options, JointCollectionTpl>& ModelTpl<Scalar, Options, JointCollectionTpl>::operator=(const ModelTpl & other)
+  template<template<typename, int> class OtherJointCollectionTpl>
+  ModelTpl<Scalar, Options, JointCollectionTpl> &
+  ModelTpl<Scalar, Options, JointCollectionTpl>::operator=(
+    const ModelTpl<Scalar, Options, OtherJointCollectionTpl> & other)
   {
     this->nq = other.nq;
     this->nv = other.nv;
@@ -341,7 +345,12 @@ namespace pinocchio
     this->nframes = other.nframes;
     this->inertias = other.inertias;
     this->jointPlacements = other.jointPlacements;
-    this->joints = other.joints;
+    this->joints.clear();
+    this->joints.reserve(other.joints.size());
+    for (const auto & other_joint : other.joints)
+    {
+      this->joints.push_back(other_joint);
+    }
     this->idx_qs = other.idx_qs;
     this->nqs = other.nqs;
     this->idx_vs = other.idx_vs;

@@ -173,4 +173,12 @@
     <connect body1="right-plantar-rod" body2="right-foot" anchor="0.35012 0 0"/>
     <connect body1="right-achilles-rod" body2="right-heel-spring" anchor="0.5012 0 0"/>
   </equality>
+
+  <keyframe>
+    <key name="home"
+      qpos="0 0 1.0059301 1 0 0 0 0.00449956 0 0.497301 0.97861 -0.0164104 0.0177766
+        -0.204298 -1.1997 0 1.42671 -2.25907e-06 -1.52439 1.50645 -1.59681 -0.00449956 0 0.497301
+        0.97874 0.0038687 -0.0151572 -0.204509 -1.1997 0 1.42671 0 -1.52439 1.50645 -1.59681"/>
+  </keyframe>
+
 </mujoco>

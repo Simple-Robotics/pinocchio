@@ -211,6 +211,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-free-flyer.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-generic.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-generic.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-helical.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-helical-unaligned.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/joint/joint-mimic.hpp
@@ -371,6 +372,7 @@ set(${PROJECT_NAME}_PARSERS_SOURCES
     ${PROJECT_SOURCE_DIR}/src/parsers/mjcf/mjcf-graph-geom.cpp)
 
 set(${PROJECT_NAME}_PARSERS_PUBLIC_HEADERS
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/meshloader-fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/srdf.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/parsers/srdf.hxx

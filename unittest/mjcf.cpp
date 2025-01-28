@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(convert_inertia_fullinertia)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(convert_inertia_diaginertia)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(geoms_construction)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(inertia_from_geom)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(convert_orientation)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
 
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(merge_default)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model;
-  MjcfGraph::UrdfVisitor visitor(model);
+  MjcfGraph::MjcfVisitor visitor(model);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseDefault(ptr.get_child("default"), ptr, "default");
@@ -458,7 +458,8 @@ BOOST_AUTO_TEST_CASE(parse_default_class)
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.xml");
 
   pinocchio::Model model_m;
-  pinocchio::mjcf::buildModel(filename, model_m, constraint_models);
+  pinocchio::mjcf::buildModel(filename, model_m);
+  pinocchio::mjcf::buildConstraintModelsFromXML(filename, model_m, constraint_models);
 
   std::string file_u = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/test_mjcf.urdf");
   pinocchio::Model model_u;
@@ -503,7 +504,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_no_strippath)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());
@@ -540,7 +541,7 @@ BOOST_AUTO_TEST_CASE(parse_dirs_strippath)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());
@@ -572,7 +573,7 @@ BOOST_AUTO_TEST_CASE(parse_RX)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelRX;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -609,7 +610,7 @@ BOOST_AUTO_TEST_CASE(parse_PX)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPX;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -646,7 +647,7 @@ BOOST_AUTO_TEST_CASE(parse_Sphere)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelS;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -683,7 +684,7 @@ BOOST_AUTO_TEST_CASE(parse_Free)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelF;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -721,7 +722,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_RXRY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelRXRY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -763,7 +764,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXPY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXPY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -805,7 +806,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXRY)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXRY;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -847,7 +848,7 @@ BOOST_AUTO_TEST_CASE(parse_composite_PXSphere)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m, modelPXSphere;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -939,6 +940,55 @@ BOOST_AUTO_TEST_CASE(adding_keyframes)
 
   Eigen::VectorXd vect_ref(model_m.nq);
   vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+  ::pinocchio::normalize(model_m, vect_ref);
+
+  BOOST_CHECK(vect_model.size() == vect_ref.size());
+  BOOST_CHECK(vect_model == vect_ref);
+}
+
+// Test laoding a model with a spherical joint and verify that keyframe is valid
+BOOST_AUTO_TEST_CASE(adding_keyframes_with_ref_and_freejoint)
+{
+  std::istringstream xmlData(R"(
+            <mujoco model="testKeyFrame">
+                <default>
+                    <position ctrllimited="true" ctrlrange="-.1 .1" kp="30"/>
+                    <default class="joint">
+                    <geom type="cylinder" size=".006" fromto="0 0 0 0 0 .05" rgba=".9 .6 1 1"/>
+                    </default>
+                </default>
+                <worldbody>
+                    <body name="body1" pos="0 0 1.1">
+                        <freejoint/>
+                        <geom type="capsule" size=".01" fromto="0 0 0 .2 0 0"/>
+                        <body pos=".2 0 0" name="body2">
+                            <joint type="ball" damping=".1"/>
+                            <geom type="capsule" size=".01" fromto="0 -.15 0 0 0 0"/>
+                        </body>
+                    </body>
+                </worldbody>
+                <keyframe>
+                    <key name="test"
+                    qpos="0 0 0.596
+                        0.988015 0 0.154359 0
+                        0.988015 0 0.154359 0"/>
+                </keyframe>
+                </mujoco>)");
+
+  auto namefile = createTempFile(xmlData);
+
+  pinocchio::Model model_m;
+  pinocchio::mjcf::buildModel(namefile.name(), model_m);
+
+  Eigen::Vector3d freejoint_trans_test = Eigen::Vector3d::Zero();
+  Eigen::Vector3d freejoint_trans = model_m.jointPlacements[1].translation();
+  BOOST_CHECK(freejoint_trans_test == freejoint_trans);
+
+  Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
+
+  Eigen::VectorXd vect_ref(model_m.nq);
+  vect_ref << 0, 0, 0.596, 0, 0.154359, 0, 0.988015, 0, 0.154359, 0, 0.988015;
+  ::pinocchio::normalize(model_m, vect_ref);
 
   BOOST_CHECK(vect_model.size() == vect_ref.size());
   BOOST_CHECK(vect_model == vect_ref);
@@ -1002,7 +1052,7 @@ BOOST_AUTO_TEST_CASE(armature)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -1043,7 +1093,7 @@ BOOST_AUTO_TEST_CASE(reference_positions)
 
   Eigen::VectorXd vect_model = model_m.referenceConfigurations.at("test");
   Eigen::VectorXd vect_ref(model_m.nq);
-  vect_ref << 0.66, 0.4;
+  vect_ref << 0.8, 0.5;
 
   BOOST_CHECK(vect_model.size() == vect_ref.size());
   BOOST_CHECK(vect_model == vect_ref);
@@ -1287,17 +1337,6 @@ BOOST_AUTO_TEST_CASE(compare_to_urdf)
   BOOST_CHECK(model_urdf.idx_vs == model_m.idx_vs);
   BOOST_CHECK(model_urdf.nvs == model_m.nvs);
 
-  typename ConfigVectorMap::const_iterator it = model_m.referenceConfigurations.begin();
-  typename ConfigVectorMap::const_iterator it_model_urdf =
-    model_urdf.referenceConfigurations.begin();
-  for (long k = 0; k < (long)model_m.referenceConfigurations.size(); ++k)
-  {
-    std::advance(it, k);
-    std::advance(it_model_urdf, k);
-    BOOST_CHECK(it->second.size() == it_model_urdf->second.size());
-    BOOST_CHECK(it->second == it_model_urdf->second);
-  }
-
   BOOST_CHECK(model_urdf.armature.size() == model_m.armature.size());
 
   BOOST_CHECK(model_urdf.armature == model_m.armature);
@@ -1417,9 +1456,12 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
   std::string filename = PINOCCHIO_MODEL_DIR + std::string("/../unittest/models/closed_chain.xml");
 
   pinocchio::Model model;
-  pinocchio::mjcf::buildModel(filename, model, constraint_models);
+  pinocchio::mjcf::buildModel(filename, model);
+  pinocchio::mjcf::buildConstraintModelsFromXML(filename, model, constraint_models);
 
   BOOST_CHECK_EQUAL(constraint_models.size(), 4);
+
+  // We check that we have correctly parsed the values contained in the XML file
   BOOST_CHECK_EQUAL(
     constraint_models[0].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
@@ -1428,9 +1470,18 @@ BOOST_AUTO_TEST_CASE(test_contact_parsing)
     constraint_models[2].joint1_placement.translation(), pinocchio::SE3::Vector3(0.50120, 0, 0));
   BOOST_CHECK_EQUAL(
     constraint_models[3].joint1_placement.translation(), pinocchio::SE3::Vector3(0.35012, 0, 0));
+
+  // Next, we check if the other constraint placement has been computed correctly.
+  // If a bilateral constraint has been constructed well, then the origin of the constraint
+  // placements, expressed in the world frame, should match
+  const Eigen::VectorXd q0 = model.referenceConfigurations["qpos0"];
+  pinocchio::Data data(model);
+  pinocchio::forwardKinematics(model, data, q0);
   for (const auto & cm : constraint_models)
   {
-    BOOST_CHECK(cm.joint2_placement.isApprox(cm.joint1_placement.inverse()));
+    const pinocchio::SE3 oMc1 = data.oMi[cm.joint1_id] * cm.joint1_placement;
+    const pinocchio::SE3 oMc2 = data.oMi[cm.joint2_id] * cm.joint2_placement;
+    BOOST_CHECK(oMc1.translation().isApprox(oMc2.translation()));
   }
 }
 
@@ -1450,7 +1501,7 @@ BOOST_AUTO_TEST_CASE(test_default_eulerseq)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "fakeMjcf");
   graph.parseGraphFromXML(namefile.name());
@@ -1486,7 +1537,7 @@ BOOST_AUTO_TEST_CASE(parse_mesh_with_vertices)
 
   typedef ::pinocchio::mjcf::details::MjcfGraph MjcfGraph;
   pinocchio::Model model_m;
-  MjcfGraph::UrdfVisitor visitor(model_m);
+  MjcfGraph::MjcfVisitor visitor(model_m);
 
   MjcfGraph graph(visitor, "/fakeMjcf/fake.xml");
   graph.parseGraphFromXML(namefile.name());

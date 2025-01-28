@@ -6,6 +6,7 @@
 #ifndef __pinocchio_parsers_urdf_hpp__
 #define __pinocchio_parsers_urdf_hpp__
 
+#include "pinocchio/parsers/fwd.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/geometry.hpp"
 #include "pinocchio/parsers/meshloader-fwd.hpp"

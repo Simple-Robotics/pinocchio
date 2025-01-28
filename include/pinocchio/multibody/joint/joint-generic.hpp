@@ -286,6 +286,16 @@ namespace pinocchio
     {
     }
 
+    template<template<typename, int> class OtherJointCollectionTpl>
+    JointModelTpl(const JointModelTpl<Scalar, Options, OtherJointCollectionTpl> & other)
+    {
+      *this = other;
+    }
+
+    template<template<typename, int> class OtherJointCollectionTpl>
+    JointModelTpl &
+    operator=(const JointModelTpl<Scalar, Options, OtherJointCollectionTpl> & other);
+
     const std::vector<bool> hasConfigurationLimit() const
     {
       return ::pinocchio::hasConfigurationLimit(*this);
@@ -476,5 +486,7 @@ namespace pinocchio
   }
 
 } // namespace pinocchio
+
+#include "pinocchio/multibody/joint/joint-generic.hxx"
 
 #endif // ifndef __pinocchio_multibody_joint_generic_hpp__

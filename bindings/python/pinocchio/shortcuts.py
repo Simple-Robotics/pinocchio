@@ -284,13 +284,11 @@ def _buildModelsFromMJCF(
     model = pin.Model()
     # model, constraint_models = pin.buildModelFromMJCF(filename, root_joint = root_joint, root_joint_name = root_joint_name)
     if root_joint is None:
-        model, constraint_models = pin.buildModelFromMJCF(filename)
+        model = pin.buildModelFromMJCF(filename)
     elif root_joint is not None and root_joint_name is None:
-        model, constraint_models = pin.buildModelFromMJCF(filename, root_joint)
+        model = pin.buildModelFromMJCF(filename, root_joint)
     else:
-        model, constraint_models = pin.buildModelFromMJCF(
-            filename, root_joint, root_joint_name
-        )
+        model = pin.buildModelFromMJCF(filename, root_joint, root_joint_name)
 
     if verbose and not WITH_HPP_FCL and meshLoader is not None:
         print(
@@ -304,6 +302,7 @@ def _buildModelsFromMJCF(
 
     lst = [model]
     if constraints:
+        constraint_models = pin.buildConstraintModelsFromMJCF(filename, model)
         lst.append(constraint_models)
 
     if not hasattr(geometry_types, "__iter__"):

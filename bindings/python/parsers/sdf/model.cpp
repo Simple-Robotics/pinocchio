@@ -25,10 +25,10 @@ namespace pinocchio
       const std::vector<std::string> & parent_guidance)
     {
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       ::pinocchio::sdf::buildModel(
-        path(filename), model, contact_models, root_link_name, parent_guidance);
-      return bp::make_tuple(model, contact_models);
+        path(filename), model, constraint_models, root_link_name, parent_guidance);
+      return bp::make_tuple(model, constraint_models);
     }
 
     bp::tuple buildModelFromSdf(
@@ -38,10 +38,10 @@ namespace pinocchio
       const std::vector<std::string> & parent_guidance)
     {
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       pinocchio::sdf::buildModel(
-        path(filename), root_joint, model, contact_models, root_link_name, parent_guidance);
-      return bp::make_tuple(model, contact_models);
+        path(filename), root_joint, model, constraint_models, root_link_name, parent_guidance);
+      return bp::make_tuple(model, constraint_models);
     }
 
     bp::tuple buildModelFromSdf(
@@ -52,11 +52,11 @@ namespace pinocchio
       const std::vector<std::string> & parent_guidance)
     {
       Model model;
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
       pinocchio::sdf::buildModel(
-        path(filename), root_joint, root_joint_name, model, contact_models, root_link_name,
+        path(filename), root_joint, root_joint_name, model, constraint_models, root_link_name,
         parent_guidance);
-      return bp::make_tuple(model, contact_models);
+      return bp::make_tuple(model, constraint_models);
     }
 #endif
 
