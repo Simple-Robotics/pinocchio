@@ -431,19 +431,19 @@ namespace pinocchio
       {
 #define INTERNAL_LOOP(axis_id, v3_in, res)                                                         \
   CartesianAxis<axis_id>::cross(v3_in, v_tmp);                                                     \
-  res.col(axis_id).noalias() = M1.rotation().transpose() * v_tmp;
+  res.col(axis_id).noalias() = iM1.rotation().transpose() * v_tmp;
 
-        const SE3 & M1 = this->joint1_placement;
+        const SE3 & iM1 = this->joint1_placement;
         Vector3 v_tmp;
-        res.template leftCols<3>() = -M1.rotation().transpose();
-        INTERNAL_LOOP(0, -M1.translation(), res.template rightCols<3>());
-        INTERNAL_LOOP(1, -M1.translation(), res.template rightCols<3>());
-        INTERNAL_LOOP(2, -M1.translation(), res.template rightCols<3>());
+        res.template leftCols<3>() = -iM1.rotation().transpose();
+        INTERNAL_LOOP(0, -iM1.translation(), res.template rightCols<3>());
+        INTERNAL_LOOP(1, -iM1.translation(), res.template rightCols<3>());
+        INTERNAL_LOOP(2, -iM1.translation(), res.template rightCols<3>());
 
         for (int i = 0; i < 3; ++i)
         {
           res.template rightCols<3>().col(i) +=
-            cdata.constraint_position_error.cross(M1.rotation().transpose().col(i));
+            cdata.constraint_position_error.cross(iM1.rotation().transpose().col(i));
         }
 
 #undef INTERNAL_LOOP
