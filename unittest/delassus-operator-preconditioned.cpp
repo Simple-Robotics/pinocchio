@@ -10,7 +10,7 @@
 
 #include <pinocchio/algorithm/delassus-operator-dense.hpp>
 #include <pinocchio/algorithm/delassus-operator-preconditioned.hpp>
-#include "pinocchio/algorithm/preconditioner-diagonal.hpp"
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
 #include <pinocchio/math/matrix.hpp>
 
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   BOOST_CHECK(isSymmetric(preconditioned_matrix));
 
   DelassusOperatorDense delassus(symmetric_mat);
-  PreconditionerDiagonal<Eigen::VectorXd> diag_preconditioner(diag_vec);
-  DelassusOperatorPreconditionedTpl<DelassusOperatorDense, PreconditionerDiagonal<Eigen::VectorXd>>
+  DiagonalPreconditioner<Eigen::VectorXd> diag_preconditioner(diag_vec);
+  DelassusOperatorPreconditionedTpl<DelassusOperatorDense, DiagonalPreconditioner<Eigen::VectorXd>>
     delassus_preconditioned(delassus, diag_preconditioner);
 
   Eigen::VectorXd res(mat_size);

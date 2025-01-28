@@ -2,10 +2,11 @@
 // Copyright (c) 2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_preconditioner_diagonal_hpp__
-#define __pinocchio_algorithm_preconditioner_diagonal_hpp__
+#ifndef __pinocchio_algorithm_diagonal_preconditioner_hpp__
+#define __pinocchio_algorithm_diagonal_preconditioner_hpp__
 
 #include "pinocchio/algorithm/preconditioner-base.hpp"
+
 namespace pinocchio
 {
 
@@ -20,17 +21,16 @@ namespace pinocchio
   /// \note We call the original problem working on (x, g, G) the **unscaled** problem.
   /// We call the new problem working on (x_bar, g_bar, G_bar) the **scaled** problem.
   ///
-  template<typename PreconditionerVectorLike>
-  struct PreconditionerDiagonal
-  : PreconditionerBase<PreconditionerDiagonal<PreconditionerVectorLike>>
+  template<typename VectorLike>
+  struct DiagonalPreconditioner : PreconditionerBase<DiagonalPreconditioner<VectorLike>>
   {
 
     /// \brief Default constructor takes a vector.
-    explicit PreconditionerDiagonal(const PreconditionerVectorLike & diagonal)
-    : m_preconditioner_diagonal(diagonal)
-    , m_preconditioner_square(diagonal)
+    explicit DiagonalPreconditioner(const Eigen::MatrixBase<VectorLike> & diagonal)
+    : m_diagonal(diagonal)
+    , m_squared_diagonal(diagonal)
     {
-      m_preconditioner_square.array() *= diagonal.array();
+      m_squared_diagonal.array() *= diagonal.array();
     }
 
     /// \brief Performs the scale operation to go from x to x_bar: x_bar = P^{-1} * x.
@@ -39,7 +39,8 @@ namespace pinocchio
     scale(const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & x_bar) const
     {
       auto & x_bar_ = x_bar.const_cast_derived();
-      x_bar_.array() = x.array() / m_preconditioner_diagonal.array();
+      x_bar_ = x;
+      scaleInPlace(x_bar_);
     }
 
     /// \brief see \ref scale
@@ -47,7 +48,7 @@ namespace pinocchio
     void scaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() = x.array() / m_preconditioner_diagonal.array();
+      x_.array() = x.array() / m_diagonal.array();
     }
 
     /// \brief Performs the unscale operation to go from x_bar to x: x = P * x_bar.
@@ -56,7 +57,8 @@ namespace pinocchio
     unscale(const Eigen::MatrixBase<MatrixIn> & x_bar, const Eigen::MatrixBase<MatrixOut> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() = x_bar.array() * m_preconditioner_diagonal.array();
+      x_ = x_bar;
+      unscaleInPlace(x_);
     }
 
     /// \brief see \ref \unscale
@@ -64,7 +66,7 @@ namespace pinocchio
     void unscaleInPlace(const Eigen::MatrixBase<MatrixIn> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() *= m_preconditioner_diagonal.array();
+      x_.array() *= m_diagonal.array();
     }
 
     /// \brief Performs the scale operation twice: x_bar = P^{-2} * x.
@@ -73,7 +75,7 @@ namespace pinocchio
       const Eigen::MatrixBase<MatrixIn> & x, const Eigen::MatrixBase<MatrixOut> & x_bar) const
     {
       auto & x_bar_ = x_bar.const_cast_derived();
-      x_bar_.array() = x.array() / m_preconditioner_square.array();
+      x_bar_.array() = x.array() / m_squared_diagonal.array();
     }
 
     /// \brief Performs the unscale operation twice: x = P * x_bar.
@@ -82,35 +84,35 @@ namespace pinocchio
       const Eigen::MatrixBase<MatrixIn> & x_bar, const Eigen::MatrixBase<MatrixOut> & x) const
     {
       auto & x_ = x.const_cast_derived();
-      x_.array() = x_bar.array() * m_preconditioner_square.array();
+      x_.array() = x_bar.array() * m_squared_diagonal.array();
     }
 
     Eigen::DenseIndex rows() const
     {
-      return m_preconditioner_diagonal.size();
+      return m_diagonal.size();
     }
     Eigen::DenseIndex cols() const
     {
-      return m_preconditioner_diagonal.size();
+      return m_diagonal.size();
     }
 
-    void setDiagonal(const PreconditionerVectorLike & x)
+    void setDiagonal(const VectorLike & x)
     {
-      m_preconditioner_diagonal = x;
-      m_preconditioner_square.array() = x.array() * x.array();
+      m_diagonal = x;
+      m_squared_diagonal.array() = x.array() * x.array();
     }
 
-    const PreconditionerVectorLike & getDiagonal() const
+    const VectorLike & getDiagonal() const
     {
-      return m_preconditioner_diagonal;
+      return m_diagonal;
     }
 
   protected:
-    PreconditionerVectorLike m_preconditioner_diagonal;
-    PreconditionerVectorLike m_preconditioner_square;
+    VectorLike m_diagonal;
+    VectorLike m_squared_diagonal;
 
-  }; // struct PreconditionerDiagonal
+  }; // struct DiagonalPreconditioner
 
 } // namespace pinocchio
 
-#endif // #ifndef __pinocchio_algorithm_preconditioner_diagonal_hpp__
+#endif // #ifndef __pinocchio_algorithm_diagonal_preconditioner_hpp__

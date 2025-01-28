@@ -2,7 +2,7 @@
 // Copyright (c) 2025 INRIA
 //
 
-#include "pinocchio/algorithm/preconditioner-diagonal.hpp"
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
 {
   Eigen::Index n = 10;
   Eigen::VectorXd precond_vec = Eigen::VectorXd::Random(n);
-  PreconditionerDiagonal<Eigen::VectorXd> precond(precond_vec);
+  DiagonalPreconditioner<Eigen::VectorXd> precond(precond_vec);
 
   Eigen::VectorXd x = Eigen::VectorXd::Random(n);
   Eigen::VectorXd x_scaled;

@@ -8,7 +8,7 @@
 #include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/crba.hpp"
-#include "pinocchio/algorithm/preconditioner-diagonal.hpp"
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
 #include "pinocchio/algorithm/delassus-operator-preconditioned.hpp"
 
 #include <boost/variant.hpp> // to avoid C99 warnings
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
       preconditioner_diag * matrix * preconditioner_diag;
 
     DelassusOperatorDense delassus(matrix);
-    typedef PreconditionerDiagonal<Eigen::VectorXd> Preconditionner;
+    typedef DiagonalPreconditioner<Eigen::VectorXd> Preconditionner;
     Preconditionner diag_preconditioner(diag_vec);
     DelassusOperatorPreconditionedTpl<DelassusOperatorDense, Preconditionner>
       delassus_preconditioned(delassus, diag_preconditioner);

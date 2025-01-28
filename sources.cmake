@@ -112,7 +112,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/model.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/preconditioner-base.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/preconditioner-diagonal.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/diagonal-preconditioner.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/pgs-solver.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/pgs-solver.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/proximal.hpp

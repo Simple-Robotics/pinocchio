@@ -138,8 +138,7 @@ namespace pinocchio
   }; // struct ZeroInitialGuessMaxConstraintViolationVisitor
 
   template<
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeIn>
@@ -172,8 +171,7 @@ namespace pinocchio
   template<
     typename DelassusDerived,
     typename VectorLike,
-    template<typename T>
-    class Holder,
+    template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
     typename VectorLikeR>
@@ -200,7 +198,7 @@ namespace pinocchio
 
     typedef ADMMUpdateRuleContainerTpl<Scalar> ADMMUpdateRuleContainer;
 
-    typedef DelassusOperatorPreconditionedTpl<DelassusDerived, PreconditionerDiagonal>
+    typedef DelassusOperatorPreconditionedTpl<DelassusDerived, DiagonalPreconditioner>
       DelassusOperatorPreconditioned;
     DelassusDerived & delassus = _delassus.derived();
 
@@ -272,7 +270,7 @@ namespace pinocchio
     // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
     z_ += R.cwiseProduct(y_) + gs;
-    z_ -=  y_.cwiseProduct(delassus.getDamping());
+    z_ -= y_.cwiseProduct(delassus.getDamping());
     if (solve_ncp)
     {
       computeDeSaxeCorrection(constraint_models, z_, s_);

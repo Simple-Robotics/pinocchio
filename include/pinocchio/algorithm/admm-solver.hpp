@@ -15,7 +15,7 @@
 
 #include "pinocchio/math/lanczos-decomposition.hpp"
 
-#include "pinocchio/algorithm/preconditioner-diagonal.hpp"
+#include "pinocchio/algorithm/diagonal-preconditioner.hpp"
 
 #include <boost/optional.hpp>
 
@@ -180,7 +180,7 @@ namespace pinocchio
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef LanczosDecompositionTpl<MatrixXs> LanczosAlgo;
-    typedef PreconditionerDiagonal<VectorXs> PreconditionerDiagonal;
+    typedef DiagonalPreconditioner<VectorXs> DiagonalPreconditioner;
 
     using Base::problem_size;
 
@@ -694,7 +694,7 @@ namespace pinocchio
     VectorXs s_bar_;
 
     /// \brief the diagonal preconditioner of the problem
-    PreconditionerDiagonal preconditioner_;
+    DiagonalPreconditioner preconditioner_;
     /// \brief Preconditioned drift term
     VectorXs g_bar_;
 

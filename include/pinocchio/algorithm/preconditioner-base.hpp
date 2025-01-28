@@ -9,17 +9,17 @@
 namespace pinocchio
 {
 
-  template<typename PreconditionerDerived>
+  template<typename Derived>
   struct PreconditionerBase
   {
 
-    PreconditionerDerived & derived()
+    Derived & derived()
     {
-      return static_cast<PreconditionerDerived &>(*this);
+      return static_cast<Derived &>(*this);
     }
-    const PreconditionerDerived & derived() const
+    const Derived & derived() const
     {
-      return static_cast<const PreconditionerDerived &>(*this);
+      return static_cast<const Derived &>(*this);
     }
 
     /// \returns compute the preconditioned variable.
