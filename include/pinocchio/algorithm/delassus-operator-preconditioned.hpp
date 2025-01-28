@@ -13,11 +13,11 @@
 namespace pinocchio
 {
 
-  template<typename DelassusOperator, typename PreconditionerVectorType>
+  template<typename DelassusOperator, typename PreconditionerType>
   struct DelassusOperatorPreconditionedTpl;
 
-  template<typename DelassusOperator, typename PreconditionerVectorType>
-  struct traits<DelassusOperatorPreconditionedTpl<DelassusOperator, PreconditionerVectorType>>
+  template<typename DelassusOperator, typename PreconditionerType>
+  struct traits<DelassusOperatorPreconditionedTpl<DelassusOperator, PreconditionerType>>
   : traits<DelassusOperator>
   {
   };
@@ -32,8 +32,8 @@ namespace pinocchio
     typedef DelassusOperatorBase<Self> Base;
 
     typedef typename traits<Self>::Matrix Matrix;
-    typedef typename traits<DelassusOperator>::Vector Vector;
-    typedef typename traits<DelassusOperator>::Scalar Scalar;
+    typedef typename traits<Self>::Vector Vector;
+    typedef typename traits<Self>::Scalar Scalar;
 
     DelassusOperatorPreconditionedTpl(
       DelassusOperatorBase<DelassusOperator> & delassus, const PreconditionerType & preconditioner)
