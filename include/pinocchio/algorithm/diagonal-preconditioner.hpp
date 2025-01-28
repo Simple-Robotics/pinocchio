@@ -66,6 +66,13 @@ namespace pinocchio
     {
     }
 
+    /// \brief Copy operator
+    DiagonalPreconditioner & operator=(const DiagonalPreconditioner & other)
+    {
+      m_diagonal = other.m_diagonal;
+      m_squared_diagonal = other.m_squared_diagonal;
+    }
+
     bool operator==(const DiagonalPreconditioner & other) const
     {
       return m_diagonal == other.m_diagonal && m_squared_diagonal == other.m_squared_diagonal;
