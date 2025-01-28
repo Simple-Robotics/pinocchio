@@ -47,8 +47,10 @@ namespace pinocchio
 
     /// \brief Construct an identity preconditioner
     /// @param size Size of the preconditioner
-    static DiagonalPreconditioner
-    Identity(const Eigen::Index size){return DiagonalPreconditioner(size)}
+    static DiagonalPreconditioner Identity(const Eigen::Index size)
+    {
+      return DiagonalPreconditioner(size);
+    }
 
     /// \brief Move constructor
     DiagonalPreconditioner(DiagonalPreconditioner && other)
