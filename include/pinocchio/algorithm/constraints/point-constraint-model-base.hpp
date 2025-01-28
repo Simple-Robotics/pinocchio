@@ -445,13 +445,13 @@ namespace pinocchio
           res.template rightCols<3>().col(i) +=
             cdata.constraint_position_error.cross(iM1.rotation().transpose().col(i));
         }
-        else
-        {
-          assert(false && "Should never happened");
-        }
+      }
+      else
+      {
+        assert(false && "Should never happened");
+      }
 
 #undef INTERNAL_LOOP
-      }
 
       return res;
     }
