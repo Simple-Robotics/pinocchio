@@ -13,6 +13,8 @@ cmake = ">=3.10"
 cxx-compiler = ">=1.7.0"
 ninja = ">=1.11"
 pkg-config = ">=0.29.2"
+doxygen = ">=1.12.0"
+git = ">=2.47.1"
 
 [dependencies]
 libboost-devel = ">=1.80.0"
