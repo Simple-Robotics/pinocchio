@@ -1,0 +1,37 @@
+# use docker image with pixi installed (and not much else)
+image: ghcr.io/prefix-dev/pixi:noble
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  PIXI_ENV: "collision"
+  CMAKE_BUILD_PARALLEL_LEVEL: 2
+  CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
+  CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+  CCACHE_COMPRESS: true
+  CCACHE_COMPRESSLEVEL: 6
+
+test-job:
+  stage: test
+  tags:
+    - large
+  cache:
+    # Cache .pixi directory, invalidate the cache on lockfile
+    - key:
+        files:
+          - pixi.lock
+      paths:
+        - .pixi/
+    # Cache .ccache directory for each branch
+    - key: ccache-$CI_COMMIT_REF_SLUG
+      fallback_keys:
+        - ccache-$CI_DEFAULT_BRANCH
+      paths:
+        - .ccache/
+
+  script:
+    - echo "ccache pre build statistics"
+    - pixi run -e $PIXI_ENV ccache -sv
+    - echo "Run pixi run test"
+    - pixi run -e $PIXI_ENV test
+    - echo "ccache post build statistics"
+    - pixi run -e $PIXI_ENV ccache -sv
