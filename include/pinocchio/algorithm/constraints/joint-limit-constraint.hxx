@@ -191,6 +191,8 @@ namespace pinocchio
     }
 
     m_compliance = ComplianceVectorType::Zero(size());
+    m_margin = MarginVectorType::Zero(size());
+    corrector_parameters = BaumgarteCorrectorParameters(size());
   }
 
   template<typename Scalar, int Options>

@@ -95,6 +95,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs ComplianceVectorType;
+    typedef VectorXs MarginVectorType;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
@@ -136,7 +137,6 @@ namespace pinocchio
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & active_joints)
-    : corrector_parameters(active_joints.size())
     {
       init(model, active_joints, model.lowerPositionLimit, model.upperPositionLimit);
     }
@@ -150,7 +150,6 @@ namespace pinocchio
       const JointIndexVector & active_joints,
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
-    : corrector_parameters(active_joints.size())
     {
       init(model, active_joints, lb, ub);
     }
@@ -261,6 +260,18 @@ namespace pinocchio
     ComplianceVectorType & compliance()
     {
       return m_compliance;
+    }
+
+    /// \brief Returns the margin internally stored in the constraint model
+    const MarginVectorType & margin() const
+    {
+      return m_margin;
+    }
+
+    /// \brief Returns the margin internally stored in the constraint model
+    MarginVectorType & margin()
+    {
+      return m_margin;
     }
 
     ///
@@ -389,6 +400,9 @@ namespace pinocchio
 
     ///  \brief Corrector parameters
     BaumgarteCorrectorParameters corrector_parameters;
+
+    /// \brief Margin vector. For each joint, the vector specified the margin thresholh under
+    MarginVectorType m_margin;
   };
 
   template<typename _Scalar, int _Options>
