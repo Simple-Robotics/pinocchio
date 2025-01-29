@@ -291,9 +291,11 @@ namespace pinocchio
     dual_feasibility_vector = rhs;
     computeDualConeProjection(constraint_models, rhs, rhs);
     dual_feasibility_vector -= rhs;
+    dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
+    const Scalar absolute_residual_warm_start = math::max(complementarity, dual_feasibility);
+
     dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
     dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
-
     this->absolute_residual = math::max(complementarity, dual_feasibility);
 
     // Checking if the initial guess is better than 0.
@@ -304,7 +306,7 @@ namespace pinocchio
     const Scalar absolute_residual_zero_guess =
       computeZeroInitialGuessMaxConstraintViolation(constraint_models, g);
 
-    if (absolute_residual_zero_guess < this->absolute_residual)
+    if (absolute_residual_zero_guess < absolute_residual_warm_start)
     { // If true, this means that the zero value initial guess leads a better feasibility in the
       // sense of the constraints satisfaction.
       // So we set the primal variables to the 0 initial guess and the dual variable to g.
@@ -568,6 +570,12 @@ namespace pinocchio
         y_bar_previous_norm_inf = y_bar_norm_inf;
         z_bar_previous_norm_inf = z_bar_norm_inf;
       } // end ADMM main for loop
+
+      unscalePrimalSolution(x_bar_, x_);
+      unscalePrimalSolution(y_bar_, y_);
+      unscaleDualSolution(z_bar_, z_);
+      unscaleDualSolution(s_bar_, s_);
+
       this->relative_residual = math::max(
         dx_bar_norm / math::max(x_bar_norm_inf, x_bar_previous_norm_inf),
         dy_bar_norm / math::max(y_bar_norm_inf, y_bar_previous_norm_inf));
@@ -594,14 +602,10 @@ namespace pinocchio
     //
 
     this->it = it;
-    unscalePrimalSolution(x_bar_, x_); // only for debug purposes
-    unscalePrimalSolution(y_bar_, y_);
     // we time-rescale dual solution and desaxe correction
     // so that z_ and s_ are back at the constraints formulations levels
-    unscaleDualSolution(z_bar_, z_);
-    z_.array() *= time_scaling_acc_to_constraints.array();
-    unscaleDualSolution(s_bar_, s_);
-    s_.array() *= time_scaling_acc_to_constraints.array();
+    z_constraint_ = z_.array() * time_scaling_acc_to_constraints.array();
+    s_constraint_ = s_.array() * time_scaling_acc_to_constraints.array();
 
     if (abs_prec_reached)
       return true;

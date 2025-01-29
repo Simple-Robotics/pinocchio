@@ -300,8 +300,10 @@ namespace pinocchio
     , y_bar_previous(VectorXs::Zero(problem_dim))
     , z_bar_previous(VectorXs::Zero(problem_dim))
     , z_(VectorXs::Zero(problem_dim))
+    , z_constraint_(VectorXs::Zero(problem_dim))
     , z_bar_(VectorXs::Zero(problem_dim))
     , s_(VectorXs::Zero(problem_dim))
+    , s_constraint_(VectorXs::Zero(problem_dim))
     , s_bar_(VectorXs::Zero(problem_dim))
     , preconditioner_(VectorXs::Ones(problem_dim))
     , g_bar_(VectorXs::Zero(problem_dim))
@@ -593,12 +595,12 @@ namespace pinocchio
     /// \returns the dual solution of the problem
     const VectorXs & getDualSolution() const
     {
-      return z_;
+      return z_constraint_;
     }
     /// \returns the complementarity shift
     const VectorXs & getComplementarityShift() const
     {
-      return s_;
+      return s_constraint_;
     }
 
     /// \returns the scaled primal solution of the problem
@@ -685,11 +687,13 @@ namespace pinocchio
     VectorXs x_bar_previous, y_bar_previous, z_bar_previous;
     /// \brief Dual variable of the ADMM (corresponds to the contact velocity or acceleration).
     VectorXs z_;
+    VectorXs z_constraint_;
     /// \brief Scaled dual variable of the ADMM (corresponds to the contact velocity or
     /// acceleration).
     VectorXs z_bar_;
     /// \brief De Saxé shift
     VectorXs s_;
+    VectorXs s_constraint_;
     /// \brief Scaled De Saxé shift
     VectorXs s_bar_;
 
