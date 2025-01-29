@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_loop_constrained_aba_hxx__
@@ -16,11 +16,12 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
-    class Allocator>
+    class ConstraintModel,
+    class ConstraintModelAllocator>
   inline void initLcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, Allocator> & contact_models)
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models)
   {
 
     typedef typename Model::JointIndex JointIndex;
@@ -28,10 +29,10 @@ namespace pinocchio
     typedef Data::Matrix6 Matrix6;
 
     // Ensure only LOCAL_WORLD_ALIGNED constraints are accepted
-    for (std::size_t i = 0; i < contact_models.size(); ++i)
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
-      const RigidConstraintModelTpl<Scalar, Options> & contact_model = contact_models[i];
-      switch (contact_model.reference_frame)
+      const ConstraintModel & cmodel = constraint_models[i];
+      switch (cmodel.reference_frame)
       {
       case LOCAL_WORLD_ALIGNED:
         break;
@@ -46,13 +47,13 @@ namespace pinocchio
 
     // Get links supporting constraints
     std::fill(data.constraints_supported_dim.begin(), data.constraints_supported_dim.end(), 0);
-    for (std::size_t i = 0; i < contact_models.size(); ++i)
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
-      const RigidConstraintModelTpl<Scalar, Options> & contact_model = contact_models[i];
-      const JointIndex joint1_id = contact_model.joint1_id;
-      const JointIndex joint2_id = contact_model.joint2_id;
+      const ConstraintModel & cmodel = constraint_models[i];
+      const JointIndex joint1_id = cmodel.joint1_id;
+      const JointIndex joint2_id = cmodel.joint2_id;
 
-      const auto constraint_size = contact_model.size();
+      const auto constraint_size = cmodel.size();
       data.constraints_supported_dim[joint1_id] += constraint_size;
       data.constraints_supported_dim[joint2_id] += constraint_size;
 
@@ -538,17 +539,18 @@ namespace pinocchio
     typename ConfigVectorType,
     typename TangentVectorType1,
     typename TangentVectorType2,
-    class ContactModelAllocator,
-    class ContactDataAllocator>
+    class ConstraintModel,
+    class ConstraintModelAllocator,
+    class ConstraintData,
+    class ConstraintDataAllocator>
   inline const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType & lcaba(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentVectorType1> & v,
     const Eigen::MatrixBase<TangentVectorType2> & tau,
-    const std::vector<RigidConstraintModelTpl<Scalar, Options>, ContactModelAllocator> &
-      contact_models,
-    std::vector<RigidConstraintDataTpl<Scalar, Options>, ContactDataAllocator> & contact_datas,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     ProximalSettingsTpl<Scalar> & settings)
   {
 
@@ -563,7 +565,7 @@ namespace pinocchio
     typedef typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex JointIndex;
     typedef std::pair<JointIndex, JointIndex> JointPair;
     typedef Data::Matrix6 Matrix6;
-    typedef RigidConstraintModel::Matrix36 Matrix36;
+    typedef typename ConstraintModel::Matrix36 Matrix36;
 
     data.u = tau;
     data.oa_gf[0] = -model.gravity;
@@ -585,25 +587,25 @@ namespace pinocchio
         typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
     }
 
-    for (std::size_t i = 0; i < contact_models.size(); ++i)
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
-      RigidConstraintData & cdata = contact_datas[i];
+      ConstraintData & cdata = constraint_datas[i];
       cdata.contact_force.setZero();
-      const RigidConstraintModelTpl<Scalar, Options> & contact_model = contact_models[i];
-      typename RigidConstraintData::Motion & vc1 = contact_datas[i].contact1_velocity;
-      typename RigidConstraintData::Motion & vc2 = contact_datas[i].contact2_velocity;
-      const JointIndex joint_id = contact_model.joint1_id;
-      const JointIndex joint2_id = contact_model.joint2_id;
+      const ConstraintModel & cmodel = constraint_models[i];
+      typename ConstraintData::Motion & vc1 = cdata.contact1_velocity;
+      typename ConstraintData::Motion & vc2 = cdata.contact2_velocity;
+      const JointIndex joint_id = cmodel.joint1_id;
+      const JointIndex joint2_id = cmodel.joint2_id;
 
       const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
-        contact_model.corrector;
-      typename RigidConstraintData::Motion & contact_vel_err = cdata.contact_velocity_error;
+        cmodel.corrector;
+      typename ConstraintData::Motion & contact_vel_err = cdata.contact_velocity_error;
 
       SE3 & oMc1 = cdata.oMc1;
-      oMc1 = data.oMi[joint_id] * contact_model.joint1_placement;
+      oMc1 = data.oMi[joint_id] * cmodel.joint1_placement;
 
       SE3 & oMc2 = cdata.oMc2;
-      oMc2 = data.oMi[joint2_id] * contact_model.joint2_placement;
+      oMc2 = data.oMi[joint2_id] * cmodel.joint2_placement;
 
       SE3 & c1Mc2 = cdata.c1Mc2;
       c1Mc2 = oMc1.actInv(oMc2);
@@ -615,7 +617,7 @@ namespace pinocchio
         vc2.setZero();
       const Motion vc2_in_frame1 = c1Mc2.act(vc2);
 
-      if (contact_model.type == CONTACT_6D)
+      if (cmodel.type == CONTACT_6D)
       {
         cdata.contact_placement_error = -log6(c1Mc2);
         contact_vel_err = vc1 - vc2_in_frame1;
@@ -659,7 +661,7 @@ namespace pinocchio
           A1.transpose()
           * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
       }
-      else if (contact_model.type == CONTACT_3D)
+      else if (cmodel.type == CONTACT_3D)
       {
         const Matrix36 & A1 = oMc1.toActionMatrixInverse().topRows<3>();
         data.oYaba[joint_id].noalias() += mu * A1.transpose() * A1;
@@ -749,15 +751,15 @@ namespace pinocchio
         if (data.constraints_supported_dim[j] > 0)
           data.of[j].setZero();
       }
-      for (std::size_t j = 0; j < contact_models.size(); ++j)
+      for (std::size_t j = 0; j < constraint_models.size(); ++j)
       {
-        const RigidConstraintModelTpl<Scalar, Options> & contact_model = contact_models[j];
-        RigidConstraintData & cdata = contact_datas[j];
-        const JointIndex joint1_id = contact_model.joint1_id;
-        const JointIndex joint2_id = contact_model.joint2_id;
-        typename RigidConstraintData::Motion & contact_acc_err = cdata.contact_acceleration_error;
+        const ConstraintModel & cmodel = constraint_models[j];
+        ConstraintData & cdata = constraint_datas[j];
+        const JointIndex joint1_id = cmodel.joint1_id;
+        const JointIndex joint2_id = cmodel.joint2_id;
+        typename ConstraintData::Motion & contact_acc_err = cdata.contact_acceleration_error;
 
-        if (contact_model.type == CONTACT_6D)
+        if (cmodel.type == CONTACT_6D)
         {
           if (joint2_id > 0)
             contact_acc_err = cdata.oMc1.actInv((data.oa[joint1_id] - data.oa[joint2_id]))
@@ -790,7 +792,7 @@ namespace pinocchio
 
           if (joint2_id > 0)
             data.of[joint2_id].toVector().noalias() -=
-              cdata.oMc2.toActionMatrixInverse().topRows<3>().transpose()
+              cdata.oMc2.toActionMatrixInverse().template topRows<3>().transpose()
               * (cdata.c1Mc2.rotation().transpose() * (mu * contact_acc_err.linear()));
         }
         Scalar c_err_residual = contact_acc_err.toVector().template lpNorm<Eigen::Infinity>();
