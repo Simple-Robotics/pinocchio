@@ -145,6 +145,7 @@ namespace pinocchio
       // Normal update
       Scalar & fz = primal_vector.coeffRef(2);
       const Scalar fz_previous = fz;
+      assert(G_block.coeff(2, 2) > 0 && "G_block.coeff(2, 2) is zero");
       fz -= Scalar(this->over_relax_value / G_block.coeff(2, 2)) * dual_vector[2];
       fz = math::max(Scalar(0), fz);
 
@@ -162,7 +163,10 @@ namespace pinocchio
 
       const Scalar mu_fz = this->set.mu * fz;
       if (f_tangent_norm > mu_fz) // Project in the circle of radius mu_fz
+      {
+        assert(f_tangent_norm > 0 && "f_tangent_norm is zero");
         f_tangent *= mu_fz / f_tangent_norm;
+      }
 
       // Account for the f_tangent updated value
       dual_vector.noalias() += G_block.template leftCols<2>() * (f_tangent - f_tangent_previous);
@@ -232,6 +236,7 @@ namespace pinocchio
 
       for (Eigen::DenseIndex i = 0; i < size; ++i)
       {
+        assert(G_block.coeff(i, i) > 0 && "G_block.coeff(i, i) is zero");
         Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
         primal_vector[i] += d_primal_value;
         dual_vector.noalias() += G_block.col(i) * d_primal_value; // TODO: this could be optimized
@@ -259,6 +264,7 @@ namespace pinocchio
 
       for (Eigen::DenseIndex i = 0; i < size; ++i)
       {
+        assert(G_block.coeff(i, i) > 0 && "G_block.coeff(i, i) is zero");
         Scalar d_primal_value = -this->over_relax_value * dual_vector[i] / G_block.coeff(i, i);
         primal_vector[i] += d_primal_value;
         dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized using aloca
@@ -344,6 +350,7 @@ namespace pinocchio
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
+        assert(G_block.coeff(row_id, row_id) && "G_block.coeff(i, i) is zero");
         value -= Scalar(over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
         value = set.rowiseProject(row_id, value);
         dual_vector.noalias() +=
@@ -403,6 +410,7 @@ namespace pinocchio
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
+        assert(G_block.coeff(row_id, row_id) && "G_block.coeff(i, i) is zero");
         value -= Scalar(over_relax_value / G_block.coeff(row_id, row_id)) * dual_vector[row_id];
         value = set.rowiseProject(row_id, value);
         dual_vector += G_block.col(row_id) * Scalar(value - value_previous);
