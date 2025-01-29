@@ -365,6 +365,10 @@ namespace pinocchio
       const Eigen::MatrixBase<OutputMatrix> & _res,
       AssignmentOperatorTag<op> aot = SetTo()) const;
 
+  public:
+    ///  \brief Corrector parameters
+    BaumgarteCorrectorParameters corrector_parameters;
+
   protected:
     template<
       template<typename, int> class JointCollectionTpl,
@@ -397,9 +401,6 @@ namespace pinocchio
 
     ConstraintSet m_set;
     ComplianceVectorType m_compliance;
-
-    ///  \brief Corrector parameters
-    BaumgarteCorrectorParameters corrector_parameters;
 
     /// \brief Margin vector. For each joint, the vector specified the margin thresholh under
     MarginVectorType m_margin;
