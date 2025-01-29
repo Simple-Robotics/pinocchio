@@ -91,8 +91,8 @@ namespace pinocchio
     static inline Scalar computeRhoPower(const Scalar L, const Scalar m, const Scalar rho)
     {
       const Scalar cond = L / m;
-      const Scalar sqtr_L_m = math::sqrt(L * m);
-      const Scalar rho_power = math::log(rho / sqtr_L_m) / math::log(cond);
+      const Scalar sqrt_L_m = math::sqrt(L * m);
+      const Scalar rho_power = math::log(rho / sqrt_L_m) / math::log(cond);
       return rho_power;
     }
 
