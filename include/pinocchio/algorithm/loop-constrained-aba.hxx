@@ -28,20 +28,6 @@ namespace pinocchio
     typedef std::pair<JointIndex, JointIndex> JointPair;
     typedef Data::Matrix6 Matrix6;
 
-    // Ensure only LOCAL_WORLD_ALIGNED constraints are accepted
-    for (std::size_t i = 0; i < constraint_models.size(); ++i)
-    {
-      const ConstraintModel & cmodel = constraint_models[i];
-      switch (cmodel.reference_frame)
-      {
-      case LOCAL_WORLD_ALIGNED:
-        break;
-      default:
-        assert(false && "Frames other than LOCAL_WORLD_ALIGNED not accepted");
-        break;
-      }
-    }
-
     auto & neighbours = data.neighbour_links;
     neighbours.resize(static_cast<size_t>(model.njoints));
 
@@ -236,7 +222,6 @@ namespace pinocchio
     {
 
       typedef typename Model::JointIndex JointIndex;
-      typedef typename Data::Inertia Inertia;
       typedef typename Data::Force Force;
       typedef typename Data::Matrix6 Matrix6;
 
@@ -248,12 +233,9 @@ namespace pinocchio
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
-      typename Inertia::Matrix6 & Ia = data.oYaba[i];
+      auto & Ia = data.oYaba[i];
 
-      typedef
-        typename SizeDepType<JointModel::NV>::template ColsReturn<pinocchio::Data::Matrix6x>::Type
-          ColBlock;
-      ColBlock Jcols = jmodel.jointCols(data.J);
+      auto Jcols = jmodel.jointCols(data.J);
 
       Force & fi = data.of[i];
 
@@ -594,7 +576,7 @@ namespace pinocchio
       const ConstraintModel & cmodel = constraint_models[i];
       typename ConstraintData::Motion & vc1 = cdata.contact1_velocity;
       typename ConstraintData::Motion & vc2 = cdata.contact2_velocity;
-      const JointIndex joint_id = cmodel.joint1_id;
+      const JointIndex joint1_id = cmodel.joint1_id;
       const JointIndex joint2_id = cmodel.joint2_id;
 
       const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
@@ -602,7 +584,7 @@ namespace pinocchio
       typename ConstraintData::Motion & contact_vel_err = cdata.contact_velocity_error;
 
       SE3 & oMc1 = cdata.oMc1;
-      oMc1 = data.oMi[joint_id] * cmodel.joint1_placement;
+      oMc1 = data.oMi[joint1_id] * cmodel.joint1_placement;
 
       SE3 & oMc2 = cdata.oMc2;
       oMc2 = data.oMi[joint2_id] * cmodel.joint2_placement;
@@ -610,7 +592,7 @@ namespace pinocchio
       SE3 & c1Mc2 = cdata.c1Mc2;
       c1Mc2 = oMc1.actInv(oMc2);
 
-      vc1 = oMc1.actInv(data.ov[joint_id]);
+      vc1 = oMc1.actInv(data.ov[joint1_id]);
       if (joint2_id > 0)
         vc2 = oMc2.actInv(data.ov[joint2_id]);
       else
@@ -623,7 +605,7 @@ namespace pinocchio
         contact_vel_err = vc1 - vc2_in_frame1;
         const Matrix6 A1 = oMc1.toActionMatrixInverse();
         const Matrix6 A1tA1 = A1.transpose() * A1;
-        data.oYaba[joint_id].noalias() += mu * A1tA1;
+        data.oYaba[joint1_id].noalias() += mu * A1tA1;
 
         // Baumgarte
         if (check_expression_if_real<Scalar, false>(
@@ -647,8 +629,8 @@ namespace pinocchio
             A2.transpose()
             * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
 
-          const JointPair jp =
-            joint_id < joint2_id ? JointPair{joint_id, joint2_id} : JointPair{joint2_id, joint_id};
+          const JointPair jp = joint1_id < joint2_id ? JointPair{joint1_id, joint2_id}
+                                                     : JointPair{joint2_id, joint1_id};
           assert(data.joint_cross_coupling.exist(jp) && "Must never happen");
           data.joint_cross_coupling.get(jp) -= mu * A1tA1;
         }
@@ -657,14 +639,14 @@ namespace pinocchio
           cdata.contact_acceleration_desired.toVector().noalias() -= A1 * model.gravity.toVector();
         }
 
-        data.of[joint_id].toVector().noalias() +=
+        data.of[joint1_id].toVector().noalias() +=
           A1.transpose()
           * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
       }
       else if (cmodel.type == CONTACT_3D)
       {
         const Matrix36 & A1 = oMc1.toActionMatrixInverse().topRows<3>();
-        data.oYaba[joint_id].noalias() += mu * A1.transpose() * A1;
+        data.oYaba[joint1_id].noalias() += mu * A1.transpose() * A1;
 
         if (check_expression_if_real<Scalar, false>(
               isZero(corrector.Kp, static_cast<Scalar>(0.))
@@ -693,14 +675,14 @@ namespace pinocchio
             A2.transpose()
             * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
 
-          if (joint_id < joint2_id)
+          if (joint1_id < joint2_id)
           {
-            data.joint_cross_coupling.get({joint_id, joint2_id}).noalias() +=
+            data.joint_cross_coupling.get({joint1_id, joint2_id}).noalias() +=
               mu * A1.transpose() * A2;
           }
           else
           {
-            data.joint_cross_coupling.get({joint2_id, joint_id}).noalias() +=
+            data.joint_cross_coupling.get({joint2_id, joint1_id}).noalias() +=
               mu * A2.transpose() * A1;
           }
         }
@@ -709,7 +691,7 @@ namespace pinocchio
           cdata.contact_acceleration_desired.linear().noalias() -= A1 * model.gravity.toVector();
         }
 
-        data.of[joint_id].toVector().noalias() +=
+        data.of[joint1_id].toVector().noalias() +=
           A1.transpose()
           * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
       }
