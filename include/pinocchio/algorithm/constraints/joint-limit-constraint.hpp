@@ -13,6 +13,7 @@
 #include "pinocchio/algorithm/constraints/joint-limit-constraint-cone.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -98,6 +99,8 @@ namespace pinocchio
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
 
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 
@@ -133,6 +136,7 @@ namespace pinocchio
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & active_joints)
+    : corrector_parameters(active_joints.size())
     {
       init(model, active_joints, model.lowerPositionLimit, model.upperPositionLimit);
     }
@@ -146,6 +150,7 @@ namespace pinocchio
       const JointIndexVector & active_joints,
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
+    : corrector_parameters(active_joints.size())
     {
       init(model, active_joints, lb, ub);
     }
@@ -270,6 +275,7 @@ namespace pinocchio
     {
       return base() == other.base()
              && active_configuration_components == other.active_configuration_components
+             && corrector_parameters == other.corrector_parameters
              && active_lower_bound_constraints == other.active_lower_bound_constraints
              && active_lower_bound_constraints_tangent
                   == other.active_lower_bound_constraints_tangent
@@ -380,6 +386,9 @@ namespace pinocchio
 
     ConstraintSet m_set;
     ComplianceVectorType m_compliance;
+
+    ///  \brief Corrector parameters
+    BaumgarteCorrectorParameters corrector_parameters;
   };
 
   template<typename _Scalar, int _Options>
