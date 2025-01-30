@@ -406,6 +406,11 @@ namespace pinocchio
       return lanczos_algo;
     }
 
+    ADMMSolverStats & getStats()
+    {
+      return stats;
+    }
+
     ///
     /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
     /// starting from the initial guess.

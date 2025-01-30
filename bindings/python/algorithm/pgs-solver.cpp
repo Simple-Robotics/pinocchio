@@ -8,6 +8,7 @@
 
 #include "pinocchio/bindings/python/algorithm/contact-solver-base.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
+#include "pinocchio/bindings/python/utils/macros.hpp"
 #include <eigenpy/eigen-from-python.hpp>
 
 namespace pinocchio
@@ -17,6 +18,7 @@ namespace pinocchio
     namespace bp = boost::python;
 
     typedef PGSContactSolverTpl<context::Scalar> Solver;
+    typedef Solver::SolverStats SolverStats;
 
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
     template<typename DelassusMatrixType, typename ConstraintModel>
@@ -97,7 +99,9 @@ namespace pinocchio
           "Returns the primal solution of the problem.", bp::return_internal_reference<>())
         .def(
           "getDualSolution", &Solver::getDualSolution, bp::arg("self"),
-          "Returns the dual solution of the problem.", bp::return_internal_reference<>());
+          "Returns the dual solution of the problem.", bp::return_internal_reference<>())
+
+        .def("getStats", &Solver::getStats, bp::arg("self"), bp::return_internal_reference<>());
 
       typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
 
@@ -105,6 +109,23 @@ namespace pinocchio
       boost::mpl::for_each<
         ConstraintModelVariant::types, boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
       expose_solve<context::ConstraintModel>(class_);
+
+      {
+        bp::class_<SolverStats>(
+          "SolverStats", "",
+          bp::init<int>((bp::arg("self"), bp::arg("max_it")), "Default constructor"))
+          .def("reset", &SolverStats::reset, bp::arg("self"), "Reset the stasts.")
+          .def(
+            "size", &SolverStats::size, bp::arg("self"),
+            "Size of the vectors stored in the structure.")
+
+          .PINOCCHIO_ADD_PROPERTY_READONLY(SolverStats, primal_feasibility, "")
+          .PINOCCHIO_ADD_PROPERTY_READONLY(SolverStats, dual_feasibility, "")
+          .PINOCCHIO_ADD_PROPERTY_READONLY(SolverStats, dual_feasibility_ncp, "")
+          .PINOCCHIO_ADD_PROPERTY_READONLY(SolverStats, complementarity, "")
+          .PINOCCHIO_ADD_PROPERTY_READONLY(
+            SolverStats, it, "Number of iterations performed by the algorithm.");
+      }
 
 #endif
     }

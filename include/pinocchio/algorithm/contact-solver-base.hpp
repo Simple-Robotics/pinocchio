@@ -72,7 +72,6 @@ namespace pinocchio
     , relative_precision(Scalar(1e-6))
     , absolute_residual(Scalar(-1))
     , relative_residual(Scalar(-1))
-    , stats(max_it)
 #ifdef PINOCCHIO_WITH_HPP_FCL
     , timer(false)
 #endif // PINOCCHIO_WITH_HPP_FCL
@@ -149,11 +148,6 @@ namespace pinocchio
     }
 #endif // PINOCCHIO_WITH_HPP_FCL
 
-    SolverStats & getStats()
-    {
-      return stats;
-    }
-
   protected:
     /// \brief Size of the problem
     int problem_size;
@@ -169,9 +163,6 @@ namespace pinocchio
     Scalar absolute_residual;
     /// \brief Relative convergence residual value
     Scalar relative_residual;
-
-    /// \brief Stats of the solver
-    SolverStats stats;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
     Timer timer;

@@ -23,11 +23,14 @@ namespace pinocchio
     typedef ContactSolverBaseTpl<Scalar> Base;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
 
+    typedef typename Base::SolverStats SolverStats;
+
     explicit PGSContactSolverTpl(const int problem_size)
     : Base(problem_size)
     , x(problem_size)
     , x_previous(problem_size)
     , y(problem_size)
+    , stats(Base::max_it)
     {
     }
 
@@ -95,6 +98,11 @@ namespace pinocchio
       return y;
     }
 
+    SolverStats & getStats()
+    {
+      return stats;
+    }
+
   protected:
     /// \brief Previous temporary value of the optimum.
     VectorXs x, x_previous;
@@ -104,7 +112,8 @@ namespace pinocchio
     using Base::timer;
 #endif // PINOCCHIO_WITH_HPP_FCL
 
-    using Base::stats;
+    /// \brief Stats of the solver
+    SolverStats stats;
 
   }; // struct PGSContactSolverTpl
 } // namespace pinocchio

@@ -362,7 +362,7 @@ namespace pinocchio
 
       {
         bp::class_<SolverStats>(
-          "SolverStats", "",
+          "ADMMSolverStats", "",
           bp::init<int>((bp::arg("self"), bp::arg("max_it")), "Default constructor"))
           .def("reset", &SolverStats::reset, bp::arg("self"), "Reset the stasts.")
           .def(
