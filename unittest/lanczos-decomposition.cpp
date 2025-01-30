@@ -231,7 +231,28 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
 
   {
     LanczosDecomposition lanczos_decomposition(G_expression, 7);
+    SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
+  }
+
+  Eigen::VectorXd mean_inertia =
+    Eigen::VectorXd::Constant(delassus_matrix_plain.rows(), data.M.diagonal().trace());
+  mean_inertia /= (double)delassus_matrix_plain.rows();
+  mean_inertia = mean_inertia.array().sqrt();
+  typedef DiagonalPreconditioner<Eigen::VectorXd> Preconditionner;
+  Preconditionner diag_preconditioner(mean_inertia);
+  DelassusOperatorPreconditionedTpl<
+    DelassusCholeskyExpressionTpl<ContactCholeskyDecomposition>, Preconditionner>
+    delassus_preconditioned(G_expression, diag_preconditioner);
+
+  const Eigen::MatrixXd delassus_preconditioned_matrix_plain = delassus_preconditioned.matrix();
+
+  for (int decomposition_size = 3; decomposition_size <= delassus_matrix_plain.rows();
+       ++decomposition_size)
+  {
+    LanczosDecomposition lanczos_decomposition(delassus_preconditioned, decomposition_size);
+    SET_LINE;
+    checkDecomposition(lanczos_decomposition, delassus_preconditioned_matrix_plain);
   }
 }
 
