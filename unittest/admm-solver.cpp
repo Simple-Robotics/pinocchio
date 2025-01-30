@@ -78,6 +78,7 @@ struct TestBoxTpl
     ADMMContactSolverTpl<double> admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
+    admm_solver.setLanczosSize((int)g.size());
 
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-10);
