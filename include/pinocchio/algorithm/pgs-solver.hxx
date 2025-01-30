@@ -583,6 +583,11 @@ namespace pinocchio
     x = x_sol;
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
+    if (stat_record)
+    {
+      stats.reset();
+    }
+
     for (; it <= this->max_it; ++it)
     {
       x_previous = x;
