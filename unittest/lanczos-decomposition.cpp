@@ -222,18 +222,19 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
   //  std::cout << "The eigenvalues of delassus_matrix_plain are:\n" <<
   //  eigensolver.eigenvalues().transpose() << std::endl;
 
-  for (int decomposition_size = 3; decomposition_size <= 6; ++decomposition_size)
+  for (int decomposition_size = 3; decomposition_size <= delassus_matrix_plain.rows();
+       ++decomposition_size)
   {
     LanczosDecomposition lanczos_decomposition(G_expression, decomposition_size);
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
   }
 
-  {
-    LanczosDecomposition lanczos_decomposition(G_expression, 7);
-    SET_LINE;
-    checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
-  }
+  // {
+  //   LanczosDecomposition lanczos_decomposition(G_expression, 7);
+  //   SET_LINE;
+  //   checkDecomposition(lanczos_decomposition, delassus_matrix_plain);
+  // }
 
   Eigen::VectorXd mean_inertia =
     Eigen::VectorXd::Constant(delassus_matrix_plain.rows(), data.M.diagonal().trace());
