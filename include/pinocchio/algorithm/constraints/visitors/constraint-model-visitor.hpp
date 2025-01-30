@@ -53,6 +53,12 @@ namespace pinocchio
       {
         return cmodel.shortname();
       }
+      std::string operator()(const boost::blank &) const
+      {
+        PINOCCHIO_THROW_PRETTY(
+          std::invalid_argument, "The constraint model is of type boost::blank.");
+        return internal::NoRun<std::string>::run();
+      }
 
       template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>
       static std::string run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
@@ -76,6 +82,12 @@ namespace pinocchio
       std::string operator()(const ConstraintDataBase<ConstraintDataDerived> & cdata) const
       {
         return cdata.shortname();
+      }
+      std::string operator()(const boost::blank &) const
+      {
+        PINOCCHIO_THROW_PRETTY(
+          std::invalid_argument, "The constraint data is of type boost::blank.");
+        return internal::NoRun<std::string>::run();
       }
 
       template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>

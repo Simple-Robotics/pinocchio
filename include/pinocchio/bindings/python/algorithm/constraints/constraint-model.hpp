@@ -28,6 +28,12 @@ namespace pinocchio
         return obj;
       }
 
+      result_type operator()(boost::blank) const
+      {
+        bp::object obj;
+        return obj;
+      }
+
       static result_type extract(const ConstraintModel & cmodel)
       {
         return boost::apply_visitor(ExtractConstraintModelVariantTypeVisitor(), cmodel);

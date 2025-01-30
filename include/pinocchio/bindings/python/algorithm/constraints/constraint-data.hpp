@@ -30,7 +30,7 @@ namespace pinocchio
 
       result_type operator()(boost::blank) const
       {
-        bp::object obj();
+        bp::object obj;
         return obj;
       }
 
