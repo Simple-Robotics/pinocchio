@@ -28,6 +28,15 @@ namespace pinocchio
     {
       return static_cast<const Derived &>(*this);
     }
+
+    std::string shortname() const
+    {
+      return derived().shortname();
+    }
+    static std::string classname()
+    {
+      return Derived::classname();
+    }
   };
 
 } // namespace pinocchio

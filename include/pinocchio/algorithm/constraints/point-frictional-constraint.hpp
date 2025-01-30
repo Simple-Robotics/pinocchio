@@ -234,6 +234,15 @@ namespace pinocchio
 
     using Base::compliance;
 
+    static std::string classname()
+    {
+      return std::string("FrictionalPointConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
   protected:
     ConstraintSet m_set = ConstraintSet();
 
@@ -296,6 +305,14 @@ namespace pinocchio
       return static_cast<const Base &>(*this);
     }
 
+    static std::string classname()
+    {
+      return std::string("FrictionalPointConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
   }; // struct FrictionalPointConstraintDataTpl<_Scalar,_Options>
 
 } // namespace pinocchio

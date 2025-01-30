@@ -284,6 +284,15 @@ namespace pinocchio
              && m_compliance == other.m_compliance;
     }
 
+    static std::string classname()
+    {
+      return std::string("FrictionalJointConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
   protected:
     template<template<typename, int> class JointCollectionTpl>
     void init(
@@ -319,6 +328,15 @@ namespace pinocchio
     bool operator==(const FrictionalJointConstraintDataTpl & /*other*/) const
     {
       return true;
+    }
+
+    static std::string classname()
+    {
+      return std::string("FrictionalJointConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
     }
   };
 } // namespace pinocchio

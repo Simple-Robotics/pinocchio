@@ -76,6 +76,15 @@ namespace pinocchio
       return static_cast<const ConstraintDataVariant &>(*this);
     }
 
+    static std::string classname()
+    {
+      return "ConstraintData";
+    }
+    std::string shortname() const
+    {
+      return ::pinocchio::shortname(*this);
+    }
+
     template<typename ConstraintDataDerived>
     bool isEqual(const ConstraintDataBase<ConstraintDataDerived> & other) const
     {

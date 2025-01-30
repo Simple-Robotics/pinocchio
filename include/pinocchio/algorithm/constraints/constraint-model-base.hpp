@@ -212,6 +212,15 @@ namespace pinocchio
       return *this;
     }
 
+    std::string shortname() const
+    {
+      return derived().shortname();
+    }
+    static std::string classname()
+    {
+      return Derived::classname();
+    }
+
   protected:
     template<int Options, template<typename, int> class JointCollectionTpl>
     explicit ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & /*model*/)

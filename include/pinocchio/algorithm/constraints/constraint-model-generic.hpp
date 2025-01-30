@@ -170,6 +170,15 @@ namespace pinocchio
         *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
     }
 
+    static std::string classname()
+    {
+      return "ConstraintModel";
+    }
+    std::string shortname() const
+    {
+      return ::pinocchio::shortname(*this);
+    }
+
     /// \brief Returns the size of the constraint
     int size() const
     {

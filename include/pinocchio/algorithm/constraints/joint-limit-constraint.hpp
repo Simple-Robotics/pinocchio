@@ -369,6 +369,15 @@ namespace pinocchio
     ///  \brief Corrector parameters
     BaumgarteCorrectorParameters corrector_parameters;
 
+    static std::string classname()
+    {
+      return std::string("JointLimitConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
   protected:
     template<
       template<typename, int> class JointCollectionTpl,
@@ -435,6 +444,15 @@ namespace pinocchio
 
     /// \brief Residual of the constraint
     VectorXs constraint_residual;
+
+    static std::string classname()
+    {
+      return std::string("JointLimitConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
   };
 } // namespace pinocchio
 
