@@ -176,7 +176,7 @@ namespace pinocchio
     }
     std::string shortname() const
     {
-      return ::pinocchio::shortname(*this);
+      return ::pinocchio::visitors::shortname(*this);
     }
 
     /// \brief Returns the size of the constraint

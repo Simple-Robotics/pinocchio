@@ -28,6 +28,12 @@ namespace pinocchio
         return obj;
       }
 
+      result_type operator()(boost::blank) const
+      {
+        bp::object obj();
+        return obj;
+      }
+
       static result_type extract(const ConstraintData & cdata)
       {
         return boost::apply_visitor(ExtractConstraintDataVariantTypeVisitor(), cdata);
@@ -40,6 +46,7 @@ namespace pinocchio
       static void expose()
       {
         bp::class_<ConstraintData>("ConstraintData", "Generic Constraint Data", bp::no_init)
+          .def(bp::init<>(bp::arg("self"), "Default constructor"))
           .def(
             bp::init<const typename ConstraintData::ConstraintDataVariant &>(bp::args("self", "cdata")))
           .def(ConstraintDataBasePythonVisitor<ConstraintData>())

@@ -82,7 +82,7 @@ namespace pinocchio
     }
     std::string shortname() const
     {
-      return ::pinocchio::shortname(*this);
+      return ::pinocchio::visitors::shortname(*this);
     }
 
     template<typename ConstraintDataDerived>
