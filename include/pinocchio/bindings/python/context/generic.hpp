@@ -62,7 +62,6 @@ namespace pinocchio
       typedef FrameTpl<Scalar, Options> Frame;
       typedef ModelTpl<Scalar, Options> Model;
       typedef DataTpl<Scalar, Options> Data;
-
       typedef JointCollectionDefaultTpl<Scalar, Options> JointCollectionDefault;
 
       // Joints
@@ -190,6 +189,8 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(DualCoulombFrictionCone)
         DualCoulombFrictionConeVector;
       typedef BoxSetTpl<context::Scalar> BoxSet;
+
+      typedef ConstraintCollectionDefaultTpl<Scalar, Options> ConstraintCollectionDefault;
 
       typedef DelassusOperatorDenseTpl<Scalar, Options> DelassusOperatorDense;
       typedef DelassusOperatorSparseTpl<Scalar, Options> DelassusOperatorSparse;
