@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
     DelassusCholeskyExpressionTpl<ContactCholeskyDecomposition>, Preconditionner>
     delassus_preconditioned(G_expression, diag_preconditioner);
 
-  const Eigen::MatrixXd delassus_preconditioned_matrix_plain = delassus_preconditioned.matrix();
+  const Eigen::MatrixXd delassus_preconditioned_matrix_plain = delassus_preconditioned.matrix(true);
 
   for (int decomposition_size = 3; decomposition_size <= delassus_matrix_plain.rows();
        ++decomposition_size)
