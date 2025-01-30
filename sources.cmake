@@ -266,6 +266,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/aligned-vector.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/archive.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/data.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/delassus.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/eigen.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/csv.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/fcl.hpp
