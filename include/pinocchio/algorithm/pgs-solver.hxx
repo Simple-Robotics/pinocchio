@@ -152,11 +152,11 @@ namespace pinocchio
       dual_vector += G_block.col(2) * (fz - fz_previous);
 
       // Tangential update
-      const Scalar min_D_tangent = math::min(G_block.coeff(0, 0), G_block.coeff(1, 1));
+      const Scalar min_D_tangent =
+        math::max(1e-12, math::min(G_block.coeff(0, 0), G_block.coeff(1, 1)));
       auto f_tangent = primal_vector.template head<2>();
       const Vector2 f_tangent_previous = f_tangent;
 
-      assert(min_D_tangent > 0 && "min_D_tangent is zero");
       f_tangent -= this->over_relax_value / min_D_tangent * dual_vector.template head<2>();
       const Scalar f_tangent_norm = f_tangent.norm();
 
