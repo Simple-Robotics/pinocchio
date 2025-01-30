@@ -212,7 +212,11 @@ namespace pinocchio
             const SE3 geomPlacement = bodyPlacement * geom.geomPlacement;
             std::ostringstream geometry_object_suffix;
             geometry_object_suffix << "_" << objectId;
-            std::string geometry_object_name = std::string(bodyName + geometry_object_suffix.str());
+            std::string geometry_object_name = geom.geomName;
+            if (geom.geomName.empty())
+            {
+              geometry_object_name = std::string(bodyName + geometry_object_suffix.str());
+            }
 
             GeometryObject geometry_object(
               geometry_object_name, frame.parentJoint, frame_id, geomPlacement, geometry, meshPath,
