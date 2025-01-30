@@ -116,10 +116,14 @@ namespace pinocchio
       return delassus_matrix.cols();
     }
 
-    Matrix matrix() const
+    Matrix matrix(bool enforce_symmetry = false) const
     {
       mat_tmp = delassus_matrix;
       mat_tmp += damping.asDiagonal();
+      if (enforce_symmetry)
+      {
+        enforceSymmetry(mat_tmp);
+      }
       return mat_tmp;
     }
 

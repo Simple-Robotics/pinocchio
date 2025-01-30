@@ -361,6 +361,19 @@ namespace pinocchio
           m = rhs.minCoeff();
           this->lanczos_algo.compute(G_bar);
           L = ::pinocchio::computeLargestEigenvalue(this->lanczos_algo.Ts(), 1e-8);
+#ifndef NDEBUG
+          const bool enforce_symmetry = true;
+          Eigen::MatrixXd delassus = G_bar.matrix(enforce_symmetry);
+          Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(delassus);
+          Eigen::VectorXd eigvals = solver.eigenvalues();
+          Scalar true_m = eigvals.minCoeff();
+          Scalar true_L = eigvals.maxCoeff();
+          if (true_m > 0)
+          {
+            assert(std::abs((true_m - m) / true_m) < 0.01 && "true_m and m are too far apart.");
+          }
+          assert(std::abs((true_L - L) / true_L) < 0.01 && "true_L and L are too far apart.");
+#endif // NDEBUG
         }
         else
         {

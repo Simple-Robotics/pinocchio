@@ -222,10 +222,16 @@ namespace pinocchio
       return delassus_matrix.cols();
     }
 
-    SparseMatrix matrix() const
+    SparseMatrix matrix(bool enforce_symmetry = false) const
     {
       delassus_matrix_plus_damping = delassus_matrix;
       delassus_matrix_plus_damping += damping.asDiagonal();
+      if (enforce_symmetry)
+      {
+        // TODO: enforce symmetry for sparse matrices
+        PINOCCHIO_THROW(
+          std::invalid_argument, "enforceSymmetry not implemented for sparse matrices");
+      }
       return delassus_matrix_plus_damping;
     }
 

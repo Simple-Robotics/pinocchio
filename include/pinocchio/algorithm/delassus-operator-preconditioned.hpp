@@ -117,9 +117,9 @@ namespace pinocchio
       return ref().cols();
     }
 
-    Matrix matrix() const
+    Matrix matrix(bool enforce_symmetry = false) const
     {
-      return m_preconditioner.getDiagonal().asDiagonal() * m_delassus.matrix()
+      return m_preconditioner.getDiagonal().asDiagonal() * m_delassus.matrix(enforce_symmetry)
              * m_preconditioner.getDiagonal().asDiagonal();
     }
 
