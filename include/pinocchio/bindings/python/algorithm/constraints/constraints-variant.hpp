@@ -5,6 +5,8 @@
 #ifndef __pinocchio_python_algorithm_constraints_variant_hpp__
 #define __pinocchio_python_algorithm_constraints_variant_hpp__
 
+#include <boost/algorithm/string/replace.hpp>
+
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-model.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraints-models.hpp"
