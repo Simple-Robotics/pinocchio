@@ -145,15 +145,19 @@ namespace pinocchio
       // Normal update
       Scalar & fz = primal_vector.coeffRef(2);
       const Scalar fz_previous = fz;
-      fz -= Scalar(this->over_relax_value / math::max(1e-12, G_block.coeff(2, 2))) * dual_vector[2];
+      fz -= Scalar(
+              this->over_relax_value
+              / math::max(Eigen::NumTraits<Scalar>::dummy_precision(), G_block.coeff(2, 2)))
+            * dual_vector[2];
       fz = math::max(Scalar(0), fz);
 
       // Account for the fz updated value
       dual_vector += G_block.col(2) * (fz - fz_previous);
 
       // Tangential update
-      const Scalar min_D_tangent =
-        math::max(1e-12, math::min(G_block.coeff(0, 0), G_block.coeff(1, 1)));
+      const Scalar min_D_tangent = math::max(
+        Eigen::NumTraits<Scalar>::dummy_precision(),
+        math::min(G_block.coeff(0, 0), G_block.coeff(1, 1)));
       auto f_tangent = primal_vector.template head<2>();
       const Vector2 f_tangent_previous = f_tangent;
 
@@ -236,7 +240,8 @@ namespace pinocchio
       for (Eigen::DenseIndex i = 0; i < size; ++i)
       {
         Scalar d_primal_value =
-          -this->over_relax_value * dual_vector[i] / math::max(1e-12, G_block.coeff(i, i));
+          -this->over_relax_value * dual_vector[i]
+          / math::max(Eigen::NumTraits<Scalar>::dummy_precision(), G_block.coeff(i, i));
         primal_vector[i] += d_primal_value;
         dual_vector.noalias() += G_block.col(i) * d_primal_value; // TODO: this could be optimized
       }
@@ -264,7 +269,8 @@ namespace pinocchio
       for (Eigen::DenseIndex i = 0; i < size; ++i)
       {
         Scalar d_primal_value =
-          -this->over_relax_value * dual_vector[i] / math::max(1e-12, G_block.coeff(i, i));
+          -this->over_relax_value * dual_vector[i]
+          / math::max(Eigen::NumTraits<Scalar>::dummy_precision(), G_block.coeff(i, i));
         primal_vector[i] += d_primal_value;
         dual_vector += G_block.col(i) * d_primal_value; // TODO: this could be optimized using aloca
       }
@@ -349,8 +355,11 @@ namespace pinocchio
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
-        value -= Scalar(over_relax_value / math::max(1e-12, G_block.coeff(row_id, row_id)))
-                 * dual_vector[row_id];
+        value -=
+          Scalar(
+            over_relax_value
+            / math::max(Eigen::NumTraits<Scalar>::dummy_precision(), G_block.coeff(row_id, row_id)))
+          * dual_vector[row_id];
         value = set.rowiseProject(row_id, value);
         dual_vector.noalias() +=
           G_block.col(row_id)
@@ -409,8 +418,11 @@ namespace pinocchio
       {
         Scalar & value = primal_vector.coeffRef(row_id);
         const Scalar value_previous = value;
-        value -= Scalar(over_relax_value / math::max(1e-12, G_block.coeff(row_id, row_id)))
-                 * dual_vector[row_id];
+        value -=
+          Scalar(
+            over_relax_value
+            / math::max(Eigen::NumTraits<Scalar>::dummy_precision(), G_block.coeff(row_id, row_id)))
+          * dual_vector[row_id];
         value = set.rowiseProject(row_id, value);
         dual_vector += G_block.col(row_id) * Scalar(value - value_previous);
       }
