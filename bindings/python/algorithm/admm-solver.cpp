@@ -24,7 +24,7 @@ namespace pinocchio
     namespace bp = boost::python;
 
     typedef ADMMContactSolverTpl<context::Scalar> Solver;
-    typedef Solver::SolverStats SolverStats;
+    typedef Solver::ADMMSolverStats SolverStats;
     typedef context::Scalar Scalar;
     typedef context::VectorXs VectorXs;
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;

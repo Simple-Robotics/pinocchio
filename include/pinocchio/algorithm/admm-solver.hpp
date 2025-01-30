@@ -209,54 +209,29 @@ namespace pinocchio
     //      boost::optional<VectorXs> L_vector;
     //    };
     //
-    struct SolverStats
+    struct ADMMSolverStats : Base::SolverStats
     {
-      explicit SolverStats(const int max_it)
-      : it(0)
+      explicit ADMMSolverStats(const int max_it)
+      : Base::SolverStats(max_it)
       , cholesky_update_count(0)
       {
-        primal_feasibility.reserve(size_t(max_it));
-        dual_feasibility.reserve(size_t(max_it));
-        dual_feasibility_ncp.reserve(size_t(max_it));
-        complementarity.reserve(size_t(max_it));
         rho.reserve(size_t(max_it));
       }
 
       void reset()
       {
-        primal_feasibility.clear();
-        dual_feasibility.clear();
-        complementarity.clear();
-        dual_feasibility_ncp.clear();
+        Base::SolverStats::reset();
         rho.clear();
-        it = 0;
         cholesky_update_count = 0;
       }
-
-      size_t size() const
-      {
-        return primal_feasibility.size();
-      }
-
-      ///  \brief Number of total iterations.
-      int it;
 
       ///  \brief Number of Cholesky updates.
       int cholesky_update_count;
 
-      /// \brief History of primal feasibility values.
-      std::vector<Scalar> primal_feasibility;
-
-      /// \brief History of dual feasibility values.
-      std::vector<Scalar> dual_feasibility;
-      std::vector<Scalar> dual_feasibility_ncp;
-
-      /// \brief History of complementarity values.
-      std::vector<Scalar> complementarity;
-
       /// \brief History of rho values.
       std::vector<Scalar> rho;
     };
+
     //
     //    struct SolverResults
     //    {
@@ -543,8 +518,9 @@ namespace pinocchio
       bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(problem_size),
-        VectorXs::Ones(problem_size), primal_guess.const_cast_derived(), boost::none, solve_ncp);
+        delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(this->problem_size),
+        VectorXs::Ones(this->problem_size), primal_guess.const_cast_derived(), boost::none,
+        solve_ncp);
     }
 
     ///
@@ -647,11 +623,6 @@ namespace pinocchio
       preconditioner_.scale(z_bar, z);
     }
 
-    SolverStats & getStats()
-    {
-      return stats;
-    }
-
   protected:
     bool is_initialized;
 
@@ -712,8 +683,7 @@ namespace pinocchio
 
     int cholesky_update_count;
 
-    /// \brief Stats of the solver
-    SolverStats stats;
+    ADMMSolverStats stats;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
     using Base::timer;

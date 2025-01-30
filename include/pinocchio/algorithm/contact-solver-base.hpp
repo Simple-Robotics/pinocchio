@@ -25,6 +25,45 @@ namespace pinocchio
     typedef hpp::fcl::Timer Timer;
 #endif // PINOCCHIO_WITH_HPP_FCL
 
+    struct SolverStats
+    {
+      explicit SolverStats(const int max_it)
+      : it(0)
+      {
+        primal_feasibility.reserve(size_t(max_it));
+        dual_feasibility.reserve(size_t(max_it));
+        dual_feasibility_ncp.reserve(size_t(max_it));
+        complementarity.reserve(size_t(max_it));
+      }
+
+      void reset()
+      {
+        primal_feasibility.clear();
+        dual_feasibility.clear();
+        complementarity.clear();
+        dual_feasibility_ncp.clear();
+        it = 0;
+      }
+
+      size_t size() const
+      {
+        return primal_feasibility.size();
+      }
+
+      ///  \brief Number of total iterations.
+      int it;
+
+      /// \brief History of primal feasibility values.
+      std::vector<Scalar> primal_feasibility;
+
+      /// \brief History of dual feasibility values.
+      std::vector<Scalar> dual_feasibility;
+      std::vector<Scalar> dual_feasibility_ncp;
+
+      /// \brief History of complementarity values.
+      std::vector<Scalar> complementarity;
+    };
+
     explicit ContactSolverBaseTpl(const int problem_size)
     : problem_size(problem_size)
     , max_it(1000)
@@ -33,6 +72,7 @@ namespace pinocchio
     , relative_precision(Scalar(1e-6))
     , absolute_residual(Scalar(-1))
     , relative_residual(Scalar(-1))
+    , stats(max_it)
 #ifdef PINOCCHIO_WITH_HPP_FCL
     , timer(false)
 #endif // PINOCCHIO_WITH_HPP_FCL
@@ -109,6 +149,11 @@ namespace pinocchio
     }
 #endif // PINOCCHIO_WITH_HPP_FCL
 
+    SolverStats & getStats()
+    {
+      return stats;
+    }
+
   protected:
     /// \brief Size of the problem
     int problem_size;
@@ -124,6 +169,9 @@ namespace pinocchio
     Scalar absolute_residual;
     /// \brief Relative convergence residual value
     Scalar relative_residual;
+
+    /// \brief Stats of the solver
+    SolverStats stats;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
     Timer timer;

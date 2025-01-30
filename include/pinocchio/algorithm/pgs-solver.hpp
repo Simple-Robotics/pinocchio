@@ -45,8 +45,7 @@ namespace pinocchio
     template<
       typename MatrixLike,
       typename VectorLike,
-      template<typename T>
-      class Holder,
+      template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
       typename VectorLikeOut>
@@ -57,7 +56,8 @@ namespace pinocchio
         constraint_models,
       // const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeOut> & x,
-      const Scalar over_relax = Scalar(1));
+      const Scalar over_relax = Scalar(1),
+      const bool stat_record = false);
 
     ///
     /// \brief Solve the constrained problem composed of problem data (G,g,constraint_sets) and
@@ -81,7 +81,8 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeInitialGuess> & x,
-      const Scalar over_relax = Scalar(1));
+      const Scalar over_relax = Scalar(1),
+      const bool stat_record = false);
 
     /// \returns the primal solution of the problem
     const VectorXs & getPrimalSolution() const
@@ -102,6 +103,8 @@ namespace pinocchio
 #ifdef PINOCCHIO_WITH_HPP_FCL
     using Base::timer;
 #endif // PINOCCHIO_WITH_HPP_FCL
+
+    using Base::stats;
 
   }; // struct PGSContactSolverTpl
 } // namespace pinocchio

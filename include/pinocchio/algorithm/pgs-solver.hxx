@@ -545,7 +545,8 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
-    const Scalar over_relax)
+    const Scalar over_relax,
+    const bool stat_record)
 
   {
 
@@ -630,6 +631,14 @@ namespace pinocchio
         break;
 
       x_previous_norm_inf = x_norm_inf;
+
+      if (stat_record)
+      {
+        stats.it = it;
+        stats.primal_feasibility.push_back(primal_feasibility);
+        stats.dual_feasibility.push_back(dual_feasibility);
+        stats.complementarity.push_back(complementarity);
+      }
     }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -660,7 +669,8 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Eigen::DenseBase<VectorLikeOut> & x_sol,
-    const Scalar over_relax)
+    const Scalar over_relax,
+    const bool stat_record)
 
   {
     typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
@@ -669,7 +679,7 @@ namespace pinocchio
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    return solve(G, g, wrapped_constraint_models, x_sol, over_relax);
+    return solve(G, g, wrapped_constraint_models, x_sol, over_relax, stat_record);
   }
 } // namespace pinocchio
 
