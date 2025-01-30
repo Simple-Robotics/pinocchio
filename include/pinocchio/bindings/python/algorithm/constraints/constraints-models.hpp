@@ -16,22 +16,11 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    template<class T>
-    struct WrapperModelBase
-    {
-      typedef typename T::Base Base;
-    }
-    template<>
-    struct WrapperModelBase<boost::blank>
-    {
-      typedef typename boost::blank Base;
-    }
-
     // Add the inheritance
     template<class T>
     inline bp::class_<T> & expose_constraint_model_inheritance(bp::class_<T> & cl)
     {
-      return ConstraintModelInheritanceHelper<T, typename WrapperModelBase<T>::Base>::expose_inheritance();
+      return ConstraintModelInheritanceHelper<T, typename T::Base>::expose_inheritance(cl);
     }
 
     // generic expose_constraint_model : do nothing special

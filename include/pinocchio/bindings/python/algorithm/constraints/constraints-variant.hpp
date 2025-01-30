@@ -54,6 +54,9 @@ namespace pinocchio
               .def(PrintableVisitor<T>())));
         bp::implicitly_convertible<T, context::ConstraintData>();
       }
+
+      void operator()(boost::blank)
+      {}
     };
 
     struct ConstraintModelExposer
@@ -69,6 +72,9 @@ namespace pinocchio
               .def(PrintableVisitor<T>())));
         bp::implicitly_convertible<T, context::ConstraintModel>();
       }
+
+      void operator()(boost::blank)
+      {}
     };
   } // namespace python
 } // namespace pinocchio
