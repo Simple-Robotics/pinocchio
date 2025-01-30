@@ -602,6 +602,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-rnea.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-contact-jacobian.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/constraints/expose-cones.cpp
+    ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/constraints/expose-constraints.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-cholesky.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-regressor.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-kinematics-derivatives.cpp

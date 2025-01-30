@@ -98,6 +98,7 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
   exposeInertia();
   exposeSymmetric3();
   exposeJoints();
+  exposeConstraints();
   exposeExplog();
   exposeRpy();
   exposeLinalg();
