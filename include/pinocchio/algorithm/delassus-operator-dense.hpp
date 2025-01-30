@@ -139,6 +139,11 @@ namespace pinocchio
       return res;
     }
 
+    bool operator==(const Self & other) const
+    {
+      return delassus_matrix == other.delassus_matrix && damping == other.damping;
+    }
+
   protected:
     Matrix delassus_matrix;
     mutable Matrix mat_tmp;

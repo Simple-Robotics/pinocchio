@@ -35,6 +35,11 @@ namespace pinocchio
     typedef DelassusCholeskyExpressionTpl<_ContactCholeskyDecomposition> Self;
     typedef DelassusOperatorBase<Self> Base;
     typedef typename ContactCholeskyDecomposition::EigenStorageVector EigenStorageVector;
+    enum
+    {
+      Options = ContactCholeskyDecomposition::Options,
+    };
+    typedef DelassusOperatorDenseTpl<Scalar, Options> DelassusOperatorDense;
 
     typedef
       typename SizeDepType<Eigen::Dynamic>::template BlockReturn<RowMatrix>::Type RowMatrixBlockXpr;
@@ -152,6 +157,14 @@ namespace pinocchio
     Matrix inverse() const
     {
       return self.getOperationalSpaceInertiaMatrix();
+    }
+
+    ///
+    /// \brief Returns the corresponding dense delassus operator.
+    ///
+    DelassusOperatorDense dense(bool enforce_symmetry = false)
+    {
+      return DelassusOperatorDense(this->matrix(enforce_symmetry));
     }
 
     ///
