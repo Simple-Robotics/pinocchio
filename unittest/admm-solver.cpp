@@ -705,13 +705,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   }
 }
 
-BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
+BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
 {
   Model model;
-  JointIndex joint_id_x = model.addJoint(0, JointModelPX(), SE3::Identity(), "slider_x");
-  JointIndex joint_id_y = model.addJoint(joint_id_x, JointModelPY(), SE3::Identity(), "slider_y");
-  JointIndex joint_id_z = model.addJoint(joint_id_y, JointModelPZ(), SE3::Identity(), "slider_z");
-  
+  JointIndex joint_id_x = model.addJoint(0, JointModelRX(), SE3::Identity(), "revolute_x");
+  JointIndex joint_id_y = model.addJoint(joint_id_x, JointModelRY(), SE3::Identity(), "revolute_y");
+  JointIndex joint_id_z = model.addJoint(joint_id_y, JointModelRZ(), SE3::Identity(), "revolute_z");
+
+  const SE3::Vector3 small_box_dims = SE3::Vector3::Ones() * 1e-3;
   const double small_box_mass = 1e-6;
   const Inertia small_box_inertia =
     Inertia::FromBox(small_box_mass, small_box_dims[0], small_box_dims[1], small_box_dims[2]);
@@ -805,9 +806,158 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
     BOOST_CHECK(dual_solution.isZero(1e-6));
     BOOST_CHECK(dual_solution2.isZero(1e-6));
 
-    std::cout << "tau_push_against_lower_bound:   " << tau_push_against_lower_bound << std::endl;
-    std::cout << "constraint_jacobian.transpose() * primal_solution:   " << constraint_jacobian.transpose() * primal_solution << std::endl;
-    std::cout << "primal_solution:   " << primal_solution << std::endl;
+    // std::cout << "tau_push_against_lower_bound:   " << tau_push_against_lower_bound << std::endl;
+    // std::cout << "constraint_jacobian.transpose() * primal_solution:   "
+    //           << constraint_jacobian.transpose() * primal_solution << std::endl;
+    // std::cout << "primal_solution:   " << primal_solution << std::endl;
+
+    BOOST_CHECK((tau_push_against_lower_bound + constraint_jacobian.transpose() * primal_solution)
+                  .isZero(1e-6));
+  }
+
+  // External torques push the slider away from the lower bound
+  {
+    data.q_in = q0;
+    const auto & cmodel = constraint_models[0];
+    auto & cdata = constraint_datas[0];
+    cmodel.calc(model, data, cdata);
+
+    const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
+    const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
+    g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
+    g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
+
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
+    admm_solver.setAbsolutePrecision(1e-13);
+    admm_solver.setRelativePrecision(1e-14);
+
+    Eigen::VectorXd compliance = Eigen::VectorXd::Zero(g_tilde_move_away.size());
+    boost::optional<const Eigen::Ref<const Eigen::VectorXd>> preconditioner_vec(
+      Eigen::VectorXd::Ones(g_tilde_move_away.size()));
+    boost::optional<const Eigen::Ref<const Eigen::VectorXd>> primal_solution_constref(
+      primal_solution);
+    const bool has_converged = admm_solver.solve(
+      G_expression, g_tilde_move_away, constraint_models, dt, compliance, preconditioner_vec,
+      primal_solution_constref);
+    primal_solution = admm_solver.getPrimalSolution();
+    BOOST_CHECK(has_converged);
+
+    dual_solution = (G_plain * primal_solution).cwiseProduct(time_scaling) + g_move_away;
+    Eigen::VectorXd dual_solution2 = admm_solver.getDualSolution();
+
+    BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
+    BOOST_CHECK(primal_solution.isZero());
+    BOOST_CHECK(dual_solution.isApprox(g_move_away));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
+{
+  Model model;
+  JointIndex joint_id_x = model.addJoint(0, JointModelPX(), SE3::Identity(), "slider_x");
+  JointIndex joint_id_y = model.addJoint(joint_id_x, JointModelPY(), SE3::Identity(), "slider_y");
+  JointIndex joint_id_z = model.addJoint(joint_id_y, JointModelPZ(), SE3::Identity(), "slider_z");
+
+  const SE3::Vector3 small_box_dims = SE3::Vector3::Ones() * 1e-3;
+  const double small_box_mass = 1e-6;
+  const Inertia small_box_inertia =
+    Inertia::FromBox(small_box_mass, small_box_dims[0], small_box_dims[1], small_box_dims[2]);
+
+  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
+  const double box_mass = 10;
+  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
+
+  model.appendBodyToJoint(joint_id_x, small_box_inertia);
+  model.appendBodyToJoint(joint_id_y, small_box_inertia);
+  model.appendBodyToJoint(joint_id_z, box_inertia);
+  model.gravity.setZero();
+  model.lowerPositionLimit[0] = 0.;
+  model.lowerPositionLimit[1] = 0.;
+  model.lowerPositionLimit[2] = 0.;
+  Data data(model);
+
+  Eigen::VectorXd q0 = Eigen::VectorXd::Zero(model.nq);
+  const Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  const Eigen::VectorXd tau_push_against_lower_bound = -Eigen::VectorXd::Ones(model.nv);
+
+  const double dt = 1e-3;
+
+  typedef JointLimitConstraintModel ConstraintModel;
+  typedef ConstraintModel::ConstraintData ConstraintData;
+  std::vector<ConstraintModel> constraint_models;
+  std::vector<ConstraintData> constraint_datas;
+  ConstraintModel::JointIndexVector active_joints = {joint_id_x, joint_id_y, joint_id_z};
+
+  ConstraintModel joint_limit_constraint_model(model, active_joints);
+  constraint_models.push_back(joint_limit_constraint_model);
+
+  for (const auto & cm : constraint_models)
+    constraint_datas.push_back(cm.createData());
+
+  const Eigen::VectorXd v_free_against_lower_bound =
+    v0 + dt * aba(model, data, q0, v0, tau_push_against_lower_bound, Convention::WORLD);
+  const Eigen::VectorXd v_free_move_away =
+    v0 + dt * aba(model, data, q0, v0, -tau_push_against_lower_bound, Convention::WORLD);
+
+  // Cholesky of the Delassus matrix
+  crba(model, data, q0, Convention::WORLD);
+  ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
+
+  auto G_expression = chol.getDelassusCholeskyExpression();
+  const auto G_plain = G_expression.matrix();
+  const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
+
+  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  constraint_jacobian.setZero();
+  getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
+
+  Eigen::VectorXd time_scaling(delassus_matrix_plain.rows());
+  internal::getTimeScalingFromAccelerationToConstraints(constraint_models, dt, time_scaling);
+
+  // External torques push the slider against the lower bound
+  {
+    data.q_in = q0;
+    const auto & cmodel = constraint_models[0];
+    auto & cdata = constraint_datas[0];
+    cmodel.calc(model, data, cdata);
+
+    const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
+    const Eigen::VectorXd g_tilde_against_lower_bound =
+      g_against_lower_bound + cdata.constraint_residual / dt;
+    g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
+    g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
+
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
+    admm_solver.setAbsolutePrecision(1e-13);
+    admm_solver.setRelativePrecision(1e-14);
+
+    Eigen::VectorXd compliance = Eigen::VectorXd::Zero(g_tilde_against_lower_bound.size());
+    boost::optional<const Eigen::Ref<const Eigen::VectorXd>> preconditioner_vec(
+      Eigen::VectorXd::Ones(g_tilde_against_lower_bound.size()));
+    boost::optional<const Eigen::Ref<const Eigen::VectorXd>> primal_solution_constref(
+      primal_solution);
+    const bool has_converged = admm_solver.solve(
+      G_expression, g_tilde_against_lower_bound, constraint_models, dt, compliance,
+      preconditioner_vec, primal_solution_constref);
+    primal_solution = admm_solver.getPrimalSolution();
+    BOOST_CHECK(has_converged);
+
+    dual_solution = (G_plain * primal_solution).cwiseProduct(time_scaling) + g_against_lower_bound;
+    Eigen::VectorXd dual_solution2 = admm_solver.getDualSolution();
+
+    BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
+    BOOST_CHECK(dual_solution.isZero(1e-6));
+    BOOST_CHECK(dual_solution2.isZero(1e-6));
+
+    // std::cout << "tau_push_against_lower_bound:   " << tau_push_against_lower_bound << std::endl;
+    // std::cout << "constraint_jacobian.transpose() * primal_solution:   "
+    //           << constraint_jacobian.transpose() * primal_solution << std::endl;
+    // std::cout << "primal_solution:   " << primal_solution << std::endl;
 
     BOOST_CHECK((tau_push_against_lower_bound + constraint_jacobian.transpose() * primal_solution)
                   .isZero(1e-6));
@@ -933,6 +1083,10 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
       G_expression, g_tilde_against_lower_bound, constraint_models, dt, compliance,
       preconditioner_vec, primal_solution_constref);
     primal_solution = admm_solver.getPrimalSolution();
+    // std::cout << " admm_solver.getAbsoluteConvergenceResidual():   " <<
+    // admm_solver.getAbsoluteConvergenceResidual() << std::endl; std::cout << "
+    // admm_solver.getRelativeConvergenceResidual():   " <<
+    // admm_solver.getRelativeConvergenceResidual() << std::endl;
     BOOST_CHECK(has_converged);
 
     constraint_velocity =
@@ -1078,7 +1232,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
     BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
     BOOST_CHECK(constraint_velocity.isZero(1e-6));
     BOOST_CHECK(
-      (dual_solution - (G_plain * primal_solution + g_tilde_against_lower_bound)).isZero(1e-6));
+      (dual_solution
+       - (G_plain * primal_solution.cwiseProduct(time_scaling) + g_tilde_against_lower_bound))
+        .isZero(1e-6));
 
     BOOST_CHECK((-tau_gravity + constraint_jacobian.transpose() * primal_solution).isZero(1e-6));
   }
@@ -1178,7 +1334,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
   Eigen::VectorXd time_scaling(delassus_matrix_plain.rows());
   internal::getTimeScalingFromAccelerationToConstraints(constraint_models, dt, time_scaling);
 
-  // Gravity pushes the freeflyer against the lower bound
+  // External torques push the freeflyer against from the lower bound
   {
     data.q_in = q0;
     const auto & cmodel = constraint_models[0];
@@ -1225,7 +1381,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
       < 1e-6);
   }
 
-  // External torques compensate the gravity to push the freeflyer away from the lower bound
+  // External torques push the freeflyer away from the lower bound
   {
     data.q_in = q0;
     const auto & cmodel = constraint_models[0];
