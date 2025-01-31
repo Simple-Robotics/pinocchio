@@ -11,6 +11,7 @@
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraints-models.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraints-datas.hpp"
+#include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
 namespace pinocchio
 {
@@ -71,6 +72,20 @@ namespace pinocchio
               .def(ConstraintModelBasePythonVisitor<T>())
               .def(PrintableVisitor<T>())));
         bp::implicitly_convertible<T, context::ConstraintModel>();
+      }
+
+      void operator()(boost::blank)
+      {}
+    };
+
+    struct ConstraintStdExposer
+    {
+      template<class T>
+      void operator()(T)
+      {
+        StdAlignedVectorPythonVisitor<T>::expose(
+          "StdVec_" + sanitizedClassname<T>().c_str()
+        );
       }
 
       void operator()(boost::blank)
