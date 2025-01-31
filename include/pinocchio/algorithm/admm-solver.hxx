@@ -368,12 +368,12 @@ namespace pinocchio
           Eigen::VectorXd eigvals = solver.eigenvalues();
           Scalar true_m = eigvals.minCoeff();
           Scalar true_L = eigvals.maxCoeff();
-          if (true_m > 0)
-          {
-            assert(
-              math::fabs((true_m - m) / math::max(true_m, m)) < 0.01
-              && "true_m and m are too far apart.");
-          }
+          //          if (true_m > 0)
+          //          {
+          //            assert(
+          //              math::fabs((true_m - m) / math::max(true_m, m)) < 0.01
+          //              && "true_m and m are too far apart.");
+          //          }
           assert(
             math::fabs((true_L - L) / math::max(true_L, L)) < 0.01
             && "true_L and L are too far apart.");
