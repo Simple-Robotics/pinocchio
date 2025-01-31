@@ -546,7 +546,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
-    dual_solution = G * primal_solution * dt + g_tilde_against_lower_bound;
+    dual_solution = G * primal_solution * dt * dt + g_tilde_against_lower_bound;
     Eigen::VectorXd dual_solution2 = pgs_solver.getDualSolution();
 
     // std::cout << "primal_solution:   " << primal_solution.transpose() << std::endl;
@@ -570,8 +570,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     auto & cdata = constraint_datas[0];
     cmodel.calc(model, data, cdata);
 
-    const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
-    const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
+    const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away * dt;
+    const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual;
 
     Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
     Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
@@ -583,12 +583,13 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
-    dual_solution = G * primal_solution + g_move_away;
+    dual_solution = G * primal_solution * dt * dt + g_tilde_move_away;
     Eigen::VectorXd dual_solution2 = pgs_solver.getDualSolution();
 
     BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
     BOOST_CHECK(primal_solution.isZero());
-    BOOST_CHECK(dual_solution.isApprox(g_move_away));
+    BOOST_CHECK(dual_solution.isApprox(g_tilde_move_away));
+    BOOST_CHECK(dual_solution2.isApprox(g_tilde_move_away));
   }
 }
 
