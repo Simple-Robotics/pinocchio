@@ -17,6 +17,15 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
+    typedef std::vector<JointIndex> JointIndexVector;
+
+    template<class T>
+    struct GetModelFromCModel
+    {
+      typedef typename T::Scalar Scalar;
+      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
+    }
+
     // Add the inheritance
     template<class T>
     inline bp::class_<T> & expose_constraint_model_inheritance(bp::class_<T> & cl)
@@ -52,10 +61,29 @@ namespace pinocchio
     }
 
     template<>
+    bp::class_<context::WeldConstraintModel> & expose_constraint_model(
+      bp::class_<context::WeldConstraintModel> & cl
+    )
+    {
+      return cl
+      ;
+    }
+
+    template<>
     bp::class_<context::FrictionalJointConstraintModel> & expose_constraint_model(
       bp::class_<context::FrictionalJointConstraintModel> & cl)
     {
       return cl
+        .def(
+          bp::init<const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
+          const JointIndexVector &>
+          ((bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
+          "Contructor from given joint index vector "
+          "implied in the constraint."))
+        .def("getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
+          "Create a Data object for the given constraint model.")
+        // .def("getRowActiveIndexes", ...)
+        // .def("getRowSparsityPattern", ...)
       ;
     }
 
@@ -64,15 +92,27 @@ namespace pinocchio
       bp::class_<context::JointLimitConstraintModel> & cl)
     {
       return cl
-      ;
-    }
-
-    template<>
-    bp::class_<context::WeldConstraintModel> & expose_constraint_model(
-      bp::class_<context::WeldConstraintModel> & cl
-    )
-    {
-      return cl
+        .def(
+          bp::init<const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
+          const JointIndexVector &>
+          ((bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
+          "Contructor from given joint index vector "
+          "implied in the constraint."))
+        // Init with lb and ub
+        .def("getActiveLowerBoundConstraints",
+          &context::FrictionalJointConstraintModel::getActiveLowerBoundConstraints,
+          "Active lower bound constraints.")
+        .def("getActiveLowerBoundConstraintsTangent",
+          &context::FrictionalJointConstraintModel::getActiveLowerBoundConstraintsTangent,
+          "Active lower bound constraints in tangent.")
+        .def("getActiveUpperBoundConstraints",
+          &context::FrictionalJointConstraintModel::getActiveUpperBoundConstraints,
+          "Active upper bound constraints.")
+        .def("getActiveUpperBoundConstraintsTangent",
+          &context::FrictionalJointConstraintModel::getActiveUpperBoundConstraintsTangent,
+          "Active upper bound constraints in tangent.")
+        // .def("getRowActiveIndexes", ...)
+        // .def("getRowSparsityPattern", ...)
       ;
     }
   } // namespace python

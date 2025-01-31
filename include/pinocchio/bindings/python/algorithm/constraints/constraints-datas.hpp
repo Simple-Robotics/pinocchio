@@ -51,10 +51,23 @@ namespace pinocchio
     }
 
     template<>
+    bp::class_<context::WeldConstraintData> & expose_constraint_data(
+      bp::class_<context::WeldConstraintData> & cl
+    )
+    {
+      return cl
+      ;
+    }
+
+    template<>
     bp::class_<context::FrictionalJointConstraintData> & expose_constraint_data(
       bp::class_<context::FrictionalJointConstraintData> & cl)
     {
       return cl
+        .def(
+          bp::init<
+            const typename context::FrictionalJointConstraintData::ConstraintModel &>
+            (bp::args("self", "constraint_model")))
       ;
     }
 
@@ -63,15 +76,13 @@ namespace pinocchio
       bp::class_<context::JointLimitConstraintData> & cl)
     {
       return cl
-      ;
-    }
-
-    template<>
-    bp::class_<context::WeldConstraintData> & expose_constraint_data(
-      bp::class_<context::WeldConstraintData> & cl
-    )
-    {
-      return cl
+        .def(
+          bp::init<
+            const typename context::JointLimitConstraintData::ConstraintModel &>
+            (bp::args("self", "constraint_model")))
+        .PINOCCHIO_ADD_PROPERTY(
+          context::JointLimitConstraintData,
+          constraint_residual, "Constraint residual.")
       ;
     }
   } // namespace python
