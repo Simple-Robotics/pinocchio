@@ -96,7 +96,7 @@ namespace pinocchio
       return static_cast<const Base &>(*this);
     }
 
-  protected:
+  // protected:
     ///
     ///  \brief Default constructor
     ///
@@ -105,7 +105,7 @@ namespace pinocchio
     {
     }
 
-  public:
+  // public:
     ///
     ///  \brief Contructor with from a given type, joint indexes and placements.
     ///

@@ -44,8 +44,8 @@ namespace pinocchio
           .def("size", &Self::size, "Constraint size")
           // .def("compliance", &Self::compliance,
           //   "Return the compliance stored in the model.")
-          .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
-          .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
+          // .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
+          // .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
           // .def("jacobian_matrix_product", &jacobianMatrixProduct,
           //   bp::args("self", "model", "data", "matrix"))
           // .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
