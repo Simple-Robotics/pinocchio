@@ -127,12 +127,16 @@ namespace pinocchio
       return m_delassus.matrix(enforce_symmetry) + m_compliance.asDiagonal().toDenseMatrix();
     }
 
+    /// \returns the numerical damping on the Delassus.
+    /// NB: this quantity has the same effect as a compliance but is urely numerical and does not
+    /// model any physical phenomenon.
     const Vector & getDamping() const
     {
       m_tmp_vec = ref().getDamping() - m_compliance;
       return m_tmp_vec;
     }
 
+    /// \returns the compliance on the Delassus
     const Vector & getCompliance() const
     {
       return m_compliance;
@@ -140,7 +144,10 @@ namespace pinocchio
 
   protected:
     DelassusOperator & m_delassus;
+
+    /// \brief Physical compliance on the Delassus.
     ComplianceType & m_compliance;
+
     Vector m_tmp_vec;
 
   }; // struct DelassusOperatorCompliant
