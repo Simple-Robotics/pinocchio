@@ -133,6 +133,9 @@ namespace pinocchio
     //      JointModelPrismaticUnaligned>
     //      ValidJointTypes;
 
+    JointLimitConstraintModelTpl()
+    {}
+
     template<template<typename, int> class JointCollectionTpl>
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -434,6 +437,9 @@ namespace pinocchio
 
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef typename ConstraintModel::VectorXs VectorXs;
+
+    JointLimitConstraintDataTpl()
+    {}
 
     explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
     : constraint_residual(constraint_model.size())
