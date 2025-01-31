@@ -31,7 +31,7 @@ namespace pinocchio
         cl
           .def("classname", &Self::classname)
           .staticmethod("classname")
-          .def("shortname", &Self::shortname, bp::arg("self"))
+          .def("shortname", &Self::shortname)
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)

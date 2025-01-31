@@ -39,7 +39,7 @@ namespace pinocchio
     template<class ConstraintDataDerived>
     struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, FrameConstraintDataBase<ConstraintDataDerived>>
     {
-      typedef ConstraintModelDerived Self;
+      typedef ConstraintDataDerived Self;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -63,7 +63,7 @@ namespace pinocchio
     template<class ConstraintDataDerived>
     struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, PointConstraintDataBase<ConstraintDataDerived>>
     {
-      typedef ConstraintModelDerived Self;
+      typedef ConstraintDataDerived Self;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const

@@ -82,8 +82,6 @@ namespace pinocchio
           .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
           .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          .def("createData", &Self::compliance, bp::arg("self") ,
-            "Return the compliance stored in the model.")
           // .def("getRowSparsityPattern", ...)
           // .def("getRowActiveIndexes", ...)
           // .def("getA1", ...)
@@ -95,6 +93,9 @@ namespace pinocchio
     template<class ConstraintModelDerived>
     struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, PointConstraintModelBase<ConstraintModelDerived>>
     {
+      typedef ConstraintModelDerived Self;
+      typedef typename ConstraintModelDerived::Scalar Scalar;
+      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -134,8 +135,6 @@ namespace pinocchio
           .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
           .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          .def("createData", &Self::compliance, bp::arg("self") ,
-            "Return the compliance stored in the model.")
           // .def("getRowSparsityPattern", ...)
           // .def("getRowActiveIndexes", ...)
           // .def("getA1", ...)
