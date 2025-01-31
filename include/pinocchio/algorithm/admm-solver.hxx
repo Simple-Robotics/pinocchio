@@ -370,9 +370,13 @@ namespace pinocchio
           Scalar true_L = eigvals.maxCoeff();
           if (true_m > 0)
           {
-            assert(std::abs((true_m - m) / true_m) < 0.01 && "true_m and m are too far apart.");
+            assert(
+              math::fabs((true_m - m) / math::max(true_m, m)) < 0.01
+              && "true_m and m are too far apart.");
           }
-          assert(std::abs((true_L - L) / true_L) < 0.01 && "true_L and L are too far apart.");
+          assert(
+            math::fabs((true_L - L) / math::max(true_L, L)) < 0.01
+            && "true_L and L are too far apart.");
 #endif // NDEBUG
         }
         else
