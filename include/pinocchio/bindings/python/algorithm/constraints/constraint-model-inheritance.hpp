@@ -135,11 +135,13 @@ namespace pinocchio
           .PINOCCHIO_ADD_PROPERTY(T, loop_span_indexes, "Loop span indexes.")
           .PINOCCHIO_ADD_PROPERTY(T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          // .def("getRowSparsityPattern", ...)
-          // .def("getRowActiveIndexes", ...)
-          // .def("getA1", ...)
-          // .def("getA2", ...)
-          // TODO: OTHER SPECIAL METHODS RELATED TO POINT
+          // .def("getRowSparsityPattern", &T::getRowSparsityPattern, args...)
+          // .def("getRowActiveIndexes", &T::computeConstraintSpatialInertia , args...)
+          // .def("getA1", &T::getA1, args...)
+          // .def("getA2", &T::getA2, args...)
+          // .def("computeConstraintSpatialInertia", &T::computeConstraintSpatialInertia, args...)
+          // .def("appendConstraintDiagonalInertiaToJointInertias", &T::appendConstraintDiagonalInertiaToJointInertias, args...)
+          // .def("mapConstraintForceToJointForces", &T::mapConstraintForceToJointForces, args...)
           ;
       }
     };

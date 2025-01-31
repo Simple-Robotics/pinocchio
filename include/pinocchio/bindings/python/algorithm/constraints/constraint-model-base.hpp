@@ -70,19 +70,19 @@ namespace pinocchio
         return res;
       }
 
-      // static void jacobianMatrixProduct(
-      //   const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
-      //   context::MatrixXs & matrix)
-      // {
-      //   return self.jacobianMatrixProduct(model, data, constraint_data, matrix);
-      // }
+      static void jacobianMatrixProduct(
+        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        context::MatrixXs & matrix)
+      {
+        return self.jacobianMatrixProduct(model, data, constraint_data, matrix);
+      }
 
-      // static void jacobianTransposeMatrixProduct(
-      //   const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
-      //   context::MatrixXs & matrix)
-      // {
-      //   return self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix);
-      // }
+      static void jacobianTransposeMatrixProduct(
+        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        context::MatrixXs & matrix)
+      {
+        return self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix);
+      }
     };
   } // namespace python
 } // namespace pinocchio
