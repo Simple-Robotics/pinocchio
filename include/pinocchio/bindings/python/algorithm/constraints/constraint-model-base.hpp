@@ -29,7 +29,6 @@ namespace pinocchio
     public:
       typedef ConstraintModelDerived Self;
       typedef typename ConstraintModelDerived::Scalar Scalar;
-
       typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
       typedef DataTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Data;
 
@@ -38,6 +37,7 @@ namespace pinocchio
       {
         cl
           .PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
+          .PINOCCHIO_ADD_PROPERTY(Self, size, "Size of the contact.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
           .def("createData", &Self::createData, bp::arg("self") ,
@@ -46,8 +46,10 @@ namespace pinocchio
             "Shortame for the constraint type")
           .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
           .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
-          // .def("jacobianMatrixProduct", ...)
-          // .def("jacobianTransposeMatrixProduct", ...)
+          .def("jacobian_matrix_product", &jacobianMatrixProduct,
+            bp::args("self", "model", "data", "matrix"))
+          .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
+            bp::args("self", "model", "data", "matrix"))
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
@@ -65,6 +67,20 @@ namespace pinocchio
         context::MatrixXs & jacobian_matrix)
       {
         return self.jacobian(model, data, constraint_data, jacobian_matrix);
+      }
+
+      static void jacobianMatrixProduct(
+        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        context::MatrixXs & matrix)
+      {
+        return self.jacobianMatrixProduct(model, data, constraint_data, matrix);
+      }
+
+      static void jacobianTransposeMatrixProduct(
+        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        context::MatrixXs & matrix)
+      {
+        return self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix);
       }
     };
   } // namespace python
