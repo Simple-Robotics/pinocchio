@@ -36,14 +36,14 @@ namespace pinocchio
       {
         cl
           .PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
-          .PINOCCHIO_ADD_PROPERTY(Self, size, "Size of the contact.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
           .def("createData", &Self::createData, "Create a Data object for the given constraint model.")
           .def("shortname", &Self::shortname, "Shortame for the constraint type")
           .def("set", &Self::shortname, "Constraint set")
-          .def("compliance", &Self::compliance,
-            "Return the compliance stored in the model.")
+          .def("size", &Self::size, "Constraint size")
+          // .def("compliance", &Self::compliance,
+          //   "Return the compliance stored in the model.")
           .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
           .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
           // .def("jacobian_matrix_product", &jacobianMatrixProduct,

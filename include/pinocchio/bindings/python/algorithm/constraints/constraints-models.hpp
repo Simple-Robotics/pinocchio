@@ -24,7 +24,7 @@ namespace pinocchio
     {
       typedef typename T::Scalar Scalar;
       typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
-    }
+    };
 
     // Add the inheritance
     template<class T>
