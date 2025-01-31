@@ -33,18 +33,47 @@ namespace pinocchio
       ;
     }
 
-    // specialization for ConstraintModelRevolute
-    // template<>
-    // bp::class_<context::ConstraintModelRX> &
-    // expose_constraint_model<context::ConstraintModelRX>(bp::class_<context::ConstraintModelRX> & cl)
-    // {
-    //   return cl
-    //     .def(bp::init<>(
-    //       bp::args("self"), "Init ConstraintModelRX with the X axis ([1, 0, 0]) as rotation axis."))
-    //     .def(
-    //       "getMotionAxis", &context::ConstraintModelRX::getMotionAxis,
-    //       "Rotation axis of the ConstraintModelRX.");
-    // };
+    // specialization for ConstraintModels
+    template<>
+    bp::class_<context::BilateralPointConstraintModel> & expose_constraint_model(
+      bp::class_<context::BilateralPointConstraintModel> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::FrictionalPointConstraintModel> & expose_constraint_model(
+      bp::class_<context::FrictionalPointConstraintModel> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::FrictionalJointConstraintModel> & expose_constraint_model(
+      bp::class_<context::FrictionalJointConstraintModel> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::JointLimitConstraintModel> & expose_constraint_model(
+      bp::class_<context::JointLimitConstraintModel> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::WeldConstraintModel> & expose_constraint_model(
+      bp::class_<context::WeldConstraintModel> & cl
+    )
+    {
+      return cl
+      ;
+    }
   } // namespace python
 } // namespace pinocchio
 

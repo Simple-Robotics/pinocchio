@@ -32,15 +32,47 @@ namespace pinocchio
       ;
     }
 
-    // specialization for ConstraintDataRevoluteUnaligned
-    // template<>
-    // inline bp::class_<ConstraintDataRevoluteUnaligned> &
-    // expose_constraint_data<ConstraintDataRevoluteUnaligned>(bp::class_<ConstraintDataRevoluteUnaligned> & cl)
-    // {
-    //   return cl
-    //     .def(bp::init<const Eigen::Vector3d &>(
-    //       bp::args("axis"), "Init ConstraintDataRevoluteUnaligned from an axis with x-y-z components"));
-    // };
+    // specialization for ConstraintDatas
+    template<>
+    bp::class_<context::BilateralPointConstraintData> & expose_constraint_data(
+      bp::class_<context::BilateralPointConstraintData> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::FrictionalPointConstraintData> & expose_constraint_data(
+      bp::class_<context::FrictionalPointConstraintData> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::FrictionalJointConstraintData> & expose_constraint_data(
+      bp::class_<context::FrictionalJointConstraintData> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::JointLimitConstraintData> & expose_constraint_data(
+      bp::class_<context::JointLimitConstraintData> & cl)
+    {
+      return cl
+      ;
+    }
+
+    template<>
+    bp::class_<context::WeldConstraintData> & expose_constraint_data(
+      bp::class_<context::WeldConstraintData> & cl
+    )
+    {
+      return cl
+      ;
+    }
   } // namespace python
 } // namespace pinocchio
 
