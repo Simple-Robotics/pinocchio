@@ -35,7 +35,7 @@ namespace pinocchio
     typedef typename traits<Self>::Scalar Scalar;
 
     DelassusOperatorCompliantTpl(
-      DelassusOperatorBase<DelassusOperator> & delassus, const ComplianceType & compliance)
+      DelassusOperatorBase<DelassusOperator> & delassus, ComplianceType & compliance)
     : m_delassus(delassus.derived())
     , m_compliance(compliance)
     , m_tmp_vec(compliance.cols())
@@ -50,6 +50,17 @@ namespace pinocchio
     const DelassusOperator & ref() const
     {
       return m_delassus;
+    }
+
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & vec)
+    {
+      m_compliance = vec;
+    }
+
+    void updateCompliance(const Scalar mu)
+    {
+      this->updateCompliance(Vector::Constant(ref().size(), mu));
     }
 
     template<typename VectorLike>
@@ -129,7 +140,7 @@ namespace pinocchio
 
   protected:
     DelassusOperator & m_delassus;
-    const ComplianceType & m_compliance;
+    ComplianceType & m_compliance;
     Vector m_tmp_vec;
 
   }; // struct DelassusOperatorCompliant
