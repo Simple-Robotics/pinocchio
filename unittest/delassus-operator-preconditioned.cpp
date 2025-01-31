@@ -1,6 +1,4 @@
 #define PINOCCHIO_EIGEN_CHECK_MALLOC
-#include <iostream>
-
 #include <pinocchio/fwd.hpp>
 
 #include <boost/variant.hpp> // to avoid C99 warnings
