@@ -24,41 +24,44 @@ namespace pinocchio
     : public bp::def_visitor<ConstraintModelBasePythonVisitor<ConstraintModelDerived>>
     {
     public:
+      typedef ConstraintModelDerived Self;
+      typedef typename ConstraintModelDerived::Scalar Scalar;
+
+      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
+      typedef DataTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Data;
+
       template<class PyClass>
       void visit(PyClass & cl) const
       {
         cl
-          // .def(bp::init<>(bp::arg("self")))
-          // // All are add_properties cause ReadOnly
-          // .add_property("id", &get_id)
-          // .add_property(
-          //   "hasConfigurationLimit", &ConstraintModelDerived::hasConfigurationLimit,
-          //   "Return vector of boolean if joint has configuration limits.")
-          // .def("classname", &ConstraintModelDerived::classname)
-          // .staticmethod("classname")
-          // .def("calc", &calc0, bp::args("self", "cdata", "q"))
+          .PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
+          .def("classname", &Self::classname)
+          .staticmethod("classname")
+          .def("createData", &Self::createData, bp::arg("self") ,
+            "Create a Data object for the given constraint model.")
+          .def("shortname", &Self::shortname, bp::arg("self") ,
+            "Shortame for the constraint type")
+          .def("calc", &calc, bp::arg("self", "model", "data", "constraint_data"))
+          .def("jacobian", &jacobian, bp::arg("self", "model", "data", "jacobian_matrix"))
+          // .def("jacobianMatrixProduct", ...)
+          // .def("jacobianTransposeMatrixProduct", ...)
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
 #endif
           ;
-      // }
-      // static JointIndex get_id(const ConstraintModelDerived & self)
-      // {
-      //   return self.id();
-      // }
-      // static void
-      // calc0(const ConstraintModelDerived & self, ConstraintDataDerived & cdata, const context::VectorXs & q)
-      // {
-      //   self.calc(cdata, q);
-      // }
-      // static void calc1(
-      //   const ConstraintModelDerived & self,
-      //   ConstraintDataDerived & cdata,
-      //   const context::VectorXs & q,
-      //   const context::VectorXs & v)
-      // {
-      //   self.calc(cdata, q, v);
+      }
+
+      static void calc(const Self & self, Model & model, Data & data)
+      {
+        return self.calc(model, data, constraint_data);
+      }
+
+      static void jacobian(
+        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        context::MatrixXs & jacobian_matrix)
+      {
+        return self.jacobian(model, data, constraint_data, jacobian_matrix);
       }
     };
   } // namespace python

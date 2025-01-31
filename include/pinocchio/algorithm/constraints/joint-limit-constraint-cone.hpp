@@ -90,6 +90,19 @@ namespace pinocchio
       return dim();
     }
 
+    /// \brief Comparison operator
+    bool operator==(const JointLimitConstraintConeTpl & other) const
+    {
+      return negative_orthant == other.negative_orthant
+        && positive_orthant == other.positive_orthant;
+    }
+
+    /// \brief Difference  operator
+    bool operator!=(const JointLimitConstraintConeTpl & other) const
+    {
+      return !(*this == other);
+    }
+
     /// \brief Check whether a vector x lies within the orthant.
     ///
     /// \param[in] x vector to check .

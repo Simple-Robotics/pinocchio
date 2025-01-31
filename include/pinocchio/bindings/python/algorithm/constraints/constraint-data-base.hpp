@@ -23,24 +23,21 @@ namespace pinocchio
     struct ConstraintDataBasePythonVisitor
     : public bp::def_visitor<ConstraintDataBasePythonVisitor<ConstraintDataDerived>>
     {
+      typedef ConstraintDataDerived Self;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
         cl
-          // All are add_properties cause ReadOnly
-          // .add_property("joint_q", &get_constraint_q)
-          // .def("shortname", &ConstraintDataDerived::shortname, bp::arg("self"))
+          .def("classname", &Self::classname)
+          .staticmethod("classname")
+          .def("shortname", &Self::shortname, bp::arg("self"))
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
 #endif
           ;
       }
-      // static typename ConstraintDataDerived::ConfigVector_t get_constraint_q(const ConstraintDataDerived & self)
-      // {
-      //   return self.joint_q_accessor();
-      // }
     };
   } // namespace python
 } // namespace pinocchio
