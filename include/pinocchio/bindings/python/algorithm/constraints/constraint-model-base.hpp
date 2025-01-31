@@ -9,9 +9,12 @@
 #include <eigenpy/exception.hpp>
 #include <eigenpy/eigen-to-python.hpp>
 
+#include "pinocchio/multibody/model.hpp"
+#include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/bindings/python/fwd.hpp"
+#include "pinocchio/bindings/python/utils/macros.hpp"
 
 namespace pinocchio
 {
@@ -41,8 +44,8 @@ namespace pinocchio
             "Create a Data object for the given constraint model.")
           .def("shortname", &Self::shortname, bp::arg("self") ,
             "Shortame for the constraint type")
-          .def("calc", &calc, bp::arg("self", "model", "data", "constraint_data"))
-          .def("jacobian", &jacobian, bp::arg("self", "model", "data", "jacobian_matrix"))
+          .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
+          .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
           // .def("jacobianMatrixProduct", ...)
           // .def("jacobianTransposeMatrixProduct", ...)
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
@@ -52,7 +55,7 @@ namespace pinocchio
           ;
       }
 
-      static void calc(const Self & self, Model & model, Data & data)
+      static void calc(const Self & self, Model & model, Data & data, ConstraintData & constraint_data)
       {
         return self.calc(model, data, constraint_data);
       }
