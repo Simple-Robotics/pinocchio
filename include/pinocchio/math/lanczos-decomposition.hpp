@@ -91,7 +91,7 @@ namespace pinocchio
       auto & alphas = m_Ts.diagonal();
       auto & betas = m_Ts.subDiagonal();
 
-      const Scalar prec = 2 * Eigen::NumTraits<Scalar>::epsilon();
+      const Scalar prec = 10 * Eigen::NumTraits<Scalar>::epsilon();
 
       m_Qs.setIdentity();
 
