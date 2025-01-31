@@ -27,10 +27,12 @@ namespace pinocchio
       const DelassusMatrixType & G,
       const context::VectorXs & g,
       const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) & constraint_models,
+      const context::Scalar dt,
       Eigen::Ref<context::VectorXs> x,
-      const context::Scalar over_relax = 1)
+      const context::Scalar over_relax = 1,
+      const bool stat_record = false)
     {
-      return solver.solve(G, g, constraint_models, x, over_relax);
+      return solver.solve(G, g, constraint_models, dt, x, over_relax, stat_record);
     }
 #endif
 

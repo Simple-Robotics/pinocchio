@@ -57,12 +57,12 @@ namespace pinocchio
       const BlockType &,
       ForceType &,
       VelocityType &,
-      Scalar &,
-      Scalar &,
-      Scalar &,
       DualToPosType &,
-      TimeScalingType1 &,
-      TimeScalingType2 &>
+      const TimeScalingType1 &,
+      const TimeScalingType2 &,
+      Scalar &,
+      Scalar &,
+      Scalar &>
       ArgsType;
     typedef PGSConstraintProjectionStepBase<Scalar> Base;
     typedef visitors::ConstraintUnaryVisitorBase<PGSConstraintProjectionStepVisitor<
@@ -88,8 +88,8 @@ namespace pinocchio
       ForceType & force,
       VelocityType & velocity,
       DualToPosType & dual_to_pos,
-      TimeScalingType1 & time_scaling_acc_to_constraints,
-      TimeScalingType2 & time_scaling_constraints_to_pos,
+      const TimeScalingType1 & time_scaling_acc_to_constraints,
+      const TimeScalingType2 & time_scaling_constraints_to_pos,
       Scalar & complementarity,
       Scalar & primal_feasibility,
       Scalar & dual_feasibility)
@@ -117,8 +117,8 @@ namespace pinocchio
       ForceType & force,
       VelocityType & velocity,
       DualToPosType & dual_to_pos,
-      TimeScalingType1 & time_scaling_acc_to_constraints,
-      TimeScalingType2 & time_scaling_constraints_to_pos)
+      const TimeScalingType1 & time_scaling_acc_to_constraints,
+      const TimeScalingType2 & time_scaling_constraints_to_pos)
     {
       algo(
         cmodel.derived(), this->over_relax_value, G_block.derived(), force, velocity, dual_to_pos,
@@ -133,8 +133,8 @@ namespace pinocchio
       ForceType & force,
       VelocityType & velocity,
       DualToPosType & dual_to_pos,
-      TimeScalingType1 & time_scaling_acc_to_constraints,
-      TimeScalingType2 & time_scaling_constraints_to_pos)
+      const TimeScalingType1 & time_scaling_acc_to_constraints,
+      const TimeScalingType2 & time_scaling_constraints_to_pos)
     {
       ArgsType args(
         this->over_relax_value, G_block.derived(), force, velocity, dual_to_pos,
