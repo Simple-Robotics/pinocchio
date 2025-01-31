@@ -225,6 +225,8 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
   for (int decomposition_size = 3; decomposition_size <= delassus_matrix_plain.rows();
        ++decomposition_size)
   {
+    std::cout << "decomposition_size: " << decomposition_size << std::endl;
+    std::cout << "delassus_matrix_plain.rows(): " << delassus_matrix_plain.rows() << std::endl;
     LanczosDecomposition lanczos_decomposition(G_expression, decomposition_size);
     SET_LINE;
     checkDecomposition(lanczos_decomposition, delassus_matrix_plain);

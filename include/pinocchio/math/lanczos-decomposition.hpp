@@ -86,6 +86,7 @@ namespace pinocchio
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         A.rows() == m_Qs.rows(), "The input matrix is not of correct size.");
 
+      const Eigen::DenseIndex num_cols = A.cols();
       const Eigen::DenseIndex decomposition_size = m_Ts.cols();
       auto & alphas = m_Ts.diagonal();
       auto & betas = m_Ts.subDiagonal();
@@ -122,10 +123,29 @@ namespace pinocchio
           if (betas[k] <= prec)
           {
             // Pick a new arbitrary vector
-            orthonormalisation(m_Qs.leftCols(k + 1), q_next);
+            bool found_new_base_vector = false;
 
-            const Scalar q_next_norm = q_next.norm();
-            assert(q_next_norm > prec && "Issue with picking a new arbitrary vector.");
+            Scalar q_next_norm = -1; //= q_next.norm();
+
+            for (Eigen::DenseIndex j = 0; j < num_cols; ++j)
+            {
+              const Eigen::DenseIndex base_col_id = (k + 1 + j) % num_cols;
+              if (base_col_id == 0)
+                continue; // The first column of Qs is the first unit vector.
+
+              typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(decltype(q_next)) VectorPlain;
+              q_next = VectorPlain::Unit(num_cols, base_col_id);
+              orthonormalisation(m_Qs.leftCols(k + 1), q_next);
+              q_next_norm = q_next.norm();
+              if (q_next_norm > prec)
+              {
+                found_new_base_vector = true;
+                break;
+              }
+            }
+
+            assert(found_new_base_vector && "Issue with picking a new arbitrary vector.");
+
             q_next /= q_next_norm;
             betas[k] = 0.;
             m_rank++;
