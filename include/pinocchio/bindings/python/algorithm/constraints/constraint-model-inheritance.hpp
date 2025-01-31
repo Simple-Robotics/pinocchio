@@ -39,6 +39,9 @@ namespace pinocchio
     // Specialize
     template<class ConstraintModelDerived>
     struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, FrameConstraintModelBase<ConstraintModelDerived>>
+    : public bp::def_visitor<
+      ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, FrameConstraintModelBase<ConstraintModelDerived>>
+    >
     {
       typedef ConstraintModelDerived Self;
       typedef typename ConstraintModelDerived::Scalar Scalar;
@@ -92,6 +95,9 @@ namespace pinocchio
 
     template<class ConstraintModelDerived>
     struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, PointConstraintModelBase<ConstraintModelDerived>>
+    : public bp::def_visitor<
+      ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, PointConstraintModelBase<ConstraintModelDerived>>
+    >
     {
       typedef ConstraintModelDerived Self;
       typedef typename ConstraintModelDerived::Scalar Scalar;

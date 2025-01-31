@@ -57,16 +57,17 @@ namespace pinocchio
           ;
       }
 
-      static void calc(const Self & self, Model & model, Data & data, ConstraintData & constraint_data)
+      static void calc(const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         return self.calc(model, data, constraint_data);
       }
 
-      static void jacobian(
-        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
-        context::MatrixXs & jacobian_matrix)
+      static context::MatrixXs jacobian(
+        const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
-        return self.jacobian(model, data, constraint_data, jacobian_matrix);
+        const context::MatrixXs res(self.size(), model.nv);
+        self.jacobian(model, data, constraint_data, res);
+        return res;
       }
 
       // static void jacobianMatrixProduct(
