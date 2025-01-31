@@ -299,6 +299,11 @@ namespace pinocchio
              && m_compliance == other.m_compliance;
     }
 
+    bool operator!=(const JointLimitConstraintModelTpl & other) const
+    {
+      return !(*this == other);
+    }
+
     // Jacobian operations
 
     template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
@@ -440,6 +445,11 @@ namespace pinocchio
       if (this == &other)
         return true;
       return this->constraint_residual == other.constraint_residual;
+    }
+
+    bool operator!=(const JointLimitConstraintDataTpl & other) const
+    {
+      return !(*this == other);
     }
 
     /// \brief Residual of the constraint

@@ -293,6 +293,11 @@ namespace pinocchio
       return classname();
     }
 
+    bool operator!=(const FrictionalJointConstraintModelTpl & other) const
+    {
+      return !(*this == other);
+    }
+
   protected:
     template<template<typename, int> class JointCollectionTpl>
     void init(
@@ -328,6 +333,11 @@ namespace pinocchio
     bool operator==(const FrictionalJointConstraintDataTpl & /*other*/) const
     {
       return true;
+    }
+
+    bool operator!=(const FrictionalJointConstraintDataTpl & other) const
+    {
+      return !(*this == other);
     }
 
     static std::string classname()
