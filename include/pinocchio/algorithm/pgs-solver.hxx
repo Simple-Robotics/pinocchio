@@ -9,8 +9,6 @@
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 #include "pinocchio/algorithm/contact-solver-utils.hpp"
 
-#include <iostream>
-
 namespace pinocchio
 {
 
