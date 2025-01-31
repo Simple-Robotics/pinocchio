@@ -20,35 +20,42 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    // Default inheritance template
+    // Default inheritance Visitor Template
     template<class ConstraintDataDerived, class ConstraintDataBase>
-    struct ConstraintDataInheritanceHelper
+    struct ConstraintDataInheritancePythonVisitor
+    : public bp::def_visitor<ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, ConstraintDataBase>>
     {
-      static bp::class_<ConstraintDataDerived> & expose_inheritance(bp::class_<ConstraintDataDerived> & cl)
+    public:
+      template<class PyClass>
+      void visit(PyClass & cl) const
       {
-        return cl
-        ;
+        cl
+          ;
       }
     };
 
     // Specialize
     template<class ConstraintDataDerived>
-    struct ConstraintDataInheritanceHelper<ConstraintDataDerived, FrameConstraintDataBase<ConstraintDataDerived>>
+    struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, FrameConstraintDataBase<ConstraintDataDerived>>
     {
-      static bp::class_<ConstraintDataDerived> & expose_inheritance(bp::class_<ConstraintDataDerived> & cl)
+    public:
+      template<class PyClass>
+      void visit(PyClass & cl) const
       {
-        return cl
-        ;
+        cl
+          ;
       }
     };
 
     template<class ConstraintDataDerived>
-    struct ConstraintDataInheritanceHelper<ConstraintDataDerived, PointConstraintDataBase<ConstraintDataDerived>>
+    struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, PointConstraintDataBase<ConstraintDataDerived>>
     {
-      static bp::class_<ConstraintDataDerived> & expose_inheritance(bp::class_<ConstraintDataDerived> & cl)
+    public:
+      template<class PyClass>
+      void visit(PyClass & cl) const
       {
-        return cl
-        ;
+        cl
+          ;
       }
     };
   } // namespace python

@@ -20,7 +20,8 @@ namespace pinocchio
     template<class T>
     inline bp::class_<T> & expose_constraint_data_inheritance(bp::class_<T> & cl)
     {
-      return ConstraintDataInheritanceHelper<T, typename T::Base>::expose_inheritance(cl);
+      return cl
+      .def(ConstraintDataInheritancePythonVisitor<T, typename T::Base>());
     }
 
     // generic expose_constraint_data : do nothing special
