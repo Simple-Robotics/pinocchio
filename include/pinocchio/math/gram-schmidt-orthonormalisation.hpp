@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_math_gram_schmidt_orthonormalisation_hpp__
@@ -12,12 +12,16 @@ namespace pinocchio
   ///  \brief Perform the Gram-Schmidt orthonormalisation on the input/output vector for a given
   /// input basis
   ///
-  ///  \param[in] basis Orthonormal basis
-  ///  \param[in,out] vec Vector to orthonomarlize wrt the input basis
+  ///  \param[in] basis Orthonormal basis.
+  ///  \param[in,out] vec Vector to orthonomarlize wrt the input basis.
+  ///  \param[in] threshold Only perform the orthonormalization if the scalar product between the
+  /// current column and the input vector is above the given threshold.
   ///
   template<typename MatrixType, typename VectorType>
   void orthonormalisation(
-    const Eigen::MatrixBase<MatrixType> & basis, const Eigen::MatrixBase<VectorType> & vec_)
+    const Eigen::MatrixBase<MatrixType> & basis,
+    const Eigen::MatrixBase<VectorType> & vec_,
+    const typename MatrixType::Scalar & threshold = 0)
   {
     typedef typename VectorType::Scalar Scalar;
     VectorType & vec = vec_.const_cast_derived();
@@ -29,9 +33,13 @@ namespace pinocchio
     {
       const auto col = basis.col(col_id);
       const Scalar alpha = col.dot(vec);
-      vec -= alpha * col;
+      if (math::fabs(alpha) >= threshold) // only perform the orthonormalization if the scalar
+                                          // product is above a certain threshold
+        vec -= alpha * col;
     }
-    assert((basis.transpose() * vec).isZero(1e-10));
+
+    if (threshold == 0)
+      assert((basis.transpose() * vec).isZero(1e-10));
   }
 } // namespace pinocchio
 
