@@ -128,7 +128,7 @@ namespace pinocchio
     }
 
     /// \returns the numerical damping on the Delassus.
-    /// NB: this quantity has the same effect as a compliance but is urely numerical and does not
+    /// NB: this quantity has the same effect as a compliance but is purely numerical and does not
     /// model any physical phenomenon.
     const Vector & getDamping() const
     {
