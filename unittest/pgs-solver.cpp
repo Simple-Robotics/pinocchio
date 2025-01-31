@@ -75,14 +75,17 @@ struct TestBoxTpl
     constraint_jacobian.setZero();
     getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
-    const Eigen::VectorXd g = constraint_jacobian * v_free;
+    Eigen::VectorXd time_scaling(delassus_matrix_plain.rows());
+    internal::getTimeScalingFromAccelerationToConstraints(constraint_models, dt, time_scaling);
+
+    const Eigen::VectorXd g = (constraint_jacobian * v_free).cwiseProduct(time_scaling / dt);
     //    std::cout << "g: " << g.transpose() << std::endl;
 
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
-    pgs_solver.setAbsolutePrecision(1e-10);
+    pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     pgs_solver.setMaxIterations(1000);
-    has_converged = pgs_solver.solve(G, g, constraint_models, primal_solution);
+    has_converged = pgs_solver.solve(G, g, constraint_models, dt, primal_solution);
     primal_solution = pgs_solver.getPrimalSolution();
 
     //    // Check with sparse view too
@@ -104,7 +107,7 @@ struct TestBoxTpl
     dual_solution = pgs_solver.getDualSolution();
     //    std::cout << "constraint_velocity: " << constraint_velocity.transpose() << std::endl;
 
-    const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * primal_solution / dt;
+    const Eigen::VectorXd tau_ext = constraint_jacobian.transpose() * primal_solution;
 
     v_next =
       v0
@@ -194,8 +197,7 @@ BOOST_AUTO_TEST_CASE(box)
 
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(test.dual_solution.isZero(2e-10));
-    BOOST_CHECK(
-      computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
@@ -214,7 +216,7 @@ BOOST_AUTO_TEST_CASE(box)
 
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(test.dual_solution.isZero(1e-7));
-    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
+    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear());
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
   }
@@ -231,11 +233,10 @@ BOOST_AUTO_TEST_CASE(box)
     test(q0, v0, tau0, fext, dt);
 
     BOOST_CHECK(test.has_converged == true);
-    const Force::Vector3 f_tot_ref =
-      (-box_mass * Model::gravity981 - 1 / scaling * fext.linear()) * dt;
+    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - 1 / scaling * fext.linear());
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(
-      math::fabs(Motion(test.v_next).linear().norm() - (f_sliding * 0.1 / box_mass * dt)) <= 1e-6);
+      math::fabs(Motion(test.v_next).linear().norm() - (f_sliding * 0.1 / box_mass) * dt) <= 1e-6);
     BOOST_CHECK(Motion(test.v_next).angular().isZero(1e-6));
   }
 }
@@ -294,8 +295,7 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
 
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(test.dual_solution.isZero(2e-10));
-    BOOST_CHECK(
-      computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981 * dt, 1e-8));
+    BOOST_CHECK(computeFtot(test.primal_solution).isApprox(-box_mass * Model::gravity981, 1e-8));
     BOOST_CHECK(test.v_next.isZero(2e-10));
   }
 
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(bilateral_box)
 
     BOOST_CHECK(test.has_converged == true);
     BOOST_CHECK(test.dual_solution.isZero(1e-8));
-    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear()) * dt;
+    const Force::Vector3 f_tot_ref = (-box_mass * Model::gravity981 - fext.linear());
     BOOST_CHECK(computeFtot(test.primal_solution).isApprox(f_tot_ref, 1e-6));
     BOOST_CHECK(test.v_next.isZero(1e-8));
   }
@@ -425,9 +425,9 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(g.size());
   Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(g.size());
   PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
-  pgs_solver.setAbsolutePrecision(1e-10);
+  pgs_solver.setAbsolutePrecision(1e-13);
   pgs_solver.setRelativePrecision(1e-14);
-  const bool has_converged = pgs_solver.solve(G, g, constraint_models, primal_solution);
+  const bool has_converged = pgs_solver.solve(G, g, constraint_models, dt, primal_solution);
   primal_solution = pgs_solver.getPrimalSolution();
   BOOST_CHECK(has_converged);
 
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   for (const auto & cm : constraint_models)
     constraint_datas.push_back(cm.createData());
 
-  const Eigen::VectorXd v_free_againt_lower_bound =
+  const Eigen::VectorXd v_free_against_lower_bound =
     dt * aba(model, data, q0, v0, tau_push_against_lower_bound, Convention::WORLD);
   const Eigen::VectorXd v_free_move_away =
     dt * aba(model, data, q0, v0, -tau_push_against_lower_bound, Convention::WORLD);
@@ -531,30 +531,36 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     auto & cdata = constraint_datas[0];
     cmodel.calc(model, data, cdata);
 
-    const Eigen::VectorXd g_againt_lower_bound = constraint_jacobian * v_free_againt_lower_bound;
-    const Eigen::VectorXd g_tilde_againt_lower_bound =
-      g_againt_lower_bound + cdata.constraint_residual / dt;
+    const Eigen::VectorXd g_against_lower_bound =
+      constraint_jacobian * v_free_against_lower_bound * dt;
+    const Eigen::VectorXd g_tilde_against_lower_bound =
+      g_against_lower_bound + cdata.constraint_residual;
 
     Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
     Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
-    pgs_solver.setAbsolutePrecision(1e-10);
+    pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged =
-      pgs_solver.solve(G, g_tilde_againt_lower_bound, constraint_models, primal_solution);
+      pgs_solver.solve(G, g_tilde_against_lower_bound, constraint_models, dt, primal_solution);
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
-    dual_solution = G * primal_solution + g_againt_lower_bound;
+    dual_solution = G * primal_solution * dt + g_tilde_against_lower_bound;
     Eigen::VectorXd dual_solution2 = pgs_solver.getDualSolution();
+
+    // std::cout << "primal_solution:   " << primal_solution.transpose() << std::endl;
+    // std::cout << "constraint_jacobian.transpose() * primal_solution:   " <<
+    // (constraint_jacobian.transpose() * primal_solution).transpose() << std::endl; std::cout <<
+    // "dual_solution:   " << dual_solution.transpose() << std::endl; std::cout << "dual_solution2:
+    // " << dual_solution2.transpose() << std::endl;
 
     BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
     BOOST_CHECK(dual_solution.isZero());
     BOOST_CHECK(dual_solution2.isZero());
 
-    BOOST_CHECK(
-      (tau_push_against_lower_bound + constraint_jacobian.transpose() * primal_solution / dt)
-        .isZero(1e-8));
+    BOOST_CHECK((tau_push_against_lower_bound + constraint_jacobian.transpose() * primal_solution)
+                  .isZero(1e-8));
   }
 
   // External torques push the slider away from the lower bound
@@ -570,10 +576,10 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
     Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
-    pgs_solver.setAbsolutePrecision(1e-10);
+    pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged =
-      pgs_solver.solve(G, g_tilde_move_away, constraint_models, primal_solution);
+      pgs_solver.solve(G, g_tilde_move_away, constraint_models, dt, primal_solution);
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 

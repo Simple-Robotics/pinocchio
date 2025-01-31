@@ -30,6 +30,10 @@ namespace pinocchio
     , x(problem_size)
     , x_previous(problem_size)
     , y(problem_size)
+    , y_to_pos(problem_size)
+    , time_scaling_acc_to_constraints(VectorXs::Zero(problem_size))
+    , time_scaling_constraints_to_pos(VectorXs::Zero(problem_size))
+    , gs(VectorXs::Zero(problem_size))
     , stats(Base::max_it)
     {
     }
@@ -57,6 +61,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
+      const Scalar dt,
       // const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Eigen::DenseBase<VectorLikeOut> & x,
       const Scalar over_relax = Scalar(1),
@@ -83,6 +88,7 @@ namespace pinocchio
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+      const Scalar dt,
       const Eigen::DenseBase<VectorLikeInitialGuess> & x,
       const Scalar over_relax = Scalar(1),
       const bool stat_record = false);
@@ -107,7 +113,13 @@ namespace pinocchio
     /// \brief Previous temporary value of the optimum.
     VectorXs x, x_previous;
     /// \brief Value of the dual variable
-    VectorXs y;
+    VectorXs y, y_to_pos;
+
+    /// \brief Time scaling vector for constraints
+    VectorXs time_scaling_acc_to_constraints, time_scaling_constraints_to_pos;
+    /// \brief Vector g divided by time scaling (g / time_scaling_acc_to_constraints)
+    VectorXs gs;
+
 #ifdef PINOCCHIO_WITH_HPP_FCL
     using Base::timer;
 #endif // PINOCCHIO_WITH_HPP_FCL

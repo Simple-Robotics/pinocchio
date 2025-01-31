@@ -54,13 +54,13 @@ namespace pinocchio
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_sets", "x"),
+            (bp::args("self", "G", "g", "constraint_sets", "dt", "x"),
              (bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false)),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.")
           .def(
             "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_sets", "x"),
+            (bp::args("self", "G", "g", "constraint_sets", "dt", "x"),
              (bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false)),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.");

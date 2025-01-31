@@ -64,7 +64,7 @@ struct TestBoxTpl
     // std::cout << "chol.getDamping() :   " << chol.getDamping().transpose() << std::endl;
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
-    // std::cout << "delassus_matrix_plain:    " << delassus_matrix_plain << std::endl;
+    std::cout << "delassus_matrix_plain:    " << delassus_matrix_plain << std::endl;
     auto G_expression = chol.getDelassusCholeskyExpression();
 
     Eigen::MatrixXd constraint_jacobian(delassus_matrix_plain.rows(), model.nv);
