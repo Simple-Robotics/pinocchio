@@ -159,7 +159,7 @@ namespace pinocchio
       typedef WeldConstraintModelTpl<Scalar, Options> WeldConstraintModel;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
         WeldConstraintModelVector;
-      typedef WeldConstraintDataTpl<Scalar, Options> WeldConstraintDataTpl;
+      typedef WeldConstraintDataTpl<Scalar, Options> WeldConstraintData;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintData)
         WeldConstraintDataVector;
 
@@ -177,11 +177,11 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintData)
         FrictionalJointConstraintDataVector;
 
-      typedef JointLimitModelTpl<Scalar, Options> JointLimitModel;
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitModel)
+      typedef JointLimitConstraintModelTpl<Scalar, Options> JointLimitConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitConstraintModel)
         JointLimitModelVector;
-      typedef JointLimitDataTpl<Scalar, Options> JointLimitDataTpl;
-      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitData)
+      typedef JointLimitConstraintDataTpl<Scalar, Options> JointLimitConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitConstraintData)
         JointLimitDataVector;
 
       typedef ConstraintModelTpl<Scalar, Options> ConstraintModel;
