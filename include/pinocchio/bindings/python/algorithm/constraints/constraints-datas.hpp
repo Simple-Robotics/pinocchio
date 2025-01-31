@@ -17,14 +17,6 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    // Add the inheritance
-    template<class T>
-    inline bp::class_<T> & expose_constraint_data_inheritance(bp::class_<T> & cl)
-    {
-      return cl
-      .def(ConstraintDataInheritancePythonVisitor<T, typename T::Base>());
-    }
-
     // generic expose_constraint_data : do nothing special
     template<class T>
     inline bp::class_<T> & expose_constraint_data(bp::class_<T> & cl)

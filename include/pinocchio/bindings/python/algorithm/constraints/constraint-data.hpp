@@ -54,7 +54,8 @@ namespace pinocchio
           .def(
             "extract", ExtractConstraintDataVariantTypeVisitor<ConstraintData>::extract, bp::arg("self"),
             "Returns a reference of the internal constraint managed by the ConstraintData",
-            bp::with_custodian_and_ward_postcall<0, 1>());
+            bp::with_custodian_and_ward_postcall<0, 1>())
+          ;
       }
     };
   } // namespace python

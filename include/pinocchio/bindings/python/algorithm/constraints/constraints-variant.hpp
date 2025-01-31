@@ -9,6 +9,8 @@
 
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-model.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp"
+#include "pinocchio/bindings/python/algorithm/constraints/constraint-model-inheritance.hpp"
+#include "pinocchio/bindings/python/algorithm/constraints/constraint-data-inheritance.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraints-models.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraints-datas.hpp"
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
@@ -84,7 +86,7 @@ namespace pinocchio
       void operator()(T)
       {
         StdAlignedVectorPythonVisitor<T>::expose(
-          "StdVec_" + sanitizedClassname<T>().c_str()
+          std::string("StdVec_") + sanitizedClassname<T>().c_str()
         );
       }
 

@@ -23,9 +23,9 @@ namespace pinocchio
     namespace bp = boost::python;
 
     // Default inheritance Visitor Template
-    template<class ConstraintModelDerived, class ConstraintModelBase>
+    template<class T, class TBase>
     struct ConstraintModelInheritancePythonVisitor
-    : public bp::def_visitor<ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, ConstraintModelBase>>
+    : public bp::def_visitor<ConstraintModelInheritancePythonVisitor<T, TBase>>
     {
     public:
       template<class PyClass>
@@ -37,15 +37,12 @@ namespace pinocchio
     };
 
     // Specialize
-    template<class ConstraintModelDerived>
-    struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, FrameConstraintModelBase<ConstraintModelDerived>>
-    : public bp::def_visitor<
-      ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, FrameConstraintModelBase<ConstraintModelDerived>>
-    >
+    template<class T>
+    struct ConstraintModelInheritancePythonVisitor<T, FrameConstraintModelBase<T>>
+    : public bp::def_visitor<ConstraintModelInheritancePythonVisitor<T, FrameConstraintModelBase<T>>>
     {
-      typedef ConstraintModelDerived Self;
-      typedef typename ConstraintModelDerived::Scalar Scalar;
-      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
+      typedef typename T::Scalar Scalar;
+      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -70,21 +67,21 @@ namespace pinocchio
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
             "Contructor from given joint index of the first joint "
             "implied in the constraint."))
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_id, "Index of the first joint in the model tree")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_id, "Index of the second joint in the model tree")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_placement, "Position of attached point with respect to the frame of joint1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_placement, "Position of attached point with respect to the frame of joint2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_offset, "Desired constraint shift at position level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, corrector_parameters, "Corrector parameters.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_id, "Index of the first joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_id, "Index of the second joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_placement, "Position of attached point with respect to the frame of joint1.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_placement, "Position of attached point with respect to the frame of joint2.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_offset, "Desired constraint shift at position level.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
+          .PINOCCHIO_ADD_PROPERTY(T, corrector_parameters, "Corrector parameters.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(T, loop_span_indexes, "Loop span indexes.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
           // .def("getRowSparsityPattern", ...)
           // .def("getRowActiveIndexes", ...)
           // .def("getA1", ...)
@@ -93,15 +90,12 @@ namespace pinocchio
       }
     };
 
-    template<class ConstraintModelDerived>
-    struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, PointConstraintModelBase<ConstraintModelDerived>>
-    : public bp::def_visitor<
-      ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, PointConstraintModelBase<ConstraintModelDerived>>
-    >
+    template<class T>
+    struct ConstraintModelInheritancePythonVisitor<T, PointConstraintModelBase<T>>
+    : public bp::def_visitor<ConstraintModelInheritancePythonVisitor<T, PointConstraintModelBase<T>>>
     {
-      typedef ConstraintModelDerived Self;
-      typedef typename ConstraintModelDerived::Scalar Scalar;
-      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
+      typedef typename T::Scalar Scalar;
+      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -126,21 +120,21 @@ namespace pinocchio
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
             "Contructor from given joint index of the first joint "
             "implied in the constraint."))
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_id, "Index of the first joint in the model tree")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_id, "Index of the second joint in the model tree")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_placement, "Position of attached point with respect to the frame of joint1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_placement, "Position of attached point with respect to the frame of joint2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_offset, "Desired constraint shift at position level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
-          .PINOCCHIO_ADD_PROPERTY(Self, corrector_parameters, "Corrector parameters.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
-          .PINOCCHIO_ADD_PROPERTY(Self, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
-          .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
-          .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_id, "Index of the first joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_id, "Index of the second joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_placement, "Position of attached point with respect to the frame of joint1.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_placement, "Position of attached point with respect to the frame of joint2.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_offset, "Desired constraint shift at position level.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
+          .PINOCCHIO_ADD_PROPERTY(T, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
+          .PINOCCHIO_ADD_PROPERTY(T, corrector_parameters, "Corrector parameters.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(T, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(T, loop_span_indexes, "Loop span indexes.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
+          .PINOCCHIO_ADD_PROPERTY(T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
           // .def("getRowSparsityPattern", ...)
           // .def("getRowActiveIndexes", ...)
           // .def("getA1", ...)
@@ -149,6 +143,15 @@ namespace pinocchio
           ;
       }
     };
+
+    // Add the inheritance
+    template<class T>
+    inline bp::class_<T> & expose_constraint_model_inheritance(bp::class_<T> & cl)
+    {
+      return cl
+      .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>());
+      ;
+    }
   } // namespace python
 } // namespace pinocchio
 

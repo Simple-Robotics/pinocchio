@@ -8,7 +8,6 @@
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
 #include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
 #include "pinocchio/bindings/python/fwd.hpp"
-#include "pinocchio/bindings/python/algorithm/constraints/constraint-model-inheritance.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
 
 namespace pinocchio
@@ -25,15 +24,6 @@ namespace pinocchio
       typedef typename T::Scalar Scalar;
       typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
     };
-
-    // Add the inheritance
-    template<class T>
-    inline bp::class_<T> & expose_constraint_model_inheritance(bp::class_<T> & cl)
-    {
-      return cl
-      .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>());
-      ;
-    }
 
     // generic expose_constraint_model : do nothing special
     template<class T>
