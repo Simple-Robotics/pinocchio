@@ -81,7 +81,7 @@ namespace pinocchio
           "Contructor from given joint index vector "
           "implied in the constraint."))
         .def("getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
-          "Create a Data object for the given constraint model.")
+          bp::return_value_policy<bp::copy_const_reference>())
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
       ;
@@ -93,23 +93,27 @@ namespace pinocchio
     {
       return cl
         .def(
-          bp::init<const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
+          bp::init<const GetModelFromCModel<context::JointLimitConstraintModel>::Model &,
           const JointIndexVector &>
           ((bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
           "Contructor from given joint index vector "
           "implied in the constraint."))
         // Init with lb and ub
         .def("getActiveLowerBoundConstraints",
-          &context::FrictionalJointConstraintModel::getActiveLowerBoundConstraints,
+          &context::JointLimitConstraintModel::getActiveLowerBoundConstraints,
+          bp::return_value_policy<bp::copy_const_reference>(),
           "Active lower bound constraints.")
         .def("getActiveLowerBoundConstraintsTangent",
-          &context::FrictionalJointConstraintModel::getActiveLowerBoundConstraintsTangent,
+          &context::JointLimitConstraintModel::getActiveLowerBoundConstraintsTangent,
+          bp::return_value_policy<bp::copy_const_reference>(),
           "Active lower bound constraints in tangent.")
         .def("getActiveUpperBoundConstraints",
-          &context::FrictionalJointConstraintModel::getActiveUpperBoundConstraints,
+          &context::JointLimitConstraintModel::getActiveUpperBoundConstraints,
+          bp::return_value_policy<bp::copy_const_reference>(),
           "Active upper bound constraints.")
         .def("getActiveUpperBoundConstraintsTangent",
-          &context::FrictionalJointConstraintModel::getActiveUpperBoundConstraintsTangent,
+          &context::JointLimitConstraintModel::getActiveUpperBoundConstraintsTangent,
+          bp::return_value_policy<bp::copy_const_reference>(),
           "Active upper bound constraints in tangent.")
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
