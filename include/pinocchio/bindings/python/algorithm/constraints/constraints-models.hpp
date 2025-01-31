@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
 #include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
+#include "pinocchio/bindings/python/fwd.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-model-inheritance.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
 
