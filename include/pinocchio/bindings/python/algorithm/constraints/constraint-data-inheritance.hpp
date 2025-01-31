@@ -38,6 +38,9 @@ namespace pinocchio
     // Specialize
     template<class ConstraintDataDerived>
     struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, FrameConstraintDataBase<ConstraintDataDerived>>
+    : public bp::def_visitor<
+      ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, FrameConstraintDataBase<ConstraintDataDerived>>
+    >
     {
       typedef ConstraintDataDerived Self;
     public:
@@ -62,6 +65,9 @@ namespace pinocchio
 
     template<class ConstraintDataDerived>
     struct ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, PointConstraintDataBase<ConstraintDataDerived>>
+    : public bp::def_visitor<
+      ConstraintDataInheritancePythonVisitor<ConstraintDataDerived, PointConstraintDataBase<ConstraintDataDerived>>
+    >
     {
       typedef ConstraintDataDerived Self;
     public:
