@@ -9,10 +9,12 @@
 #include <eigenpy/exception.hpp>
 #include <eigenpy/eigen-to-python.hpp>
 
+#include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/frame-constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/point-constraint-model-base.hpp"
 #include "pinocchio/bindings/python/fwd.hpp"
+#include "pinocchio/bindings/python/utils/macros.hpp"
 
 namespace pinocchio
 {
@@ -38,11 +40,54 @@ namespace pinocchio
     template<class ConstraintModelDerived>
     struct ConstraintModelInheritancePythonVisitor<ConstraintModelDerived, FrameConstraintModelBase<ConstraintModelDerived>>
     {
+      typedef ConstraintModelDerived Self;
+      typedef typename ConstraintModelDerived::Scalar Scalar;
+      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
         cl
+          .def(bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
+            (bp::arg("self"), bp::arg("model"),
+             bp::arg("joint1_id"), bp::arg("joint1_placement"),
+             bp::arg("joint2_id"), bp::arg("joint2_placement")),
+            "Contructor from given joint index and placement for the two joints "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex, const SE3 &>(
+            (bp::arg("self"), bp::arg("model"),
+             bp::arg("joint1_id"), bp::arg("joint1_placement")),
+            "Contructor from given joint index and placement of the first joint "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex, const JointIndex &>(
+            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
+            "Contructor from given joint index for the two joints "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex&>(
+            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
+            "Contructor from given joint index of the first joint "
+            "implied in the constraint."))
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_id, "Index of the first joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_id, "Index of the second joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_placement, "Position of attached point with respect to the frame of joint1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_placement, "Position of attached point with respect to the frame of joint2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_offset, "Desired constraint shift at position level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, corrector_parameters, "Corrector parameters.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
+          .def("createData", &Self::compliance, bp::arg("self") ,
+            "Return the compliance stored in the model.")
+          // .def("getRowSparsityPattern", ...)
+          // .def("getRowActiveIndexes", ...)
+          // .def("getA1", ...)
+          // .def("getA2", ...)
           ;
       }
     };
@@ -55,6 +100,47 @@ namespace pinocchio
       void visit(PyClass & cl) const
       {
         cl
+          .def(bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
+            (bp::arg("self"), bp::arg("model"),
+             bp::arg("joint1_id"), bp::arg("joint1_placement"),
+             bp::arg("joint2_id"), bp::arg("joint2_placement")),
+            "Contructor from given joint index and placement for the two joints "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex, const SE3 &>(
+            (bp::arg("self"), bp::arg("model"),
+             bp::arg("joint1_id"), bp::arg("joint1_placement")),
+            "Contructor from given joint index and placement of the first joint "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex, const JointIndex &>(
+            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
+            "Contructor from given joint index for the two joints "
+            "implied in the constraint."))
+          .def(bp::init<const Model &, JointIndex&>(
+            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
+            "Contructor from given joint index of the first joint "
+            "implied in the constraint."))
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_id, "Index of the first joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_id, "Index of the second joint in the model tree")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_placement, "Position of attached point with respect to the frame of joint1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_placement, "Position of attached point with respect to the frame of joint2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_offset, "Desired constraint shift at position level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_velocity, "Desired constraint velocity at velocity level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, desired_constraint_acceleration, "Desired constraint velocity at acceleration level.")
+          .PINOCCHIO_ADD_PROPERTY(Self, corrector_parameters, "Corrector parameters.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_joint2_sparsity, "Colwise sparsity pattern associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint1_span_indexes, " Jointwise span indexes associated with joint 1.")
+          .PINOCCHIO_ADD_PROPERTY(Self, joint2_span_indexes, "Jointwise span indexes associated with joint 2.")
+          .PINOCCHIO_ADD_PROPERTY(Self, loop_span_indexes, "Loop span indexes.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_sparsity, "Sparsity pattern associated to the constraint.")
+          .PINOCCHIO_ADD_PROPERTY(Self, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
+          .def("createData", &Self::compliance, bp::arg("self") ,
+            "Return the compliance stored in the model.")
+          // .def("getRowSparsityPattern", ...)
+          // .def("getRowActiveIndexes", ...)
+          // .def("getA1", ...)
+          // .def("getA2", ...)
+          // TODO: OTHER SPECIAL METHODS RELATED TO POINT
           ;
       }
     };
