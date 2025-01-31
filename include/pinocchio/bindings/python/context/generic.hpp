@@ -177,6 +177,13 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintData)
         FrictionalJointConstraintDataVector;
 
+      typedef JointLimitModelTpl<Scalar, Options> JointLimitModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitModel)
+        JointLimitModelVector;
+      typedef JointLimitDataTpl<Scalar, Options> JointLimitDataTpl;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitData)
+        JointLimitDataVector;
+
       typedef ConstraintModelTpl<Scalar, Options> ConstraintModel;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
       typedef ConstraintDataTpl<Scalar, Options> ConstraintData;
