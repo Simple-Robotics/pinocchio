@@ -211,8 +211,15 @@ namespace pinocchio
 
     // First, we initialize the primal and dual variables
     int it = 0;
+    cholesky_update_count = 0;
+
     Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_bar_norm, //
       primal_feasibility, dual_feasibility_ncp, dual_feasibility;
+
+    if (stat_record)
+    {
+      stats.reset();
+    }
 
     // Then, we get the time_scaling_acc_to_constraints T from the constraints to construct gs,
     // which is g time-scaled depending on the formulation of each constraint: gs = T^{-1} * g. The
@@ -410,11 +417,6 @@ namespace pinocchio
       G_bar.updateDamping(rhs);
       cholesky_update_count = 1;
 
-      if (stat_record)
-      {
-        stats.reset();
-      }
-
       is_initialized = true;
 
       // End of Initialization phase
@@ -601,14 +603,11 @@ namespace pinocchio
       this->absolute_residual =
         math::max(primal_feasibility, math::max(complementarity, dual_feasibility));
 
-      // Save values
-      this->rho_power = ADMMSpectralUpdateRule::computeRhoPower(L, m, rho);
-      this->rho = rho;
-
-      if (stat_record)
+      // Save values of spectral update rule
+      if (admm_update_rule == ADMMUpdateRule::SPECTRAL)
       {
-        stats.it = it;
-        stats.cholesky_update_count = cholesky_update_count;
+        this->rho_power = ADMMSpectralUpdateRule::computeRhoPower(L, m, rho_);
+        this->rho = rho_;
       }
     }
     PINOCCHIO_EIGEN_MALLOC_ALLOWED();
@@ -623,6 +622,12 @@ namespace pinocchio
     // so that z_ and s_ are back at the constraints formulations levels
     z_constraint_ = z_.array() * time_scaling_acc_to_constraints.array();
     s_constraint_ = s_.array() * time_scaling_acc_to_constraints.array();
+
+    if (stat_record)
+    {
+      stats.it = it;
+      stats.cholesky_update_count = cholesky_update_count;
+    }
 
     if (abs_prec_reached)
       return true;
