@@ -41,7 +41,9 @@ namespace pinocchio
           .def(
             "createData", &Self::createData, "Create a Data object for the given constraint model.")
           .def("shortname", &Self::shortname, "Shortame for the constraint type")
-          .def("set", &Self::shortname, "Constraint set")
+          .def(
+            "set", (ConstraintSet & (Self::*)()) & Self::set, "Constraint set",
+            bp::return_internal_reference<>())
           .def("size", &Self::size, "Constraint size")
         // .def("compliance", &Self::compliance,
         //   "Return the compliance stored in the model.")
