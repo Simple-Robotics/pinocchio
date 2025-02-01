@@ -35,7 +35,7 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
+        cl.PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the constraint.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
           .def(
