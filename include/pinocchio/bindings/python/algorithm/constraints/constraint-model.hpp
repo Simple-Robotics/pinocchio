@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_model_hpp__
@@ -51,7 +51,8 @@ namespace pinocchio
           .def(ConstraintModelBasePythonVisitor<ConstraintModel>())
           .def(PrintableVisitor<ConstraintModel>())
           .def(
-            "extract", ExtractConstraintModelVariantTypeVisitor<ConstraintModel>::extract, bp::arg("self"),
+            "extract", ExtractConstraintModelVariantTypeVisitor<ConstraintModel>::extract,
+            bp::arg("self"),
             "Returns a reference of the internal joint managed by the ConstraintModel",
             bp::with_custodian_and_ward_postcall<0, 1>());
       }

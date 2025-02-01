@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_models_hpp__
@@ -29,85 +29,83 @@ namespace pinocchio
     template<class T>
     bp::class_<T> & expose_constraint_model(bp::class_<T> & cl)
     {
-      return cl
-      ;
+      return cl;
     }
 
     // specialization for ConstraintModels
     template<>
-    bp::class_<context::BilateralPointConstraintModel> & expose_constraint_model(
-      bp::class_<context::BilateralPointConstraintModel> & cl)
+    bp::class_<context::BilateralPointConstraintModel> &
+    expose_constraint_model(bp::class_<context::BilateralPointConstraintModel> & cl)
     {
-      return cl
-      ;
+      return cl;
     }
 
     template<>
-    bp::class_<context::FrictionalPointConstraintModel> & expose_constraint_model(
-      bp::class_<context::FrictionalPointConstraintModel> & cl)
+    bp::class_<context::FrictionalPointConstraintModel> &
+    expose_constraint_model(bp::class_<context::FrictionalPointConstraintModel> & cl)
     {
-      return cl
-      ;
+      return cl;
     }
 
     template<>
-    bp::class_<context::WeldConstraintModel> & expose_constraint_model(
-      bp::class_<context::WeldConstraintModel> & cl
-    )
+    bp::class_<context::WeldConstraintModel> &
+    expose_constraint_model(bp::class_<context::WeldConstraintModel> & cl)
     {
-      return cl
-      ;
+      return cl;
     }
 
     template<>
-    bp::class_<context::FrictionalJointConstraintModel> & expose_constraint_model(
-      bp::class_<context::FrictionalJointConstraintModel> & cl)
+    bp::class_<context::FrictionalJointConstraintModel> &
+    expose_constraint_model(bp::class_<context::FrictionalJointConstraintModel> & cl)
     {
       return cl
-        .def(
-          bp::init<const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
-          const JointIndexVector &>
-          ((bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
+        .def(bp::init<
+             const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
+             const JointIndexVector &>(
+          (bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
           "Contructor from given joint index vector "
           "implied in the constraint."))
-        .def("getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
+        .def(
+          "getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
           bp::return_value_policy<bp::copy_const_reference>())
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
-      ;
+        ;
     }
 
     template<>
-    bp::class_<context::JointLimitConstraintModel> & expose_constraint_model(
-      bp::class_<context::JointLimitConstraintModel> & cl)
+    bp::class_<context::JointLimitConstraintModel> &
+    expose_constraint_model(bp::class_<context::JointLimitConstraintModel> & cl)
     {
       return cl
-        .def(
-          bp::init<const GetModelFromCModel<context::JointLimitConstraintModel>::Model &,
-          const JointIndexVector &>
-          ((bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
+        .def(bp::init<
+             const GetModelFromCModel<context::JointLimitConstraintModel>::Model &,
+             const JointIndexVector &>(
+          (bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
           "Contructor from given joint index vector "
           "implied in the constraint."))
         // Init with lb and ub
-        .def("getActiveLowerBoundConstraints",
+        .def(
+          "getActiveLowerBoundConstraints",
           &context::JointLimitConstraintModel::getActiveLowerBoundConstraints,
-          bp::return_value_policy<bp::copy_const_reference>(),
-          "Active lower bound constraints.")
-        .def("getActiveLowerBoundConstraintsTangent",
+          bp::return_value_policy<bp::copy_const_reference>(), "Active lower bound constraints.")
+        .def(
+          "getActiveLowerBoundConstraintsTangent",
           &context::JointLimitConstraintModel::getActiveLowerBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
           "Active lower bound constraints in tangent.")
-        .def("getActiveUpperBoundConstraints",
+        .def(
+          "getActiveUpperBoundConstraints",
           &context::JointLimitConstraintModel::getActiveUpperBoundConstraints,
-          bp::return_value_policy<bp::copy_const_reference>(),
-          "Active upper bound constraints.")
-        .def("getActiveUpperBoundConstraintsTangent",
+          bp::return_value_policy<bp::copy_const_reference>(), "Active upper bound constraints.")
+        .def(
+          "getActiveUpperBoundConstraintsTangent",
           &context::JointLimitConstraintModel::getActiveUpperBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
           "Active upper bound constraints in tangent.")
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
-      ;
+        ;
     }
   } // namespace python
 } // namespace pinocchio

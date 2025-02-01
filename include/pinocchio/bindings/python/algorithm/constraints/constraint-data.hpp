@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_data_hpp__
@@ -47,15 +47,15 @@ namespace pinocchio
       {
         bp::class_<ConstraintData>("ConstraintData", "Generic Constraint Data", bp::no_init)
           .def(bp::init<>(bp::arg("self"), "Default constructor"))
-          .def(
-            bp::init<const typename ConstraintData::ConstraintDataVariant &>(bp::args("self", "cdata")))
+          .def(bp::init<const typename ConstraintData::ConstraintDataVariant &>(
+            bp::args("self", "cdata")))
           .def(ConstraintDataBasePythonVisitor<ConstraintData>())
           .def(PrintableVisitor<ConstraintData>())
           .def(
-            "extract", ExtractConstraintDataVariantTypeVisitor<ConstraintData>::extract, bp::arg("self"),
+            "extract", ExtractConstraintDataVariantTypeVisitor<ConstraintData>::extract,
+            bp::arg("self"),
             "Returns a reference of the internal constraint managed by the ConstraintData",
-            bp::with_custodian_and_ward_postcall<0, 1>())
-          ;
+            bp::with_custodian_and_ward_postcall<0, 1>());
       }
     };
   } // namespace python

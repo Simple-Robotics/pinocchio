@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_model_base_hpp__
@@ -30,26 +30,27 @@ namespace pinocchio
       typedef typename ConstraintModelDerived::Scalar Scalar;
       typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
       typedef DataTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Data;
+
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl
-          .PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
+        cl.PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the contact.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
-          .def("createData", &Self::createData, "Create a Data object for the given constraint model.")
+          .def(
+            "createData", &Self::createData, "Create a Data object for the given constraint model.")
           .def("shortname", &Self::shortname, "Shortame for the constraint type")
           .def("set", &Self::shortname, "Constraint set")
           .def("size", &Self::size, "Constraint size")
-          // .def("compliance", &Self::compliance,
-          //   "Return the compliance stored in the model.")
-          // .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
-          // .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
-          // .def("jacobian_matrix_product", &jacobianMatrixProduct,
-          //   bp::args("self", "model", "data", "matrix"))
-          // .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
-          //   bp::args("self", "model", "data", "matrix"))
+        // .def("compliance", &Self::compliance,
+        //   "Return the compliance stored in the model.")
+        // .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
+        // .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
+        // .def("jacobian_matrix_product", &jacobianMatrixProduct,
+        //   bp::args("self", "model", "data", "matrix"))
+        // .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
+        //   bp::args("self", "model", "data", "matrix"))
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
@@ -57,7 +58,8 @@ namespace pinocchio
           ;
       }
 
-      static void calc(const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
+      static void calc(
+        const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         return self.calc(model, data, constraint_data);
       }
@@ -71,14 +73,20 @@ namespace pinocchio
       }
 
       static void jacobianMatrixProduct(
-        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        const Self & self,
+        Model & model,
+        Data & data,
+        ConstraintData & constraint_data,
         context::MatrixXs & matrix)
       {
         return self.jacobianMatrixProduct(model, data, constraint_data, matrix);
       }
 
       static void jacobianTransposeMatrixProduct(
-        const Self & self, Model & model, Data & data, ConstraintData & constraint_data,
+        const Self & self,
+        Model & model,
+        Data & data,
+        ConstraintData & constraint_data,
         context::MatrixXs & matrix)
       {
         return self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix);

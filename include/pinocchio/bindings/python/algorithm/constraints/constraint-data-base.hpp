@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_data_base_hpp__
@@ -24,12 +24,12 @@ namespace pinocchio
     : public bp::def_visitor<ConstraintDataBasePythonVisitor<ConstraintDataDerived>>
     {
       typedef ConstraintDataDerived Self;
+
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl
-          .def("classname", &Self::classname)
+        cl.def("classname", &Self::classname)
           .staticmethod("classname")
           .def("shortname", &Self::shortname)
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
