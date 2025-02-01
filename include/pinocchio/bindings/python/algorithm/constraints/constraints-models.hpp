@@ -16,15 +16,6 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    typedef std::vector<JointIndex> JointIndexVector;
-
-    template<class T>
-    struct GetModelFromCModel
-    {
-      typedef typename T::Scalar Scalar;
-      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
-    };
-
     // generic expose_constraint_model : do nothing special
     template<class T>
     bp::class_<T> & expose_constraint_model(bp::class_<T> & cl)
@@ -58,32 +49,31 @@ namespace pinocchio
     bp::class_<context::FrictionalJointConstraintModel> &
     expose_constraint_model(bp::class_<context::FrictionalJointConstraintModel> & cl)
     {
-      return cl
-        .def(bp::init<
-             const GetModelFromCModel<context::FrictionalJointConstraintModel>::Model &,
-             const JointIndexVector &>(
-          (bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
-          "Contructor from given joint index vector "
-          "implied in the constraint."))
+
+      typedef typename context::FrictionalJointConstraintModel::JointIndexVector JointIndexVector;
+
+      cl.def(bp::init<const context::Model &, const JointIndexVector &>(
+               (bp::arg("self"), bp::arg("model"), bp::arg("active_joints")),
+               "Contructor from given joint index vector "
+               "implied in the constraint."))
         .def(
           "getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
           bp::return_value_policy<bp::copy_const_reference>())
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
         ;
+      return cl;
     }
 
     template<>
     bp::class_<context::JointLimitConstraintModel> &
     expose_constraint_model(bp::class_<context::JointLimitConstraintModel> & cl)
     {
-      return cl
-        .def(bp::init<
-             const GetModelFromCModel<context::JointLimitConstraintModel>::Model &,
-             const JointIndexVector &>(
-          (bp::arg("self"), bp::arg("model"), bp::arg("joint_id_vector")),
-          "Contructor from given joint index vector "
-          "implied in the constraint."))
+      typedef typename context::FrictionalJointConstraintModel::JointIndexVector JointIndexVector;
+      cl.def(bp::init<const context::Model &, const JointIndexVector &>(
+               (bp::arg("self"), bp::arg("model"), bp::arg("active_joints")),
+               "Contructor from given joint index vector "
+               "implied in the constraint."))
         // Init with lb and ub
         .def(
           "getActiveLowerBoundConstraints",
@@ -106,6 +96,7 @@ namespace pinocchio
         // .def("getRowActiveIndexes", ...)
         // .def("getRowSparsityPattern", ...)
         ;
+      return cl;
     }
   } // namespace python
 } // namespace pinocchio
