@@ -195,11 +195,13 @@ namespace pinocchio
 
         // Range
         auto range_ = el.get_optional<std::string>("<xmlattr>.range");
+        bool has_range_limits = false;
         if (range_)
         {
           Eigen::Vector2d rangeT = internal::getVectorFromStream<2>(*range_);
           range.minConfig[0] = currentCompiler.convertAngle(rangeT(0));
           range.maxConfig[0] = currentCompiler.convertAngle(rangeT(1));
+          has_range_limits = true;
         }
         // Effort limit
         range_ = el.get_optional<std::string>("<xmlattr>.actuatorfrcrange");
@@ -234,14 +236,26 @@ namespace pinocchio
         value = el.get_optional<double>("<xmlattr>.ref");
         if (value)
         {
+          bool has_pos_ref = false;
           if (jointType == "slide")
+          {
             posRef = *value;
+            has_pos_ref = true;
+          }
           else if (jointType == "hinge")
+          {
             posRef = currentCompiler.convertAngle(*value);
+            has_pos_ref = true;
+          }
           else
             PINOCCHIO_THROW_PRETTY(
               std::invalid_argument,
               "Reference position can only be used with hinge or slide joints.");
+          if (has_range_limits && has_pos_ref)
+          {
+            range.minConfig[0] += posRef;
+            range.maxConfig[0] += posRef;
+          }
         }
       }
 
