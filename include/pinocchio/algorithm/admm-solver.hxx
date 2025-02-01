@@ -606,8 +606,8 @@ namespace pinocchio
       // Save values of spectral update rule
       if (admm_update_rule == ADMMUpdateRule::SPECTRAL)
       {
-        this->rho_power = ADMMSpectralUpdateRule::computeRhoPower(L, m, rho_);
-        this->rho = rho_;
+        this->rho_power = ADMMSpectralUpdateRule::computeRhoPower(L, m, rho);
+        this->rho = rho;
       }
     }
     PINOCCHIO_EIGEN_MALLOC_ALLOWED();
