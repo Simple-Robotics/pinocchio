@@ -55,6 +55,7 @@ namespace pinocchio
     // Expose algorithms
     void exposeAlgorithms();
     void exposeExtras();
+    void exposeConstraints();
 
 #ifdef PINOCCHIO_PYTHON_INTERFACE_WITH_HPP_FCL_PYTHON_BINDINGS
     void exposeFCL();

@@ -49,13 +49,6 @@ namespace pinocchio
     {
     }
 
-    ///  \brief Copy constructor
-    JointLimitConstraintConeTpl(const JointLimitConstraintConeTpl & other)
-    : negative_orthant(other.negative_orthant)
-    , positive_orthant(other.positive_orthant)
-    {
-    }
-
     void resize(
       const Eigen::DenseIndex negative_orthant_size, const Eigen::DenseIndex positive_orthant_size)
     {
@@ -88,6 +81,19 @@ namespace pinocchio
     Eigen::DenseIndex size() const
     {
       return dim();
+    }
+
+    /// \brief Comparison operator
+    bool operator==(const JointLimitConstraintConeTpl & other) const
+    {
+      return negative_orthant == other.negative_orthant
+             && positive_orthant == other.positive_orthant;
+    }
+
+    /// \brief Difference  operator
+    bool operator!=(const JointLimitConstraintConeTpl & other) const
+    {
+      return !(*this == other);
     }
 
     /// \brief Check whether a vector x lies within the orthant.

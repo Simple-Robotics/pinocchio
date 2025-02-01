@@ -96,7 +96,7 @@ namespace pinocchio
       return static_cast<const Base &>(*this);
     }
 
-  protected:
+  // protected:
     ///
     ///  \brief Default constructor
     ///
@@ -105,7 +105,7 @@ namespace pinocchio
     {
     }
 
-  public:
+  // public:
     ///
     ///  \brief Contructor with from a given type, joint indexes and placements.
     ///
@@ -234,6 +234,15 @@ namespace pinocchio
 
     using Base::compliance;
 
+    static std::string classname()
+    {
+      return std::string("PointBilateralConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
   protected:
     ConstraintSet m_set = ConstraintSet(3);
 
@@ -296,6 +305,14 @@ namespace pinocchio
       return static_cast<const Base &>(*this);
     }
 
+    static std::string classname()
+    {
+      return std::string("PointBilateralConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
   }; // struct BilateralPointConstraintDataTpl<_Scalar,_Options>
 
 } // namespace pinocchio

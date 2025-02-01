@@ -62,7 +62,6 @@ namespace pinocchio
       typedef FrameTpl<Scalar, Options> Frame;
       typedef ModelTpl<Scalar, Options> Model;
       typedef DataTpl<Scalar, Options> Data;
-
       typedef JointCollectionDefaultTpl<Scalar, Options> JointCollectionDefault;
 
       // Joints
@@ -157,6 +156,13 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintData)
         BilateralPointConstraintDataVector;
 
+      typedef WeldConstraintModelTpl<Scalar, Options> WeldConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
+        WeldConstraintModelVector;
+      typedef WeldConstraintDataTpl<Scalar, Options> WeldConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintData)
+        WeldConstraintDataVector;
+
       typedef FrictionalPointConstraintModelTpl<Scalar, Options> FrictionalPointConstraintModel;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalPointConstraintModel)
         FrictionalPointConstraintModelVector;
@@ -171,6 +177,13 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(FrictionalJointConstraintData)
         FrictionalJointConstraintDataVector;
 
+      typedef JointLimitConstraintModelTpl<Scalar, Options> JointLimitConstraintModel;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitConstraintModel)
+        JointLimitModelVector;
+      typedef JointLimitConstraintDataTpl<Scalar, Options> JointLimitConstraintData;
+      typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(JointLimitConstraintData)
+        JointLimitDataVector;
+
       typedef ConstraintModelTpl<Scalar, Options> ConstraintModel;
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
       typedef ConstraintDataTpl<Scalar, Options> ConstraintData;
@@ -183,6 +196,8 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(DualCoulombFrictionCone)
         DualCoulombFrictionConeVector;
       typedef BoxSetTpl<context::Scalar> BoxSet;
+
+      typedef ConstraintCollectionDefaultTpl<Scalar, Options> ConstraintCollectionDefault;
 
       typedef DelassusOperatorDenseTpl<Scalar, Options> DelassusOperatorDense;
       typedef DelassusOperatorSparseTpl<Scalar, Options> DelassusOperatorSparse;

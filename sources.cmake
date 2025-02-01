@@ -507,8 +507,16 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/delassus-operator.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/proximal.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/algorithms.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data-base.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data-inheritance.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-model-base.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-model.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-model-inheritance.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraints-datas.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraints-models.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraints-variant.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/coulomb-friction-cone.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/point-bilateral-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/context.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/pybind11-all.hpp
@@ -602,6 +610,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-rnea.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-contact-jacobian.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/constraints/expose-cones.cpp
+    ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/constraints/expose-constraints.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-cholesky.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-regressor.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/algorithm/expose-kinematics-derivatives.cpp

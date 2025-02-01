@@ -43,6 +43,66 @@ namespace pinocchio
       };
     } // namespace internal
 
+    /**
+     * @brief      ConstraintModelShortnameVisitor visitor
+     */
+    struct ConstraintModelShortnameVisitor : boost::static_visitor<std::string>
+    {
+      template<typename ConstraintModelDerived>
+      std::string operator()(const ConstraintModelBase<ConstraintModelDerived> & cmodel) const
+      {
+        return cmodel.shortname();
+      }
+      std::string operator()(const boost::blank &) const
+      {
+        PINOCCHIO_THROW_PRETTY(
+          std::invalid_argument, "The constraint model is of type boost::blank.");
+        return internal::NoRun<std::string>::run();
+      }
+
+      template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>
+      static std::string run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+      {
+        return boost::apply_visitor(ConstraintModelShortnameVisitor(), cmodel);
+      }
+    };
+
+    template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>
+    inline std::string shortname(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      return ConstraintModelShortnameVisitor::run(cmodel);
+    }
+
+    /**
+     * @brief      ConstraintDataShortnameVisitor visitor
+     */
+    struct ConstraintDataShortnameVisitor : boost::static_visitor<std::string>
+    {
+      template<typename ConstraintDataDerived>
+      std::string operator()(const ConstraintDataBase<ConstraintDataDerived> & cdata) const
+      {
+        return cdata.shortname();
+      }
+      std::string operator()(const boost::blank &) const
+      {
+        PINOCCHIO_THROW_PRETTY(
+          std::invalid_argument, "The constraint data is of type boost::blank.");
+        return internal::NoRun<std::string>::run();
+      }
+
+      template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>
+      static std::string run(const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata)
+      {
+        return boost::apply_visitor(ConstraintDataShortnameVisitor(), cdata);
+      }
+    };
+
+    template<typename Scalar, int Options, template<typename S, int O> class ConstraintCollectionTpl>
+    inline std::string shortname(const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata)
+    {
+      return ConstraintDataShortnameVisitor::run(cdata);
+    }
+
     ///
     /// \brief Base structure for \b Unary visitation of a ConstraintModel.
     ///        This structure provides runners to call the right visitor according to the number of

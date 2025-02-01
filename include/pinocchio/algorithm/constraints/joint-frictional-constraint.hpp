@@ -105,6 +105,9 @@ namespace pinocchio
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
+    FrictionalJointConstraintModelTpl()
+    {}
+
     template<template<typename, int> class JointCollectionTpl>
     FrictionalJointConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -284,6 +287,20 @@ namespace pinocchio
              && m_compliance == other.m_compliance;
     }
 
+    static std::string classname()
+    {
+      return std::string("FrictionalJointConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
+    bool operator!=(const FrictionalJointConstraintModelTpl & other) const
+    {
+      return !(*this == other);
+    }
+
   protected:
     template<template<typename, int> class JointCollectionTpl>
     void init(
@@ -312,6 +329,9 @@ namespace pinocchio
 
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
 
+    FrictionalJointConstraintDataTpl()
+    {}
+
     explicit FrictionalJointConstraintDataTpl(const ConstraintModel & /*constraint_model*/)
     {
     }
@@ -319,6 +339,20 @@ namespace pinocchio
     bool operator==(const FrictionalJointConstraintDataTpl & /*other*/) const
     {
       return true;
+    }
+
+    bool operator!=(const FrictionalJointConstraintDataTpl & other) const
+    {
+      return !(*this == other);
+    }
+
+    static std::string classname()
+    {
+      return std::string("FrictionalJointConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
     }
   };
 } // namespace pinocchio

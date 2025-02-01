@@ -7,7 +7,6 @@
 #include "pinocchio/bindings/python/fwd.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/coulomb-friction-cone.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/box-set.hpp"
-#include "pinocchio/bindings/python/algorithm/constraints/point-bilateral-constraint.hpp"
 // #include "pinocchio/bindings/python/serialization/serialization.hpp"
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
@@ -15,10 +14,8 @@ namespace pinocchio
 {
   namespace python
   {
-
     void exposeCones()
     {
-#ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
       CoulombFrictionConePythonVisitor<context::CoulombFrictionCone>::expose();
       StdVectorPythonVisitor<context::CoulombFrictionConeVector>::expose(
         "StdVec_CoulombFrictionCone");
@@ -34,15 +31,6 @@ namespace pinocchio
       // #endif
 
       BoxSetPythonVisitor<context::BoxSet>::expose();
-
-      BilateralPointConstraintModelPythonVisitor<context::BilateralPointConstraintModel>::expose();
-
-      StdVectorPythonVisitor<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(
-        context::BilateralPointConstraintModel)>::expose("StdVec_BilateralPointConstraintModel");
-      StdVectorPythonVisitor<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(
-        context::BilateralPointConstraintData)>::expose("StdVec_BilateralPointConstraintData");
-#endif
     }
-
   } // namespace python
 } // namespace pinocchio

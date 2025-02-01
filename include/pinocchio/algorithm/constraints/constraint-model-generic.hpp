@@ -170,6 +170,15 @@ namespace pinocchio
         *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
     }
 
+    static std::string classname()
+    {
+      return "ConstraintModel";
+    }
+    std::string shortname() const
+    {
+      return ::pinocchio::visitors::shortname(*this);
+    }
+
     /// \brief Returns the size of the constraint
     int size() const
     {
@@ -191,8 +200,38 @@ namespace pinocchio
         std::runtime_error, "Set method is not accessible for ConstraintModelTpl.");
       return val;
     }
-  }; // struct ConstraintModelTpl
 
+    ConstraintModelVariant & toVariant()
+    {
+      return static_cast<ConstraintModelVariant &>(*this);
+    }
+
+    const ConstraintModelVariant & toVariant() const
+    {
+      return static_cast<const ConstraintModelVariant &>(*this);
+    }
+
+    template<typename ConstraintModelDerived>
+    bool isEqual(const ConstraintModelBase<ConstraintModelDerived> & other) const
+    {
+      return ::pinocchio::isEqual(*this, other.derived());
+    }
+
+    bool isEqual(const ConstraintModelTpl & other) const
+    {
+      return toVariant() == other.toVariant();
+    }
+
+    bool operator==(const ConstraintModelTpl & other) const
+    {
+      return isEqual(other);
+    }
+
+    bool operator!=(const ConstraintModelTpl & other) const
+    {
+      return !(*this == other);
+    }
+  }; // struct ConstraintModelTpl
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_constraint_model_generic_hpp__

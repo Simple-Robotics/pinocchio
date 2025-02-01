@@ -133,6 +133,9 @@ namespace pinocchio
     //      JointModelPrismaticUnaligned>
     //      ValidJointTypes;
 
+    JointLimitConstraintModelTpl()
+    {}
+
     template<template<typename, int> class JointCollectionTpl>
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -299,6 +302,11 @@ namespace pinocchio
              && m_compliance == other.m_compliance;
     }
 
+    bool operator!=(const JointLimitConstraintModelTpl & other) const
+    {
+      return !(*this == other);
+    }
+
     // Jacobian operations
 
     template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
@@ -369,6 +377,15 @@ namespace pinocchio
     ///  \brief Corrector parameters
     BaumgarteCorrectorParameters corrector_parameters;
 
+    static std::string classname()
+    {
+      return std::string("JointLimitConstraintModel");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
+
   protected:
     template<
       template<typename, int> class JointCollectionTpl,
@@ -421,6 +438,9 @@ namespace pinocchio
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef typename ConstraintModel::VectorXs VectorXs;
 
+    JointLimitConstraintDataTpl()
+    {}
+
     explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
     : constraint_residual(constraint_model.size())
     {
@@ -433,8 +453,22 @@ namespace pinocchio
       return this->constraint_residual == other.constraint_residual;
     }
 
+    bool operator!=(const JointLimitConstraintDataTpl & other) const
+    {
+      return !(*this == other);
+    }
+
     /// \brief Residual of the constraint
     VectorXs constraint_residual;
+
+    static std::string classname()
+    {
+      return std::string("JointLimitConstraintData");
+    }
+    std::string shortname() const
+    {
+      return classname();
+    }
   };
 } // namespace pinocchio
 

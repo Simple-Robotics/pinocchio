@@ -212,6 +212,27 @@ namespace pinocchio
       return *this;
     }
 
+    std::string shortname() const
+    {
+      return derived().shortname();
+    }
+    static std::string classname()
+    {
+      return Derived::classname();
+    }
+
+    void disp(std::ostream & os) const
+    {
+      using namespace std;
+      os << shortname() << endl;
+    }
+
+    friend std::ostream & operator<<(std::ostream & os, const ConstraintModelBase<Derived> & constraint)
+    {
+      constraint.disp(os);
+      return os;
+    }
+
   protected:
     template<int Options, template<typename, int> class JointCollectionTpl>
     explicit ConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & /*model*/)

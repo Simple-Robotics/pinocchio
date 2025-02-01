@@ -148,6 +148,7 @@ namespace pinocchio
     /// \brief Compliance associated with the contact model
     ComplianceVectorType m_compliance = ComplianceVectorType::Zero();
 
+  public:
     ///
     ///  \brief Default constructor
     ///
@@ -158,7 +159,7 @@ namespace pinocchio
     {
     }
 
-  public:
+  //  public:
     ///
     ///  \brief Contructor with from a given type, joint indexes and placements.
     ///
@@ -240,7 +241,7 @@ namespace pinocchio
     , joint1_id(joint1_id)
     , joint2_id(joint2_id)
     , joint1_placement(SE3::Identity())
-    , joint2_placement(SE3::Ideneity())
+    , joint2_placement(SE3::Identity())
     , desired_constraint_offset(Vector3::Zero())
     , desired_constraint_velocity(Vector3::Zero())
     , desired_constraint_acceleration(Vector3::Zero())

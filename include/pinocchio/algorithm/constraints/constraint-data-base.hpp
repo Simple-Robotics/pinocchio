@@ -28,8 +28,34 @@ namespace pinocchio
     {
       return static_cast<const Derived &>(*this);
     }
-  };
 
+    std::string shortname() const
+    {
+      return derived().shortname();
+    }
+    static std::string classname()
+    {
+      return Derived::classname();
+    }
+
+    void disp(std::ostream & os) const
+    {
+      using namespace std;
+      os << shortname() << endl;
+    }
+
+    friend std::ostream & operator<<(std::ostream & os, const ConstraintDataBase<Derived> & constraint)
+    {
+      constraint.disp(os);
+      return os;
+    }
+
+  protected:
+    /// \brief Default constructor
+    ConstraintDataBase()
+    {
+    }
+  };
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_constraint_data_base_hpp__
