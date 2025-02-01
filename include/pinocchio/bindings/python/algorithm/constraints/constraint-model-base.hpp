@@ -27,9 +27,10 @@ namespace pinocchio
     : public bp::def_visitor<ConstraintModelBasePythonVisitor<ConstraintModelDerived>>
     {
       typedef ConstraintModelDerived Self;
-      typedef typename ConstraintModelDerived::Scalar Scalar;
-      typedef ModelTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Model;
-      typedef DataTpl<Scalar, ConstraintModelDerived::Options, JointCollectionDefaultTpl> Data;
+      typedef typename Self::Scalar Scalar;
+      typedef typename Self::ConstraintSet ConstraintSet;
+      typedef context::Model Model;
+      typedef context::Data Data;
 
     public:
       template<class PyClass>
