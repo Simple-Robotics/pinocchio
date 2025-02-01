@@ -50,7 +50,6 @@ namespace boost
       typedef ::pinocchio::DelassusOperatorDenseTpl<Scalar, Options> Self;
       typedef typename Self::Base Base;
       typedef typename Self::CholeskyDecomposition CholeskyDecomposition;
-      typedef typename Self::Matrix Matrix;
       typedef ::pinocchio::DelassusOperatorDenseTpl<Scalar, Options> Self;
 
       ar & make_nvp("base", boost::serialization::base_object<Base>(delassus));
