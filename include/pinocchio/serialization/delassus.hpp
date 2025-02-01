@@ -63,8 +63,8 @@ namespace boost
       if (Archive::is_loading::value)
       {
         delassus_.llt = CholeskyDecomposition(delassus_.delassus_matrix);
-        delassus_.mat_tmp =
-          Matrix(delassus_.delassus_matrix.rows(), delassus_.delassus_matrix.cols());
+        delassus_.mat_tmp.resize(
+          delassus_.delassus_matrix.rows(), delassus_.delassus_matrix.cols());
       }
     }
 
