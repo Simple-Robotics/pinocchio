@@ -50,11 +50,11 @@ namespace pinocchio
       void operator()(T)
       {
         expose_constraint_data<T>(
-          expose_constraint_data_inheritance<T>(
-            bp::class_<T>(
-              sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::init<>())
-              .def(ConstraintDataBasePythonVisitor<T>())
-              .def(PrintableVisitor<T>())));
+          bp::class_<T>(
+            sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::init<>())
+            .def(ConstraintDataBasePythonVisitor<T>())
+            .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>())
+            .def(PrintableVisitor<T>()));
         bp::implicitly_convertible<T, context::ConstraintData>();
       }
 
@@ -68,11 +68,11 @@ namespace pinocchio
       void operator()(T)
       {
         expose_constraint_model<T>(
-          expose_constraint_model_inheritance<T>(
-            bp::class_<T>(
-              sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::no_init)
-              .def(ConstraintModelBasePythonVisitor<T>())
-              .def(PrintableVisitor<T>())));
+          bp::class_<T>(
+            sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::no_init)
+            .def(ConstraintModelBasePythonVisitor<T>())
+            .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>())
+            .def(PrintableVisitor<T>()));
         bp::implicitly_convertible<T, context::ConstraintModel>();
       }
 

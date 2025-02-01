@@ -145,15 +145,6 @@ namespace pinocchio
           ;
       }
     };
-
-    // Add the inheritance
-    template<class T>
-    inline bp::class_<T> & expose_constraint_model_inheritance(bp::class_<T> & cl)
-    {
-      return cl
-      .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>());
-      ;
-    }
   } // namespace python
 } // namespace pinocchio
 
