@@ -28,9 +28,8 @@ namespace pinocchio
     {
     public:
       template<class PyClass>
-      void visit(PyClass & cl) const
+      void visit(PyClass &) const
       {
-        cl;
       }
     };
 
