@@ -697,11 +697,6 @@ namespace pinocchio
       else
         rel_prec_reached = false;
 
-      if (abs_prec_reached || rel_prec_reached)
-        break;
-
-      x_previous_norm_inf = x_norm_inf;
-
       if (stat_record)
       {
         stats.it = it;
@@ -709,6 +704,11 @@ namespace pinocchio
         stats.dual_feasibility.push_back(dual_feasibility);
         stats.complementarity.push_back(complementarity);
       }
+
+      if (abs_prec_reached || rel_prec_reached)
+        break;
+
+      x_previous_norm_inf = x_norm_inf;
     }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
