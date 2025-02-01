@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_cholesky_expression_hpp__
@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
+#include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 
 namespace pinocchio
@@ -162,7 +163,7 @@ namespace pinocchio
     ///
     /// \brief Returns the corresponding dense delassus operator.
     ///
-    DelassusOperatorDense dense(bool enforce_symmetry = false)
+    DelassusOperatorDense dense(bool enforce_symmetry = false) const
     {
       return DelassusOperatorDense(this->matrix(enforce_symmetry));
     }
