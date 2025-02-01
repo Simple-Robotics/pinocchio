@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2025 CNRS INRIA
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_constraints_variant_hpp__
@@ -59,7 +59,8 @@ namespace pinocchio
       }
 
       void operator()(boost::blank)
-      {}
+      {
+      }
     };
 
     struct ConstraintModelExposer
@@ -77,21 +78,22 @@ namespace pinocchio
       }
 
       void operator()(boost::blank)
-      {}
+      {
+      }
     };
 
-    struct ConstraintStdExposer
+    struct ConstraintStdVectorExposer
     {
       template<class T>
       void operator()(T)
       {
         StdAlignedVectorPythonVisitor<T>::expose(
-          std::string("StdVec_") + sanitizedClassname<T>().c_str()
-        );
+          std::string("StdVec_") + sanitizedClassname<T>().c_str());
       }
 
       void operator()(boost::blank)
-      {}
+      {
+      }
     };
   } // namespace python
 } // namespace pinocchio
