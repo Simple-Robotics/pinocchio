@@ -2,8 +2,8 @@
 // Copyright (c) 2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_delassus_serialization_hpp__
-#define __pinocchio_algorithm_delassus_serialization_hpp__
+#ifndef __pinocchio_serialization_delassus_hpp__
+#define __pinocchio_serialization_delassus_hpp__
 
 #include "pinocchio/serialization/eigen.hpp"
 #include "pinocchio/algorithm/delassus-operator.hpp"
@@ -71,4 +71,4 @@ namespace boost
   } // namespace serialization
 } // namespace boost
 
-#endif // __pinocchio_algorithm_delassus_serialization_hpp__
+#endif // __pinocchio_serialization_delassus_hpp__
