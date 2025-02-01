@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2024 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #ifndef __pinocchio_python_algorithm_contact_cholesky_hpp__
@@ -37,6 +37,9 @@ namespace pinocchio
       typedef typename Self::RowMatrix RowMatrix;
       typedef typename Self::Vector Vector;
 
+      typedef context::ConstraintModel ConstraintModel;
+      typedef context::ConstraintData ConstraintData;
+
       typedef Eigen::Ref<Matrix> RefMatrix;
       typedef Eigen::Ref<RowMatrix> RefRowMatrix;
       typedef Eigen::Ref<Vector> RefVector;
@@ -45,6 +48,11 @@ namespace pinocchio
         RigidConstraintModelVector;
       typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
         RigidConstraintDataVector;
+
+      typedef
+        typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
+      typedef
+        typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) ConstraintDataVector;
 
       typedef pinocchio::python::context::Model Model;
       typedef pinocchio::python::context::Data Data;
@@ -57,6 +65,9 @@ namespace pinocchio
           .def(bp::init<const Model &, const RigidConstraintModelVector &>(
             (bp::arg("self"), bp::arg("model"), bp::arg("contact_models")),
             "Constructor from a model and a collection of RigidConstraintModels."))
+          .def(bp::init<const Model &, const ConstraintModelVector &>(
+            (bp::arg("self"), bp::arg("model"), bp::arg("constraint_models")),
+            "Constructor from a model and a collection of ConstraintModels."))
 
           .add_property(
             "U",
