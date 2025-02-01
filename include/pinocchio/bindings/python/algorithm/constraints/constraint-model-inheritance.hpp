@@ -56,11 +56,11 @@ namespace pinocchio
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
             "Contructor from given joint index and placement of the first joint "
             "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, const JointIndex &>(
+          .def(bp::init<const Model &, JointIndex, JointIndex>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
             "Contructor from given joint index for the two joints "
             "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex &>(
+          .def(bp::init<const Model &, JointIndex>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
             "Contructor from given joint index of the first joint "
             "implied in the constraint."))
@@ -118,13 +118,13 @@ namespace pinocchio
                  "implied in the constraint."))
           .def(bp::init<const Model &, JointIndex, const SE3 &>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
-            "Contructor from given joint index and placement of the first joint "
+            "Contructor from the given joint index and the placement wrt the first joint "
             "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, const JointIndex &>(
+          .def(bp::init<const Model &, JointIndex, JointIndex>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
-            "Contructor from given joint index for the two joints "
+            "Contructor from given joint indexes for the two joints "
             "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex &>(
+          .def(bp::init<const Model &, JointIndex>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
             "Contructor from given joint index of the first joint "
             "implied in the constraint."))
