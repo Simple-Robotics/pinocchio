@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_dense_hpp__
@@ -137,6 +137,18 @@ namespace pinocchio
       Matrix res = Matrix::Identity(size(), size());
       llt.solveInPlace(res);
       return res;
+    }
+
+    bool operator==(const Self & other) const
+    {
+      if (&other == this)
+        return true;
+      return delassus_matrix == other.delassus_matrix && damping == other.damping;
+    }
+
+    bool operator!=(const Self & other) const
+    {
+      return !(*this == other);
     }
 
   protected:

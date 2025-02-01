@@ -6,6 +6,7 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
+#include "pinocchio/algorithm/crba.hpp"
 
 #include "pinocchio/serialization/fwd.hpp"
 #include "pinocchio/serialization/archive.hpp"
@@ -19,6 +20,8 @@
 #include "pinocchio/serialization/data.hpp"
 
 #include "pinocchio/serialization/geometry.hpp"
+
+#include "pinocchio/serialization/delassus.hpp"
 
 #include "pinocchio/multibody/sample-models.hpp"
 
@@ -76,6 +79,15 @@ struct empty_contructor_algo<pinocchio::GeometryObject>
   static pinocchio::GeometryObject * run()
   {
     return new pinocchio::GeometryObject("", 0, 0, pinocchio::SE3::Identity(), nullptr);
+  }
+};
+
+template<>
+struct empty_contructor_algo<pinocchio::DelassusOperatorDense>
+{
+  static pinocchio::DelassusOperatorDense * run()
+  {
+    return new pinocchio::DelassusOperatorDense(Eigen::MatrixXd(2, 2));
   }
 };
 
@@ -748,6 +760,66 @@ BOOST_AUTO_TEST_CASE(test_data_serialization)
   Data data(model);
 
   generic_test(data, TEST_SERIALIZATION_FOLDER "/Data", "Data");
+}
+
+BOOST_AUTO_TEST_CASE(test_delassus_operator_dense_serialization)
+{
+  using namespace pinocchio;
+
+  // create model
+  Model model;
+  buildModels::manipulator(model);
+  model.lowerPositionLimit.setConstant(-1.0);
+  model.upperPositionLimit.setConstant(1.0);
+  model.lowerDryFrictionLimit.setConstant(-1.0);
+  model.upperDryFrictionLimit.setConstant(1.0);
+  Data data(model);
+
+  // setup data
+  Eigen::VectorXd q0 = ::pinocchio::neutral(model);
+  Eigen::VectorXd v0 = Eigen::VectorXd::Zero(model.nv);
+  Eigen::VectorXd tau = Eigen::VectorXd::Zero(model.nv);
+  data.q_in = q0;
+  aba(model, data, q0, v0, tau, Convention::WORLD);
+  crba(model, data, q0, Convention::WORLD);
+
+  // create constraints
+  std::vector<ConstraintModel> constraint_models;
+  std::vector<ConstraintData> constraint_datas;
+
+  FrictionalJointConstraintModel::JointIndexVector active_friction_idxs;
+  FrictionalJointConstraintModel::JointIndexVector active_limit_idxs;
+  for (size_t i = 1; i < model.joints.size(); ++i)
+  {
+    const Model::JointModel & joint = model.joints[i];
+    active_friction_idxs.push_back(joint.id());
+    active_limit_idxs.push_back(joint.id());
+  }
+  FrictionalJointConstraintModel joints_friction(model, active_friction_idxs);
+  constraint_models.push_back(joints_friction);
+  constraint_datas.push_back(joints_friction.createData());
+  //
+  JointLimitConstraintModel joints_limit(model, active_limit_idxs);
+  constraint_models.push_back(joints_limit);
+  constraint_datas.push_back(joints_limit.createData());
+
+  for (size_t i = 0; i < constraint_models.size(); ++i)
+  {
+    const ConstraintModel & cmodel = constraint_models[i];
+    ConstraintData & cdata = constraint_datas[i];
+    cmodel.calc(model, data, cdata);
+  }
+
+  // compute delassus
+  ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
+
+  // check dense method
+  DelassusOperatorDense delassus_operator_dense = chol.getDelassusCholeskyExpression().dense();
+
+  generic_test(
+    delassus_operator_dense, TEST_SERIALIZATION_FOLDER "/DelassusOperatorDense",
+    "DelassusOperatorDense");
 }
 
 BOOST_AUTO_TEST_CASE(test_collision_pair)
