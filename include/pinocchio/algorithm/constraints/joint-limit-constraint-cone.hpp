@@ -49,13 +49,6 @@ namespace pinocchio
     {
     }
 
-    ///  \brief Copy constructor
-    JointLimitConstraintConeTpl(const JointLimitConstraintConeTpl & other)
-    : negative_orthant(other.negative_orthant)
-    , positive_orthant(other.positive_orthant)
-    {
-    }
-
     void resize(
       const Eigen::DenseIndex negative_orthant_size, const Eigen::DenseIndex positive_orthant_size)
     {
@@ -94,7 +87,7 @@ namespace pinocchio
     bool operator==(const JointLimitConstraintConeTpl & other) const
     {
       return negative_orthant == other.negative_orthant
-        && positive_orthant == other.positive_orthant;
+             && positive_orthant == other.positive_orthant;
     }
 
     /// \brief Difference  operator
