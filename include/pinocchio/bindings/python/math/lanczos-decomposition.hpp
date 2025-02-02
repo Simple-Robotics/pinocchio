@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_python_math_lanczos_decomposition_hpp__
@@ -7,6 +7,7 @@
 
 #include "pinocchio/bindings/python/fwd.hpp"
 #include "pinocchio/math/lanczos-decomposition.hpp"
+#include "pinocchio/bindings/python/utils/copyable.hpp"
 
 #include <eigenpy/eigenpy.hpp>
 #include <eigenpy/memory.hpp>
@@ -21,6 +22,7 @@ namespace pinocchio
     struct LanczosDecompositionPythonVisitor
     : public boost::python::def_visitor<LanczosDecompositionPythonVisitor<LanczosDecomposition>>
     {
+      typedef LanczosDecomposition Self;
       typedef typename LanczosDecomposition::Scalar Scalar;
       typedef typename LanczosDecomposition::TridiagonalMatrix TridiagonalMatrix;
       typedef typename LanczosDecomposition::PlainMatrix PlainMatrix;
@@ -32,12 +34,16 @@ namespace pinocchio
         //        static const Scalar dummy_precision = Eigen::NumTraits<Scalar>::dummy_precision();
 
         cl.def(bp::init<const context::MatrixXs &, const Eigen::DenseIndex>(
-                 (bp::arg("self"), bp::arg("mat"), bp::arg("decomposition_size")),
+                 (bp::arg("self"), bp::arg("matrix"), bp::arg("decomposition_size")),
                  "Default constructor from a given matrix and a given decomposition size."))
+
+          .def(bp::init<const Eigen::DenseIndex, const Eigen::DenseIndex>(
+            (bp::arg("self"), bp::arg("size"), bp::arg("decomposition_size")),
+            "Default constructor for the Lanczos decomposition from a given matrix size."))
 
           .def(
             "compute", &LanczosDecomposition::template compute<context::MatrixXs>,
-            bp::args("self", "mat"),
+            bp::args("self", "matrix"),
             "Computes the Lanczos decomposition for the given input matrix.")
 
           .def(
@@ -54,7 +60,7 @@ namespace pinocchio
           .def(
             "computeDecompositionResidual",
             &LanczosDecomposition::template computeDecompositionResidual<context::MatrixXs>,
-            bp::args("self", "mat"),
+            bp::args("self", "matrix"),
             "Computes the residual associated with the decomposition, namely, the quantity \f$ A "
             "Q_s - Q_s T_s \f$")
 
@@ -69,6 +75,8 @@ namespace pinocchio
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
 #endif
+
+          .def(CopyableVisitor<Self>())
 
           ;
       }
