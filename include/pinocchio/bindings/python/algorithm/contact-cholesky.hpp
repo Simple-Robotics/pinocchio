@@ -124,6 +124,32 @@ namespace pinocchio
             "regularized with a factor mu.")
 
           .def(
+            "compute",
+            (void (*)(
+              Self & self, const Model &, Data &, const ConstraintModelVector &,
+              ConstraintDataVector &, const Scalar))&compute,
+            (bp::arg("self"), bp::arg("model"), bp::arg("data"), bp::arg("constraint_models"),
+             bp::arg("constraint_datas"), bp::arg("mu") = 0),
+            "Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix\n"
+            "related to the system mass matrix and the Jacobians of the contact patches contained "
+            "in\n"
+            "the vector of ConstraintModel named constraint_models. The decomposition is "
+            "regularized with a factor mu.")
+
+          .def(
+            "compute",
+            (void (*)(
+              Self & self, const Model &, Data &, const ConstraintModelVector &,
+              ConstraintDataVector &, const Vector &))&compute,
+            (bp::arg("self"), bp::arg("model"), bp::arg("data"), bp::arg("constraint_models"),
+             bp::arg("constraint_datas"), bp::arg("mus")),
+            "Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix\n"
+            "related to the system mass matrix and the Jacobians of the contact patches contained "
+            "in\n"
+            "the vector of ConstraintModel named constraint_models. The decomposition is "
+            "regularized with a factor mu.")
+
+          .def(
             "updateDamping", (void(Self::*)(const Scalar &)) & Self::updateDamping,
             bp::args("self", "mu"),
             "Update the damping term on the upper left block part of the KKT matrix. The damping "
@@ -266,23 +292,33 @@ namespace pinocchio
         return self.solve(mat);
       }
 
+      template<
+        typename ConstraintModel,
+        typename ConstraintModelAllocator,
+        typename ConstraintData,
+        typename ConstraintDataAllocator>
       static void compute(
         Self & self,
         const Model & model,
         Data & data,
-        const RigidConstraintModelVector & contact_models,
-        RigidConstraintDataVector & contact_datas,
+        const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models,
+        std::vector<ConstraintData, ConstraintDataAllocator> & contact_datas,
         const Scalar mu = static_cast<Scalar>(0))
       {
         self.compute(model, data, contact_models, contact_datas, mu);
       }
 
+      template<
+        typename ConstraintModel,
+        typename ConstraintModelAllocator,
+        typename ConstraintData,
+        typename ConstraintDataAllocator>
       static void compute(
         Self & self,
         const Model & model,
         Data & data,
-        const RigidConstraintModelVector & contact_models,
-        RigidConstraintDataVector & contact_datas,
+        const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models,
+        std::vector<ConstraintData, ConstraintDataAllocator> & contact_datas,
         const Vector & mus)
       {
         self.compute(model, data, contact_models, contact_datas, mus);
