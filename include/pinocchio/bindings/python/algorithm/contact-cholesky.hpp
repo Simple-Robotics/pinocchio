@@ -49,10 +49,8 @@ namespace pinocchio
       typedef typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)
         RigidConstraintDataVector;
 
-      typedef
-        typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
-      typedef
-        typename PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) ConstraintDataVector;
+      typedef context::ConstraintModelVector ConstraintModelVector;
+      typedef context::ConstraintDataVector ConstraintDataVector;
 
       typedef pinocchio::python::context::Model Model;
       typedef pinocchio::python::context::Data Data;
