@@ -87,7 +87,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const CoulombFrictionConeTpl & other) const
     {
-      return mu == other.mu;
+      return base() == other.base() && mu == other.mu;
     }
 
     /// \brief Difference  operator
@@ -262,6 +262,15 @@ namespace pinocchio
       return dim();
     }
 
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
+    }
+
     /// \var Friction coefficient
     Scalar mu;
   }; // CoulombFrictionConeTpl
@@ -303,7 +312,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const DualCoulombFrictionConeTpl & other) const
     {
-      return mu == other.mu;
+      return base() == other.base() && mu == other.mu;
     }
 
     /// \brief Difference  operator
@@ -374,6 +383,15 @@ namespace pinocchio
     DualCone dual() const
     {
       return DualCone(mu);
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
     }
 
     /// \var Friction coefficient

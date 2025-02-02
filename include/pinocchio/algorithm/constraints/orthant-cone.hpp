@@ -90,7 +90,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const OrthantConeBase & other) const
     {
-      return m_size == other.m_size;
+      return base() == other.base() && m_size == other.m_size;
     }
 
     /// \brief Difference  operator

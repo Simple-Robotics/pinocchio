@@ -81,7 +81,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const BoxSetTpl & other) const
     {
-      return m_lb == other.m_lb && m_ub == other.m_ub;
+      return base() == other.base() && m_lb == other.m_lb && m_ub == other.m_ub;
     }
 
     /// \brief Difference  operator
@@ -189,6 +189,15 @@ namespace pinocchio
     {
       assert(row_id < size());
       return math::max(m_lb[row_id], math::min(m_ub[row_id], value));
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
     }
 
   protected:
