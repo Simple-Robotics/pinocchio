@@ -38,6 +38,7 @@ namespace pinocchio
     void exposeLinalg();
     void exposeTridiagonalMatrix();
     void exposeLanczosDecomposition();
+    void exposeGramSchmidtOrthonormalisation();
 
     // Expose multibody classes
     void exposeJoints();

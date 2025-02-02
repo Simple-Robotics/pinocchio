@@ -105,6 +105,7 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
   exposeLinalg();
   exposeTridiagonalMatrix();
   exposeLanczosDecomposition();
+  exposeGramSchmidtOrthonormalisation();
   exposeSkew();
   exposeLieGroups();
 
