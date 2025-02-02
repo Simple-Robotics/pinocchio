@@ -39,7 +39,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
-    typedef SetBase<NullSetTpl> Base;
+    typedef ConeBase<NullSetTpl> Base;
 
     /// \brief Constructor from a given size
     ///
