@@ -214,13 +214,13 @@ namespace pinocchio
       return m_Qs;
     }
 
-    /// \brief Returns the size
+    /// \brief Returns the external size of the Lanczos decomposition.
     Eigen::DenseIndex size() const
     {
       return m_Qs.rows();
     }
 
-    /// \brief Returns the size of the decomposition
+    /// \brief Returns the inerternal size of the Lanczos decomposition.
     Eigen::DenseIndex decompositionSize() const
     {
       return m_Ts.rows();
