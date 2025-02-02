@@ -366,8 +366,8 @@ namespace pinocchio
         {
           PINOCCHIO_TRACY_ZONE_SCOPED_N("ADMMContactSolverTpl::solve - lanczos");
           m = rhs.minCoeff();
-          this->lanczos_algo.compute(G_bar);
-          L = ::pinocchio::computeLargestEigenvalue(this->lanczos_algo.Ts(), 1e-8);
+          this->lanczos_decomposition.compute(G_bar);
+          L = ::pinocchio::computeLargestEigenvalue(this->lanczos_decomposition.Ts(), 1e-8);
 #ifndef NDEBUG
           const bool enforce_symmetry = true;
           Eigen::MatrixXd delassus = G_bar.matrix(enforce_symmetry);

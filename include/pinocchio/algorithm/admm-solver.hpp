@@ -179,7 +179,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
-    typedef LanczosDecompositionTpl<MatrixXs> LanczosAlgo;
+    typedef LanczosDecompositionTpl<MatrixXs> LanczosDecomposition;
     typedef DiagonalPreconditioner<VectorXs> DiagonalPreconditioner;
 
     using Base::problem_size;
@@ -264,7 +264,7 @@ namespace pinocchio
     , rho_power_factor(rho_power_factor)
     , linear_update_rule_factor(linear_update_rule_factor)
     , ratio_primal_dual(ratio_primal_dual)
-    , lanczos_algo(
+    , lanczos_decomposition(
         static_cast<Eigen::DenseIndex>(math::max(2, problem_dim)),
         static_cast<Eigen::DenseIndex>(math::max(2, math::min(lanczos_size, problem_dim))))
     , x_(VectorXs::Zero(problem_dim))
@@ -391,19 +391,19 @@ namespace pinocchio
       int new_lanczos_decomposition_size =
         math::max(2, math::min(decomposition_size, this->problem_size));
       if (
-        new_lanczos_size != this->lanczos_algo.size()
-        || new_lanczos_decomposition_size != this->lanczos_algo.decompositionSize())
+        new_lanczos_size != this->lanczos_decomposition.size()
+        || new_lanczos_decomposition_size != this->lanczos_decomposition.decompositionSize())
       {
-        this->lanczos_algo = LanczosAlgo(
+        this->lanczos_decomposition = LanczosDecomposition(
           static_cast<Eigen::DenseIndex>(new_lanczos_size),
           static_cast<Eigen::DenseIndex>(new_lanczos_decomposition_size));
       }
     }
 
     /// \returns the Lanczos algorithm used for eigenvalues estimation.
-    const LanczosAlgo & getLanczosAlgo() const
+    const LanczosDecomposition & getLanczosDecomposition() const
     {
-      return lanczos_algo;
+      return lanczos_decomposition;
     }
 
     ADMMSolverStats & getStats()
@@ -653,7 +653,7 @@ namespace pinocchio
     Scalar ratio_primal_dual;
 
     /// \brief Lanczos decomposition algorithm.
-    LanczosAlgo lanczos_algo;
+    LanczosDecomposition lanczos_decomposition;
 
     /// \brief Primal variables (corresponds to the constraint impulses)
     VectorXs x_, y_;
