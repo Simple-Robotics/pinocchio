@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_random_matrix)
     for (size_t k = 0; k < 1000; ++k)
     {
       const Eigen::VectorXd random_vec = Eigen::VectorXd::Random(size);
-      orthonormalisation(basis.leftCols(10), random_vec);
+      orthogonalization(basis.leftCols(10), random_vec);
       BOOST_CHECK((basis.leftCols(10).transpose() * random_vec).isZero());
     }
   }

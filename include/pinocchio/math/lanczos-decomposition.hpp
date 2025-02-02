@@ -115,7 +115,7 @@ namespace pinocchio
 
           // Perform Gram-Schmidt orthogonalization procedure.
           if (k > 0)
-            orthonormalisation(m_Qs.leftCols(k + 1), m_A_times_q);
+            orthogonalization(m_Qs.leftCols(k + 1), m_A_times_q);
           assert(m_Qs.leftCols(k + 1).cols() == k + 1);
 
           // Compute beta
@@ -135,7 +135,7 @@ namespace pinocchio
 
               typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(decltype(q_next)) VectorPlain;
               q_next = VectorPlain::Unit(num_cols, base_col_id);
-              orthonormalisation(m_Qs.leftCols(k + 1), q_next);
+              orthogonalization(m_Qs.leftCols(k + 1), q_next);
               q_next_norm = q_next.norm();
               if (q_next_norm > prec)
               {

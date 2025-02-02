@@ -9,7 +9,7 @@
 
 namespace pinocchio
 {
-  ///  \brief Perform the Gram-Schmidt orthonormalisation on the input/output vector for a given
+  ///  \brief Perform the Gram-Schmidt orthogonalization on the input/output vector for a given
   /// input basis
   ///
   ///  \param[in] basis Orthonormal basis.
@@ -18,7 +18,7 @@ namespace pinocchio
   /// current column and the input vector is above the given threshold.
   ///
   template<typename MatrixType, typename VectorType>
-  void orthonormalisation(
+  void orthogonalization(
     const Eigen::MatrixBase<MatrixType> & basis,
     const Eigen::MatrixBase<VectorType> & vec_,
     const typename MatrixType::Scalar & threshold = 0)
