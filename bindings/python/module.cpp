@@ -40,6 +40,7 @@ BOOST_PYTHON_MODULE(PINOCCHIO_PYTHON_MODULE_NAME)
 
   eigenpy::OptionalConverter<context::VectorXs, boost::optional>::registration();
   eigenpy::OptionalConverter<Eigen::Ref<context::VectorXs>, boost::optional>::registration();
+  eigenpy::OptionalConverter<Eigen::Ref<const context::VectorXs>, boost::optional>::registration();
   eigenpy::OptionalConverter<
     const Eigen::Ref<const context::VectorXs>, boost::optional>::registration();
 
