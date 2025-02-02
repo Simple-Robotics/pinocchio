@@ -50,6 +50,18 @@ namespace pinocchio
       return os;
     }
 
+    template<typename OtherDerived>
+    bool operator==(const ConstraintDataBase<OtherDerived> &) const
+    {
+      return true;
+    }
+
+    template<typename OtherDerived>
+    bool operator!=(const ConstraintDataBase<OtherDerived> & other) const
+    {
+      return !(*this == other);
+    }
+
   protected:
     /// \brief Default constructor
     ConstraintDataBase()
