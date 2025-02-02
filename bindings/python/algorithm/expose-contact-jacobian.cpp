@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 INRIA
+// Copyright (c) 2021-2025 INRIA
 //
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
@@ -14,46 +14,57 @@ namespace pinocchio
   namespace python
   {
 
-    typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(context::RigidConstraintModel)
-      RigidConstraintModelVector;
-    typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(context::RigidConstraintData)
-      RigidConstraintDataVector;
-
+    template<typename ConstraintModel, typename ConstraintData>
     static context::MatrixXs getConstraintJacobian_proxy(
       const context::Model & model,
       const context::Data & data,
-      const context::RigidConstraintModel & contact_model,
-      context::RigidConstraintData & contact_data)
+      const ConstraintModel & constraint_model,
+      ConstraintData & constraint_data)
     {
-      context::MatrixXs J(contact_model.size(), model.nv);
+      context::MatrixXs J(constraint_model.size(), model.nv);
       J.setZero();
-      getConstraintJacobian(model, data, contact_model, contact_data, J);
+      getConstraintJacobian(model, data, constraint_model, constraint_data, J);
       return J;
     }
 
+    template<typename ConstraintModelVector, typename ConstraintDataVector>
     static context::MatrixXs getConstraintsJacobian_proxy(
       const context::Model & model,
       const context::Data & data,
-      const RigidConstraintModelVector & contact_models,
-      RigidConstraintDataVector & contact_datas)
+      const ConstraintModelVector & constraint_models,
+      ConstraintDataVector & constraint_datas)
     {
-      const Eigen::DenseIndex constraint_size = getTotalConstraintSize(contact_models);
+      const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
       context::MatrixXs J(constraint_size, model.nv);
       J.setZero();
-      getConstraintsJacobian(model, data, contact_models, contact_datas, J);
+      getConstraintsJacobian(model, data, constraint_models, constraint_datas, J);
       return J;
     }
 
     void exposeContactJacobian()
     {
       bp::def(
-        "getConstraintJacobian", getConstraintJacobian_proxy,
-        bp::args("model", "data", "contact_model", "contact_data"),
-        "Computes the kinematic Jacobian associatied to a given constraint model.");
+        "getConstraintJacobian",
+        getConstraintJacobian_proxy<context::RigidConstraintModel, context::RigidConstraintData>,
+        bp::args("model", "data", "constraint_model", "constraint_data"),
+        "Computes the kinematic Jacobian associatied with a given constraint model.");
       bp::def(
-        "getConstraintsJacobian", getConstraintsJacobian_proxy,
-        bp::args("model", "data", "contact_models", "contact_datas"),
-        "Computes the kinematic Jacobian associatied to a given set of constraint models.");
+        "getConstraintsJacobian",
+        getConstraintsJacobian_proxy<
+          context::RigidConstraintModelVector, context::RigidConstraintDataVector>,
+        bp::args("model", "data", "constraint_models", "constraint_datas"),
+        "Computes the kinematic Jacobian associatied with a given set of constraint models.");
+
+      bp::def(
+        "getConstraintJacobian",
+        getConstraintJacobian_proxy<context::ConstraintModel, context::ConstraintData>,
+        bp::args("model", "data", "constraint_model", "constraint_data"),
+        "Computes the kinematic Jacobian associatied with a given constraint model.");
+      bp::def(
+        "getConstraintsJacobian",
+        getConstraintsJacobian_proxy<context::ConstraintModelVector, context::ConstraintDataVector>,
+        bp::args("model", "data", "constraint_models", "constraint_datas"),
+        "Computes the kinematic Jacobian associatied with a given set of constraint models.");
     }
   } // namespace python
 } // namespace pinocchio
