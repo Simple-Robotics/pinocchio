@@ -9,7 +9,7 @@
     <geom contype="0" conaffinity="0" condim="1" solref="0.005 1"/>
     <equality solref="0.005 1"/>
     <default class="cassie">
-      <geom material="cassie" group="2"/>
+      <geom group="2"/>
     </default>
     <default class="collision">
       <geom contype="1" group="3" type="capsule"/>
