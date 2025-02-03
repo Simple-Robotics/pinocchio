@@ -630,6 +630,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_SOURCES
     ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-linalg.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-tridiagonal-matrix.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-lanczos-decomposition.cpp
+    ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-gram-schmidt-orthonormalisation.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-rpy.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/math/expose-eigen-types.cpp
     ${PROJECT_SOURCE_DIR}/bindings/python/serialization/serialization.cpp
