@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #include <eigenpy/memory.hpp>
@@ -23,13 +23,15 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    typedef ADMMContactSolverTpl<context::Scalar> Solver;
-    typedef Solver::ADMMSolverStats SolverStats;
     typedef context::Scalar Scalar;
     typedef context::VectorXs VectorXs;
-    typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
-    typedef ContactCholeskyDecompositionTpl<context::Scalar, context::Options>
-      ContactCholeskyDecomposition;
+
+    typedef ADMMContactSolverTpl<Scalar> Solver;
+    typedef Solver::ADMMSolverStats SolverStats;
+    typedef typename Solver::ConstRefVectorXs ConstRefVectorXs;
+    typedef typename Solver::RefConstVectorXs RefConstVectorXs;
+
+    typedef ContactCholeskyDecompositionTpl<Scalar, context::Options> ContactCholeskyDecomposition;
 
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
 
@@ -37,13 +39,13 @@ namespace pinocchio
     static bool solve_wrapper(
       Solver & solver,
       DelassusDerived & delassus,
-      const context::VectorXs & g,
+      const VectorXs & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::Scalar dt,
-      const context::VectorXs & R,
-      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
-      const boost::optional<ConstRefVectorXs> primal_solution = boost::none,
-      const boost::optional<ConstRefVectorXs> dual_solution = boost::none,
+      const Scalar dt,
+      const VectorXs & R,
+      const boost::optional<RefConstVectorXs> preconditioner = boost::none,
+      const boost::optional<RefConstVectorXs> primal_solution = boost::none,
+      const boost::optional<RefConstVectorXs> dual_solution = boost::none,
       bool solve_ncp = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false)
@@ -57,12 +59,13 @@ namespace pinocchio
     static bool solve_wrapper2(
       Solver & solver,
       DelassusDerived & delassus,
-      const context::VectorXs & g,
+      const VectorXs & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      Eigen::Ref<context::VectorXs> x,
+      const Scalar dt,
+      const VectorXs & primal_guess,
       bool solve_ncp = true)
     {
-      return solver.solve(delassus, g, constraint_models, x, solve_ncp);
+      return solver.solve(delassus, g, constraint_models, dt, primal_guess, solve_ncp);
     }
 #endif
 
@@ -71,7 +74,7 @@ namespace pinocchio
     template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeConeProjection_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::VectorXs & forces)
+      const VectorXs & forces)
     {
       context::VectorXs res(forces.size());
 
@@ -88,7 +91,7 @@ namespace pinocchio
     template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeDualConeProjection_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::VectorXs & velocities)
+      const VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
 
@@ -105,7 +108,7 @@ namespace pinocchio
     template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::Scalar computePrimalFeasibility_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::VectorXs & forces)
+      const VectorXs & forces)
     {
       return ::pinocchio::internal::computePrimalFeasibility(constraint_models, forces);
     }
@@ -113,8 +116,8 @@ namespace pinocchio
     template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::Scalar computeReprojectionError_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::VectorXs & forces,
-      const context::VectorXs & velocities)
+      const VectorXs & forces,
+      const VectorXs & velocities)
     {
       return ::pinocchio::internal::computeReprojectionError(constraint_models, forces, velocities);
     }
@@ -122,7 +125,7 @@ namespace pinocchio
     template<typename ConstraintModel, typename ConstraintModelAllocator>
     static context::VectorXs computeDeSaxeCorrection_wrapper(
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const context::VectorXs & velocities)
+      const VectorXs & velocities)
     {
       context::VectorXs res(velocities.size());
       typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
@@ -136,6 +139,7 @@ namespace pinocchio
     }
 #endif // PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
 
+    template<typename Solver>
     struct SolveMethodExposer
     {
       SolveMethodExposer(bp::class_<Solver> & class_)
@@ -170,7 +174,7 @@ namespace pinocchio
             solve_wrapper<
               ContactCholeskyDecomposition::DelassusCholeskyExpression, ConstraintModel,
               ConstraintModelAllocator>,
-            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+            (bp::args("self", "delassus", "g", "constraint_models", "dt", "R"),
              bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
@@ -180,7 +184,7 @@ namespace pinocchio
             "solve",
             solve_wrapper<
               context::DelassusOperatorDense, ConstraintModel, ConstraintModelAllocator>,
-            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+            (bp::args("self", "delassus", "g", "constraint_models", "dt", "R"),
              bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
@@ -190,7 +194,7 @@ namespace pinocchio
             "solve",
             solve_wrapper<
               context::DelassusOperatorSparse, ConstraintModel, ConstraintModelAllocator>,
-            (bp::args("self", "delassus", "g", "constraint_models", "R"),
+            (bp::args("self", "delassus", "g", "constraint_models", "dt", "R"),
              bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
              bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
@@ -205,9 +209,10 @@ namespace pinocchio
             "solve",
             solve_wrapper<
               DelassusOperatorSparseAccelerate, ConstraintModel, ConstraintModelAllocator>,
-            (bp::args("self", "delassus", "g", "constraint_models", "R"),
-             bp::arg("primal_solution") = boost::none, bp::arg("dual_solution") = boost::none,
-             bp::arg("solve_ncp") = true, bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
+            (bp::args("self", "delassus", "g", "constraint_models", "dt", "R"),
+             bp::arg("preconditioner") = boost::none, bp::arg("primal_solution") = boost::none,
+             bp::arg("dual_solution") = boost::none, bp::arg("solve_ncp") = true,
+             bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
         }
@@ -261,7 +266,7 @@ namespace pinocchio
     template<typename ConstraintModel>
     static void expose_solve(bp::class_<Solver> & class_)
     {
-      SolveMethodExposer expose(class_);
+      SolveMethodExposer<Solver> expose(class_);
       expose.run(static_cast<ConstraintModel *>(nullptr));
     }
 
@@ -339,6 +344,14 @@ namespace pinocchio
           "Returns the dual solution of the problem.", bp::return_internal_reference<>())
 
         .def(
+          "setLanczosSize", &Solver::setLanczosSize, bp::args("self", "decomposition_size"),
+          "Set the size of the Lanczos decomposition.")
+
+        .def(
+          "getLanczosDecomposition", &Solver::getLanczosDecomposition, bp::arg("self"),
+          "Get the Lanczos decomposition.", bp::return_internal_reference<>())
+
+        .def(
           "getCholeskyUpdateCount", &Solver::getCholeskyUpdateCount, bp::arg("self"),
           "Returns the number of updates of the Cholesky factorization due to rho updates.")
 
@@ -353,11 +366,12 @@ namespace pinocchio
 
         .def("getStats", &Solver::getStats, bp::arg("self"), bp::return_internal_reference<>());
 
-      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
+      //      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
 
-      SolveMethodExposer solve_exposer(cl);
-      boost::mpl::for_each<
-        ConstraintModelVariant::types, boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
+      //      SolveMethodExposer<Solver> solve_exposer(cl);
+      //      boost::mpl::for_each<
+      //        ConstraintModelVariant::types,
+      //        boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
       expose_solve<context::ConstraintModel>(cl);
 
       {
