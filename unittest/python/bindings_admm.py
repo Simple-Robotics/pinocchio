@@ -21,7 +21,7 @@ class TestADMM(TestCase):
             model.appendBodyToJoint(joint_id, box_inertia, pin.SE3.Identity())
 
         friction_coeff = 0.4
-        list_bpcm = pin.StdVec_BilateralPointConstraintModel()
+        list_cm = pin.StdVec_ConstraintModel()
         for i in range(n_cubes):
             local_trans_box_1 = 0.5 * box_dims
             local_trans_box_2 = 0.5 * box_dims
@@ -29,24 +29,25 @@ class TestADMM(TestCase):
             rot = np.identity(3)
             theta = np.pi / 2
             c, s = np.cos(theta), np.sin(theta)
-            R = np.matrix([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+            R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
             for j in range(4):
-                print(np.identity(3), (rot @ local_trans_box_1))
                 local_placement_1 = pin.SE3(np.identity(3), (rot @ local_trans_box_1))
                 local_placement_2 = pin.SE3(np.identity(3), (rot @ local_trans_box_2))
-                bpcm = pin.BilateralPointConstraintModel(
+                fpcm = pin.FrictionalPointConstraintModel(
                     model, i, local_placement_1, i + 1, local_placement_2
                 )
-                list_bpcm.append(bpcm)
+                fpcm.set = pin.CoulombFrictionCone(friction_coeff)
+                list_cm.append(pin.ConstraintModel(fpcm))
                 rot = R @ rot
 
-        return model, list_bpcm
+        return model, list_cm
 
     def setupTest(self, model, constraint_models, q0, v0, tau0, fext, dt):
         data = model.createData()
-        constraint_datas = pin.StdVec_BilateralPointConstraintData()
+        constraint_datas = pin.StdVec_ConstraintData()
         for cm in constraint_models:
             constraint_datas.append(cm.createData())
+        pin.crba(model, data, q0, pin.Convention.WORLD)
         chol = pin.ContactCholeskyDecomposition(model, constraint_models)
         chol.compute(model, data, constraint_models, constraint_datas, 1e-10)
         delassus_matrix = chol.getDelassusCholeskyExpression().matrix()
@@ -73,6 +74,4 @@ class TestADMM(TestCase):
 
 
 if __name__ == "__main__":
-    test_admm = TestADMM()
-    test_admm.test_box()
-    print("ok")
+    unittest.main()
