@@ -12,6 +12,11 @@ coal_found = coal_spec is not None
 if coal_found:
     import coal
 
+matplotlib_spec = importlib.util.find_spec("matplotlib")
+matplotlib_found = matplotlib_spec is not None
+if matplotlib_found:
+    import matplotlib.pyplot as plt
+
 meshcat_spec = importlib.util.find_spec("meshcat")
 meshcat_found = meshcat_spec is not None
 if meshcat_found:
@@ -148,35 +153,38 @@ class TestADMM(TestCase):
         geom_data = geom_model.createData()
         pin.updateGeometryPlacements(model, data, geom_model, geom_data, q)
         pin.computeCollisions(geom_model, geom_data, False)
+        pin.computeContactPatches(geom_model, geom_data)
         contact_constraints = pin.StdVec_ConstraintModel()
         for i, res in enumerate(geom_data.collisionResults):
-            if res.isCollision():
+            patch_res = geom_data.contactPatchResults[i]
+            if res.isCollision() and patch_res.numContactPatches():
                 geom_id1, geom_id2 = (
                     geom_model.collisionPairs[i].first,
                     geom_model.collisionPairs[i].second,
                 )
                 joint_id1 = geom_model.geometryObjects[geom_id1].parentJoint
                 joint_id2 = geom_model.geometryObjects[geom_id2].parentJoint
-                contacts = res.getContacts()
                 joint_placement_1 = data.oMi[joint_id1]
                 joint_placement_2 = data.oMi[joint_id2]
-                for contact in contacts:
-                    pos_i = contact.pos
-                    normal_i = contact.normal
+                patch = patch_res.getContactPatch(0)
+                contact_normal = patch.getNormal()
+                num_contacts_colpair = min(patch.size(), 4)
+                for contact_id in range(num_contacts_colpair):
+                    contact_position = patch.getPoint(contact_id)
                     ex_i, ey_i = self.complete_orthonormal_basis(
-                        contact.normal, joint_placement_1
+                        contact_normal, joint_placement_1
                     )
                     ex_i = np.expand_dims(ex_i, axis=1)
                     ey_i = np.expand_dims(ey_i, axis=1)
-                    normal_i = np.expand_dims(contact.normal, axis=1)
+                    normal_i = np.expand_dims(contact_position, axis=1)
                     R_i = np.concatenate((ex_i, ey_i, normal_i), axis=1)
                     R_i1 = np.dot(joint_placement_1.rotation.T, R_i)
                     R_i2 = np.dot(joint_placement_2.rotation.T, R_i)
                     pos_i1 = joint_placement_1.rotation.T @ (
-                        pos_i - joint_placement_1.translation
+                        contact_position - joint_placement_1.translation
                     )
                     pos_i2 = joint_placement_2.rotation.T @ (
-                        pos_i - joint_placement_2.translation
+                        contact_position - joint_placement_2.translation
                     )
                     placement_i1 = pin.SE3(R_i1, pos_i1)
                     placement_i2 = pin.SE3(R_i2, pos_i2)
@@ -186,6 +194,7 @@ class TestADMM(TestCase):
                     contact_constraints.append(contact_model_i)
         return contact_constraints
 
+    @unittest.skipUnless(meshcat_found, "Needs meshcat.")
     def createVisualizer(
         self,
         model: pin.GeometryModel,
@@ -201,6 +210,23 @@ class TestADMM(TestCase):
         vizer: MeshcatVisualizer = MeshcatVisualizer(model, geom_model, visual_model)
         vizer.initViewer(viewer=viewer, open=False, loadModel=True)
         return vizer, viewer
+
+    def plotContactSolver(self, solver):
+        stats: pin.SolverStats = solver.getStats()
+        if stats.size() > 0:
+            plt.figure()
+            it = solver.getIterationCount()
+            abs_res = solver.getAbsoluteConvergenceResidual()
+            rel_res = solver.getRelativeConvergenceResidual()
+            plt.cla()
+            plt.title(f"it = {it}, abs res = {abs_res:.2e}, rel res = {rel_res:.2e}")
+            plt.plot(stats.complementarity, label="complementarity")
+            plt.plot(stats.primal_feasibility, label="primal feas")
+            plt.plot(stats.dual_feasibility, label="dual feas")
+            plt.yscale("log")
+            plt.legend()
+            plt.ion()
+            plt.show()
 
     def test_box(self):
         model, constraint_models = self.buildStackOfCubesModel([1e-3])
@@ -218,7 +244,7 @@ class TestADMM(TestCase):
         solver.solve(delassus, g, constraint_models, dt, compliance)
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
-    def test_cassie(self, display=False):
+    def test_cassie(self, display=False, stat_record=True):
         current_dir = Path(__file__).parent
         model_dir = current_dir / "../models/"
         model_path = model_dir / "closed_chain.xml"
@@ -230,16 +256,19 @@ class TestADMM(TestCase):
         )
 
         # Adding bilateral constraints to the list of constraints
+        print("Number of bilateral constraints:", len(bilateral_constraint_models))
         for bpcm in bilateral_constraint_models:
             constraint_models.append(pin.ConstraintModel(bpcm))
 
         # adding joint limit constraints
         active_joints_limits = [i for i in range(1, model.njoints)]
+        print("Size of joint limits constraints:", len(active_joints_limits))
         jlcm = pin.JointLimitConstraintModel(model, active_joints_limits)
         constraint_models.append(pin.ConstraintModel(jlcm))
 
         # adding friction on joints
         active_joints_friction = [i for i in range(1, model.njoints)]
+        print("Size of joint frictions constraints:", len(active_joints_friction))
         fjcm = pin.FrictionalJointConstraintModel(model, active_joints_friction)
         constraint_models.append(pin.ConstraintModel(fjcm))
 
@@ -254,16 +283,40 @@ class TestADMM(TestCase):
 
         # Adding constraints from frictional contacts
         contact_constraints = self.computeContactConstraints(model, geom_model, q0)
+        print("Number of contact points:", len(contact_constraints))
         for fpcm in contact_constraints:
             constraint_models.append(pin.ConstraintModel(fpcm))
 
         delassus, g = self.setupTest(model, constraint_models, q0, v0, tau0, fext, dt)
+
+        # self.assertTrue(delassus.matrix().shape[0] == (3 * len(bilateral_constraint_models)) + (3 * len(contact_constraints)), "constraint problem is of wrong size." )
 
         compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.ADMMContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
+
+        has_converged = solver.solve(
+            delassus,
+            g,
+            constraint_models,
+            dt,
+            compliance,
+            None,
+            None,
+            None,
+            True,
+            pin.ADMMUpdateRule.SPECTRAL,
+            stat_record,
+        )
+        self.assertTrue(has_converged, "Solver did not converge.")
+        print(solver.getIterationCount())
+        print(solver.getAbsoluteConvergenceResidual())
+        print(solver.getRelativeConvergenceResidual())
+
+        if stat_record:
+            self.plotContactSolver(solver)
 
         if display:
             vizer, viewer = self.createVisualizer(model, geom_model, geom_model)
