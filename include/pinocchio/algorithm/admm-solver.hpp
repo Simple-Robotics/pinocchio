@@ -177,6 +177,8 @@ namespace pinocchio
     typedef _Scalar Scalar;
     typedef ContactSolverBaseTpl<_Scalar> Base;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
+    typedef Eigen::Ref<VectorXs> RefVectorXs;
+    typedef Eigen::Ref<const VectorXs> RefConstVectorXs;
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef LanczosDecompositionTpl<MatrixXs> LanczosDecomposition;
@@ -441,9 +443,9 @@ namespace pinocchio
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Scalar dt,
       const Eigen::MatrixBase<VectorLikeR> & R,
-      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
-      const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
-      const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
+      const boost::optional<RefConstVectorXs> preconditioner = boost::none,
+      const boost::optional<RefConstVectorXs> primal_guess = boost::none,
+      const boost::optional<RefConstVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false);
@@ -478,9 +480,9 @@ namespace pinocchio
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
       const Scalar dt,
       const Eigen::MatrixBase<VectorLikeR> & R,
-      const boost::optional<ConstRefVectorXs> preconditioner = boost::none,
-      const boost::optional<ConstRefVectorXs> primal_guess = boost::none,
-      const boost::optional<ConstRefVectorXs> dual_guess = boost::none,
+      const boost::optional<RefConstVectorXs> preconditioner = boost::none,
+      const boost::optional<RefConstVectorXs> primal_guess = boost::none,
+      const boost::optional<RefConstVectorXs> dual_guess = boost::none,
       bool solve_ncp = true,
       ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
       bool stat_record = false)

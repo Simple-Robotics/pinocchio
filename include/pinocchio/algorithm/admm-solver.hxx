@@ -181,9 +181,9 @@ namespace pinocchio
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
     const Eigen::MatrixBase<VectorLikeR> & R,
-    const boost::optional<ConstRefVectorXs> preconditioner,
-    const boost::optional<ConstRefVectorXs> primal_guess,
-    const boost::optional<ConstRefVectorXs> dual_guess,
+    const boost::optional<RefConstVectorXs> preconditioner,
+    const boost::optional<RefConstVectorXs> primal_guess,
+    const boost::optional<RefConstVectorXs> dual_guess,
     bool solve_ncp,
     ADMMUpdateRule admm_update_rule,
     bool stat_record)
