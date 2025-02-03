@@ -433,7 +433,7 @@ namespace pinocchio
     {
       Options = _Options
     };
-    typedef ConstraintModelBase<JointLimitConstraintDataTpl> Base;
+    typedef ConstraintDataBase<JointLimitConstraintDataTpl> Base;
     typedef std::vector<JointIndex> JointIndexVector;
 
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
