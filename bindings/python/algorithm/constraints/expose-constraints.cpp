@@ -24,7 +24,7 @@ namespace pinocchio
 
       typedef context::ConstraintCollectionDefault::ConstraintDataVariant ConstraintDataVariant;
       boost::mpl::for_each<ConstraintDataVariant::types>(ConstraintDataExposer());
-      boost::mpl::for_each<ConstraintModelVariant::types>(ConstraintStdVectorExposer());
+      boost::mpl::for_each<ConstraintDataVariant::types>(ConstraintStdVectorExposer());
       bp::to_python_converter<
         ConstraintDataVariant, ConstraintVariantVisitor<ConstraintDataVariant>>();
       ConstraintDataPythonVisitor<context::ConstraintData>::expose();
