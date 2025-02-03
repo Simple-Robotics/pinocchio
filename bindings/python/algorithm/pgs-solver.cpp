@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022-2024 INRIA
+// Copyright (c) 2022-2025 INRIA
 //
 
 #include "pinocchio/algorithm/pgs-solver.hpp"
@@ -26,9 +26,9 @@ namespace pinocchio
       Solver & solver,
       const DelassusMatrixType & G,
       const context::VectorXs & g,
-      const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) & constraint_models,
+      const context::ConstraintModelVector & constraint_models,
       const context::Scalar dt,
-      Eigen::Ref<context::VectorXs> x,
+      const Eigen::Ref<const context::VectorXs> x,
       const context::Scalar over_relax = 1,
       const bool stat_record = false)
     {
@@ -36,6 +36,7 @@ namespace pinocchio
     }
 #endif
 
+    template<typename Solver>
     struct SolveMethodExposer
     {
       SolveMethodExposer(bp::class_<Solver> & class_)
@@ -56,23 +57,23 @@ namespace pinocchio
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_sets", "dt", "x"),
-             (bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false)),
+            (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
+             bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.")
           .def(
             "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_sets", "dt", "x"),
-             (bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false)),
+            (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
+             bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.");
       }
 
-      template<typename S, int O>
-      void run(FictiousConstraintModelTpl<S, O> * ptr = 0)
-      {
-        PINOCCHIO_UNUSED_VARIABLE(ptr);
-      }
+      //      template<typename S, int O>
+      //      void run(FictiousConstraintModelTpl<S, O> * ptr = 0)
+      //      {
+      //        PINOCCHIO_UNUSED_VARIABLE(ptr);
+      //      }
 
       void run(boost::blank * ptr = 0)
       {
@@ -85,7 +86,7 @@ namespace pinocchio
     template<typename ConstraintModel>
     static void expose_solve(bp::class_<Solver> & class_)
     {
-      SolveMethodExposer expose(class_);
+      SolveMethodExposer<Solver> expose(class_);
       expose.run(static_cast<ConstraintModel *>(nullptr));
     }
 
@@ -105,11 +106,12 @@ namespace pinocchio
 
         .def("getStats", &Solver::getStats, bp::arg("self"), bp::return_internal_reference<>());
 
-      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
-
-      SolveMethodExposer solve_exposer(class_);
-      boost::mpl::for_each<
-        ConstraintModelVariant::types, boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
+      //      typedef context::ConstraintModel::ConstraintModelVariant ConstraintModelVariant;
+      //
+      //       SolveMethodExposer<Solver> solve_exposer(class_);
+      //       boost::mpl::for_each<
+      //         ConstraintModelVariant::types,
+      //         boost::mpl::make_identity<boost::mpl::_1>>(solve_exposer);
       expose_solve<context::ConstraintModel>(class_);
 
       {
