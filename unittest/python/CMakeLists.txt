@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 CNRS INRIA
+# Copyright (c) 2015-2025 CNRS INRIA
 #
 
 set(${PROJECT_NAME}_PYTHON_TESTS
@@ -29,6 +29,8 @@ set(${PROJECT_NAME}_PYTHON_TESTS
     bindings_rnea
     bindings_aba
     bindings_joint_algorithms
+    # Solvers
+    bindings_admm
     # Algo derivatives
     bindings_kinematics_derivatives
     bindings_frame_derivatives

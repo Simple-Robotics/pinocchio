@@ -21,7 +21,7 @@ class TestADMM(TestCase):
             model.appendBodyToJoint(joint_id, box_inertia, pin.SE3.Identity())
 
         friction_coeff = 0.4
-        list_cm = pin.StdVec_ConstraintModel()
+        list_cm = []
         for i in range(n_cubes):
             local_trans_box_1 = 0.5 * box_dims
             local_trans_box_2 = 0.5 * box_dims
@@ -44,7 +44,7 @@ class TestADMM(TestCase):
 
     def setupTest(self, model, constraint_models, q0, v0, tau0, fext, dt):
         data = model.createData()
-        constraint_datas = pin.StdVec_ConstraintData()
+        constraint_datas = []
         for cm in constraint_models:
             constraint_datas.append(cm.createData())
         pin.crba(model, data, q0, pin.Convention.WORLD)
