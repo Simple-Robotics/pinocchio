@@ -54,6 +54,12 @@ namespace pinocchio
             "be all positive.")
 
           .def(
+            "getDamping",
+            +[](const DelassusOperator & self) -> context::VectorXs { return self.getDamping(); },
+            bp::arg("self"),
+            "Returns the value of the damping terms contained in the Delassus operator")
+
+          .def(
             "matrix", (Matrix(DelassusOperator::*)(bool) const)&DelassusOperator::matrix,
             (bp::arg("self"), bp::arg("enforce_symmetry") = false),
             "Returns the Delassus expression as a dense matrix.")
