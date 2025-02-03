@@ -9,6 +9,7 @@
 #include "pinocchio/serialization/eigen.hpp"
 #include "pinocchio/serialization/se3.hpp"
 #include "pinocchio/serialization/constraints-set.hpp"
+#include "pinocchio/serialization/boost-blank.hpp"
 
 #include <boost/serialization/variant.hpp>
 
@@ -289,8 +290,7 @@ namespace boost
       typename Archive,
       typename Scalar,
       int Options,
-      template<typename, int>
-      class ConstraintCollectionTpl>
+      template<typename, int> class ConstraintCollectionTpl>
     void serialize(
       Archive & ar,
       pinocchio::ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
@@ -302,7 +302,8 @@ namespace boost
 
       typedef typename ConstraintCollectionTpl<Scalar, Options>::ConstraintModelVariant
         ConstraintModelVariant;
-      ar & make_nvp("base_variant", base_object<ConstraintModelVariant>(cmodel));
+      ar & make_nvp(
+        "base_variant", boost::serialization::base_object<ConstraintModelVariant>(cmodel));
     }
 
   } // namespace serialization

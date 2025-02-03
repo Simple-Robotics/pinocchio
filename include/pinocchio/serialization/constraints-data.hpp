@@ -8,6 +8,7 @@
 #include "pinocchio/algorithm/constraints/constraints.hpp"
 #include "pinocchio/serialization/eigen.hpp"
 #include "pinocchio/serialization/se3.hpp"
+#include "pinocchio/serialization/boost-blank.hpp"
 
 #include <boost/serialization/variant.hpp>
 
