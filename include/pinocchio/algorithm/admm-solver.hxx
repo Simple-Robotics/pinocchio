@@ -259,9 +259,6 @@ namespace pinocchio
     }
 
     // Retrieve the pre-conditioner
-    // TODO: if input precontioner is none, should we re-use the internal one or
-    // reset the internal one?
-    // For now, we are re-using it.
     if (preconditioner)
     {
       preconditioner_.setDiagonal(preconditioner.get());
@@ -269,6 +266,10 @@ namespace pinocchio
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         preconditioner_.getDiagonal().minCoeff() > Scalar(0),
         "Preconditioner should be a strictly positive vector.");
+    }
+    else
+    {
+      preconditioner_.setDiagonal(VectorXs::Ones(problem_size));
     }
 
     // Init y
