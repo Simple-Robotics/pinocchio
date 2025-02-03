@@ -23,6 +23,8 @@
 
 #include "pinocchio/serialization/delassus.hpp"
 
+#include "pinocchio/serialization/constraints-model.hpp"
+
 #include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
@@ -922,6 +924,169 @@ BOOST_AUTO_TEST_CASE(test_geometry_model_and_data_serialization)
   }
   #endif // hpp-fcl >= 3.0.0
 #endif   // PINOCCHIO_WITH_HPP_FCL
+}
+
+template<typename DerivedConstraintModel>
+struct JointLimitAndFrictionConstraintModelInitializer
+{
+  typedef pinocchio::Model Model;
+  typedef pinocchio::JointIndex JointIndex;
+
+  static DerivedConstraintModel run()
+  {
+    Model model;
+    pinocchio::buildModels::manipulator(model);
+
+    const std::string ee_name = "wrist2_joint";
+    const JointIndex ee_id = model.getJointId(ee_name);
+
+    // get joint path to end-effector
+    const Model::IndexVector & ee_support = model.supports[ee_id];
+    // get joint ids to put in the joint limit constraint (omit first joint as it is always the
+    // universe)
+    const Model::IndexVector active_joint_ids(ee_support.begin() + 1, ee_support.end());
+
+    DerivedConstraintModel cmodel(model, active_joint_ids);
+    cmodel.name = cmodel.classname();
+    cmodel.compliance().setRandom();
+
+    return cmodel;
+  }
+};
+
+template<typename DerivedConstraintModel>
+struct PointAndFrameConstraintModelInitializer
+{
+  typedef pinocchio::Model Model;
+  typedef pinocchio::JointIndex JointIndex;
+  typedef pinocchio::SE3 SE3;
+
+  static DerivedConstraintModel run()
+  {
+    Model model;
+    pinocchio::buildModels::manipulator(model);
+
+    const std::string joint1_name = "elbow_joint";
+    const JointIndex joint1_id = model.getJointId(joint1_name);
+
+    const std::string joint2_name = "wrist2_joint";
+    const JointIndex joint2_id = model.getJointId(joint2_name);
+
+    DerivedConstraintModel cmodel(model, joint1_id, SE3::Random(), joint2_id, SE3::Random());
+    cmodel.name = cmodel.classname();
+    cmodel.compliance().setRandom();
+    cmodel.corrector_parameters.Kp.setRandom();
+    cmodel.corrector_parameters.Kd.setRandom();
+
+    return cmodel;
+  }
+};
+
+template<typename ConstraintModel>
+struct initConstraint;
+
+template<>
+struct initConstraint<pinocchio::JointLimitConstraintModel>
+{
+  typedef pinocchio::JointLimitConstraintModel ConstraintModel;
+
+  static ConstraintModel run()
+  {
+    // Note: JointLimitConstraintModel's constraint set is automatically constructed
+    // uppon construction of the constraint model.
+    ConstraintModel cmodel =
+      JointLimitAndFrictionConstraintModelInitializer<ConstraintModel>::run();
+    cmodel.margin().setRandom();
+    cmodel.corrector_parameters.Kd.setRandom();
+    cmodel.corrector_parameters.Kp.setRandom();
+    return cmodel;
+  }
+};
+
+template<>
+struct initConstraint<pinocchio::FrictionalJointConstraintModel>
+{
+  typedef pinocchio::FrictionalJointConstraintModel ConstraintModel;
+
+  static ConstraintModel run()
+  {
+    // Note: The upper/lower bounds of FrictionalJointConstraintModel's constraint set
+    // need to be set after constructing the constraint model.
+    ConstraintModel cmodel =
+      JointLimitAndFrictionConstraintModelInitializer<ConstraintModel>::run();
+    Eigen::VectorXd lb = -Eigen::VectorXd::Random(cmodel.size()).array().abs();
+    Eigen::VectorXd ub = Eigen::VectorXd::Random(cmodel.size()).array().abs();
+    cmodel.set() = pinocchio::BoxSet(lb, ub);
+    return cmodel;
+  }
+};
+
+template<>
+struct initConstraint<pinocchio::BilateralPointConstraintModel>
+{
+  typedef pinocchio::BilateralPointConstraintModel ConstraintModel;
+
+  static ConstraintModel run()
+  {
+    // Note: For bilateral constraints, no need to manually set the constraint set.
+    ConstraintModel cmodel = PointAndFrameConstraintModelInitializer<ConstraintModel>::run();
+    return cmodel;
+  }
+};
+
+template<>
+struct initConstraint<pinocchio::FrictionalPointConstraintModel>
+{
+  typedef pinocchio::FrictionalPointConstraintModel ConstraintModel;
+
+  static ConstraintModel run()
+  {
+    // Note: For frictional point constraints, the friction coeff of the coulomb cone needs to be
+    // set.
+    ConstraintModel cmodel = PointAndFrameConstraintModelInitializer<ConstraintModel>::run();
+    cmodel.set() = pinocchio::CoulombFrictionCone(0.1234);
+    return cmodel;
+  }
+};
+
+template<>
+struct initConstraint<pinocchio::WeldConstraintModel>
+{
+  typedef pinocchio::WeldConstraintModel ConstraintModel;
+
+  static ConstraintModel run()
+  {
+    // Note: For weld constraints, no need to manually set the constraint set.
+    ConstraintModel cmodel = PointAndFrameConstraintModelInitializer<ConstraintModel>::run();
+    return cmodel;
+  }
+};
+
+struct TestConstraintModel
+{
+  void operator()(boost::blank) const
+  {
+    // do nothing
+  }
+
+  template<typename ConstraintModel>
+  void operator()(const pinocchio::ConstraintModelBase<ConstraintModel> &) const
+  {
+    ConstraintModel cmodel = initConstraint<ConstraintModel>::run();
+    test(cmodel);
+  }
+
+  template<typename ConstraintModel>
+  static void test(ConstraintModel & cmodel)
+  {
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel");
+  }
+};
+
+BOOST_AUTO_TEST_CASE(test_constraints_models_serialization)
+{
+  using namespace pinocchio;
+  boost::mpl::for_each<ConstraintModelVariant::types>(TestConstraintModel());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
