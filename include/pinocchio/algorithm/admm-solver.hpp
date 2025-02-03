@@ -526,8 +526,7 @@ namespace pinocchio
     {
       return solve(
         delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(this->problem_size),
-        VectorXs::Ones(this->problem_size), primal_guess.const_cast_derived(), boost::none,
-        solve_ncp);
+        boost::none, primal_guess.derived(), boost::none, solve_ncp);
     }
 
     ///
