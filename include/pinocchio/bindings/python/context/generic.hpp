@@ -48,6 +48,8 @@ namespace pinocchio
       typedef Eigen::Matrix<Scalar, 7, 1, Options> Vector7s;
       typedef Eigen::Quaternion<Scalar, Options> Quaternion;
       typedef Eigen::AngleAxis<Scalar> AngleAxis;
+      typedef Eigen::Ref<VectorXs> RefVectorXs;
+      typedef Eigen::Ref<MatrixXs> RefMatrixXs;
 
       // Spatial
       typedef SE3Tpl<Scalar, Options> SE3;
