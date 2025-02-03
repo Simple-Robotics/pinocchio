@@ -37,7 +37,7 @@ namespace pinocchio
   : ConstraintDataBase<ConstraintDataTpl<_Scalar, _Options, ConstraintCollectionTpl>>
   , ConstraintCollectionTpl<_Scalar, _Options>::ConstraintDataVariant
   {
-    typedef ConstraintDataBase<ConstraintModelTpl<_Scalar, _Options, ConstraintCollectionTpl>> Base;
+    typedef ConstraintDataBase<ConstraintDataTpl<_Scalar, _Options, ConstraintCollectionTpl>> Base;
     typedef _Scalar Scalar;
     enum
     {
