@@ -587,13 +587,13 @@ namespace pinocchio
     template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
-    typename VectorLikeOut>
+    typename VectorLikeGuess>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
-    const Eigen::DenseBase<VectorLikeOut> & x_sol,
+    const Eigen::DenseBase<VectorLikeGuess> & x_guess,
     const Scalar over_relax,
     const bool stat_record)
 
@@ -604,7 +604,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(g.size(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.rows(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.cols(), this->getProblemSize());
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(x_sol.size(), this->getProblemSize());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(x_guess.size(), this->getProblemSize());
 
     const size_t nc = constraint_models.size(); // num constraints
 
@@ -623,7 +623,7 @@ namespace pinocchio
 
     Scalar complementarity, proximal_metric, primal_feasibility, dual_feasibility;
     bool abs_prec_reached = false, rel_prec_reached = false;
-    x = x_sol;
+    x = x_guess;
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
     if (stat_record)
@@ -736,13 +736,13 @@ namespace pinocchio
     typename VectorLike,
     typename ConstraintModel,
     typename ConstraintModelAllocator,
-    typename VectorLikeOut>
+    typename VectorLikeGuess>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
-    const Eigen::DenseBase<VectorLikeOut> & x_sol,
+    const Eigen::DenseBase<VectorLikeGuess> & x_guess,
     const Scalar over_relax,
     const bool stat_record)
 
@@ -753,7 +753,7 @@ namespace pinocchio
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    return solve(G, g, wrapped_constraint_models, dt, x_sol, over_relax, stat_record);
+    return solve(G, g, wrapped_constraint_models, dt, x_guess, over_relax, stat_record);
   }
 } // namespace pinocchio
 

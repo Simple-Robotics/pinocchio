@@ -55,15 +55,14 @@ namespace pinocchio
       template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
-      typename VectorLikeOut>
+      typename VectorLikeGuess>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
       const Scalar dt,
-      // const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
-      const Eigen::DenseBase<VectorLikeOut> & x,
+      const Eigen::DenseBase<VectorLikeGuess> & x_guess,
       const Scalar over_relax = Scalar(1),
       const bool stat_record = false);
 
@@ -74,7 +73,7 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the contact problem.
     /// \param[in] g Free contact acceleration or velicity associted with the contact problem.
     /// \param[in] constraint_models Vector of constraint models.
-    /// \param[in,out] x Initial guess and output solution of the problem
+    /// \param[in] x_guess Initial guess and output solution of the problem
     /// \param[in] over_relax Over relaxation value
     ///
     /// \returns True if the problem has converged.
@@ -83,13 +82,13 @@ namespace pinocchio
       typename VectorLike,
       typename ConstraintModel,
       typename ConstraintModelAllocator,
-      typename VectorLikeInitialGuess>
+      typename VectorLikeGuess>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Scalar dt,
-      const Eigen::DenseBase<VectorLikeInitialGuess> & x,
+      const Eigen::DenseBase<VectorLikeGuess> & x_guess,
       const Scalar over_relax = Scalar(1),
       const bool stat_record = false);
 
