@@ -5,6 +5,7 @@
 #ifndef __pinocchio_algorithm_constraints_constraint_collection_default_hpp__
 #define __pinocchio_algorithm_constraints_constraint_collection_default_hpp__
 
+#include "pinocchio/algorithm/constraints/fwd.hpp"
 #include <boost/variant.hpp>
 
 namespace pinocchio
@@ -56,6 +57,9 @@ namespace pinocchio
       WeldConstraintData>
       ConstraintDataVariant;
   }; // struct ConstraintCollectionDefaultTpl
+
+  typedef ConstraintCollectionDefault::ConstraintModelVariant ConstraintModelVariant;
+  typedef ConstraintCollectionDefault::ConstraintDataVariant ConstraintDataVariant;
 
 } // namespace pinocchio
 
