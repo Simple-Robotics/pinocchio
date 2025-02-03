@@ -1136,4 +1136,88 @@ BOOST_AUTO_TEST_CASE(test_constraints_data_serialization)
   boost::mpl::for_each<ConstraintDataVariant::types>(TestConstraintData());
 }
 
+BOOST_AUTO_TEST_CASE(test_constraint_model_variant)
+{
+  using namespace pinocchio;
+
+  Model model;
+  pinocchio::buildModels::manipulator(model);
+  Data data(model);
+
+  // run aba to populate data
+  Eigen::VectorXd q = pinocchio::randomConfiguration(model);
+  Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
+  Eigen::VectorXd tau = Eigen::VectorXd::Random(model.nv);
+  aba(model, data, q, v, tau, pinocchio::Convention::WORLD);
+
+  std::vector<ConstraintModel> cmodels;
+  std::vector<ConstraintData> cdatas;
+  {
+    JointLimitConstraintModel cmodel_ = initConstraint<JointLimitConstraintModel>::run(model);
+    ConstraintModel cmodel(cmodel_);
+    ConstraintData cdata(cmodel.createData());
+    cmodel.calc(model, data, cdata);
+
+    cmodels.push_back(cmodel);
+    cdatas.push_back(cdata);
+
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_variant");
+    generic_test(cdata, TEST_SERIALIZATION_FOLDER "/Constraint", "cdata_variant");
+  }
+  {
+    FrictionalJointConstraintModel cmodel_ =
+      initConstraint<FrictionalJointConstraintModel>::run(model);
+    ConstraintModel cmodel(cmodel_);
+    ConstraintData cdata(cmodel.createData());
+    cmodel.calc(model, data, cdata);
+
+    cmodels.push_back(cmodel);
+    cdatas.push_back(cdata);
+
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_variant");
+    generic_test(cdata, TEST_SERIALIZATION_FOLDER "/Constraint", "cdata_variant");
+  }
+  {
+    FrictionalPointConstraintModel cmodel_ =
+      initConstraint<FrictionalPointConstraintModel>::run(model);
+    ConstraintModel cmodel(cmodel_);
+    ConstraintData cdata(cmodel.createData());
+    cmodel.calc(model, data, cdata);
+
+    cmodels.push_back(cmodel);
+    cdatas.push_back(cdata);
+
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_variant");
+    generic_test(cdata, TEST_SERIALIZATION_FOLDER "/Constraint", "cdata_variant");
+  }
+  {
+    BilateralPointConstraintModel cmodel_ =
+      initConstraint<BilateralPointConstraintModel>::run(model);
+    ConstraintModel cmodel(cmodel_);
+    ConstraintData cdata(cmodel.createData());
+    cmodel.calc(model, data, cdata);
+
+    cmodels.push_back(cmodel);
+    cdatas.push_back(cdata);
+
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_variant");
+    generic_test(cdata, TEST_SERIALIZATION_FOLDER "/Constraint", "cdata_variant");
+  }
+  {
+    WeldConstraintModel cmodel_ = initConstraint<WeldConstraintModel>::run(model);
+    ConstraintModel cmodel(cmodel_);
+    ConstraintData cdata(cmodel.createData());
+    cmodel.calc(model, data, cdata);
+
+    cmodels.push_back(cmodel);
+    cdatas.push_back(cdata);
+
+    generic_test(cmodel, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_variant");
+    generic_test(cdata, TEST_SERIALIZATION_FOLDER "/Constraint", "cdata_variant");
+  }
+
+  // test vector of constraints
+  generic_test(cmodels, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_vector");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
