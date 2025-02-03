@@ -19,8 +19,7 @@ namespace pinocchio
       bp::to_python_converter<
         ConstraintModelVariant, ConstraintVariantVisitor<ConstraintModelVariant>>();
       ConstraintModelPythonVisitor<context::ConstraintModel>::expose();
-      StdAlignedVectorPythonVisitor<context::ConstraintModel>::expose(
-        "StdVec_ConstraintModelVector");
+      StdAlignedVectorPythonVisitor<context::ConstraintModel>::expose("StdVec_ConstraintModel");
 
       typedef context::ConstraintCollectionDefault::ConstraintDataVariant ConstraintDataVariant;
       boost::mpl::for_each<ConstraintDataVariant::types>(ConstraintDataExposer());
@@ -28,7 +27,7 @@ namespace pinocchio
       bp::to_python_converter<
         ConstraintDataVariant, ConstraintVariantVisitor<ConstraintDataVariant>>();
       ConstraintDataPythonVisitor<context::ConstraintData>::expose();
-      StdAlignedVectorPythonVisitor<context::ConstraintData>::expose("StdVec_ConstraintDataVector");
+      StdAlignedVectorPythonVisitor<context::ConstraintData>::expose("StdVec_ConstraintData");
     }
   } // namespace python
 } // namespace pinocchio
