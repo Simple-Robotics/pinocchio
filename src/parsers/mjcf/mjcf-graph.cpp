@@ -1014,6 +1014,12 @@ namespace pinocchio
       {
         typedef MjcfVisitor::SE3 SE3;
 
+        if (mapOfBodies.find(nameOfBody) == mapOfBodies.end())
+        {
+          std::stringstream ss;
+          ss << "Cannot find body " << nameOfBody;
+          PINOCCHIO_THROW_PRETTY(std::invalid_argument, ss.str());
+        }
         MjcfBody currentBody = mapOfBodies.at(nameOfBody);
 
         // get parent body frame
@@ -1330,6 +1336,8 @@ namespace pinocchio
       {
         mjcfVisitor.setName(modelName);
         // get name and inertia of first root link
+        PINOCCHIO_THROW_PRETTY_IF(
+          bodiesList.empty(), std::invalid_argument, "MJCF parser: no body found in parsed tree.");
         std::string rootLinkName = bodiesList.at(0);
         MjcfBody rootBody = mapOfBodies.find(rootLinkName)->second;
         if (rootBody.jointChildren.size() == 0)
