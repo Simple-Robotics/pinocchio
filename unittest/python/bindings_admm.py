@@ -53,7 +53,9 @@ class TestADMM(TestCase):
         delassus_matrix = chol.getDelassusCholeskyExpression().matrix()
         delassus = pin.DelassusOperatorDense(delassus_matrix)
         vfree = v0 + dt * pin.aba(model, data, q0, v0, tau0, fext)
-        Jc = pin.getConstraintJacobian(model, data, constraint_models, constraint_datas)
+        Jc = pin.getConstraintsJacobian(
+            model, data, constraint_models, constraint_datas
+        )
         g = Jc @ vfree
         return delassus, g
 
