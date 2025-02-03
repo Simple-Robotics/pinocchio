@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_sparse_hpp__
@@ -121,6 +121,8 @@ namespace pinocchio
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> Matrix;
+
+    typedef const Vector & getDampingReturnType;
   };
 
   template<typename _Scalar, int _Options, class SparseCholeskyDecomposition>

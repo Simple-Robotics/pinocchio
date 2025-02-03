@@ -22,6 +22,9 @@ namespace pinocchio
     typedef typename ContactCholeskyDecomposition::Scalar Scalar;
     typedef typename ContactCholeskyDecomposition::Matrix Matrix;
     typedef typename ContactCholeskyDecomposition::Vector Vector;
+
+    typedef typename ContactCholeskyDecomposition::EigenStorageVector EigenStorageVector;
+    typedef const typename EigenStorageVector::MapType getDampingReturnType;
   };
 
   template<typename _ContactCholeskyDecomposition>

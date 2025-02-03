@@ -57,6 +57,8 @@ namespace pinocchio
 
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) ConstraintDataVector;
+
+    typedef const Vector & getDampingReturnType;
   };
 
   template<

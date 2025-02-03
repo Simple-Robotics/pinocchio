@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_delassus_operator_base_hpp__
@@ -129,6 +129,7 @@ namespace pinocchio
   {
     typedef typename traits<DelassusOperatorDerived>::Scalar Scalar;
     typedef typename traits<DelassusOperatorDerived>::Vector Vector;
+    typedef typename traits<DelassusOperatorDerived>::getDampingReturnType getDampingReturnType;
     typedef PowerIterationAlgoTpl<Vector> PowerIterationAlgo;
 
     DelassusOperatorDerived & derived()
@@ -192,6 +193,11 @@ namespace pinocchio
       typedef typename MultiplicationOperatorReturnType<
         DelassusOperatorBase, Eigen::MatrixBase<MatrixDerived>>::type ReturnType;
       return ReturnType(derived(), x.derived());
+    }
+
+    getDampingReturnType getDamping() const
+    {
+      return derived().getDamping();
     }
 
     Eigen::DenseIndex size() const

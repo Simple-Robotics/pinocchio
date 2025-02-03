@@ -23,6 +23,8 @@ namespace pinocchio
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> Matrix;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
+
+    typedef const Vector & getDampingReturnType;
   };
 
   template<typename _Scalar, int _Options>
