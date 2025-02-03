@@ -74,6 +74,12 @@ namespace pinocchio
       {
         if (geom.geomType == "mesh")
         {
+          if (currentGraph.mapOfMeshes.find(geom.meshName) == currentGraph.mapOfMeshes.end())
+          {
+            std::stringstream ss;
+            ss << "Cannot find mesh " << geom.meshName << " for geometry " << geom.geomName;
+            PINOCCHIO_THROW_PRETTY(std::invalid_argument, ss.str());
+          }
           MjcfMesh currentMesh = currentGraph.mapOfMeshes.at(geom.meshName);
           if (currentMesh.vertices.size() > 0)
           {
@@ -200,11 +206,29 @@ namespace pinocchio
             std::string texturePath;
             if (!geom.materialName.empty())
             {
+              if (
+                currentGraph.mapOfMaterials.find(geom.materialName)
+                == currentGraph.mapOfMaterials.end())
+              {
+                std::stringstream ss;
+                ss << "Cannot find material " << geom.materialName << " for geometry "
+                   << geom.geomName;
+                PINOCCHIO_THROW_PRETTY(std::invalid_argument, ss.str());
+              }
               MjcfMaterial mat = currentGraph.mapOfMaterials.at(geom.materialName);
               meshColor = mat.rgba;
               overrideMaterial = true;
               if (!mat.texture.empty())
               {
+                if (
+                  currentGraph.mapOfTextures.find(geom.materialName)
+                  == currentGraph.mapOfTextures.end())
+                {
+                  std::stringstream ss;
+                  ss << "Cannot find texture for material " << geom.materialName << " for geometry "
+                     << geom.geomName;
+                  PINOCCHIO_THROW_PRETTY(std::invalid_argument, ss.str());
+                }
                 MjcfTexture text = currentGraph.mapOfTextures.at(mat.texture);
                 texturePath = text.filePath;
               }
