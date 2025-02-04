@@ -261,11 +261,11 @@ namespace pinocchio
     // Retrieve the pre-conditioner
     if (preconditioner)
     {
-      preconditioner_.setDiagonal(preconditioner.get());
       PINOCCHIO_CHECK_ARGUMENT_SIZE(preconditioner_.rows(), problem_size);
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         preconditioner_.getDiagonal().minCoeff() > Scalar(0),
         "Preconditioner should be a strictly positive vector.");
+      preconditioner_.setDiagonal(preconditioner.get());
     }
     else
     {
