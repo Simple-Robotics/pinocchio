@@ -451,9 +451,9 @@ namespace pinocchio
       const boost::optional<RefConstVectorXs> preconditioner = boost::none,
       const boost::optional<RefConstVectorXs> primal_guess = boost::none,
       const boost::optional<RefConstVectorXs> dual_guess = boost::none,
-      bool solve_ncp = true,
-      ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
-      bool stat_record = false);
+      const bool solve_ncp = true,
+      const ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
+      const bool stat_record = false);
 
     ///
     /// \brief Solve the constraint problem composed of problem data (G,g,constraint_models) and
@@ -468,7 +468,6 @@ namespace pinocchio
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
     /// \param[in] solve_ncp whether to solve the NCP (true) or CCP (false)
-    /// \param[in] compute_largest_eigen_values run power iteration algorithm
     /// \param[in] admm_update_rule update rule for ADMM (linear or spectral)
     /// \param[in] stat_record record solver metrics
     ///
@@ -488,9 +487,9 @@ namespace pinocchio
       const boost::optional<RefConstVectorXs> preconditioner = boost::none,
       const boost::optional<RefConstVectorXs> primal_guess = boost::none,
       const boost::optional<RefConstVectorXs> dual_guess = boost::none,
-      bool solve_ncp = true,
-      ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
-      bool stat_record = false)
+      const bool solve_ncp = true,
+      const ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
+      const bool stat_record = false)
     {
       typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
       typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
@@ -527,7 +526,7 @@ namespace pinocchio
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
-      bool solve_ncp = true)
+      const bool solve_ncp = true)
     {
       return solve(
         delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(this->problem_size),
@@ -557,7 +556,7 @@ namespace pinocchio
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
       const Scalar dt,
       const Eigen::DenseBase<VectorLikeOut> & primal_guess,
-      bool solve_ncp = true)
+      const bool solve_ncp = true)
     {
       typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
       typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;

@@ -46,9 +46,9 @@ namespace pinocchio
       const boost::optional<RefConstVectorXs> preconditioner = boost::none,
       const boost::optional<RefConstVectorXs> primal_solution = boost::none,
       const boost::optional<RefConstVectorXs> dual_solution = boost::none,
-      bool solve_ncp = true,
-      ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
-      bool stat_record = false)
+      const bool solve_ncp = true,
+      const ADMMUpdateRule admm_update_rule = ADMMUpdateRule::SPECTRAL,
+      const bool stat_record = false)
     {
       return solver.solve(
         delassus, g, constraint_models, dt, R, preconditioner, primal_solution, dual_solution,
@@ -63,7 +63,7 @@ namespace pinocchio
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Scalar dt,
       const VectorXs & primal_guess,
-      bool solve_ncp = true)
+      const bool solve_ncp = true)
     {
       return solver.solve(delassus, g, constraint_models, dt, primal_guess, solve_ncp);
     }

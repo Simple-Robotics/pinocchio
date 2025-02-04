@@ -64,6 +64,7 @@ namespace pinocchio
       const Scalar dt,
       const Eigen::DenseBase<VectorLikeGuess> & x_guess,
       const Scalar over_relax = Scalar(1),
+      const bool solve_ncp = true,
       const bool stat_record = false);
 
     ///
@@ -90,6 +91,7 @@ namespace pinocchio
       const Scalar dt,
       const Eigen::DenseBase<VectorLikeGuess> & x_guess,
       const Scalar over_relax = Scalar(1),
+      const bool solve_ncp = true,
       const bool stat_record = false);
 
     /// \returns the primal solution of the problem

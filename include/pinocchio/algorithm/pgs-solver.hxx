@@ -595,6 +595,7 @@ namespace pinocchio
     const Scalar dt,
     const Eigen::DenseBase<VectorLikeGuess> & x_guess,
     const Scalar over_relax,
+    const bool solve_ncp,
     const bool stat_record)
 
   {
@@ -699,6 +700,22 @@ namespace pinocchio
 
       if (stat_record)
       {
+        VectorXs tmp, rhs;
+        tmp = G * x;
+        tmp.noalias() += gs;
+        if (solve_ncp)
+        {
+          internal::computeDeSaxeCorrection(constraint_models, tmp, rhs);
+          tmp.noalias() += rhs;
+        }
+
+        tmp.array() *=
+          time_scaling_acc_to_constraints.array(); // back to constraint formulation level
+        rhs = tmp;
+        internal::computeDualConeProjection(constraint_models, rhs, rhs);
+        tmp -= rhs;
+        Scalar dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
+        stats.dual_feasibility_ncp.push_back(dual_feasibility_ncp);
         stats.it = it;
         stats.primal_feasibility.push_back(primal_feasibility);
         stats.dual_feasibility.push_back(dual_feasibility);
@@ -744,6 +761,7 @@ namespace pinocchio
     const Scalar dt,
     const Eigen::DenseBase<VectorLikeGuess> & x_guess,
     const Scalar over_relax,
+    const bool solve_ncp,
     const bool stat_record)
 
   {
@@ -753,7 +771,7 @@ namespace pinocchio
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    return solve(G, g, wrapped_constraint_models, dt, x_guess, over_relax, stat_record);
+    return solve(G, g, wrapped_constraint_models, dt, x_guess, over_relax, solve_ncp, stat_record);
   }
 } // namespace pinocchio
 

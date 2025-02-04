@@ -184,9 +184,9 @@ namespace pinocchio
     const boost::optional<RefConstVectorXs> preconditioner,
     const boost::optional<RefConstVectorXs> primal_guess,
     const boost::optional<RefConstVectorXs> dual_guess,
-    bool solve_ncp,
-    ADMMUpdateRule admm_update_rule,
-    bool stat_record)
+    const bool solve_ncp,
+    const ADMMUpdateRule admm_update_rule,
+    const bool stat_record)
 
   {
     // Unused for now
@@ -214,7 +214,7 @@ namespace pinocchio
     cholesky_update_count = 0;
 
     Scalar complementarity, dx_bar_norm, dy_bar_norm, dz_bar_norm, //
-      primal_feasibility, dual_feasibility_ncp, dual_feasibility;
+      primal_feasibility, dual_feasibility;
 
     if (stat_record)
     {
@@ -520,7 +520,7 @@ namespace pinocchio
           internal::computeDualConeProjection(constraint_models, rhs, rhs);
           tmp -= rhs;
 
-          dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
+          Scalar dual_feasibility_ncp = tmp.template lpNorm<Eigen::Infinity>();
 
           stats.primal_feasibility.push_back(primal_feasibility);
           stats.dual_feasibility.push_back(dual_feasibility);

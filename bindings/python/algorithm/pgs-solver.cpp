@@ -30,9 +30,10 @@ namespace pinocchio
       const context::Scalar dt,
       const Eigen::Ref<const context::VectorXs> x,
       const context::Scalar over_relax = 1,
+      const bool solve_ncp = true,
       const bool stat_record = false)
     {
-      return solver.solve(G, g, constraint_models, dt, x, over_relax, stat_record);
+      return solver.solve(G, g, constraint_models, dt, x, over_relax, solve_ncp, stat_record);
     }
 #endif
 
@@ -58,13 +59,15 @@ namespace pinocchio
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
             (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
-             bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false),
+             bp::arg("over_relax") = context::Scalar(1), bp::arg("solve_ncp") = true,
+             bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.")
           .def(
             "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
             (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
-             bp::arg("over_relax") = context::Scalar(1), bp::arg("stat_record") = false),
+             bp::arg("over_relax") = context::Scalar(1), bp::arg("solve_ncp") = true,
+             bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.");
       }
