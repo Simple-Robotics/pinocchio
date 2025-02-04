@@ -53,7 +53,7 @@ namespace pinocchio
           .def(
             "extract", ExtractConstraintModelVariantTypeVisitor<ConstraintModel>::extract,
             bp::arg("self"),
-            "Returns a reference of the internal joint managed by the ConstraintModel",
+            "Returns a reference of the internal constraint managed by the ConstraintModel",
             bp::with_custodian_and_ward_postcall<0, 1>());
       }
     };
