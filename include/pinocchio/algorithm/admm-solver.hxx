@@ -570,7 +570,6 @@ namespace pinocchio
         case (ADMMUpdateRule::LINEAR):
           update_delassus_factorization = admm_update_rule_container.linear_rule.eval(
             primal_feasibility, admm_dual_feasibility, rho);
-          ;
           break;
         }
 
