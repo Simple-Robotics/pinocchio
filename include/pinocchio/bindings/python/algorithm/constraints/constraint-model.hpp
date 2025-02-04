@@ -6,8 +6,11 @@
 #define __pinocchio_python_algorithm_constraints_model_hpp__
 
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
+#include "pinocchio/serialization/constraints-model.hpp"
+
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
+#include "pinocchio/bindings/python/serialization/serializable.hpp"
 
 namespace pinocchio
 {
@@ -49,6 +52,7 @@ namespace pinocchio
           .def(bp::init<const ConstraintModel &>(bp::args("self", "other"), "Copy constructor"))
           .def(ConstraintModelBasePythonVisitor<ConstraintModel>())
           .def(PrintableVisitor<ConstraintModel>())
+          .def(SerializableVisitor<ConstraintModel>())
           .def(
             "extract", ExtractConstraintModelVariantTypeVisitor<ConstraintModel>::extract,
             bp::arg("self"),

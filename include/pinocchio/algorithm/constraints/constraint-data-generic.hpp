@@ -36,6 +36,7 @@ namespace pinocchio
   struct ConstraintDataTpl
   : ConstraintDataBase<ConstraintDataTpl<_Scalar, _Options, ConstraintCollectionTpl>>
   , ConstraintCollectionTpl<_Scalar, _Options>::ConstraintDataVariant
+  , serialization::Serializable<ConstraintDataTpl<_Scalar, _Options, ConstraintCollectionTpl>>
   {
     typedef ConstraintDataBase<ConstraintDataTpl<_Scalar, _Options, ConstraintCollectionTpl>> Base;
     typedef _Scalar Scalar;
