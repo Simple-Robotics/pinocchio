@@ -29,6 +29,7 @@ namespace pinocchio
       typedef ConstraintModelDerived Self;
       typedef typename Self::Scalar Scalar;
       typedef typename Self::ConstraintSet ConstraintSet;
+      typedef typename Self::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
 
@@ -39,9 +40,9 @@ namespace pinocchio
         cl.PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the constraint.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
+          .def("shortname", &Self::shortname, "Shortame for the constraint type")
           .def(
             "createData", &Self::createData, "Create a Data object for the given constraint model.")
-          .def("shortname", &Self::shortname, "Shortame for the constraint type")
           .add_property(
             "set",
             bp::make_function(
@@ -50,14 +51,26 @@ namespace pinocchio
             "Constraint set")
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size")
-        // .def("compliance", &Self::compliance,
-        //   "Return the compliance stored in the model.")
-        // .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
-        // .def("jacobian", &jacobian, bp::args("self", "model", "data", "jacobian_matrix"))
-        // .def("jacobian_matrix_product", &jacobianMatrixProduct,
-        //   bp::args("self", "model", "data", "matrix"))
-        // .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
-        //   bp::args("self", "model", "data", "matrix"))
+          .def("calc", &ConstraintModelBasePythonVisitor::_calc, bp::args("self", "model", "data", "constraint_data"))
+          .def("jacobian", &ConstraintModelBasePythonVisitor::_jacobian, bp::args("self", "model", "data", "constraint_data"))
+          .def("jacobian_matrix_product", &ConstraintModelBasePythonVisitor::_jacobianMatrixProduct,
+            bp::args("self", "model", "data", "constraint_data", "matrix"))
+          .def("jacobian_transpose_matrix_product", &ConstraintModelBasePythonVisitor::_jacobianTransposeMatrixProduct,
+            bp::args("self", "model", "data", "constraint_data", "matrix"))
+          .def(
+            "compliance", +[](const Self & self) -> context::VectorXs { return self.compliance(); }, "Compliance")
+          .def(
+            "getRowSparsityPattern",
+            &Self::getRowSparsityPattern,
+            bp::args("self", "row_id"),
+            bp::return_value_policy<bp::copy_const_reference>(),
+            "Colwise sparsity associated with a given row.")
+          .def(
+            "getRowActiveIndexes",
+            &Self::getRowActiveIndexes,
+            bp::args("self", "row_id"),
+            bp::return_value_policy<bp::copy_const_reference>(),
+            "Vector of the active indexes associated with a given row.")
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
@@ -65,13 +78,13 @@ namespace pinocchio
           ;
       }
 
-      static void calc(
+      static void _calc(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
-        return self.calc(model, data, constraint_data);
+        self.calc(model, data, constraint_data);
       }
 
-      static context::MatrixXs jacobian(
+      static context::MatrixXs _jacobian(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         const context::MatrixXs res(self.size(), model.nv);
@@ -79,24 +92,28 @@ namespace pinocchio
         return res;
       }
 
-      static void jacobianMatrixProduct(
+      static context::MatrixXs _jacobianMatrixProduct(
         const Self & self,
-        Model & model,
-        Data & data,
-        ConstraintData & constraint_data,
-        context::MatrixXs & matrix)
+        const Model & model,
+        const Data & data,
+        const ConstraintData & constraint_data,
+        const context::MatrixXs & matrix)
       {
-        return self.jacobianMatrixProduct(model, data, constraint_data, matrix);
+        const context::MatrixXs res(self.size(), model.nv);
+        self.jacobianMatrixProduct(model, data, constraint_data, matrix, res);
+        return res;
       }
 
-      static void jacobianTransposeMatrixProduct(
+      static context::MatrixXs _jacobianTransposeMatrixProduct(
         const Self & self,
-        Model & model,
-        Data & data,
-        ConstraintData & constraint_data,
-        context::MatrixXs & matrix)
+        const Model & model,
+        const Data & data,
+        const ConstraintData & constraint_data,
+        const context::MatrixXs & matrix)
       {
-        return self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix);
+        const context::MatrixXs res(self.size(), model.nv);
+        self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix, res);
+        return res;
       }
     };
   } // namespace python
