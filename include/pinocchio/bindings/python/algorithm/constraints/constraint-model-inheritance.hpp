@@ -41,8 +41,10 @@ namespace pinocchio
         ConstraintModelInheritancePythonVisitor<T, FrameConstraintModelBase<T>>>
     {
       typedef typename T::Scalar Scalar;
-      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
-
+      typedef typename T::ConstraintSet ConstraintSet;
+      typedef typename T::ConstraintData ConstraintData;
+      typedef context::Model Model;
+      typedef context::Data Data;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -91,13 +93,40 @@ namespace pinocchio
             T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          // .def("getRowSparsityPattern", ...)
-          // .def("getRowActiveIndexes", ...)
-          // .def("getA1", ...)
-          // .def("getA2", ...)
+          .def("getA1", &_getA1, bp::args("self", "constraint_data", "reference_frame"))
+          .def("getA2", &_getA2, bp::args("self", "constraint_data", "reference_frame"))
           ;
       }
+
+      static context::Matrix6s _getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      {
+        context::Matrix6s res;
+        switch(rf) {
+          case WORLD:
+            res = self.getA1(constraint_data, WorldFrame());
+          case LOCAL:
+            res = self.getA1(constraint_data, LocalFrame());
+          case LOCAL_WORLD_ALIGNED:
+            res = self.getA1(constraint_data, LocalWorldAlignedFrame());
+        }
+        return res;
+      }
+
+      static context::Matrix6s _getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      {
+        context::Matrix6s res;
+        switch(rf) {
+          case WORLD:
+            res = self.getA2(constraint_data, WorldFrame());
+          case LOCAL:
+            res = self.getA2(constraint_data, LocalFrame());
+          case LOCAL_WORLD_ALIGNED:
+            res = self.getA2(constraint_data, LocalWorldAlignedFrame());
+        }
+        return res;
+      }
     };
+
 
     template<class T>
     struct ConstraintModelInheritancePythonVisitor<T, PointConstraintModelBase<T>>
@@ -105,8 +134,10 @@ namespace pinocchio
         ConstraintModelInheritancePythonVisitor<T, PointConstraintModelBase<T>>>
     {
       typedef typename T::Scalar Scalar;
-      typedef ModelTpl<Scalar, T::Options, JointCollectionDefaultTpl> Model;
-
+      typedef typename T::ConstraintSet ConstraintSet;
+      typedef typename T::ConstraintData ConstraintData;
+      typedef context::Model Model;
+      typedef context::Data Data;
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -155,15 +186,41 @@ namespace pinocchio
             T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          // .def("getRowSparsityPattern", &T::getRowSparsityPattern, args...)
-          // .def("getRowActiveIndexes", &T::computeConstraintSpatialInertia , args...)
-          // .def("getA1", &T::getA1, args...)
-          // .def("getA2", &T::getA2, args...)
+          .def("getA1", &_getA1, bp::args("self", "constraint_data", "reference_frame"))
+          .def("getA2", &_getA2, bp::args("self", "constraint_data", "reference_frame"))
           // .def("computeConstraintSpatialInertia", &T::computeConstraintSpatialInertia, args...)
           // .def("appendConstraintDiagonalInertiaToJointInertias",
           // &T::appendConstraintDiagonalInertiaToJointInertias, args...)
           // .def("mapConstraintForceToJointForces", &T::mapConstraintForceToJointForces, args...)
           ;
+      }
+
+      static context::Matrix36s _getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      {
+        context::Matrix36s res;
+        switch(rf) {
+          case WORLD:
+            res = self.getA1(constraint_data, WorldFrame());
+          case LOCAL:
+            res = self.getA1(constraint_data, LocalFrame());
+          case LOCAL_WORLD_ALIGNED:
+            res = self.getA1(constraint_data, LocalWorldAlignedFrame());
+        }
+        return res;
+      }
+
+      static context::Matrix36s _getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      {
+        context::Matrix36s res;
+        switch(rf) {
+          case WORLD:
+            res = self.getA2(constraint_data, WorldFrame());
+          case LOCAL:
+            res = self.getA2(constraint_data, LocalFrame());
+          case LOCAL_WORLD_ALIGNED:
+            res = self.getA2(constraint_data, LocalWorldAlignedFrame());
+        }
+        return res;
       }
     };
   } // namespace python
