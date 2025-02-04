@@ -253,8 +253,8 @@ namespace pinocchio
               "Reference position can only be used with hinge or slide joints.");
           if (has_range_limits && has_pos_ref)
           {
-            range.minConfig[0] += posRef;
-            range.maxConfig[0] += posRef;
+            range.minConfig[0] -= posRef;
+            range.maxConfig[0] -= posRef;
           }
         }
       }
