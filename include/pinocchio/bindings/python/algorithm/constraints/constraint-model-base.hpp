@@ -48,7 +48,8 @@ namespace pinocchio
               (ConstraintSet & (Self::*)()) & Self::set, bp::return_internal_reference<>()),
             +[](Self & self, const ConstraintSet & new_set) { self.set() = new_set; },
             "Constraint set")
-          .def("size", &Self::size, "Constraint size")
+          .def(
+            "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size")
         // .def("compliance", &Self::compliance,
         //   "Return the compliance stored in the model.")
         // .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"))
