@@ -416,6 +416,7 @@ namespace pinocchio
       preconditioner_.unscaleSquare(R, rhs);
       rhs += VectorXs::Constant(this->problem_size, prox_value);
       G_bar.updateDamping(rhs);
+      Scalar old_prox_value = prox_value;
       cholesky_update_count = 1;
 
       is_initialized = true;
@@ -580,10 +581,14 @@ namespace pinocchio
         if (update_delassus_factorization)
         {
           prox_value = mu_prox + tau * rho;
-          preconditioner_.unscaleSquare(R, rhs);
-          rhs += VectorXs::Constant(this->problem_size, prox_value);
-          G_bar.updateDamping(rhs);
-          cholesky_update_count++;
+          if (old_prox_value != prox_value)
+          {
+            preconditioner_.unscaleSquare(R, rhs);
+            rhs += VectorXs::Constant(this->problem_size, prox_value);
+            G_bar.updateDamping(rhs);
+            cholesky_update_count++;
+            old_prox_value = prox_value;
+          }
         }
 
         x_bar_previous_norm_inf = x_bar_norm_inf;
