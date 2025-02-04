@@ -524,6 +524,7 @@ namespace pinocchio
 
           stats.primal_feasibility.push_back(primal_feasibility);
           stats.dual_feasibility.push_back(dual_feasibility);
+          stats.dual_feasibility_admm.push_back(admm_dual_feasibility);
           stats.dual_feasibility_ncp.push_back(dual_feasibility_ncp);
           stats.complementarity.push_back(complementarity);
           stats.rho.push_back(rho);

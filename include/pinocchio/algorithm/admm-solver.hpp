@@ -217,18 +217,23 @@ namespace pinocchio
       : Base::SolverStats(max_it)
       , cholesky_update_count(0)
       {
+        dual_feasibility_admm.reserve(size_t(max_it));
         rho.reserve(size_t(max_it));
       }
 
       void reset()
       {
         Base::SolverStats::reset();
+        dual_feasibility_admm.clear();
         rho.clear();
         cholesky_update_count = 0;
       }
 
       ///  \brief Number of Cholesky updates.
       int cholesky_update_count;
+
+      /// \brief ADMM dual feasibility
+      std::vector<Scalar> dual_feasibility_admm;
 
       /// \brief History of rho values.
       std::vector<Scalar> rho;
