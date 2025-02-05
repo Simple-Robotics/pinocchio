@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/contact-solver-base.hpp"
+#include <boost/optional.hpp>
 
 namespace pinocchio
 {
@@ -22,6 +23,7 @@ namespace pinocchio
     typedef _Scalar Scalar;
     typedef ContactSolverBaseTpl<Scalar> Base;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
+    typedef Eigen::Ref<const VectorXs> RefConstVectorXs;
 
     typedef typename Base::SolverStats SolverStats;
 
@@ -54,15 +56,14 @@ namespace pinocchio
       typename VectorLike,
       template<typename T> class Holder,
       typename ConstraintModel,
-      typename ConstraintModelAllocator,
-      typename VectorLikeGuess>
+      typename ConstraintModelAllocator>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
       const Scalar dt,
-      const Eigen::DenseBase<VectorLikeGuess> & x_guess,
+      const boost::optional<RefConstVectorXs> x_guess = boost::none,
       const Scalar over_relax = Scalar(1),
       const bool solve_ncp = true,
       const bool stat_record = false);
@@ -82,14 +83,13 @@ namespace pinocchio
       typename MatrixLike,
       typename VectorLike,
       typename ConstraintModel,
-      typename ConstraintModelAllocator,
-      typename VectorLikeGuess>
+      typename ConstraintModelAllocator>
     bool solve(
       const MatrixLike & G,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Scalar dt,
-      const Eigen::DenseBase<VectorLikeGuess> & x_guess,
+      const boost::optional<RefConstVectorXs> x_guess = boost::none,
       const Scalar over_relax = Scalar(1),
       const bool solve_ncp = true,
       const bool stat_record = false);

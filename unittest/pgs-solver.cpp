@@ -85,7 +85,9 @@ struct TestBoxTpl
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     pgs_solver.setMaxIterations(1000);
-    has_converged = pgs_solver.solve(G, g, constraint_models, dt, primal_solution);
+    has_converged = pgs_solver.solve(
+      G, g, constraint_models, dt,
+      boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
 
     //    // Check with sparse view too
@@ -427,7 +429,9 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
   pgs_solver.setAbsolutePrecision(1e-13);
   pgs_solver.setRelativePrecision(1e-14);
-  const bool has_converged = pgs_solver.solve(G, g, constraint_models, dt, primal_solution);
+  const bool has_converged = pgs_solver.solve(
+    G, g, constraint_models, dt,
+    boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
   primal_solution = pgs_solver.getPrimalSolution();
   BOOST_CHECK(has_converged);
 
@@ -541,8 +545,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
-    const bool has_converged =
-      pgs_solver.solve(G, g_tilde_against_lower_bound, constraint_models, dt, primal_solution);
+    const bool has_converged = pgs_solver.solve(
+      G, g_tilde_against_lower_bound, constraint_models, dt,
+      boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
@@ -578,8 +583,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
-    const bool has_converged =
-      pgs_solver.solve(G, g_tilde_move_away, constraint_models, dt, primal_solution);
+    const bool has_converged = pgs_solver.solve(
+      G, g_tilde_move_away, constraint_models, dt,
+      boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
@@ -660,8 +666,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
-    const bool has_converged =
-      pgs_solver.solve(G, g_tilde_against_lower_bound, constraint_models, dt, primal_solution);
+    const bool has_converged = pgs_solver.solve(
+      G, g_tilde_against_lower_bound, constraint_models, dt,
+      boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 
@@ -697,8 +704,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
-    const bool has_converged =
-      pgs_solver.solve(G, g_tilde_move_away, constraint_models, dt, primal_solution);
+    const bool has_converged = pgs_solver.solve(
+      G, g_tilde_move_away, constraint_models, dt,
+      boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
 

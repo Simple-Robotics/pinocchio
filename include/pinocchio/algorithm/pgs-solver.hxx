@@ -586,14 +586,13 @@ namespace pinocchio
     typename VectorLike,
     template<typename T> class Holder,
     typename ConstraintModel,
-    typename ConstraintModelAllocator,
-    typename VectorLikeGuess>
+    typename ConstraintModelAllocator>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
-    const Eigen::DenseBase<VectorLikeGuess> & x_guess,
+    const boost::optional<RefConstVectorXs> x_guess,
     const Scalar over_relax,
     const bool solve_ncp,
     const bool stat_record)
@@ -605,7 +604,15 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(g.size(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.rows(), this->getProblemSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(G.cols(), this->getProblemSize());
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(x_guess.size(), this->getProblemSize());
+    if (x_guess)
+    {
+      x = x_guess.get();
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(x.size(), this->getProblemSize());
+    }
+    else
+    {
+      x.setZero();
+    }
 
     const size_t nc = constraint_models.size(); // num constraints
 
@@ -624,7 +631,6 @@ namespace pinocchio
 
     Scalar complementarity, proximal_metric, primal_feasibility, dual_feasibility;
     bool abs_prec_reached = false, rel_prec_reached = false;
-    x = x_guess;
     Scalar x_previous_norm_inf = x.template lpNorm<Eigen::Infinity>();
 
     if (stat_record)
@@ -752,14 +758,13 @@ namespace pinocchio
     typename MatrixLike,
     typename VectorLike,
     typename ConstraintModel,
-    typename ConstraintModelAllocator,
-    typename VectorLikeGuess>
+    typename ConstraintModelAllocator>
   bool PGSContactSolverTpl<_Scalar>::solve(
     const MatrixLike & G,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
-    const Eigen::DenseBase<VectorLikeGuess> & x_guess,
+    const boost::optional<RefConstVectorXs> x_guess,
     const Scalar over_relax,
     const bool solve_ncp,
     const bool stat_record)
