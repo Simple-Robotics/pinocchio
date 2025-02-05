@@ -245,6 +245,11 @@ namespace pinocchio
         }
         return res;
       }
+
+      static context::Matrix6s computeConstraintSpatialInertia(const T & self, const context::SE3 & placement, const context::Vector3s & diagonal_constraint_inertia)
+      {
+        return self.computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
+      }
     };
   } // namespace python
 } // namespace pinocchio
