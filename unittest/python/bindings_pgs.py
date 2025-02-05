@@ -17,7 +17,7 @@ meshcat_spec = importlib.util.find_spec("meshcat")
 meshcat_found = meshcat_spec is not None
 
 
-class TestADMM(TestCase):
+class TestPGS(TestCase):
     def test_box(self):
         model, constraint_models = self.buildStackOfCubesModel([1e-3])
         q0 = pin.neutral(model)
@@ -25,16 +25,12 @@ class TestADMM(TestCase):
         tau0 = np.zeros(model.nv)
         fext = [pin.Force.Zero() for i in range(model.njoints)]
         dt = 1e-3
-        delassus_matrix, g = self.setupTest(
-            model, constraint_models, q0, v0, tau0, fext, dt
-        )
-        delassus = pin.DelassusOperatorDense(delassus_matrix)
+        delassus, g = self.setupTest(model, constraint_models, q0, v0, tau0, fext, dt)
         compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
-        solver = pin.ADMMContactSolver(dim_pb)
+        solver = pin.PGSContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
-        solver.setLanczosSize(g.size)
         solver.solve(delassus, g, constraint_models, dt, compliance)
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
@@ -77,13 +73,10 @@ class TestADMM(TestCase):
         for fpcm in contact_constraints:
             constraint_models.append(pin.ConstraintModel(fpcm))
 
-        delassus_matrix, g = self.setupTest(
-            model, constraint_models, q0, v0, tau0, fext, dt
-        )
-        delassus = pin.DelassusOperatorDense(delassus_matrix)
+        delassus, g = self.setupTest(model, constraint_models, q0, v0, tau0, fext, dt)
 
         self.assertTrue(
-            delassus.matrix().shape[0]
+            delassus.shape[0]
             == (3 * len(bilateral_constraint_models))
             + (3 * len(contact_constraints))
             + (model.upperPositionLimit != np.inf).sum()
@@ -96,24 +89,11 @@ class TestADMM(TestCase):
 
         compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
-        solver = pin.ADMMContactSolver(dim_pb)
+        solver = pin.PGSContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
-        solver.setLanczosSize(g.size)
 
-        has_converged = solver.solve(
-            delassus,
-            g,
-            constraint_models,
-            dt,
-            compliance,
-            None,
-            None,
-            None,
-            True,
-            pin.ADMMUpdateRule.SPECTRAL,
-            stat_record,
-        )
+        has_converged = solver.solve(delassus, g, constraint_models, dt, compliance)
         self.assertTrue(has_converged, "Solver did not converge.")
         print(solver.getIterationCount())
         print(solver.getAbsoluteConvergenceResidual())
