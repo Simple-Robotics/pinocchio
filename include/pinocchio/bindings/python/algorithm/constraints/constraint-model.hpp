@@ -46,7 +46,6 @@ namespace pinocchio
       static void expose()
       {
         bp::class_<ConstraintModel>("ConstraintModel", "Generic Constraint Model", bp::no_init)
-          // .def(bp::init<>(bp::arg("self"), "Default constructor"))
           .def(bp::init<const ConstraintModel &>(bp::args("self", "other"), "Copy constructor"))
           .def(ConstraintModelBasePythonVisitor<ConstraintModel>())
           .def(PrintableVisitor<ConstraintModel>())
