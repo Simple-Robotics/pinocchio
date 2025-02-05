@@ -404,6 +404,9 @@ namespace pinocchio
           ADMMLinearUpdateRule(ratio_primal_dual, linear_update_rule_factor);
         rho = this->rho; // use the rho value stored in the solver.
         break;
+      case (ADMMUpdateRule::CONSTANT):
+        rho = this->rho; // use the rho value stored in the solver.
+        break;
       }
 
       // clamp the rho
@@ -574,6 +577,8 @@ namespace pinocchio
         case (ADMMUpdateRule::LINEAR):
           update_delassus_factorization = admm_update_rule_container.linear_rule.eval(
             primal_feasibility, dual_feasibility_constraint, rho);
+          break;
+        case (ADMMUpdateRule::CONSTANT):
           break;
         }
 

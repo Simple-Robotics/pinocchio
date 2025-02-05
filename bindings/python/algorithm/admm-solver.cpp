@@ -164,6 +164,7 @@ namespace pinocchio
           bp::enum_<::pinocchio::ADMMUpdateRule>("ADMMUpdateRule")
             .value("SPECTRAL", ::pinocchio::ADMMUpdateRule::SPECTRAL)
             .value("LINEAR", ::pinocchio::ADMMUpdateRule::LINEAR)
+            .value("CONSTANT", ::pinocchio::ADMMUpdateRule::CONSTANT)
             // .export_values()
             ;
         }

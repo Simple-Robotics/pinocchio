@@ -152,6 +152,7 @@ namespace pinocchio
   {
     SPECTRAL = 'S',
     LINEAR = 'L',
+    CONSTANT = 'C',
   };
 
   template<typename Scalar>
