@@ -106,7 +106,8 @@ namespace pinocchio
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
     FrictionalJointConstraintModelTpl()
-    {}
+    {
+    }
 
     template<template<typename, int> class JointCollectionTpl>
     FrictionalJointConstraintModelTpl(
@@ -324,13 +325,14 @@ namespace pinocchio
     {
       Options = _Options
     };
-    typedef ConstraintModelBase<FrictionalJointConstraintDataTpl> Base;
+    typedef ConstraintDataBase<FrictionalJointConstraintDataTpl> Base;
     typedef std::vector<JointIndex> JointIndexVector;
 
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
 
     FrictionalJointConstraintDataTpl()
-    {}
+    {
+    }
 
     explicit FrictionalJointConstraintDataTpl(const ConstraintModel & /*constraint_model*/)
     {

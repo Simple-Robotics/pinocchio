@@ -86,7 +86,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const JointLimitConstraintConeTpl & other) const
     {
-      return negative_orthant == other.negative_orthant
+      return base() == other.base() && negative_orthant == other.negative_orthant
              && positive_orthant == other.positive_orthant;
     }
 
@@ -149,6 +149,15 @@ namespace pinocchio
     const PositiveOrthantCone & getPositiveOrthant() const
     {
       return positive_orthant;
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
     }
 
   protected:

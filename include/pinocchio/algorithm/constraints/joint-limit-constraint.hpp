@@ -134,7 +134,8 @@ namespace pinocchio
     //      ValidJointTypes;
 
     JointLimitConstraintModelTpl()
-    {}
+    {
+    }
 
     template<template<typename, int> class JointCollectionTpl>
     JointLimitConstraintModelTpl(
@@ -299,7 +300,7 @@ namespace pinocchio
              && active_configuration_limits == other.active_configuration_limits
              && row_active_indexes == other.row_active_indexes
              && row_sparsity_pattern == other.row_sparsity_pattern && m_set == other.m_set
-             && m_compliance == other.m_compliance;
+             && m_compliance == other.m_compliance && m_margin == other.m_margin;
     }
 
     bool operator!=(const JointLimitConstraintModelTpl & other) const
@@ -432,14 +433,15 @@ namespace pinocchio
     {
       Options = _Options
     };
-    typedef ConstraintModelBase<JointLimitConstraintDataTpl> Base;
+    typedef ConstraintDataBase<JointLimitConstraintDataTpl> Base;
     typedef std::vector<JointIndex> JointIndexVector;
 
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef typename ConstraintModel::VectorXs VectorXs;
 
     JointLimitConstraintDataTpl()
-    {}
+    {
+    }
 
     explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
     : constraint_residual(constraint_model.size())

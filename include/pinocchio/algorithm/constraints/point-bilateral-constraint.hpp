@@ -204,7 +204,7 @@ namespace pinocchio
     ///
     bool operator==(const BilateralPointConstraintModelTpl & other) const
     {
-      return base() == other.base();
+      return base() == other.base() && m_set == other.m_set;
     }
 
     ///

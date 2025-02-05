@@ -152,6 +152,12 @@ namespace pinocchio
     }
 
     template<typename OtherDerived>
+    bool operator!=(const ConstraintModelBase<OtherDerived> & other) const
+    {
+      return !(*this == other);
+    }
+
+    template<typename OtherDerived>
     ConstraintModelBase & operator=(const ConstraintModelBase<OtherDerived> & other)
     {
       name = other.name;

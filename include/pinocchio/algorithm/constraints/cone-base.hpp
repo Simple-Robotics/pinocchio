@@ -43,6 +43,25 @@ namespace pinocchio
       return project(x, x_proj);
     }
 
+    bool operator==(const ConeBase & other) const
+    {
+      return base() == other.base();
+    }
+
+    bool operator!=(const ConeBase & other) const
+    {
+      return !(*this == other);
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
+    }
+
   }; // struct ConeBase
 
 } // namespace pinocchio

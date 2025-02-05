@@ -6,8 +6,11 @@
 #define __pinocchio_python_algorithm_constraints_data_hpp__
 
 #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
+#include "pinocchio/serialization/constraints-data.hpp"
+
 #include "pinocchio/bindings/python/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
+#include "pinocchio/bindings/python/serialization/serializable.hpp"
 
 namespace pinocchio
 {
@@ -51,6 +54,7 @@ namespace pinocchio
             bp::args("self", "constraint_data"), "Copy constructor."))
           .def(ConstraintDataBasePythonVisitor<ConstraintData>())
           .def(PrintableVisitor<ConstraintData>())
+          .def(SerializableVisitor<ConstraintData>())
           .def(
             "extract", ExtractConstraintDataVariantTypeVisitor<ConstraintData>::extract,
             bp::arg("self"),

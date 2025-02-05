@@ -64,6 +64,18 @@ namespace pinocchio
     {
       return derived().isInside(x, prec);
     }
+
+    template<typename OtherDerived>
+    bool operator==(const SetBase<OtherDerived> &) const
+    {
+      return true;
+    }
+
+    template<typename OtherDerived>
+    bool operator!=(const SetBase<OtherDerived> & other) const
+    {
+      return !(*this == other);
+    }
   }; // struct SetBase
 
 } // namespace pinocchio

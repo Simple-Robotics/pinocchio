@@ -39,7 +39,7 @@ namespace pinocchio
       Options = _Options
     };
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
-    typedef SetBase<NullSetTpl> Base;
+    typedef ConeBase<NullSetTpl> Base;
 
     /// \brief Constructor from a given size
     ///
@@ -65,7 +65,7 @@ namespace pinocchio
     /// \brief Comparison operator
     bool operator==(const NullSetTpl & other) const
     {
-      return m_size == other.m_size;
+      return base() == other.base() && m_size == other.m_size;
     }
 
     /// \brief Difference  operator
@@ -111,6 +111,15 @@ namespace pinocchio
     Eigen::DenseIndex size() const
     {
       return m_size;
+    }
+
+    Base & base()
+    {
+      return static_cast<Base &>(*this);
+    }
+    const Base & base() const
+    {
+      return static_cast<const Base &>(*this);
     }
 
   protected:
