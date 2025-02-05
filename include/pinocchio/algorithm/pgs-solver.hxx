@@ -700,9 +700,9 @@ namespace pinocchio
 
       if (stat_record)
       {
-        VectorXs tmp, rhs;
-        tmp = G * x;
+        VectorXs tmp = G * x;
         tmp.noalias() += gs;
+        VectorXs rhs(tmp.size());
         if (solve_ncp)
         {
           internal::computeDeSaxeCorrection(constraint_models, tmp, rhs);
