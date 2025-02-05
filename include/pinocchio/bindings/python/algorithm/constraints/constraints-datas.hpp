@@ -52,7 +52,7 @@ namespace pinocchio
     {
       return cl.def(
         bp::init<const typename context::FrictionalJointConstraintData::ConstraintModel &>(
-          bp::args("self", "constraint_model")));
+          bp::args("self", "constraint_model"), "From model constructor."));
     }
 
     template<>
@@ -61,7 +61,7 @@ namespace pinocchio
     {
       return cl
         .def(bp::init<const typename context::JointLimitConstraintData::ConstraintModel &>(
-          bp::args("self", "constraint_model")))
+          bp::args("self", "constraint_model"), "From model constructor."))
         .PINOCCHIO_ADD_PROPERTY(
           context::JointLimitConstraintData, constraint_residual, "Constraint residual.");
     }

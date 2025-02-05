@@ -46,6 +46,8 @@ namespace pinocchio
       typedef Eigen::SparseMatrix<Scalar, Eigen::RowMajor> RowSparseMatrix;
       typedef Eigen::Matrix<Scalar, 1, 1, Options, 1, 1> Matrix1s;
       typedef Eigen::Matrix<Scalar, 7, 1, Options> Vector7s;
+      typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6s;
+      typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36s;
       typedef Eigen::Quaternion<Scalar, Options> Quaternion;
       typedef Eigen::AngleAxis<Scalar> AngleAxis;
       typedef Eigen::Ref<VectorXs> RefVectorXs;

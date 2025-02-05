@@ -158,7 +158,6 @@ namespace pinocchio
     {
     }
 
-  // public:
     ///
     ///  \brief Contructor with from a given type, joint indexes and placements.
     ///

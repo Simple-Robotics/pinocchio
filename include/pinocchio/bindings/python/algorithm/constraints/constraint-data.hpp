@@ -45,16 +45,16 @@ namespace pinocchio
     {
       static void expose()
       {
-        bp::class_<ConstraintData>("ConstraintData", "Generic Constraint Data", bp::no_init)
-          .def(bp::init<>(bp::arg("self"), "Default constructor"))
+        bp::class_<ConstraintData>("ConstraintData", "Generic Constraint Data.", bp::no_init)
+          .def(bp::init<>(bp::arg("self"), "Default constructor."))
           .def(bp::init<const typename ConstraintData::ConstraintDataVariant &>(
-            bp::args("self", "cdata")))
+            bp::args("self", "constraint_data"), "Copy constructor."))
           .def(ConstraintDataBasePythonVisitor<ConstraintData>())
           .def(PrintableVisitor<ConstraintData>())
           .def(
             "extract", ExtractConstraintDataVariantTypeVisitor<ConstraintData>::extract,
             bp::arg("self"),
-            "Returns a reference of the internal constraint managed by the ConstraintData",
+            "Returns a reference of the internal constraint managed by the ConstraintData.",
             bp::with_custodian_and_ward_postcall<0, 1>());
       }
     };

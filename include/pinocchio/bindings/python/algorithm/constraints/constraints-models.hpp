@@ -49,9 +49,7 @@ namespace pinocchio
     bp::class_<context::FrictionalJointConstraintModel> &
     expose_constraint_model(bp::class_<context::FrictionalJointConstraintModel> & cl)
     {
-
       typedef typename context::FrictionalJointConstraintModel::JointIndexVector JointIndexVector;
-
       cl.def(bp::init<const context::Model &, const JointIndexVector &>(
                (bp::arg("self"), bp::arg("model"), bp::arg("active_joints")),
                "Contructor from given joint index vector "
@@ -59,8 +57,6 @@ namespace pinocchio
         .def(
           "getActiveDofs", &context::FrictionalJointConstraintModel::getActiveDofs,
           bp::return_value_policy<bp::copy_const_reference>())
-        // .def("getRowActiveIndexes", ...)
-        // .def("getRowSparsityPattern", ...)
         ;
       return cl;
     }
@@ -70,31 +66,36 @@ namespace pinocchio
     expose_constraint_model(bp::class_<context::JointLimitConstraintModel> & cl)
     {
       typedef typename context::FrictionalJointConstraintModel::JointIndexVector JointIndexVector;
+      typedef typename context::JointLimitConstraintModel Self;
       cl.def(bp::init<const context::Model &, const JointIndexVector &>(
                (bp::arg("self"), bp::arg("model"), bp::arg("active_joints")),
                "Contructor from given joint index vector "
                "implied in the constraint."))
-        // Init with lb and ub
+        .def(
+          "margin",
+          +[](const Self & self) -> context::VectorXs { return self.margin(); },
+          bp::args("self"),
+          "Returns the margin internally stored in the constraint model.")
         .def(
           "getActiveLowerBoundConstraints",
-          &context::JointLimitConstraintModel::getActiveLowerBoundConstraints,
-          bp::return_value_policy<bp::copy_const_reference>(), "Active lower bound constraints.")
+          &Self::getActiveLowerBoundConstraints,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of configuration vector index for active lower bounds.")
         .def(
           "getActiveLowerBoundConstraintsTangent",
-          &context::JointLimitConstraintModel::getActiveLowerBoundConstraintsTangent,
+          &Self::getActiveLowerBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
-          "Active lower bound constraints in tangent.")
+          "Returns the vector of tangent vector index for active lower bounds.")
         .def(
           "getActiveUpperBoundConstraints",
-          &context::JointLimitConstraintModel::getActiveUpperBoundConstraints,
-          bp::return_value_policy<bp::copy_const_reference>(), "Active upper bound constraints.")
+          &Self::getActiveUpperBoundConstraints,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of configuration vector index for active upper bounds.")
         .def(
           "getActiveUpperBoundConstraintsTangent",
-          &context::JointLimitConstraintModel::getActiveUpperBoundConstraintsTangent,
+          &Self::getActiveUpperBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
-          "Active upper bound constraints in tangent.")
-        // .def("getRowActiveIndexes", ...)
-        // .def("getRowSparsityPattern", ...)
+          "Returns the vector of tangent vector index for active upper bounds.")
         ;
       return cl;
     }
