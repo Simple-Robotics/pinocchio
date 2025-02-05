@@ -43,14 +43,12 @@ namespace pinocchio
       return project(x, x_proj);
     }
 
-    template<typename OtherDerived>
-    bool operator==(const ConeBase<OtherDerived> & other) const
+    bool operator==(const ConeBase & other) const
     {
       return base() == other.base();
     }
 
-    template<typename OtherDerived>
-    bool operator!=(const ConeBase<OtherDerived> & other) const
+    bool operator!=(const ConeBase & other) const
     {
       return !(*this == other);
     }
