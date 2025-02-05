@@ -42,8 +42,9 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<>(bp::arg("self"), "Default constructor"))
-          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model")))
+        cl.def(bp::init<>(bp::arg("self"), "Default constructor."))
+          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model"),
+            "From model constructor."))
           .PINOCCHIO_ADD_PROPERTY(T, constraint_force, "Resulting force.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc1, "Placement of the constraint frame 1 wrt WORLD.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc2, "Placement of the constraint frame 2 wrt WORLD.")
@@ -65,8 +66,9 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<>(bp::arg("self"), "Default constructor"))
-          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model")))
+        cl.def(bp::init<>(bp::arg("self"), "Default constructor."))
+          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model"),
+            "From model constructor."))
           .PINOCCHIO_ADD_PROPERTY(T, constraint_force, "Resulting force.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc1, "Placement of the constraint frame 1 wrt WORLD.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc2, "Placement of the constraint frame 2 wrt WORLD.")

@@ -40,7 +40,7 @@ namespace pinocchio
         cl.PINOCCHIO_ADD_PROPERTY(Self, name, "Name of the constraint.")
           .def("classname", &Self::classname)
           .staticmethod("classname")
-          .def("shortname", &Self::shortname, "Shortame for the constraint type")
+          .def("shortname", &Self::shortname, "Short name of the class.")
           .def(
             "createData", &Self::createData, "Create a Data object for the given constraint model.")
           .add_property(
@@ -48,17 +48,22 @@ namespace pinocchio
             bp::make_function(
               (ConstraintSet & (Self::*)()) & Self::set, bp::return_internal_reference<>()),
             +[](Self & self, const ConstraintSet & new_set) { self.set() = new_set; },
-            "Constraint set")
+            "Constraint set.")
           .def(
-            "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size")
-          .def("calc", &ConstraintModelBasePythonVisitor::_calc, bp::args("self", "model", "data", "constraint_data"))
-          .def("jacobian", &ConstraintModelBasePythonVisitor::_jacobian, bp::args("self", "model", "data", "constraint_data"))
-          .def("jacobian_matrix_product", &ConstraintModelBasePythonVisitor::_jacobianMatrixProduct,
-            bp::args("self", "model", "data", "constraint_data", "matrix"))
-          .def("jacobian_transpose_matrix_product", &ConstraintModelBasePythonVisitor::_jacobianTransposeMatrixProduct,
-            bp::args("self", "model", "data", "constraint_data", "matrix"))
+            "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
+          .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"),
+            "Evaluate the constraint values at the current state given by data and store the results.")
+          .def("jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"),
+            "Compute the constraint jacobian.")
+          .def("jacobian_matrix_product", &jacobianMatrixProduct,
+            bp::args("self", "model", "data", "constraint_data", "matrix"),
+            "Forward chain rule: return product between the jacobian and a matrix.")
+          .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
+            bp::args("self", "model", "data", "constraint_data", "matrix"),
+            "Backward chain rule: return product between the jacobian transpose and a matrix.")
           .def(
-            "compliance", +[](const Self & self) -> context::VectorXs { return self.compliance(); }, "Compliance")
+            "compliance", +[](const Self & self) -> context::VectorXs { return self.compliance(); },
+            "Compliance of the contact.")
           .def(
             "getRowSparsityPattern",
             &Self::getRowSparsityPattern,
