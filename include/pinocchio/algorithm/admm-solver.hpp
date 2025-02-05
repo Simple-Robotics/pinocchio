@@ -218,6 +218,7 @@ namespace pinocchio
       , cholesky_update_count(0)
       {
         dual_feasibility_admm.reserve(size_t(max_it));
+        dual_feasibility_constraint.reserve(size_t(max_it));
         rho.reserve(size_t(max_it));
       }
 
@@ -225,6 +226,7 @@ namespace pinocchio
       {
         Base::SolverStats::reset();
         dual_feasibility_admm.clear();
+        dual_feasibility_constraint.clear();
         rho.clear();
         cholesky_update_count = 0;
       }
@@ -234,6 +236,8 @@ namespace pinocchio
 
       /// \brief ADMM dual feasibility
       std::vector<Scalar> dual_feasibility_admm;
+      /// \brief ADMM dual feasibility
+      std::vector<Scalar> dual_feasibility_constraint;
 
       /// \brief History of rho values.
       std::vector<Scalar> rho;

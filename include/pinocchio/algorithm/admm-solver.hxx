@@ -492,9 +492,11 @@ namespace pinocchio
         unscalePrimalSolution(primal_feasibility_vector_bar, primal_feasibility_vector);
         primal_feasibility = primal_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscaleDualSolution(dual_feasibility_vector_bar, dual_feasibility_vector);
-        const Scalar admm_dual_feasibility =
+        const Scalar dual_feasibility_admm =
           dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         dual_feasibility_vector.array() *= time_scaling_acc_to_constraints.array();
+        const Scalar dual_feasibility_constraint =
+          dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
         dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
         unscalePrimalSolution(y_bar_, y_);
@@ -524,8 +526,9 @@ namespace pinocchio
 
           stats.primal_feasibility.push_back(primal_feasibility);
           stats.dual_feasibility.push_back(dual_feasibility);
-          stats.dual_feasibility_admm.push_back(admm_dual_feasibility);
+          stats.dual_feasibility_admm.push_back(dual_feasibility_admm);
           stats.dual_feasibility_ncp.push_back(dual_feasibility_ncp);
+          stats.dual_feasibility_constraint.push_back(dual_feasibility_constraint);
           stats.complementarity.push_back(complementarity);
           stats.rho.push_back(rho);
         }
@@ -566,11 +569,11 @@ namespace pinocchio
         {
         case (ADMMUpdateRule::SPECTRAL):
           update_delassus_factorization = admm_update_rule_container.spectral_rule.eval(
-            primal_feasibility, admm_dual_feasibility, rho);
+            primal_feasibility, dual_feasibility_constraint, rho);
           break;
         case (ADMMUpdateRule::LINEAR):
           update_delassus_factorization = admm_update_rule_container.linear_rule.eval(
-            primal_feasibility, admm_dual_feasibility, rho);
+            primal_feasibility, dual_feasibility_constraint, rho);
           break;
         }
 
