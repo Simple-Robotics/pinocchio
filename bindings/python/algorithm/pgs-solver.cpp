@@ -19,6 +19,7 @@ namespace pinocchio
 
     typedef PGSContactSolverTpl<context::Scalar> Solver;
     typedef Solver::SolverStats SolverStats;
+    typedef typename Solver::RefConstVectorXs RefConstVectorXs;
 
 #ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
     template<typename DelassusMatrixType, typename ConstraintModel>
@@ -28,7 +29,7 @@ namespace pinocchio
       const context::VectorXs & g,
       const context::ConstraintModelVector & constraint_models,
       const context::Scalar dt,
-      const Eigen::Ref<const context::VectorXs> x,
+      const boost::optional<RefConstVectorXs> x = boost::none,
       const context::Scalar over_relax = 1,
       const bool solve_ncp = true,
       const bool stat_record = false)
@@ -58,16 +59,16 @@ namespace pinocchio
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
-             bp::arg("over_relax") = context::Scalar(1), bp::arg("solve_ncp") = true,
-             bp::arg("stat_record") = false),
+            (bp::args("self", "G", "g", "constraint_models", "dt"),
+             bp::arg("primal_solution") = boost::none, bp::arg("over_relax") = context::Scalar(1),
+             bp::arg("solve_ncp") = true, bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.")
           .def(
             "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_models", "dt", "x"),
-             bp::arg("over_relax") = context::Scalar(1), bp::arg("solve_ncp") = true,
-             bp::arg("stat_record") = false),
+            (bp::args("self", "G", "g", "constraint_models", "dt"),
+             bp::arg("primal_solution") = boost::none, bp::arg("over_relax") = context::Scalar(1),
+             bp::arg("solve_ncp") = true, bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.");
       }
