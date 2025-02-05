@@ -83,13 +83,13 @@ namespace pinocchio
           ;
       }
 
-      static void _calc(
+      static void calc(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         self.calc(model, data, constraint_data);
       }
 
-      static context::MatrixXs _jacobian(
+      static context::MatrixXs jacobian(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         const context::MatrixXs res(self.size(), model.nv);
@@ -97,7 +97,7 @@ namespace pinocchio
         return res;
       }
 
-      static context::MatrixXs _jacobianMatrixProduct(
+      static context::MatrixXs jacobianMatrixProduct(
         const Self & self,
         const Model & model,
         const Data & data,
@@ -109,7 +109,7 @@ namespace pinocchio
         return res;
       }
 
-      static context::MatrixXs _jacobianTransposeMatrixProduct(
+      static context::MatrixXs jacobianTransposeMatrixProduct(
         const Self & self,
         const Model & model,
         const Data & data,
