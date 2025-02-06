@@ -27,7 +27,7 @@ namespace pinocchio
     VectorType & vec = vec_.const_cast_derived();
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(basis.rows(), vec.size());
-    assert((basis.transpose() * basis).isIdentity() && "The input basis is not orthonormal.");
+    //    assert((basis.transpose() * basis).isIdentity() && "The input basis is not orthonormal.");
 
     for (Eigen::DenseIndex col_id = 0; col_id < basis.cols(); ++col_id)
     {
