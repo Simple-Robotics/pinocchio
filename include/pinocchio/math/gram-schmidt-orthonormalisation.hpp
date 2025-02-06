@@ -37,21 +37,6 @@ namespace pinocchio
                                           // product is above a certain threshold
         vec -= alpha * col;
     }
-
-    //    std::cout << "basis.transpose() * vec: " << (basis.transpose() *
-    //    vec).eval().array().abs().maxCoeff() << std::endl; if(!(basis.transpose() *
-    //    vec).isZero(1e-10))
-    //    {
-    //      const auto res = (basis.transpose() * vec).eval();
-    //      for(Eigen::Index i = 0; i < res.size(); ++i)
-    //      {
-    //        std::cout << "i - " << i << " value: " << res[i] << std::endl;
-    //      }
-    //      std::cout << "vec: " << vec.norm() << std::endl;
-    //    }
-
-    //    if (threshold == 0)
-    //      assert((basis.transpose() * vec).isZero(1e-10));
   }
 
   ///  \brief Perform the orthonormalization of the input matrix via the Gram-Schmidt procedure.
