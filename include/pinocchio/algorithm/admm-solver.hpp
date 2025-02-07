@@ -573,12 +573,6 @@ namespace pinocchio
     }
 
     /// \returns the primal solution of the problem
-    const VectorXs & getTimeScalingFromAccToConstraints() const
-    {
-      return time_scaling_acc_to_constraints;
-    }
-
-    /// \returns the primal solution of the problem
     const VectorXs & getPrimalSolution() const
     {
       return y_;
