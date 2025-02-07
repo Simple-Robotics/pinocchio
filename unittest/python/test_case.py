@@ -89,23 +89,23 @@ class ContactSolverTestCase(PinocchioTestCase):
             model, data, constraint_models, constraint_datas
         )
         g = Jc @ vfree
-        # idx_cm = 0
-        # for i, cm in enumerate(constraint_models):
-        #     cd = constraint_datas[i]
-        #     cm_size = cm.size()
-        #     cm.calc(model, data, cd)
-        #     if cm.shortname() == "FrictionalPointConstraintModel":
-        #         continue
-        #     elif cm.shortname() == "FrictionalJointConstraintModel":
-        #         continue
-        #     elif cm.shortname() == "JointLimitConstraintModel":
-        #         g[idx_cm:idx_cm+cm_size] *= dt
-        #         g[idx_cm:idx_cm+cm_size] += cd.constraint_residual
-        #     elif cm.shortname() == "BilateralPointConstraintModel":
-        #         continue
-        #         g[idx_cm:idx_cm+cm_size] *= dt
-        #         g[idx_cm:idx_cm+cm_size] += cd.constraint_residual
-        #     idx_cm += cm_size
+        idx_cm = 0
+        for i, cm in enumerate(constraint_models):
+            cd = constraint_datas[i]
+            cm_size = cm.size()
+            cm.calc(model, data, cd)
+            if cm.shortname() == "FrictionalPointConstraintModel":
+                continue
+            elif cm.shortname() == "FrictionalJointConstraintModel":
+                continue
+            elif cm.shortname() == "JointLimitConstraintModel":
+                g[idx_cm : idx_cm + cm_size] *= dt
+                g[idx_cm : idx_cm + cm_size] += cd.extract().constraint_residual
+            elif cm.shortname() == "BilateralPointConstraintModel":
+                continue
+                g[idx_cm : idx_cm + cm_size] *= dt
+                g[idx_cm : idx_cm + cm_size] += cd.constraint_residual
+            idx_cm += cm_size
         return delassus_matrix, g
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
@@ -185,6 +185,7 @@ class ContactSolverTestCase(PinocchioTestCase):
         pin.computeCollisions(geom_model, geom_data, False)
         pin.computeContactPatches(geom_model, geom_data)
         contact_constraints = pin.StdVec_ConstraintModel()
+        friction_coeff = 0.4
         for i, res in enumerate(geom_data.collisionResults):
             patch_res = geom_data.contactPatchResults[i]
             if res.isCollision() and patch_res.numContactPatches():
@@ -221,6 +222,7 @@ class ContactSolverTestCase(PinocchioTestCase):
                     contact_model_i = pin.FrictionalPointConstraintModel(
                         model, joint_id2, placement_i2, joint_id1, placement_i1
                     )
+                    contact_model_i.set = pin.CoulombFrictionCone(friction_coeff)
                     contact_constraints.append(contact_model_i)
         return contact_constraints
 
