@@ -240,6 +240,8 @@ namespace pinocchio
     getTimeScalingFromConstraintsToPosition(
       time_scaling_acc_to_constraints, dt, time_scaling_constraints_to_pos);
     gs = g.array() / time_scaling_acc_to_constraints.array();
+    const Scalar g_pos_norm_inf =
+      (g.cwiseProduct(time_scaling_constraints_to_pos)).template lpNorm<Eigen::Infinity>();
 
     // Initialize De Saxé shift to 0
     // For the CCP, there is no shift
@@ -537,11 +539,18 @@ namespace pinocchio
         }
 
         // Checking stopping residual
+        const Scalar x_norm_inf = x_.template lpNorm<Eigen::Infinity>();
+        const Scalar y_norm_inf = y_.template lpNorm<Eigen::Infinity>();
+        const Scalar z_norm_inf = z_.template lpNorm<Eigen::Infinity>();
         if (
           check_expression_if_real<Scalar, false>(complementarity <= this->absolute_precision)
-          && check_expression_if_real<Scalar, false>(dual_feasibility <= this->absolute_precision)
           && check_expression_if_real<Scalar, false>(
-            primal_feasibility <= this->absolute_precision))
+            dual_feasibility
+            <= this->absolute_precision
+                 + this->relative_precision * math::max(g_pos_norm_inf, z_norm_inf))
+          && check_expression_if_real<Scalar, false>(
+            primal_feasibility <= this->absolute_precision
+                                    + this->relative_precision * math::max(x_norm_inf, y_norm_inf)))
           abs_prec_reached = true;
         else
           abs_prec_reached = false;
