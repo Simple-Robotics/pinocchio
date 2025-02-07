@@ -474,7 +474,7 @@ namespace pinocchio
           dx_bar = x_bar_ - x_bar_previous;
           dx_bar_norm =
             dx_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on x_bar
-          dual_feasibility_vector_bar.noalias() = mu_prox * dx_bar;
+          dual_feasibility_vector_bar = mu_prox * dx_bar;
         }
 
         {
@@ -482,7 +482,7 @@ namespace pinocchio
           dy_bar = y_bar_ - y_bar_previous;
           dy_bar_norm =
             dy_bar.template lpNorm<Eigen::Infinity>(); // check relative progress on y_bar
-          dual_feasibility_vector_bar.noalias() += (tau * rho) * dy_bar;
+          dual_feasibility_vector_bar += (tau * rho) * dy_bar;
         }
 
         {
@@ -513,12 +513,12 @@ namespace pinocchio
         {
           VectorXs tmp(rhs);
           G_bar.applyOnTheRight(y_bar_, rhs);
-          rhs.noalias() += g_bar_ - prox_value * y_bar_;
+          rhs += g_bar_ - prox_value * y_bar_;
           unscaleDualSolution(rhs, tmp);
           if (solve_ncp)
           {
             computeDeSaxeCorrection(constraint_models, tmp, rhs);
-            tmp.noalias() += rhs;
+            tmp += rhs;
           }
 
           tmp.array() *=
