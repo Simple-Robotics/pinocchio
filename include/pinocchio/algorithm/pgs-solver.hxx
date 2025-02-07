@@ -707,12 +707,12 @@ namespace pinocchio
       if (stat_record)
       {
         VectorXs tmp = G * x;
-        tmp.noalias() += gs;
+        tmp += gs;
         VectorXs rhs(tmp.size());
         if (solve_ncp)
         {
           internal::computeDeSaxeCorrection(constraint_models, tmp, rhs);
-          tmp.noalias() += rhs;
+          tmp += rhs;
         }
 
         tmp.array() *=
