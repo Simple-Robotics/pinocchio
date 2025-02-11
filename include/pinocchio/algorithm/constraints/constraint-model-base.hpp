@@ -199,13 +199,13 @@ namespace pinocchio
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeConstRef compliance() const
     {
-      return derived().compliance();
+      return derived().compliance_impl();
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeRef compliance()
     {
-      return derived().compliance();
+      return derived().compliance_impl();
     }
 
     ConstraintModelBase & base()
@@ -233,7 +233,8 @@ namespace pinocchio
       os << shortname() << endl;
     }
 
-    friend std::ostream & operator<<(std::ostream & os, const ConstraintModelBase<Derived> & constraint)
+    friend std::ostream &
+    operator<<(std::ostream & os, const ConstraintModelBase<Derived> & constraint)
     {
       constraint.disp(os);
       return os;

@@ -159,7 +159,7 @@ namespace pinocchio
     {
     }
 
-  //  public:
+    //  public:
     ///
     ///  \brief Contructor with from a given type, joint indexes and placements.
     ///
@@ -304,13 +304,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
+    ComplianceVectorTypeRef compliance_impl()
     {
       return m_compliance;
     }

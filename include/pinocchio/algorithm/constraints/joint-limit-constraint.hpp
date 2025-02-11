@@ -94,7 +94,14 @@ namespace pinocchio
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
-    typedef VectorXs ComplianceVectorType;
+    typedef typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorType
+      ComplianceVectorType;
+    typedef
+      typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorTypeRef
+        ComplianceVectorTypeRef;
+    typedef
+      typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorTypeConstRef
+        ComplianceVectorTypeConstRef;
     typedef VectorXs MarginVectorType;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
@@ -255,13 +262,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    const ComplianceVectorType & compliance() const
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorType & compliance()
+    ComplianceVectorTypeRef & compliance_impl()
     {
       return m_compliance;
     }

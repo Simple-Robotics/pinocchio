@@ -80,6 +80,9 @@ namespace pinocchio
     typedef ConstraintCollectionTpl<Scalar, Options> ConstraintCollection;
     typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
     typedef typename ConstraintCollection::ConstraintModelVariant ConstraintModelVariant;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -220,6 +223,18 @@ namespace pinocchio
     std::string shortname() const
     {
       return ::pinocchio::visitors::shortname(*this);
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeConstRef compliance_impl() const
+    {
+      return ::pinocchio::visitors::compliance<ComplianceVectorTypeConstRef>(*this);
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeRef compliance_impl()
+    {
+      return ::pinocchio::visitors::compliance<ComplianceVectorTypeRef>(*this);
     }
 
     /// \brief Returns the size of the constraint
