@@ -148,6 +148,8 @@ namespace pinocchio
      */
 
     // Allocate Eigen memory if needed
+    compliance_storage.resize(num_total_constraints);
+    compliance.setZero();
     damping_storage.resize(num_total_constraints);
     damping.setZero();
 
@@ -269,7 +271,37 @@ namespace pinocchio
       }
     }
 
+    // Setting physical compliance
+    int cindex = 0;
+    for (const ConstraintModel & constraint_model : contact_models)
+    {
+      const int cdim = constraint_model.size();
+      compliance.template segment(cindex, cdim) = constraint_model.compliance();
+      cindex += cdim;
+    }
+
+    // Setting numerical damping
     updateDamping(mus);
+  }
+
+  template<typename Scalar, int Options>
+  template<typename VectorLike>
+  void ContactCholeskyDecompositionTpl<Scalar, Options>::updateCompliance(
+    const Eigen::MatrixBase<VectorLike> & vec)
+  {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorLike)
+    compliance = vec;
+
+    // The diagonal term of the KKT should be updated with the new compliance
+    updateDamping(getDamping());
+  }
+
+  template<typename Scalar, int Options>
+  void ContactCholeskyDecompositionTpl<Scalar, Options>::updateCompliance(const Scalar & compliance)
+  {
+    const Eigen::DenseIndex total_dim = size();
+    const Eigen::DenseIndex total_constraints_dim = total_dim - nv;
+    updateCompliance(Vector::Constant(total_constraints_dim, compliance));
   }
 
   template<typename Scalar, int Options>
@@ -290,7 +322,7 @@ namespace pinocchio
       DUt_partial.noalias() =
         U.row(j).segment(j + 1, slice_dim).transpose().cwiseProduct(D.segment(j + 1, slice_dim));
 
-      D[j] = -vec[j] - U.row(j).segment(j + 1, slice_dim).dot(DUt_partial);
+      D[j] = -vec[j] - compliance[j] - U.row(j).segment(j + 1, slice_dim).dot(DUt_partial);
       assert(
         check_expression_if_real<Scalar>(D[j] != Scalar(0))
         && "The diagonal element is equal to zero.");

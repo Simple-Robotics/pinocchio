@@ -253,23 +253,43 @@ BOOST_AUTO_TEST_CASE(test_compute)
     }
   } // End: Test operator *
 
-  //
-  //  // Update damping
-  //  {
-  //    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-  //    const double mu = 1;
-  //    delassus_operator.updateDamping(mu);
-  //    BOOST_CHECK(delassus_operator.getDamping().isApproxToConstant(mu));
-  //
-  //    Eigen::VectorXd res_damped(delassus_operator.size());
-  //    delassus_operator.applyOnTheRight(rhs, res_damped);
-  //    const auto res_gt_damped =
-  //      ((delassus_dense_gt_undamped
-  //        + mu * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size()))
-  //       * rhs)
-  //        .eval();
-  //    BOOST_CHECK(res_damped.isApprox(res_gt_damped));
-  //  }
+  // Update damping
+  {
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+    const double mu = 1;
+    delassus_operator.updateDamping(mu);
+    BOOST_CHECK(delassus_operator.getDamping().isApproxToConstant(mu));
+
+    Eigen::VectorXd res_damped(delassus_operator.size());
+    delassus_operator.applyOnTheRight(rhs, res_damped);
+    const auto res_gt_damped =
+      ((delassus_dense_gt_undamped
+        + mu * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size()))
+       * rhs)
+        .eval();
+    BOOST_CHECK(res_damped.isApprox(res_gt_damped));
+  }
+
+  // Update compliance
+  {
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+    const double compliance = 3e-2;
+    const double mu = 1;
+    delassus_operator.updateDamping(mu);
+    delassus_operator.updateCompliance(compliance);
+    BOOST_CHECK(delassus_operator.getCompliance().isApproxToConstant(compliance));
+
+    Eigen::VectorXd res_damped(delassus_operator.size());
+    delassus_operator.applyOnTheRight(rhs, res_damped);
+    const auto res_gt_damped =
+      ((delassus_dense_gt_undamped
+        + compliance * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
+        + mu * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size()))
+       * rhs)
+        .eval();
+    BOOST_CHECK(res_damped.isApprox(res_gt_damped));
+  }
+
   //
   //  // Test solveInPlace
   //  {

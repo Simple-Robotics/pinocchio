@@ -52,9 +52,22 @@ namespace pinocchio
     , delassus_matrix(mat)
     , mat_tmp(mat.rows(), mat.cols())
     , llt(mat)
+    , compliance(Vector::Zero(mat.rows()))
     , damping(Vector::Zero(mat.rows()))
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), mat.cols());
+    }
+
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & vec)
+    {
+      compliance = vec;
+      updateDamping(getDamping());
+    }
+
+    void updateCompliance(const Scalar & compliance)
+    {
+      updateCompliance(Vector::Constant(size(), compliance));
     }
 
     template<typename VectorLike>
@@ -63,6 +76,7 @@ namespace pinocchio
       damping = vec;
       mat_tmp = delassus_matrix;
       mat_tmp += vec.asDiagonal();
+      mat_tmp += compliance.asDiagonal();
       llt.compute(mat_tmp);
     }
 
@@ -103,6 +117,7 @@ namespace pinocchio
       MatrixOut & res = res_.const_cast_derived();
       res.noalias() = delassus_matrix * x;
       res.array() += damping.array() * x.array();
+      res.array() += compliance.array() * x.array();
     }
 
     Eigen::DenseIndex size() const
@@ -122,11 +137,17 @@ namespace pinocchio
     {
       mat_tmp = delassus_matrix;
       mat_tmp += damping.asDiagonal();
+      mat_tmp += compliance.asDiagonal();
       if (enforce_symmetry)
       {
         enforceSymmetry(mat_tmp);
       }
       return mat_tmp;
+    }
+
+    const Vector & getCompliance() const
+    {
+      return compliance;
     }
 
     const Vector & getDamping() const
@@ -145,7 +166,8 @@ namespace pinocchio
     {
       if (&other == this)
         return true;
-      return delassus_matrix == other.delassus_matrix && damping == other.damping;
+      return delassus_matrix == other.delassus_matrix && damping == other.damping
+             && compliance == other.compliance;
     }
 
     bool operator!=(const Self & other) const
@@ -158,6 +180,7 @@ namespace pinocchio
     mutable Matrix mat_tmp;
     CholeskyDecomposition llt;
     Vector damping;
+    Vector compliance;
 
   }; // struct DelassusOperatorDenseTpl
 

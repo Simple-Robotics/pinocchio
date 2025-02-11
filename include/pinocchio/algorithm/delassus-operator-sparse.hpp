@@ -152,9 +152,29 @@ namespace pinocchio
     , delassus_matrix_plus_damping(mat)
     , llt(mat)
     , damping(Vector::Zero(mat.rows()))
+    , compliance(Vector::Zero(mat.rows()))
     , tmp(mat.rows())
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), mat.cols());
+    }
+
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & vec)
+    {
+      for (Eigen::DenseIndex k = 0; k < size(); ++k)
+      {
+        delassus_matrix_plus_damping.coeffRef(k, k) += -compliance[k] + vec[k];
+      }
+      compliance = vec;
+      PINOCCHIO_EIGEN_MALLOC_SAVE_STATUS();
+      PINOCCHIO_EIGEN_MALLOC_ALLOWED();
+      llt.factorize(delassus_matrix_plus_damping);
+      PINOCCHIO_EIGEN_MALLOC_RESTORE_STATUS();
+    }
+
+    void updateCompliance(const Scalar & compliance)
+    {
+      updateCompliance(Vector::Constant(size(), compliance));
     }
 
     template<typename VectorLike>
@@ -208,6 +228,7 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(x.rows(), size());
       MatrixOut & res = res_.const_cast_derived();
       res.noalias() = delassus_matrix * x;
+      res.array() += compliance.array() * x.array();
       res.array() += damping.array() * x.array();
     }
 
@@ -227,6 +248,7 @@ namespace pinocchio
     SparseMatrix matrix(bool enforce_symmetry = false) const
     {
       delassus_matrix_plus_damping = delassus_matrix;
+      delassus_matrix_plus_damping += compliance.asDiagonal();
       delassus_matrix_plus_damping += damping.asDiagonal();
       if (enforce_symmetry)
       {
@@ -235,6 +257,11 @@ namespace pinocchio
           std::invalid_argument, "enforceSymmetry not implemented for sparse matrices");
       }
       return delassus_matrix_plus_damping;
+    }
+
+    const Vector & getCompliance() const
+    {
+      return compliance;
     }
 
     const Vector & getDamping() const
@@ -255,6 +282,7 @@ namespace pinocchio
     mutable SparseMatrix delassus_matrix_plus_damping;
     CholeskyDecomposition llt;
     Vector damping;
+    Vector compliance;
     mutable Vector tmp;
 
   }; // struct DelassusOperatorSparseTpl

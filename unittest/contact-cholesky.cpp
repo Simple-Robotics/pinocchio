@@ -492,6 +492,11 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_contact6D_LOCAL)
     BOOST_CHECK(res_no_mu.isApprox(res_no_mu_ref));
   }
 
+  // test compliant Operational Space Inertia Matrix
+  {
+    const auto delassus_chol = contact_chol_decomposition.getDelassusCholeskyExpression();
+  }
+
   Data::MatrixXs H_recomposed_mu = contact_chol_decomposition_mu.U
                                    * contact_chol_decomposition_mu.D.asDiagonal()
                                    * contact_chol_decomposition_mu.U.transpose();

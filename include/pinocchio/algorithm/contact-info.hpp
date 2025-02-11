@@ -145,6 +145,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
 
     ///  \brief Type of the contact.
     ContactType type;
@@ -203,7 +204,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
     /// \brief Compliance associated with the contact model
-    Vector3 compliance;
+    VectorXs m_compliance;
 
   protected:
     ///
@@ -254,7 +255,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
+    , m_compliance(VectorXs::Zero(size()))
     {
       init(model);
     }
@@ -291,7 +292,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
+    , m_compliance(VectorXs::Zero(size()))
     {
       init(model);
     }
@@ -326,7 +327,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
+    , m_compliance(VectorXs::Zero(size()))
     {
       init(model);
     }
@@ -362,7 +363,7 @@ namespace pinocchio
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
-    , compliance(Vector3::Zero())
+    , m_compliance(VectorXs::Zero(size()))
     {
       init(model);
     }
@@ -389,6 +390,18 @@ namespace pinocchio
       return colwise_span_indexes;
     }
 
+    /// \brief Returns the compliance internally stored in the constraint model
+    const VectorXs & compliance() const
+    {
+      return m_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    VectorXs & compliance()
+    {
+      return m_compliance;
+    }
+
     ///
     ///  \brief Comparison operator
     ///
@@ -411,7 +424,7 @@ namespace pinocchio
              && depth_joint1 == other.depth_joint1 && depth_joint2 == other.depth_joint2
              && colwise_sparsity == other.colwise_sparsity
              && colwise_span_indexes == other.colwise_span_indexes
-             && loop_span_indexes == other.loop_span_indexes && compliance == other.compliance;
+             && loop_span_indexes == other.loop_span_indexes && m_compliance == other.m_compliance;
     }
 
     ///

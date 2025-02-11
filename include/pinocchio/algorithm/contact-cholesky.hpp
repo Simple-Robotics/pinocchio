@@ -116,6 +116,7 @@ namespace pinocchio
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
     , DUt(DUt_storage.map())
+    , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
     }
@@ -131,6 +132,7 @@ namespace pinocchio
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
     , DUt(DUt_storage.map())
+    , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
       // TODO Remove when API is stabilized
@@ -161,6 +163,7 @@ namespace pinocchio
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
     , DUt(DUt_storage.map())
+    , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
       typedef std::reference_wrapper<const ConstraintModel> WrappedType;
@@ -190,6 +193,7 @@ namespace pinocchio
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
     , DUt(DUt_storage.map())
+    , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
       resize(model, contact_models);
@@ -205,6 +209,7 @@ namespace pinocchio
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
     , DUt(DUt_storage.map())
+    , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
       *this = other;
@@ -222,6 +227,7 @@ namespace pinocchio
       Dinv_storage = other.Dinv_storage;
       U_storage = other.U_storage;
       DUt_storage = other.DUt_storage;
+      compliance_storage = other.compliance_storage;
       damping_storage = other.damping_storage;
 
       return *this;
@@ -555,6 +561,31 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLike> & mus);
 
     ///
+    /// \brief Update the compliance terms on the upper left block part of the KKT matrix. The
+    /// compliance terms should be all positives.
+    ///
+    /// \param[in] compliance Vector of physical compliance for the constraints.
+    ///
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & compliance);
+
+    ///
+    /// \brief Update the compliance term on the upper left block part of the KKT matrix. The
+    /// compliance terms should be all positives.
+    ///
+    /// \param[in] compliance The physical compliance for the constraints.
+    ///
+    void updateCompliance(const Scalar & compliance);
+
+    ///
+    /// \brief Returns the current compliance vector.
+    ///
+    const typename EigenStorageVector::MapType getCompliance() const
+    {
+      return compliance;
+    }
+
+    ///
     /// \brief Update the damping terms on the upper left block part of the KKT matrix. The damping
     /// terms should be all positives.
     ///
@@ -708,6 +739,10 @@ namespace pinocchio
     Eigen::DenseIndex nv;
 
     VectorOfSliceVector rowise_sparsity_pattern;
+
+    /// \brief Store the current value of the physical compliance
+    EigenStorageVector compliance_storage;
+    typename EigenStorageVector::RefMapType compliance;
 
     /// \brief Store the current damping value
     EigenStorageVector damping_storage;

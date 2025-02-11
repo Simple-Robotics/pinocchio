@@ -42,6 +42,28 @@ namespace pinocchio
             "Delassus matrix.")
 
           .def(
+            "updateCompliance",
+            (void(DelassusOperator::*)(const Scalar &)) & DelassusOperator::updateCompliance,
+            bp::args("self", "mu"),
+            "Add a compliance term to the diagonal of the Delassus matrix. The compliance term "
+            "should be "
+            "positive.")
+          .def(
+            "updateCompliance", &DelassusOperator::template updateCompliance<Vector>,
+            bp::args("self", "mus"),
+            "Add a compliance term to the diagonal of the Delassus matrix. The compliance terms "
+            "should "
+            "be all positive.")
+
+          .def(
+            "getCompliance",
+            +[](const DelassusOperator & self) -> context::VectorXs {
+              return self.getCompliance();
+            },
+            bp::arg("self"),
+            "Returns the value of the compliance terms contained in the Delassus operator")
+
+          .def(
             "updateDamping",
             (void(DelassusOperator::*)(const Scalar &)) & DelassusOperator::updateDamping,
             bp::args("self", "mu"),

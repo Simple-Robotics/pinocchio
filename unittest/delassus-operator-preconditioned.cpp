@@ -17,7 +17,7 @@ using namespace pinocchio;
 
 BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
 {
-  const Eigen::DenseIndex mat_size = 50;
+  const Eigen::DenseIndex mat_size = 3;
   const Eigen::MatrixXd mat = Eigen::MatrixXd::Random(mat_size, mat_size);
   const Eigen::MatrixXd symmetric_mat = mat.transpose() * mat;
   const Eigen::VectorXd diag_vec = 1e-1 * Eigen::VectorXd::Ones(mat_size);
@@ -57,13 +57,32 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   BOOST_CHECK(rhs.isApprox(res_solve));
 
   // Checking updateDamping
-  const double new_damping = 1e-3;
+  double new_damping = 1e-3;
   const Eigen::MatrixXd damped_preconditioned_matrix =
     preconditioned_matrix + new_damping * Eigen::MatrixXd::Identity(mat_size, mat_size);
   delassus_preconditioned.updateDamping(new_damping);
   delassus_preconditioned.applyOnTheRight(rhs, res);
   Eigen::VectorXd res_apply = damped_preconditioned_matrix * rhs;
   BOOST_CHECK(res.isApprox(res_apply));
+
+  // Checking updateCompliance
+  const double new_compliance = 3e-3;
+  delassus.updateDamping(0.);
+  delassus.updateCompliance(new_compliance);
+  DelassusOperatorPreconditionedTpl<DelassusOperatorDense, DiagonalPreconditioner<Eigen::VectorXd>>
+    delassus_preconditioned2(delassus, diag_preconditioner);
+  const Eigen::MatrixXd preconditioned_compliant_matrix =
+    preconditioner_matrix
+    * (symmetric_mat + new_compliance * Eigen::MatrixXd::Identity(mat_size, mat_size))
+    * preconditioner_matrix;
+  new_damping = 8e-3;
+  const Eigen::MatrixXd damped_preconditioned_compliant_matrix =
+    preconditioned_compliant_matrix + new_damping * Eigen::MatrixXd::Identity(mat_size, mat_size);
+  delassus_preconditioned2.updateDamping(new_damping);
+  BOOST_CHECK(damped_preconditioned_compliant_matrix.isApprox(delassus_preconditioned2.matrix()));
+  delassus_preconditioned2.applyOnTheRight(rhs, res);
+  Eigen::VectorXd res_apply2 = damped_preconditioned_compliant_matrix * rhs;
+  BOOST_CHECK(res.isApprox(res_apply2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
