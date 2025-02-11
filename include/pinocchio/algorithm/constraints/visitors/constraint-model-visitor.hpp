@@ -82,51 +82,6 @@ namespace pinocchio
     }
 
     /**
-     * @brief      ConstraintModelComplianceVisitor visitor
-     */
-    template<typename ReturnType>
-    struct ConstraintModelComplianceVisitor : boost::static_visitor<ReturnType>
-    {
-      template<typename ConstraintModelDerived>
-      ReturnType operator()(const ConstraintModelBase<ConstraintModelDerived> & cmodel) const
-      {
-        return cmodel.compliance();
-      }
-      template<typename ConstraintModelDerived>
-      ReturnType operator()(ConstraintModelBase<ConstraintModelDerived> & cmodel) const
-      {
-        return cmodel.compliance();
-      }
-      ReturnType operator()(const boost::blank &) const
-      {
-        PINOCCHIO_THROW_PRETTY(
-          std::invalid_argument, "The constraint model is of type boost::blank.");
-        return internal::NoRun<ReturnType>::run();
-      }
-
-      template<
-        typename Scalar,
-        int Options,
-        template<typename S, int O> class ConstraintCollectionTpl>
-      static ReturnType
-      run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
-      {
-        return boost::apply_visitor(ConstraintModelComplianceVisitor(), cmodel);
-      }
-    };
-
-    template<
-      typename ReturnType,
-      typename Scalar,
-      int Options,
-      template<typename S, int O> class ConstraintCollectionTpl>
-    inline ReturnType
-    compliance(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
-    {
-      return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
-    }
-
-    /**
      * @brief      ConstraintDataShortnameVisitor visitor
      */
     struct ConstraintDataShortnameVisitor : boost::static_visitor<std::string>
@@ -224,6 +179,25 @@ namespace pinocchio
       template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
       static ReturnType
       run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+      {
+        ModelVisitor<Scalar, Options, ConstraintCollectionTpl, NoArg> visitor;
+        return boost::apply_visitor(visitor, cmodel);
+      }
+
+      template<
+        typename Scalar,
+        int Options,
+        template<typename, int> class ConstraintCollectionTpl,
+        typename ArgsTmp>
+      static ReturnType
+      run(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel, ArgsTmp args)
+      {
+        ModelVisitor<Scalar, Options, ConstraintCollectionTpl, ArgsTmp> visitor(args);
+        return boost::apply_visitor(visitor, cmodel);
+      }
+
+      template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
+      static ReturnType run(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
       {
         ModelVisitor<Scalar, Options, ConstraintCollectionTpl, NoArg> visitor;
         return boost::apply_visitor(visitor, cmodel);
@@ -768,6 +742,75 @@ namespace pinocchio
       typename Algo::ArgsType args(
         model, data, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
       Algo::run(cmodel, cdata, args);
+    }
+
+    /**
+     * @brief      ConstraintModelComplianceVisitor visitor
+     */
+    template<typename ReturnType>
+    struct ConstraintModelComplianceVisitor
+    : ConstraintUnaryVisitorBase<ConstraintModelComplianceVisitor<ReturnType>, ReturnType>
+    {
+      typedef ConstraintUnaryVisitorBase<ConstraintModelComplianceVisitor<ReturnType>, ReturnType>
+        Base;
+      using Base::run;
+      typedef NoArg ArgsType;
+
+      template<typename ConstraintModelDerived>
+      static ReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.compliance();
+      }
+      template<typename ConstraintModelDerived>
+      static ReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.compliance();
+      }
+
+      template<
+        typename Scalar,
+        int Options,
+        template<typename S, int O> class ConstraintCollectionTpl>
+      static ReturnType
+      run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+      {
+        return run(cmodel.derived());
+      }
+
+      template<
+        typename Scalar,
+        int Options,
+        template<typename S, int O> class ConstraintCollectionTpl>
+      static ReturnType run(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+      {
+        return run(cmodel.derived());
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    typename traits<
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::ComplianceVectorTypeConstRef
+    compliance(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
+        ComplianceVectorTypeConstRef ReturnType;
+      return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
+    }
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    typename traits<
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::ComplianceVectorTypeRef
+    compliance(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
+        ComplianceVectorTypeRef ReturnType;
+      return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
     }
 
   } // namespace visitors

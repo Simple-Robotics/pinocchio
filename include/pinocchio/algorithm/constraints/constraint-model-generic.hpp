@@ -228,13 +228,13 @@ namespace pinocchio
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeConstRef compliance() const
     {
-      return ::pinocchio::visitors::compliance<ComplianceVectorTypeConstRef>(*this);
+      return ::pinocchio::visitors::compliance(*this);
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeRef compliance()
     {
-      return ::pinocchio::visitors::compliance<ComplianceVectorTypeRef>(*this);
+      return ::pinocchio::visitors::compliance(*this);
     }
 
     /// \brief Returns the size of the constraint
