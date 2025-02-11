@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(delassus_dense_compliant)
   Eigen::VectorXd res_apply = damped_compliant_matrix * rhs;
   BOOST_CHECK(res.isApprox(res_apply));
 
-  // Checking updateDamping
+  // Checking updateCompliance
   const double new_compliance = 4e-3;
   const Eigen::MatrixXd new_compliance_matrix =
     Eigen::VectorXd::Constant(mat_size, new_compliance).asDiagonal();
