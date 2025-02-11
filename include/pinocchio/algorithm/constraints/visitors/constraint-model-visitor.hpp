@@ -227,6 +227,14 @@ namespace pinocchio
             bf::append(boost::ref(cmodel.derived()), args));
         }
 
+        template<typename ConstraintModelDerived>
+        ReturnType operator()(ConstraintModelBase<ConstraintModelDerived> & cmodel) const
+        {
+          return bf::invoke(
+            &ConstraintModelVisitorDerived::template algo<ConstraintModelDerived>,
+            bf::append(boost::ref(cmodel.derived()), args));
+        }
+
         template<typename ConstraintDataDerived>
         ReturnType operator()(const ConstraintDataBase<ConstraintDataDerived> & cdata) const
         {
@@ -274,6 +282,13 @@ namespace pinocchio
 
         template<typename ConstraintModelDerived>
         ReturnType operator()(const ConstraintModelBase<ConstraintModelDerived> & cmodel) const
+        {
+          return ConstraintModelVisitorDerived::template algo<ConstraintModelDerived>(
+            cmodel.derived());
+        }
+
+        template<typename ConstraintModelDerived>
+        ReturnType operator()(ConstraintModelBase<ConstraintModelDerived> & cmodel) const
         {
           return ConstraintModelVisitorDerived::template algo<ConstraintModelDerived>(
             cmodel.derived());
@@ -758,12 +773,12 @@ namespace pinocchio
       template<typename ConstraintModelDerived>
       static ReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.compliance();
+        return ::pinocchio::make_const_ref(cmodel.compliance());
       }
       template<typename ConstraintModelDerived>
       static ReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.compliance();
+        return ::pinocchio::make_ref(cmodel.compliance());
       }
 
       template<
