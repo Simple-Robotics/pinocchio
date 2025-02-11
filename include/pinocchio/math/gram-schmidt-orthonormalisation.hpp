@@ -56,7 +56,7 @@ namespace pinocchio
     {
       auto vec = matrix.col(i);
       if (i > 0)
-        orthogonalization(matrix.leftCols(i), vec);
+        orthogonalization(matrix.leftCols(i), vec, threshold);
 
       const auto vec_norm = vec.norm();
       vec /= vec_norm;
