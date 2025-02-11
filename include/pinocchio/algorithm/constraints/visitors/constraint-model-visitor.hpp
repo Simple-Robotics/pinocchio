@@ -92,6 +92,11 @@ namespace pinocchio
       {
         return cmodel.compliance();
       }
+      template<typename ConstraintModelDerived>
+      ReturnType operator()(ConstraintModelBase<ConstraintModelDerived> & cmodel) const
+      {
+        return cmodel.compliance();
+      }
       ReturnType operator()(const boost::blank &) const
       {
         PINOCCHIO_THROW_PRETTY(

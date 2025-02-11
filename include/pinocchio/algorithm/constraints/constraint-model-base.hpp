@@ -199,13 +199,13 @@ namespace pinocchio
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeConstRef compliance() const
     {
-      return derived().compliance_impl();
+      return derived().compliance();
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeRef compliance()
     {
-      return derived().compliance_impl();
+      return derived().compliance();
     }
 
     ConstraintModelBase & base()

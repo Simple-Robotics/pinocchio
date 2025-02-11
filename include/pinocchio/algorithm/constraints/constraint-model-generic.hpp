@@ -32,8 +32,8 @@ namespace pinocchio
     typedef VectorXs VectorConstraintSize;
 
     typedef VectorXs ComplianceVectorType;
-    typedef ComplianceVectorType & ComplianceVectorTypeRef;
-    typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+    typedef Eigen::Ref<ComplianceVectorType> ComplianceVectorTypeRef;
+    typedef Eigen::Ref<const ComplianceVectorType> ComplianceVectorTypeConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -226,13 +226,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance_impl() const
+    ComplianceVectorTypeConstRef compliance() const
     {
       return ::pinocchio::visitors::compliance<ComplianceVectorTypeConstRef>(*this);
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance_impl()
+    ComplianceVectorTypeRef compliance()
     {
       return ::pinocchio::visitors::compliance<ComplianceVectorTypeRef>(*this);
     }
