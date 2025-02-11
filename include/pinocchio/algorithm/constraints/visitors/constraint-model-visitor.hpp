@@ -644,9 +644,13 @@ namespace pinocchio
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-      typedef boost::fusion::
-        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &, AssignmentOperatorTag<op>>
-          ArgsType;
+      typedef boost::fusion::vector<
+        const Model &,
+        const Data &,
+        const InputMatrix &,
+        OutputMatrix &,
+        AssignmentOperatorTag<op>>
+        ArgsType;
 
       template<typename ConstraintModel>
       static void algo(
@@ -659,7 +663,8 @@ namespace pinocchio
         AssignmentOperatorTag<op> aot)
       {
         cmodel.jacobianMatrixProduct(
-          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(), aot);
+          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(),
+          aot);
       }
     };
 
@@ -710,9 +715,13 @@ namespace pinocchio
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-      typedef boost::fusion::
-        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &, AssignmentOperatorTag<op>>
-          ArgsType;
+      typedef boost::fusion::vector<
+        const Model &,
+        const Data &,
+        const InputMatrix &,
+        OutputMatrix &,
+        AssignmentOperatorTag<op>>
+        ArgsType;
 
       template<typename ConstraintModel>
       static void algo(
@@ -725,7 +734,8 @@ namespace pinocchio
         AssignmentOperatorTag<op> aot)
       {
         cmodel.jacobianTransposeMatrixProduct(
-          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(), aot);
+          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(),
+          aot);
       }
     };
 
