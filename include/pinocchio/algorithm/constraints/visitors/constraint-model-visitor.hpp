@@ -753,7 +753,6 @@ namespace pinocchio
     {
       typedef ConstraintUnaryVisitorBase<ConstraintModelComplianceVisitor<ReturnType>, ReturnType>
         Base;
-      using Base::run;
       typedef NoArg ArgsType;
 
       template<typename ConstraintModelDerived>
@@ -774,7 +773,7 @@ namespace pinocchio
       static ReturnType
       run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
       {
-        return run(cmodel.derived());
+        return Base::run(cmodel.derived());
       }
 
       template<
@@ -783,7 +782,7 @@ namespace pinocchio
         template<typename S, int O> class ConstraintCollectionTpl>
       static ReturnType run(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
       {
-        return run(cmodel.derived());
+        return Base::run(cmodel.derived());
       }
     };
 
