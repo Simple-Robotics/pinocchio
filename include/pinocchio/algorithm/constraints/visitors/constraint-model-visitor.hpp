@@ -575,19 +575,21 @@ namespace pinocchio
       int Options,
       template<typename, int> class JointCollectionTpl,
       typename InputMatrix,
-      typename OutputMatrix>
+      typename OutputMatrix,
+      AssignmentOperatorType op>
     struct ConstraintModelJacobianMatrixProductVisitor
     : visitors::ConstraintUnaryVisitorBase<ConstraintModelJacobianMatrixProductVisitor<
         Scalar,
         Options,
         JointCollectionTpl,
         InputMatrix,
-        OutputMatrix>>
+        OutputMatrix,
+        op>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
       typedef boost::fusion::
-        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &>
+        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &, AssignmentOperatorTag<op>>
           ArgsType;
 
       template<typename ConstraintModel>
@@ -597,10 +599,11 @@ namespace pinocchio
         const Model & model,
         const Data & data,
         const Eigen::MatrixBase<InputMatrix> & input_matrix,
-        const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+        const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+        AssignmentOperatorTag<op> aot)
       {
         cmodel.jacobianMatrixProduct(
-          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived());
+          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(), aot);
       }
     };
 
@@ -610,21 +613,23 @@ namespace pinocchio
       template<typename S, int O> class JointCollectionTpl,
       template<typename S, int O> class ConstraintCollectionTpl,
       typename InputMatrix,
-      typename OutputMatrix>
+      typename OutputMatrix,
+      AssignmentOperatorType op = SETTO>
     void jacobianMatrixProduct(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
-      const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+      AssignmentOperatorTag<op> aot = SetTo())
     {
       typedef ConstraintModelJacobianMatrixProductVisitor<
-        Scalar, Options, JointCollectionTpl, InputMatrix, OutputMatrix>
+        Scalar, Options, JointCollectionTpl, InputMatrix, OutputMatrix, op>
         Algo;
 
       typename Algo::ArgsType args(
-        model, data, input_matrix.derived(), result_matrix.const_cast_derived());
+        model, data, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
       Algo::run(cmodel, cdata, args);
     }
 
@@ -636,19 +641,21 @@ namespace pinocchio
       int Options,
       template<typename, int> class JointCollectionTpl,
       typename InputMatrix,
-      typename OutputMatrix>
+      typename OutputMatrix,
+      AssignmentOperatorType op>
     struct ConstraintModelJacobianTransposeMatrixProductVisitor
     : visitors::ConstraintUnaryVisitorBase<ConstraintModelJacobianTransposeMatrixProductVisitor<
         Scalar,
         Options,
         JointCollectionTpl,
         InputMatrix,
-        OutputMatrix>>
+        OutputMatrix,
+        op>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
       typedef boost::fusion::
-        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &>
+        vector<const Model &, const Data &, const InputMatrix &, OutputMatrix &, AssignmentOperatorTag<op>>
           ArgsType;
 
       template<typename ConstraintModel>
@@ -658,10 +665,11 @@ namespace pinocchio
         const Model & model,
         const Data & data,
         const Eigen::MatrixBase<InputMatrix> & input_matrix,
-        const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+        const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+        AssignmentOperatorTag<op> aot)
       {
         cmodel.jacobianTransposeMatrixProduct(
-          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived());
+          model, data, cdata.derived(), input_matrix.derived(), result_matrix.const_cast_derived(), aot);
       }
     };
 
@@ -671,21 +679,23 @@ namespace pinocchio
       template<typename S, int O> class JointCollectionTpl,
       template<typename S, int O> class ConstraintCollectionTpl,
       typename InputMatrix,
-      typename OutputMatrix>
+      typename OutputMatrix,
+      AssignmentOperatorType op = SETTO>
     void jacobianTransposeMatrixProduct(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
-      const Eigen::MatrixBase<OutputMatrix> & result_matrix)
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+      AssignmentOperatorTag<op> aot = SetTo())
     {
       typedef ConstraintModelJacobianTransposeMatrixProductVisitor<
-        Scalar, Options, JointCollectionTpl, InputMatrix, OutputMatrix>
+        Scalar, Options, JointCollectionTpl, InputMatrix, OutputMatrix, op>
         Algo;
 
       typename Algo::ArgsType args(
-        model, data, input_matrix.derived(), result_matrix.const_cast_derived());
+        model, data, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
       Algo::run(cmodel, cdata, args);
     }
 

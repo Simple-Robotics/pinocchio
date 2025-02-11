@@ -74,8 +74,8 @@ namespace pinocchio
       Options = _Options
     };
 
-    typedef ConstraintModelBase<ConstraintModelTpl<_Scalar, _Options, ConstraintCollectionTpl>>
-      Base;
+    typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> Self;
+    typedef ConstraintModelBase<Self> Base;
     typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
     typedef ConstraintCollectionTpl<Scalar, Options> ConstraintCollection;
     typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
@@ -144,15 +144,36 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename InputMatrix,
       typename OutputMatrix>
+    typename traits<Self>::template JacobianMatrixProductReturnType<InputMatrix>::type
+    jacobianMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & input_matrix) const
+    {
+      typedef typename traits<Self>::template JacobianMatrixProductReturnType<InputMatrix>::type
+        ReturnType;
+      ReturnType res(size(), input_matrix.cols());
+      jacobianMatrixProduct(model, data, cdata, input_matrix.derived(), res);
+      return res;
+    }
+
+    /// \brief Runs the underlying jacobian multiplication with a matrix.
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename InputMatrix,
+      typename OutputMatrix,
+      AssignmentOperatorType op = SETTO>
     void jacobianMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
-      const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+      AssignmentOperatorTag<op> aot = SetTo()) const
     {
       ::pinocchio::visitors::jacobianMatrixProduct(
-        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
+        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
     }
 
     /// \brief Runs the underlying jacobian transpose multiplication with a matrix.
@@ -160,15 +181,36 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename InputMatrix,
       typename OutputMatrix>
+    typename traits<Self>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+    jacobianTransposeMatrixProduct(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<InputMatrix> & input_matrix) const
+    {
+      typedef
+        typename traits<Self>::template JacobianTransposeMatrixProductReturnType<InputMatrix>::type
+          ReturnType;
+      ReturnType res(model.nv, input_matrix.cols());
+      jacobianTransposeMatrixProduct(*this, model, data, cdata, input_matrix.derived(), res);
+      return res;
+    }
+
+    template<
+      typename InputMatrix,
+      typename OutputMatrix,
+      template<typename, int> class JointCollectionTpl,
+      AssignmentOperatorType op = SETTO>
     void jacobianTransposeMatrixProduct(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<InputMatrix> & input_matrix,
-      const Eigen::MatrixBase<OutputMatrix> & result_matrix) const
+      const Eigen::MatrixBase<OutputMatrix> & result_matrix,
+      AssignmentOperatorTag<op> aot = SetTo()) const
     {
       ::pinocchio::visitors::jacobianTransposeMatrixProduct(
-        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived());
+        *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
     }
 
     static std::string classname()
