@@ -12,9 +12,6 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
-#include <urdf_model/model.h>
-#include <urdf_parser/urdf_parser.h>
-
 #include <sstream>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
