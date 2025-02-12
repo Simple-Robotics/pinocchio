@@ -42,6 +42,7 @@ namespace pinocchio
       public:
         typedef ::pinocchio::urdf::details::UrdfVisitor Base;
         typedef Base::Model Model;
+        typedef Base::JointModel JointModel;
 
         MjcfVisitor(Model & model)
         : Base(model)
@@ -528,7 +529,6 @@ namespace pinocchio
 
         // Mjcf Visitor to add joint and body
         MjcfVisitor & mjcfVisitor;
-        typedef MjcfVisitor MjcfVisitor;
         typedef MjcfVisitor::Model Model;
         typedef MjcfVisitor::JointModel JointModel;
 
