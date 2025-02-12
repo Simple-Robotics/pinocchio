@@ -582,13 +582,12 @@ namespace pinocchio
 
   template<typename _Scalar>
   template<
-    typename MatrixLike,
     typename VectorLike,
     template<typename T> class Holder,
     typename ConstraintModel,
     typename ConstraintModelAllocator>
   bool PGSContactSolverTpl<_Scalar>::solve(
-    const MatrixLike & G,
+    const DelassusOperatorDense & delassus,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
@@ -598,7 +597,7 @@ namespace pinocchio
     const bool stat_record)
 
   {
-
+    const MatrixXs & G = delassus.matrix();
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       over_relax < Scalar(2) && over_relax > Scalar(0), "over_relax should lie in ]0,2[.")
     PINOCCHIO_CHECK_ARGUMENT_SIZE(g.size(), this->getProblemSize());
@@ -754,13 +753,9 @@ namespace pinocchio
   }
 
   template<typename _Scalar>
-  template<
-    typename MatrixLike,
-    typename VectorLike,
-    typename ConstraintModel,
-    typename ConstraintModelAllocator>
+  template<typename VectorLike, typename ConstraintModel, typename ConstraintModelAllocator>
   bool PGSContactSolverTpl<_Scalar>::solve(
-    const MatrixLike & G,
+    const DelassusOperatorDense & delassus,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
@@ -776,7 +771,8 @@ namespace pinocchio
     WrappedConstraintModelVector wrapped_constraint_models(
       constraint_models.cbegin(), constraint_models.cend());
 
-    return solve(G, g, wrapped_constraint_models, dt, x_guess, over_relax, solve_ncp, stat_record);
+    return solve(
+      delassus, g, wrapped_constraint_models, dt, x_guess, over_relax, solve_ncp, stat_record);
   }
 } // namespace pinocchio
 

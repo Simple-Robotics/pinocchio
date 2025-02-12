@@ -6,6 +6,7 @@
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
+#include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include "pinocchio/algorithm/pgs-solver.hpp"
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/crba.hpp"
@@ -69,6 +70,7 @@ struct TestBoxTpl
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
     const auto & G = delassus_matrix_plain;
+    const DelassusOperatorDense delassus(G);
     //    std::cout << "G:\n" << delassus_matrix_plain << std::endl;
 
     Eigen::MatrixXd constraint_jacobian(delassus_matrix_plain.rows(), model.nv);
@@ -86,7 +88,7 @@ struct TestBoxTpl
     pgs_solver.setRelativePrecision(1e-14);
     pgs_solver.setMaxIterations(1000);
     has_converged = pgs_solver.solve(
-      G, g, constraint_models, dt,
+      delassus, g, constraint_models, dt,
       boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
 
@@ -416,6 +418,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
+  const DelassusOperatorDense delassus(G);
   //    std::cout << "G:\n" << delassus_matrix_plain << std::endl;
 
   Eigen::MatrixXd constraint_jacobian(dry_friction_free_flyer.size(), model.nv);
@@ -430,7 +433,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   pgs_solver.setAbsolutePrecision(1e-13);
   pgs_solver.setRelativePrecision(1e-14);
   const bool has_converged = pgs_solver.solve(
-    G, g, constraint_models, dt,
+    delassus, g, constraint_models, dt,
     boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
   primal_solution = pgs_solver.getPrimalSolution();
   BOOST_CHECK(has_converged);
@@ -523,6 +526,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
+  const DelassusOperatorDense delassus(G);
 
   Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
   constraint_jacobian.setZero();
@@ -546,7 +550,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged = pgs_solver.solve(
-      G, g_tilde_against_lower_bound, constraint_models, dt,
+      delassus, g_tilde_against_lower_bound, constraint_models, dt,
       boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
@@ -584,7 +588,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged = pgs_solver.solve(
-      G, g_tilde_move_away, constraint_models, dt,
+      delassus, g_tilde_move_away, constraint_models, dt,
       boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
@@ -644,6 +648,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
+  const DelassusOperatorDense delassus(G);
 
   Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
   constraint_jacobian.setZero();
@@ -667,7 +672,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged = pgs_solver.solve(
-      G, g_tilde_against_lower_bound, constraint_models, dt,
+      delassus, g_tilde_against_lower_bound, constraint_models, dt,
       boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);
@@ -705,7 +710,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
     const bool has_converged = pgs_solver.solve(
-      G, g_tilde_move_away, constraint_models, dt,
+      delassus, g_tilde_move_away, constraint_models, dt,
       boost::make_optional((Eigen::Ref<const Eigen::VectorXd>)primal_solution));
     primal_solution = pgs_solver.getPrimalSolution();
     BOOST_CHECK(has_converged);

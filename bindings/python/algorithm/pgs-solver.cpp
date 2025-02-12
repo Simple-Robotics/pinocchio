@@ -25,7 +25,7 @@ namespace pinocchio
     template<typename DelassusMatrixType, typename ConstraintModel>
     static bool solve_wrapper(
       Solver & solver,
-      const DelassusMatrixType & G,
+      const DelassusOperatorDense & delassus,
       const context::VectorXs & g,
       const context::ConstraintModelVector & constraint_models,
       const context::Scalar dt,
@@ -34,7 +34,8 @@ namespace pinocchio
       const bool solve_ncp = true,
       const bool stat_record = false)
     {
-      return solver.solve(G, g, constraint_models, dt, x, over_relax, solve_ncp, stat_record);
+      return solver.solve(
+        delassus, g, constraint_models, dt, x, over_relax, solve_ncp, stat_record);
     }
 #endif
 
@@ -59,14 +60,14 @@ namespace pinocchio
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_models", "dt"),
+            (bp::args("self", "delassus", "g", "constraint_models", "dt"),
              bp::arg("primal_solution") = boost::none, bp::arg("over_relax") = context::Scalar(1),
              bp::arg("solve_ncp") = true, bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.")
           .def(
             "solve", solve_wrapper<context::SparseMatrix, ConstraintModel>,
-            (bp::args("self", "G", "g", "constraint_models", "dt"),
+            (bp::args("self", "delassus", "g", "constraint_models", "dt"),
              bp::arg("primal_solution") = boost::none, bp::arg("over_relax") = context::Scalar(1),
              bp::arg("solve_ncp") = true, bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "

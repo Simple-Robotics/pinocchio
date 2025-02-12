@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/contact-solver-base.hpp"
+#include "pinocchio/algorithm/delassus-operator-dense.hpp"
 #include <boost/optional.hpp>
 
 namespace pinocchio
@@ -22,6 +23,7 @@ namespace pinocchio
   {
     typedef _Scalar Scalar;
     typedef ContactSolverBaseTpl<Scalar> Base;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
     typedef Eigen::Ref<const VectorXs> RefConstVectorXs;
 
@@ -52,13 +54,12 @@ namespace pinocchio
     ///
     /// \returns True if the problem has converged.
     template<
-      typename MatrixLike,
       typename VectorLike,
       template<typename T> class Holder,
       typename ConstraintModel,
       typename ConstraintModelAllocator>
     bool solve(
-      const MatrixLike & G,
+      const DelassusOperatorDense & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> &
         constraint_models,
@@ -79,13 +80,9 @@ namespace pinocchio
     /// \param[in] over_relax Over relaxation value
     ///
     /// \returns True if the problem has converged.
-    template<
-      typename MatrixLike,
-      typename VectorLike,
-      typename ConstraintModel,
-      typename ConstraintModelAllocator>
+    template<typename VectorLike, typename ConstraintModel, typename ConstraintModelAllocator>
     bool solve(
-      const MatrixLike & G,
+      const DelassusOperatorDense & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
       const Scalar dt,
