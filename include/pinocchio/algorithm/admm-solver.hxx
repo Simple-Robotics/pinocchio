@@ -173,14 +173,12 @@ namespace pinocchio
     typename VectorLike,
     template<typename T> class Holder,
     typename ConstraintModel,
-    typename ConstraintModelAllocator,
-    typename VectorLikeR>
+    typename ConstraintModelAllocator>
   bool ADMMContactSolverTpl<_Scalar>::solve(
     DelassusOperatorBase<DelassusDerived> & _delassus,
     const Eigen::MatrixBase<VectorLike> & g,
     const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
     const Scalar dt,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const boost::optional<RefConstVectorXs> preconditioner,
     const boost::optional<RefConstVectorXs> primal_guess,
     const boost::optional<RefConstVectorXs> dual_guess,
@@ -202,12 +200,12 @@ namespace pinocchio
       DelassusOperatorPreconditioned;
     DelassusDerived & delassus = _delassus.derived();
 
-    const Scalar mu_R = R.minCoeff();
+    const Scalar mu_R = delassus.getCompliance().minCoeff();
     PINOCCHIO_CHECK_INPUT_ARGUMENT(dt >= Scalar(0), "dt should be positive.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(tau <= Scalar(1) && tau > Scalar(0), "tau should lie in ]0,1].");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(mu_prox >= 0, "mu_prox should be positive.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(mu_R >= Scalar(0), "R should be a positive vector.");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(R.size(), problem_size);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(delassus.getCompliance().size(), problem_size);
 
     // First, we initialize the primal and dual variables
     int it = 0;
@@ -279,7 +277,7 @@ namespace pinocchio
 
     // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
-    z_ += R.cwiseProduct(y_) + gs;
+    z_ += gs;
     z_ -= y_.cwiseProduct(delassus.getDamping());
     if (solve_ncp)
     {
@@ -347,9 +345,7 @@ namespace pinocchio
     { // the initial guess is not solution of the problem so we run the ADMM algorithm
       // Applying the preconditioner to work on a problem with a better scaling
       DelassusOperatorPreconditioned G_bar(_delassus, preconditioner_);
-      preconditioner_.unscaleSquare(R, rhs);
-      // we add the compliance to the delassus
-      rhs += VectorXs::Constant(this->problem_size, mu_prox);
+      rhs = VectorXs::Constant(this->problem_size, mu_prox);
       G_bar.updateDamping(rhs);      // G_bar =  P*(G+R)*P + mu_prox*Id
       scaleDualSolution(gs, g_bar_); // g_bar = P * gs
       scalePrimalSolution(x_, x_bar_);
@@ -418,8 +414,7 @@ namespace pinocchio
 
       // Update the cholesky decomposition
       Scalar prox_value = mu_prox + tau * rho;
-      preconditioner_.unscaleSquare(R, rhs);
-      rhs += VectorXs::Constant(this->problem_size, prox_value);
+      rhs = VectorXs::Constant(this->problem_size, prox_value);
       G_bar.updateDamping(rhs);
       Scalar old_prox_value = prox_value;
       cholesky_update_count = 1;
@@ -600,8 +595,7 @@ namespace pinocchio
           prox_value = mu_prox + tau * rho;
           if (old_prox_value != prox_value)
           {
-            preconditioner_.unscaleSquare(R, rhs);
-            rhs += VectorXs::Constant(this->problem_size, prox_value);
+            rhs = VectorXs::Constant(this->problem_size, prox_value);
             G_bar.updateDamping(rhs);
             cholesky_update_count++;
             old_prox_value = prox_value;

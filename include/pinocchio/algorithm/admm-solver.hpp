@@ -430,8 +430,6 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
     /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
     /// \param[in] constraint_models Vector of constraints.
-    /// \param[in] R Proximal regularization value associated to the compliant constraints
-    /// (corresponds to the lowest non-zero).
     /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
@@ -445,14 +443,12 @@ namespace pinocchio
       typename VectorLike,
       template<typename T> class Holder,
       typename ConstraintModel,
-      typename ConstraintAllocator,
-      typename VectorLikeR>
+      typename ConstraintAllocator>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> & constraint_models,
       const Scalar dt,
-      const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<RefConstVectorXs> preconditioner = boost::none,
       const boost::optional<RefConstVectorXs> primal_guess = boost::none,
       const boost::optional<RefConstVectorXs> dual_guess = boost::none,
@@ -467,8 +463,6 @@ namespace pinocchio
     /// \param[in] G Symmetric PSD matrix representing the Delassus of the constraint problem.
     /// \param[in] g Free constraint acceleration or velicity associted with the constraint problem.
     /// \param[in] constraint_models Vector of constraints.
-    /// \param[in] R Proximal regularization value associated to the compliant constraints
-    /// (corresponds to the lowest non-zero).
     /// \param[in] preconditioner Precondtionner of the problem.
     /// \param[in] primal_guess Optional initial guess of the primal solution (constrained forces).
     /// \param[in] dual_guess Optinal Initial guess of the dual solution (constrained velocities).
@@ -481,14 +475,12 @@ namespace pinocchio
       typename DelassusDerived,
       typename VectorLike,
       typename ConstraintModel,
-      typename ConstraintAllocator,
-      typename VectorLikeR>
+      typename ConstraintAllocator>
     bool solve(
       DelassusOperatorBase<DelassusDerived> & delassus,
       const Eigen::MatrixBase<VectorLike> & g,
       const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models,
       const Scalar dt,
-      const Eigen::MatrixBase<VectorLikeR> & R,
       const boost::optional<RefConstVectorXs> preconditioner = boost::none,
       const boost::optional<RefConstVectorXs> primal_guess = boost::none,
       const boost::optional<RefConstVectorXs> dual_guess = boost::none,
@@ -503,7 +495,7 @@ namespace pinocchio
         constraint_models.cbegin(), constraint_models.cend());
 
       return solve(
-        delassus, g, wrapped_constraint_models, dt, R, preconditioner, primal_guess, dual_guess,
+        delassus, g, wrapped_constraint_models, dt, preconditioner, primal_guess, dual_guess,
         solve_ncp, admm_update_rule, stat_record);
     }
 
@@ -534,8 +526,8 @@ namespace pinocchio
       const bool solve_ncp = true)
     {
       return solve(
-        delassus.derived(), g.derived(), constraint_models, dt, VectorXs::Zero(this->problem_size),
-        boost::none, primal_guess.derived(), boost::none, solve_ncp);
+        delassus.derived(), g.derived(), constraint_models, dt, boost::none, primal_guess.derived(),
+        boost::none, solve_ncp);
     }
 
     ///
