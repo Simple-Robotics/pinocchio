@@ -110,4 +110,72 @@ BOOST_AUTO_TEST_CASE(test_cholesky_expression_to_dense)
   BOOST_CHECK(delassus_operator_dense == true_delassus_operator_dense);
 }
 
+BOOST_AUTO_TEST_CASE(delassus_dense_compliant)
+{
+  const Eigen::DenseIndex mat_size = 50;
+  const Eigen::MatrixXd mat = Eigen::MatrixXd::Random(mat_size, mat_size);
+  const Eigen::MatrixXd symmetric_mat = mat.transpose() * mat;
+  const Eigen::VectorXd compliance = 1e-1 * Eigen::VectorXd::Ones(mat_size);
+  const Eigen::MatrixXd compliance_matrix = compliance.asDiagonal();
+  const Eigen::MatrixXd compliant_matrix = symmetric_mat + compliance_matrix;
+
+  BOOST_CHECK(isSymmetric(symmetric_mat));
+  BOOST_CHECK(isSymmetric(compliant_matrix));
+
+  DelassusOperatorDense delassus(symmetric_mat);
+  delassus.updateCompliance(compliance);
+  BOOST_CHECK(delassus.getCompliance().isApprox(compliance));
+
+  Eigen::VectorXd res(mat_size);
+  const Eigen::VectorXd rhs = Eigen::VectorXd::Random(mat_size);
+
+  // Checking matrix() method
+  BOOST_CHECK(compliant_matrix.isApprox(delassus.matrix()));
+
+  // Checking apply on the right
+  delassus.applyOnTheRight(rhs, res);
+  BOOST_CHECK(res.isApprox((compliant_matrix * rhs).eval()));
+
+  // Checking solved
+  Eigen::VectorXd damping_vec = 5e-3 * Eigen::VectorXd::Ones(mat_size);
+  Eigen::MatrixXd damping = damping_vec.asDiagonal();
+  delassus.updateDamping(damping_vec);
+  BOOST_CHECK(delassus.getDamping().isApprox(damping_vec));
+  delassus.solve(rhs, res);
+  const Eigen::MatrixXd compliant_matrix_inv = (compliant_matrix + damping).inverse();
+  Eigen::VectorXd res_solve = compliant_matrix_inv * rhs;
+  BOOST_CHECK(res.isApprox(res_solve));
+
+  // Checking solveInPlace
+  delassus.solveInPlace(rhs);
+  BOOST_CHECK(rhs.isApprox(res_solve));
+
+  // Checking updateDamping
+  const double new_damping = 1e-3;
+  const Eigen::MatrixXd damped_compliant_matrix =
+    compliant_matrix + new_damping * Eigen::MatrixXd::Identity(mat_size, mat_size);
+  delassus.updateDamping(new_damping);
+  BOOST_CHECK(delassus.getDamping().isApprox(Eigen::VectorXd::Constant(mat_size, new_damping)));
+  delassus.applyOnTheRight(rhs, res);
+  Eigen::VectorXd res_apply = damped_compliant_matrix * rhs;
+  BOOST_CHECK(res.isApprox(res_apply));
+
+  // Checking updateCompliance
+  const double new_compliance = 4e-3;
+  const Eigen::MatrixXd new_compliance_matrix =
+    Eigen::VectorXd::Constant(mat_size, new_compliance).asDiagonal();
+  const Eigen::MatrixXd new_compliant_matrix = symmetric_mat + new_compliance_matrix;
+  delassus.updateCompliance(new_compliance);
+  BOOST_CHECK(
+    delassus.getCompliance().isApprox(Eigen::VectorXd::Constant(mat_size, new_compliance)));
+  const Eigen::MatrixXd new_damped_compliant_matrix =
+    new_compliant_matrix + new_damping * Eigen::MatrixXd::Identity(mat_size, mat_size);
+  delassus.updateDamping(new_damping);
+  BOOST_CHECK(delassus.getDamping().isApprox(Eigen::VectorXd::Constant(mat_size, new_damping)));
+  delassus.applyOnTheRight(rhs, res);
+  Eigen::VectorXd new_res_apply = new_damped_compliant_matrix * rhs;
+  BOOST_CHECK(new_damped_compliant_matrix.isApprox(delassus.matrix()));
+  BOOST_CHECK(res.isApprox(new_res_apply));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

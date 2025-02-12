@@ -151,6 +151,14 @@ namespace pinocchio
     }
 
     ///
+    /// \brief Returns the current compliance vector.
+    ///
+    const typename EigenStorageVector::MapType getCompliance() const
+    {
+      return self.getCompliance();
+    }
+
+    ///
     /// \brief Returns the current damping vector.
     ///
     const typename EigenStorageVector::MapType getDamping() const
@@ -169,6 +177,29 @@ namespace pinocchio
     DelassusOperatorDense dense(bool enforce_symmetry = false) const
     {
       return DelassusOperatorDense(this->matrix(enforce_symmetry));
+    }
+
+    ///
+    /// \brief Add a compliance term to the diagonal of the Delassus matrix. The compliance terms
+    /// should be all positives.
+    ///
+    /// \param[in] compliances Vector of compliances related to the constraints.
+    ///
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & compliances)
+    {
+      const_cast<ContactCholeskyDecomposition &>(self).updateCompliance(compliances);
+    }
+
+    ///
+    /// \brief Add a compliance term to the diagonal of the Delassus matrix. The compliance term
+    /// should be positive.
+    ///
+    /// \param[in] compliance Compliance of the constraints.
+    ///
+    void updateCompliance(const Scalar & compliance)
+    {
+      const_cast<ContactCholeskyDecomposition &>(self).updateCompliance(compliance);
     }
 
     ///

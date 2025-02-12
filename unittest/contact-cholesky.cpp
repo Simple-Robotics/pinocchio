@@ -1731,6 +1731,63 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
   BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
 }
 
+BOOST_AUTO_TEST_CASE(contact_cholesky_model_with_compliance)
+{
+  using namespace Eigen;
+  using namespace pinocchio;
+
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  pinocchio::Data data_ref(model);
+
+  model.lowerPositionLimit.head<3>().fill(-1.);
+  model.upperPositionLimit.head<3>().fill(1.);
+  VectorXd q = randomConfiguration(model);
+
+  const std::string RF_name = "rleg6_joint";
+  const std::string LF_name = "lleg6_joint";
+
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
+
+  BilateralPointConstraintModel ci_RF(
+    model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Identity());
+  ci_RF.compliance() = Eigen::VectorXd::Constant(3, 6e-4);
+  constraint_models.push_back(ci_RF);
+  constraint_datas.push_back(BilateralPointConstraintData(ci_RF));
+  BilateralPointConstraintModel ci_LF(
+    model, 0, SE3::Identity(), model.getJointId(LF_name), SE3::Identity());
+  ci_LF.compliance() = Eigen::VectorXd::Constant(3, 7e-4);
+  constraint_models.push_back(ci_LF);
+  constraint_datas.push_back(BilateralPointConstraintData(ci_LF));
+
+  Data data(model);
+  crba(model, data, q, Convention::WORLD);
+
+  ContactCholeskyDecomposition contact_chol_decomposition, contact_chol_decomposition_ref;
+  contact_chol_decomposition.resize(model, constraint_models);
+
+  const double mu = 1e-10;
+  contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+
+  auto delassus_chol = contact_chol_decomposition.getDelassusCholeskyExpression();
+
+  Eigen::VectorXd compliance_vec(6);
+  compliance_vec.head(3) = Eigen::VectorXd::Constant(3, 6e-4);
+  compliance_vec.tail(3) = Eigen::VectorXd::Constant(3, 7e-4);
+
+  BOOST_CHECK(delassus_chol.getDamping().isApprox(Eigen::VectorXd::Constant(6, mu)));
+  BOOST_CHECK(delassus_chol.getCompliance().isApprox(compliance_vec));
+
+  const double new_mu = 1e-3;
+  delassus_chol.updateDamping(new_mu);
+  const double new_compliance = 1e1;
+  delassus_chol.updateCompliance(new_compliance);
+
+  BOOST_CHECK(delassus_chol.getDamping().isApprox(Eigen::VectorXd::Constant(6, new_mu)));
+  BOOST_CHECK(delassus_chol.getCompliance().isApprox(Eigen::VectorXd::Constant(6, new_compliance)));
+}
+
 BOOST_AUTO_TEST_CASE(contact_cholesky_check_resize)
 {
   using namespace Eigen;

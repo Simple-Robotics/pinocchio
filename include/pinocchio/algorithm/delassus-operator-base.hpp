@@ -146,6 +146,17 @@ namespace pinocchio
     }
 
     template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & compliance)
+    {
+      derived().updateCompliance(compliance.derived());
+    }
+
+    void updateCompliance(const Scalar compliance)
+    {
+      derived().updateCompliance(Vector::Constant(size(), compliance));
+    }
+
+    template<typename VectorLike>
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       derived().updateDamping(vec.derived());
