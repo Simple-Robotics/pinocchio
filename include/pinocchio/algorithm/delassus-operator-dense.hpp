@@ -7,6 +7,7 @@
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/delassus-operator-base.hpp"
+#include "pinocchio/algorithm/contact-cholesky.hpp"
 
 namespace pinocchio
 {
@@ -56,6 +57,21 @@ namespace pinocchio
     , damping(Vector::Zero(mat.rows()))
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), mat.cols());
+    }
+
+    template<typename ContactCholeskyDecomposition>
+    explicit DelassusOperatorDenseTpl(
+      const DelassusCholeskyExpressionTpl<ContactCholeskyDecomposition> & delassus_expression,
+      const bool enforce_symmetry = false)
+    : Base()
+    , delassus_matrix(delassus_expression.matrix(enforce_symmetry))
+    , mat_tmp(delassus_expression.rows(), delassus_expression.cols())
+    , llt(delassus_matrix)
+    , compliance(delassus_expression.getCompliance())
+    , damping(delassus_expression.getDamping())
+    {
+      delassus_matrix -= delassus_expression.getDamping().asDiagonal();
+      delassus_matrix -= delassus_expression.getCompliance().asDiagonal();
     }
 
     template<typename VectorLike>
@@ -137,6 +153,17 @@ namespace pinocchio
     {
       mat_tmp = delassus_matrix;
       mat_tmp += damping.asDiagonal();
+      mat_tmp += compliance.asDiagonal();
+      if (enforce_symmetry)
+      {
+        enforceSymmetry(mat_tmp);
+      }
+      return mat_tmp;
+    }
+
+    Matrix undampedMatrix(bool enforce_symmetry = false) const
+    {
+      mat_tmp = delassus_matrix;
       mat_tmp += compliance.asDiagonal();
       if (enforce_symmetry)
       {

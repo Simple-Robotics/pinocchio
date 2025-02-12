@@ -597,7 +597,7 @@ namespace pinocchio
     const bool stat_record)
 
   {
-    const MatrixXs & G = delassus.matrix();
+    const MatrixXs & G = delassus.undampedMatrix();
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       over_relax < Scalar(2) && over_relax > Scalar(0), "over_relax should lie in ]0,2[.")
     PINOCCHIO_CHECK_ARGUMENT_SIZE(g.size(), this->getProblemSize());

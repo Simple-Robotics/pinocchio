@@ -3,7 +3,6 @@
 //
 
 #define PINOCCHIO_EIGEN_CHECK_MALLOC
-#include <iostream>
 
 #include <pinocchio/fwd.hpp>
 
@@ -105,9 +104,20 @@ BOOST_AUTO_TEST_CASE(test_cholesky_expression_to_dense)
   // check dense method
   DelassusOperatorDense delassus_operator_dense = chol.getDelassusCholeskyExpression().dense();
   Eigen::MatrixXd true_delassus_dense = chol.getDelassusCholeskyExpression().matrix();
+  Eigen::VectorXd true_compliance = chol.getDelassusCholeskyExpression().getCompliance();
+  Eigen::VectorXd true_damping = chol.getDelassusCholeskyExpression().getDamping();
+  true_delassus_dense -= true_damping.asDiagonal();
+  true_delassus_dense -= true_compliance.asDiagonal();
   DelassusOperatorDense true_delassus_operator_dense(true_delassus_dense);
+  true_delassus_operator_dense.updateCompliance(true_compliance);
+  true_delassus_operator_dense.updateDamping(true_damping);
 
   BOOST_CHECK(delassus_operator_dense == true_delassus_operator_dense);
+
+  // check dense constructor from expression
+  DelassusOperatorDense delassus_operator_dense2(chol.getDelassusCholeskyExpression());
+
+  BOOST_CHECK(delassus_operator_dense2 == true_delassus_operator_dense);
 }
 
 BOOST_AUTO_TEST_CASE(delassus_dense_compliant)
@@ -145,6 +155,9 @@ BOOST_AUTO_TEST_CASE(delassus_dense_compliant)
   const Eigen::MatrixXd compliant_matrix_inv = (compliant_matrix + damping).inverse();
   Eigen::VectorXd res_solve = compliant_matrix_inv * rhs;
   BOOST_CHECK(res.isApprox(res_solve));
+
+  // Checking undampedMatrix() method
+  BOOST_CHECK(compliant_matrix.isApprox(delassus.undampedMatrix()));
 
   // Checking solveInPlace
   delassus.solveInPlace(rhs);

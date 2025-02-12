@@ -176,7 +176,7 @@ namespace pinocchio
     ///
     DelassusOperatorDense dense(bool enforce_symmetry = false) const
     {
-      return DelassusOperatorDense(this->matrix(enforce_symmetry));
+      return DelassusOperatorDense(*this, enforce_symmetry);
     }
 
     ///
