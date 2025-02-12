@@ -33,6 +33,7 @@ namespace pinocchio
       typedef context::Model Model;
       typedef context::Data Data;
       typedef typename Self::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+      typedef typename Self::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     public:
       template<class PyClass>
@@ -46,38 +47,44 @@ namespace pinocchio
             "createData", &Self::createData, "Create a Data object for the given constraint model.")
           .add_property(
             "set",
-            bp::make_function(
-              (ConstraintSet & (Self::*)()) & Self::set, bp::return_internal_reference<>()),
-            +[](Self & self, const ConstraintSet & new_set) { self.set() = new_set; },
+            bp::make_function( //
+              +[](const Self & self) -> const ConstraintSet & { return self.set(); },
+              bp::return_internal_reference<>()),
+            bp::make_function( //
+              +[](Self & self, const ConstraintSet & new_set) { self.set() = new_set; }),
             "Constraint set.")
           .add_property(
             "compliance",
-            bp::make_function(
-              (ComplianceVectorTypeRef & (Self::*)()) & Self::compliance, bp::return_internal_reference<>()),
-            +[](Self & self, context::VectorXs & new_vector) { self.compliance() = new_vector; },
-            "Compliance of the contact.")
+            bp::make_function( //
+              +[](const Self & self) -> context::VectorXs { return self.compliance(); }),
+            bp::make_function( //
+              +[](Self & self, const context::VectorXs & new_vector) {
+                self.compliance() = new_vector;
+              }),
+            "Compliance of the constraint.")
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
-          .def("calc", &calc, bp::args("self", "model", "data", "constraint_data"),
-            "Evaluate the constraint values at the current state given by data and store the results.")
-          .def("jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"),
+          .def(
+            "calc", &calc, bp::args("self", "model", "data", "constraint_data"),
+            "Evaluate the constraint values at the current state given by data and store the "
+            "results.")
+          .def(
+            "jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"),
             "Compute the constraint jacobian.")
-          .def("jacobian_matrix_product", &jacobianMatrixProduct,
+          .def(
+            "jacobian_matrix_product", &jacobianMatrixProduct,
             bp::args("self", "model", "data", "constraint_data", "matrix"),
             "Forward chain rule: return product between the jacobian and a matrix.")
-          .def("jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
+          .def(
+            "jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
             bp::args("self", "model", "data", "constraint_data", "matrix"),
             "Backward chain rule: return product between the jacobian transpose and a matrix.")
           .def(
-            "getRowSparsityPattern",
-            &Self::getRowSparsityPattern,
-            bp::args("self", "row_id"),
+            "getRowSparsityPattern", &Self::getRowSparsityPattern, bp::args("self", "row_id"),
             bp::return_value_policy<bp::copy_const_reference>(),
             "Colwise sparsity associated with a given row.")
           .def(
-            "getRowActiveIndexes",
-            &Self::getRowActiveIndexes,
-            bp::args("self", "row_id"),
+            "getRowActiveIndexes", &Self::getRowActiveIndexes, bp::args("self", "row_id"),
             bp::return_value_policy<bp::copy_const_reference>(),
             "Vector of the active indexes associated with a given row.")
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
