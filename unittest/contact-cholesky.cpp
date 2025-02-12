@@ -1714,10 +1714,6 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
   constraint_datas.push_back(BilateralPointConstraintData(ci_LF));
   rigid_constraint_datas.push_back(BilateralPointConstraintData(ci_LF));
 
-  // for(ConstraintModel & cm: constraint_models){
-  //   cm.compliance().setZero();
-  // }
-
   Data data(model);
   crba(model, data, q, Convention::WORLD);
 
