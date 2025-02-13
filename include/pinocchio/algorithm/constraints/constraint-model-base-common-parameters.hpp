@@ -6,7 +6,6 @@
 #define __pinocchio_algorithm_constraint_model_common_parameters_hpp__
 
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
-#include <iostream>
 
 namespace pinocchio
 {
