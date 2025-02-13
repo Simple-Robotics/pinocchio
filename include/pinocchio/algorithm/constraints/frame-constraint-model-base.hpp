@@ -79,7 +79,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
-    typedef Vector3 VectorConstraintSize;
+    typedef Vector6 VectorConstraintSize;
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
