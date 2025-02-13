@@ -11,7 +11,7 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
@@ -53,7 +53,7 @@ namespace pinocchio
   ///  \brief Contact model structure containg all the info describing the rigid contact model
   ///
   template<typename Derived>
-  struct PointConstraintModelBase : ConstraintModelBase<Derived>
+  struct PointConstraintModelBase : ConstraintModelBaseCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -66,7 +66,7 @@ namespace pinocchio
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<PointConstraintModelBase>::constraint_formulation_level;
 
-    typedef ConstraintModelBase<Derived> Base;
+    typedef ConstraintModelBaseCommonParameters<Derived> Base;
     typedef typename traits<Derived>::ConstraintModel ConstraintModel;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
 
@@ -81,9 +81,6 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Vector3 VectorConstraintSize;
-    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
-    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     Base & base()
     {
@@ -145,8 +142,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
   protected:
-    /// \brief Compliance associated with the contact model
-    ComplianceVectorType m_compliance = ComplianceVectorType::Zero();
+    using Base::m_compliance;
 
   public:
     ///
@@ -303,18 +299,6 @@ namespace pinocchio
       return colwise_span_indexes;
     }
 
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
-    {
-      return m_compliance;
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
-    {
-      return m_compliance;
-    }
-
     template<typename OtherDerived>
     friend struct PointConstraintModelBase;
 
@@ -344,7 +328,7 @@ namespace pinocchio
              && depth_joint1 == other.depth_joint1 && depth_joint2 == other.depth_joint2
              && colwise_sparsity == other.colwise_sparsity
              && colwise_span_indexes == other.colwise_span_indexes
-             && loop_span_indexes == other.loop_span_indexes && m_compliance == other.m_compliance;
+             && loop_span_indexes == other.loop_span_indexes;
     }
 
     ///
@@ -849,7 +833,7 @@ namespace pinocchio
     template<typename NewScalar, typename OtherDerived>
     void cast(PointConstraintModelBase<OtherDerived> & res) const
     {
-      res.base() = base();
+      Base::template cast<NewScalar>(res);
       res.joint1_id = joint1_id;
       res.joint2_id = joint2_id;
       res.joint1_placement = joint1_placement.template cast<NewScalar>();
@@ -869,8 +853,6 @@ namespace pinocchio
       res.depth_joint1 = depth_joint1;
       res.depth_joint2 = depth_joint2;
       res.loop_span_indexes = loop_span_indexes;
-      res.m_compliance = m_compliance.template cast<NewScalar>();
-      ;
     }
 
   protected:
@@ -959,6 +941,9 @@ namespace pinocchio
           loop_span_indexes.push_back(col_id);
         }
       }
+
+      // Set compliance
+      m_compliance = Vector3::Zero();
     }
   }; // PointConstraintModelBase<Derived>
 
