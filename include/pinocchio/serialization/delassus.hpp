@@ -33,6 +33,7 @@ namespace boost
       : public ::pinocchio::DelassusOperatorDenseTpl<Scalar, Options>
       {
         typedef ::pinocchio::DelassusOperatorDenseTpl<Scalar, Options> Base;
+        using Base::compliance;
         using Base::damping;
         using Base::delassus_matrix;
         using Base::llt;
@@ -57,6 +58,7 @@ namespace boost
       typedef internal::DelassusOperatorDenseAccessor<Scalar, Options> Accessor;
       auto & delassus_ = reinterpret_cast<Accessor &>(delassus);
       ar & make_nvp("delassus_matrix", delassus_.delassus_matrix);
+      ar & make_nvp("compliance", delassus_.compliance);
       ar & make_nvp("damping", delassus_.damping);
 
       if (Archive::is_loading::value)
