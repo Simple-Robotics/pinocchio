@@ -38,6 +38,31 @@ namespace boost
 
     namespace internal
     {
+      template<typename Derived>
+      struct ConstraintModelBaseCommonParameters
+      : public ::pinocchio::ConstraintModelBaseCommonParameters<Derived>
+      {
+        typedef ::pinocchio::ConstraintModelBaseCommonParameters<Derived> Base;
+        using Base::m_compliance;
+      };
+    } // namespace internal
+
+    template<typename Archive, typename Derived>
+    void serialize(
+      Archive & ar,
+      ::pinocchio::ConstraintModelBaseCommonParameters<Derived> & cmodel,
+      const unsigned int /*version*/)
+    {
+      typedef ::pinocchio::ConstraintModelBaseCommonParameters<Derived> Self;
+      typedef typename Self::Base Base;
+      ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      typedef internal::ConstraintModelBaseCommonParameters<Derived> Accessor;
+      auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
+      ar & make_nvp("m_compliance", cmodel_.m_compliance);
+    }
+
+    namespace internal
+    {
       template<typename Scalar, int Options>
       struct JointLimitConstraintModelAccessor
       : public ::pinocchio::JointLimitConstraintModelTpl<Scalar, Options>
@@ -49,7 +74,6 @@ namespace boost
         using Base::active_lower_bound_constraints_tangent;
         using Base::active_upper_bound_constraints;
         using Base::active_upper_bound_constraints_tangent;
-        using Base::m_compliance;
         using Base::m_margin;
         using Base::m_set;
         using Base::row_active_indexes;
@@ -81,7 +105,6 @@ namespace boost
       ar & make_nvp("row_sparsity_pattern", cmodel_.row_sparsity_pattern);
       ar & make_nvp("row_active_indexes", cmodel_.row_active_indexes);
       ar & make_nvp("m_set", cmodel_.m_set);
-      ar & make_nvp("m_compliance", cmodel_.m_compliance);
       ar & make_nvp("m_margin", cmodel_.m_margin);
     }
 
@@ -93,7 +116,6 @@ namespace boost
       {
         typedef ::pinocchio::FrictionalJointConstraintModelTpl<Scalar, Options> Base;
         using Base::active_dofs;
-        using Base::m_compliance;
         using Base::m_set;
         using Base::row_active_indexes;
         using Base::row_sparsity_pattern;
@@ -116,19 +138,7 @@ namespace boost
       ar & make_nvp("row_sparsity_pattern", cmodel_.row_sparsity_pattern);
       ar & make_nvp("row_active_indexes", cmodel_.row_active_indexes);
       ar & make_nvp("m_set", cmodel_.m_set);
-      ar & make_nvp("m_compliance", cmodel_.m_compliance);
     }
-
-    namespace internal
-    {
-      template<typename Derived>
-      struct PointConstraintModelBaseAccessor
-      : public ::pinocchio::PointConstraintModelBase<Derived>
-      {
-        typedef ::pinocchio::PointConstraintModelBase<Derived> Base;
-        using Base::m_compliance;
-      };
-    } // namespace internal
 
     template<typename Archive, typename Derived>
     void serialize(
@@ -158,9 +168,6 @@ namespace boost
       ar & make_nvp("nv", cmodel.nv);
       ar & make_nvp("depth_joint1", cmodel.depth_joint1);
       ar & make_nvp("depth_joint2", cmodel.depth_joint2);
-      typedef internal::PointConstraintModelBaseAccessor<Derived> Accessor;
-      auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
-      ar & make_nvp("m_compliance", cmodel_.m_compliance);
     }
 
     namespace internal
@@ -215,17 +222,6 @@ namespace boost
       ar & make_nvp("m_set", cmodel_.m_set);
     }
 
-    namespace internal
-    {
-      template<typename Derived>
-      struct FrameConstraintModelBaseAccessor
-      : public ::pinocchio::FrameConstraintModelBase<Derived>
-      {
-        typedef ::pinocchio::FrameConstraintModelBase<Derived> Base;
-        using Base::m_compliance;
-      };
-    } // namespace internal
-
     template<typename Archive, typename Derived>
     void serialize(
       Archive & ar,
@@ -255,9 +251,6 @@ namespace boost
       ar & make_nvp("nv", cmodel.nv);
       ar & make_nvp("depth_joint1", cmodel.depth_joint1);
       ar & make_nvp("depth_joint2", cmodel.depth_joint2);
-      typedef internal::FrameConstraintModelBaseAccessor<Derived> Accessor;
-      auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
-      ar & make_nvp("m_compliance", cmodel_.m_compliance);
     }
 
     namespace internal
