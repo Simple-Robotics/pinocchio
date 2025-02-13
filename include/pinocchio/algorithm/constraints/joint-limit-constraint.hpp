@@ -11,7 +11,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint-cone.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
@@ -82,7 +82,7 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct JointLimitConstraintModelTpl
-  : ConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
+  : ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     typedef JointLimitConstraintModelTpl Self;
@@ -90,19 +90,13 @@ namespace pinocchio
     {
       Options = _Options
     };
-    typedef ConstraintModelBase<JointLimitConstraintModelTpl> Base;
+
+    typedef ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl> Base;
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
-    typedef typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorType
-      ComplianceVectorType;
-    typedef
-      typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorTypeRef
-        ComplianceVectorTypeRef;
-    typedef
-      typename traits<JointLimitConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorTypeConstRef
-        ComplianceVectorTypeConstRef;
     typedef VectorXs MarginVectorType;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
@@ -165,6 +159,9 @@ namespace pinocchio
       init(model, active_joints, lb, ub);
     }
 
+    template<typename NewScalar, int NewOptions>
+    friend struct JointLimitConstraintModelTpl;
+
     /// \brief Cast operator
     template<typename NewScalar>
     typename CastType<NewScalar, JointLimitConstraintModelTpl>::type cast() const
@@ -178,13 +175,14 @@ namespace pinocchio
       res.active_lower_bound_constraints_tangent = active_lower_bound_constraints_tangent;
       res.active_upper_bound_constraints = active_upper_bound_constraints;
       res.active_upper_bound_constraints_tangent = active_upper_bound_constraints_tangent;
-      res.active_configuration_limits = active_configuration_limits;
+      res.active_configuration_limits = active_configuration_limits.template cast<NewScalar>();
       res.row_active_indexes = row_active_indexes;
       res.row_sparsity_pattern = row_sparsity_pattern;
       res.active_configuration_components = active_configuration_components;
+      res.corrector_parameters = corrector_parameters.template cast<NewScalar>();
 
+      res.m_margin = m_margin.template cast<NewScalar>();
       res.m_set = m_set.template cast<NewScalar>();
-      res.m_compliance = m_compliance.template cast<NewScalar>();
       return res;
     }
 
@@ -261,18 +259,6 @@ namespace pinocchio
       return m_set;
     }
 
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
-    {
-      return m_compliance;
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef & compliance()
-    {
-      return m_compliance;
-    }
-
     /// \brief Returns the margin internally stored in the constraint model
     const MarginVectorType & margin() const
     {
@@ -307,7 +293,7 @@ namespace pinocchio
              && active_configuration_limits == other.active_configuration_limits
              && row_active_indexes == other.row_active_indexes
              && row_sparsity_pattern == other.row_sparsity_pattern && m_set == other.m_set
-             && m_compliance == other.m_compliance && m_margin == other.m_margin;
+             && m_margin == other.m_margin;
     }
 
     bool operator!=(const JointLimitConstraintModelTpl & other) const
@@ -425,7 +411,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
-    ComplianceVectorType m_compliance;
+    using Base::m_compliance;
 
     /// \brief Margin vector. For each joint, the vector specified the margin thresholh under
     MarginVectorType m_margin;
