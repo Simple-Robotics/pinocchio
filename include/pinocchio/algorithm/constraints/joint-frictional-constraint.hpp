@@ -9,7 +9,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/box-set.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 
 namespace pinocchio
@@ -79,26 +79,19 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct FrictionalJointConstraintModelTpl
-  : ConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  : ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     enum
     {
       Options = _Options
     };
-    typedef ConstraintModelBase<FrictionalJointConstraintModelTpl> Base;
+    typedef ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl> Base;
     typedef FrictionalJointConstraintModelTpl Self;
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
-    typedef
-      typename traits<FrictionalJointConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorType
-        ComplianceVectorType;
-    typedef
-      typename traits<FrictionalJointConstraintModelTpl<_Scalar, _Options>>::ComplianceVectorTypeRef
-        ComplianceVectorTypeRef;
-    typedef typename traits<FrictionalJointConstraintModelTpl<_Scalar, _Options>>::
-      ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<FrictionalJointConstraintModelTpl>::constraint_formulation_level;
@@ -122,9 +115,10 @@ namespace pinocchio
       const JointIndexVector & active_joints)
     {
       init(model, active_joints);
-      m_set = ConstraintSet(size());
-      m_compliance = ComplianceVectorType::Zero(size());
     }
+
+    template<typename NewScalar, int NewOptions>
+    friend struct FrictionalJointConstraintModelTpl;
 
     /// \brief Cast operator
     template<typename NewScalar>
@@ -139,7 +133,6 @@ namespace pinocchio
       res.row_active_indexes = row_active_indexes;
 
       res.m_set = m_set.template cast<NewScalar>();
-      res.m_compliance = m_compliance.template cast<NewScalar>();
       return res;
     }
 
@@ -267,18 +260,6 @@ namespace pinocchio
       return m_set;
     }
 
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
-    {
-      return m_compliance;
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
-    {
-      return m_compliance;
-    }
-
     ///
     ///  \brief Comparison operator
     ///
@@ -291,8 +272,7 @@ namespace pinocchio
     {
       return base() == other.base() && active_dofs == other.active_dofs
              && row_sparsity_pattern == other.row_sparsity_pattern
-             && row_active_indexes == other.row_active_indexes && m_set == other.m_set
-             && m_compliance == other.m_compliance;
+             && row_active_indexes == other.row_active_indexes && m_set == other.m_set;
     }
 
     static std::string classname()
@@ -320,7 +300,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
-    ComplianceVectorType m_compliance;
+    using Base::m_compliance;
   };
 
   template<typename _Scalar, int _Options>
