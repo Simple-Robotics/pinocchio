@@ -89,6 +89,30 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
   }
 }
 
+BOOST_AUTO_TEST_CASE(cast)
+{
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+
+  const Eigen::VectorXd q = neutral(model);
+
+  const Data data(model);
+
+  const std::string RF_name = "rleg6_joint";
+  const JointIndex RF_id = model.getJointId(RF_name);
+
+  const Model::IndexVector & RF_support = model.supports[RF_id];
+  const Model::IndexVector active_joint_ids(RF_support.begin() + 1, RF_support.end());
+
+  FrictionalJointConstraintModel cm(model, active_joint_ids);
+
+  const auto cm_cast_double = cm.cast<double>();
+  BOOST_CHECK(cm_cast_double == cm);
+
+  const auto cm_cast_long_double = cm.cast<long double>();
+  BOOST_CHECK(cm_cast_long_double.cast<double>() == cm);
+}
+
 BOOST_AUTO_TEST_CASE(constraint_jacobian)
 {
   pinocchio::Model model;
