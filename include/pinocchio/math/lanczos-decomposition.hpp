@@ -124,6 +124,7 @@ namespace pinocchio
           {
             // Pick a new arbitrary vector
             bool found_new_base_vector = false;
+            PINOCCHIO_ONLY_USED_FOR_DEBUG(found_new_base_vector);
 
             Scalar q_next_norm = -1; //= q_next.norm();
 
