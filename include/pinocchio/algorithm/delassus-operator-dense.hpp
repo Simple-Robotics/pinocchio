@@ -185,7 +185,7 @@ namespace pinocchio
     Matrix inverse() const
     {
       Matrix res = Matrix::Identity(size(), size());
-      llt.solveInPlace(res);
+      solveInPlace(res);
       return res;
     }
 
