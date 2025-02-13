@@ -38,12 +38,10 @@ namespace pinocchio
     nv = model.nv;
 
     Eigen::DenseIndex num_total_constraints = 0;
-    for (auto it = contact_models.cbegin(); it != contact_models.cend(); ++it)
+    for (std::size_t i = 0; i < contact_models.size(); i++)
     {
-      const ConstraintModel & cmodel = it->get();
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        cmodel.size() > 0, "The dimension of the constraint must be positive");
-      num_total_constraints += cmodel.size();
+      const ConstraintModel & cmodel = contact_models[(std::size_t)i];
+      num_total_constraints += cmodel.activeSize();
     }
 
     const Eigen::DenseIndex total_dim = nv + num_total_constraints;
@@ -88,10 +86,10 @@ namespace pinocchio
     }
 
     Eigen::DenseIndex row_id = 0;
-    for (const auto cmodel_wrapper : contact_models)
+    for (std::size_t i = 0; i < contact_models.size(); i++)
     {
-      const ConstraintModel & cmodel = cmodel_wrapper.get();
-      for (Eigen::DenseIndex k = 0; k < cmodel.size(); ++k, row_id++)
+      const ConstraintModel & cmodel = contact_models[(std::size_t)i];
+      for (Eigen::DenseIndex k = 0; k < cmodel.activeSize(); ++k, row_id++)
       {
         const auto & row_active_indexes = cmodel.getRowActiveIndexes(k);
         nv_subtree_fromRow[row_id] =
@@ -186,6 +184,7 @@ namespace pinocchio
       "ConstraintData is not a ConstraintDataBase");
 
     assert(model.check(data) && "data is not consistent with model.");
+    assert(mus.size() == constraintDim() && "mus has not the right dimension.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       contact_models.size() == contact_datas.size(),
       "The number of constraints between contact_models and contact_datas vectors is different.");
@@ -204,7 +203,7 @@ namespace pinocchio
     {
       const ConstraintModel & cmodel = contact_models[ee_id].get();
       ConstraintData & cdata = contact_datas[ee_id].get();
-
+      // TODO: should we call resize on cmodel ?
       cmodel.calc(model, data, cdata);
     }
 
@@ -220,9 +219,9 @@ namespace pinocchio
       const ConstraintModel & cmodel = contact_models[ee_id].get();
       ConstraintData & cdata = contact_datas[ee_id].get();
 
-      const Eigen::DenseIndex constraint_dim = cmodel.size();
+      const Eigen::DenseIndex constraint_dim = cmodel.activeSize();
       cmodel.jacobian(
-        model, data, cdata, U.block(current_row, total_constraints_dim, cmodel.size(), model.nv));
+        model, data, cdata, U.block(current_row, total_constraints_dim, constraint_dim, model.nv));
       current_row += constraint_dim;
     }
 
@@ -256,12 +255,12 @@ namespace pinocchio
       for (size_t ee_id = 0; ee_id < num_ee; ++ee_id)
       {
         const ConstraintModel & cmodel = contact_models[num_ee - 1 - ee_id];
-        const Eigen::DenseIndex constraint_dim = cmodel.size();
+        const Eigen::DenseIndex constraint_dim = cmodel.activeSize();
 
         for (Eigen::DenseIndex constraint_row_id = constraint_dim - 1; constraint_row_id >= 0;
              --constraint_row_id, --current_row)
         {
-          const auto & colwise_sparsity = cmodel.getRowSparsityPattern(constraint_row_id);
+          const auto & colwise_sparsity = cmodel.getRowActiveSparsityPattern(constraint_row_id);
           if (colwise_sparsity[j])
           {
             U(current_row, jj) -= U.row(current_row).segment(jj + 1, NVT).dot(DUt_partial);
@@ -273,10 +272,12 @@ namespace pinocchio
 
     // Setting physical compliance
     int cindex = 0;
-    for (const ConstraintModel & constraint_model : contact_models)
+    for (std::size_t ee_id = 0; ee_id < num_ee; ee_id++)
     {
-      const int cdim = constraint_model.size();
-      compliance.segment(cindex, cdim) = constraint_model.compliance();
+      const ConstraintModel & cmodel = contact_models[ee_id];
+      // TODO use active compliance
+      const int cdim = cmodel.activeSize();
+      compliance.segment(cindex, cdim) = cmodel.getActiveCompliance();
       cindex += cdim;
     }
 

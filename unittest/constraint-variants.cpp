@@ -94,12 +94,13 @@ BOOST_AUTO_TEST_CASE(constraint_visitors)
     }
   }
 
-  // Test getRowSparsityPattern
+  // Test getRowActivableSparsityPattern
   {
     for (Eigen::DenseIndex row_id = 0; row_id < constraint_model.size(); ++row_id)
     {
       BOOST_CHECK(
-        constraint_model.getRowSparsityPattern(row_id) == rcm.getRowSparsityPattern(row_id));
+        constraint_model.getRowActivableSparsityPattern(row_id)
+        == rcm.getRowActivableSparsityPattern(row_id));
     }
   }
 

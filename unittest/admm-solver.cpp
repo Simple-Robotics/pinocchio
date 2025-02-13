@@ -60,6 +60,7 @@ struct TestBoxTpl
     // Cholesky of the Delassus matrix
     crba(model, data, q0, Convention::WORLD);
     ContactCholeskyDecomposition chol(model, constraint_models);
+    chol.resize(model, constraint_models, constraint_datas);
     chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
     // std::cout << "chol.getDamping() :   " << chol.getDamping().transpose() << std::endl;
 
@@ -499,6 +500,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
@@ -612,14 +614,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -628,11 +636,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   // External torques push the slider against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -669,11 +672,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   // External torques push the slider away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
@@ -755,14 +753,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -771,11 +775,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
 
   // External torques push the slider against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -817,11 +816,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
 
   // External torques push the slider away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
@@ -903,14 +897,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -919,11 +919,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
 
   // External torques push the slider against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -965,11 +960,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
 
   // External torques push the slider away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
@@ -1042,14 +1032,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1058,11 +1054,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   // Gravity pushes the freeflyer against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -1107,11 +1098,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   // External torques compensate the gravity to push the freeflyer away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
@@ -1184,14 +1170,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1200,11 +1192,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
 
   // Gravity pushes the freeflyer against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -1244,11 +1231,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
 
   // External torques compensate the gravity to push the freeflyer away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
@@ -1324,14 +1306,20 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  const auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models, constraint_datas);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1340,11 +1328,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
 
   // External torques push the freeflyer against from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound = constraint_jacobian * v_free_against_lower_bound;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual / dt;
@@ -1388,11 +1371,6 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
 
   // External torques push the freeflyer away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual / dt;
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;

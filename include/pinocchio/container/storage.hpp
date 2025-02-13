@@ -11,6 +11,23 @@ namespace pinocchio
 {
 
   template<typename MatrixLike>
+  struct EigenStorageTpl;
+
+  template<typename NewScalar, typename MatrixLike>
+  struct CastType<NewScalar, EigenStorageTpl<MatrixLike>>
+  {
+    enum
+    {
+      RowsAtCompileTime = MatrixLike::RowsAtCompileTime,
+      ColsAtCompileTime = MatrixLike::ColsAtCompileTime,
+      Options = MatrixLike::Options
+    };
+
+    typedef Eigen::Matrix<NewScalar, RowsAtCompileTime, ColsAtCompileTime, Options> NewVectorType;
+    typedef EigenStorageTpl<NewVectorType> type;
+  };
+
+  template<typename MatrixLike>
   struct EigenStorageTpl
   {
     typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixLike) PlainMatrixType;
@@ -108,6 +125,17 @@ namespace pinocchio
       new (&m_map) MapType(m_storage.data(), other.m_map.rows(), other.m_map.cols());
 
       return *this;
+    }
+
+    /// \brief Cast operator
+    template<typename NewScalar>
+    typename CastType<NewScalar, EigenStorageTpl>::type cast() const
+    {
+      typedef typename CastType<NewScalar, EigenStorageTpl>::type ReturnType;
+      ReturnType res;
+      res.resize(rows(), cols());
+      res.m_storage.head(size()) = m_storage.head(size()).template cast<NewScalar>();
+      return res;
     }
 
     /// \brief Resize the current capacity of the internal storage.
@@ -212,6 +240,16 @@ namespace pinocchio
     bool isValid() const
     {
       return data() != NULL;
+    }
+
+    template<typename OtherMatrixLike>
+    friend struct EigenStorageTpl;
+
+    /// \brief Comparison operator.
+    template<typename OtherMatrixLike>
+    bool operator==(const EigenStorageTpl<OtherMatrixLike> & other) const
+    {
+      return m_storage == other.m_storage && rows() == other.rows() && cols() == other.cols();
     }
 
   protected:

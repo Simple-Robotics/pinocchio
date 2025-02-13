@@ -45,6 +45,9 @@ namespace pinocchio
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
 
+    typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+
     typedef Vector6 BaumgarteVectorType;
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
       BaumgarteCorrectorVectorParameters;

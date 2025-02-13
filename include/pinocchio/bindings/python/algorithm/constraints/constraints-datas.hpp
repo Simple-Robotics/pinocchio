@@ -62,8 +62,19 @@ namespace pinocchio
       return cl
         .def(bp::init<const typename context::JointLimitConstraintData::ConstraintModel &>(
           bp::args("self", "constraint_model"), "From model constructor."))
+        .add_property(
+          "constraint_residual",
+          bp::make_function(
+            +[](const context::JointLimitConstraintData & self)
+              -> Eigen::Ref<context::JointLimitConstraintData::VectorXs> {
+              return Eigen::Ref<context::JointLimitConstraintData::VectorXs>(
+                self.constraint_residual);
+            },
+            bp::with_custodian_and_ward_postcall<0, 1>()),
+          "")
         .PINOCCHIO_ADD_PROPERTY(
-          context::JointLimitConstraintData, constraint_residual, "Constraint residual.");
+          context::JointLimitConstraintData, active_set_indexes,
+          "Indexes of the active constraints set.");
     }
   } // namespace python
 } // namespace pinocchio

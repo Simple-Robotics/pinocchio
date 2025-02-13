@@ -48,6 +48,9 @@ namespace pinocchio
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
 
+    typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+
     static constexpr bool has_baumgarte_corrector = false;
     typedef Eigen::Matrix<Scalar, 0, 0> BaumgarteVectorType; // empty vector
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
@@ -104,6 +107,11 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef
+      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<FrictionalJointConstraintModelTpl>::constraint_formulation_level;
@@ -157,6 +165,11 @@ namespace pinocchio
     int size() const
     {
       return int(active_dofs.size());
+    }
+
+    int activeSize() const
+    {
+      return size();
     }
 
     Base & base()
@@ -253,10 +266,16 @@ namespace pinocchio
       AssignmentOperatorTag<op> aot = SetTo()) const;
 
     /// \brief Returns the sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return row_sparsity_pattern[size_t(row_id)];
+    }
+
+    /// \brief Returns the sparsity associated with a given row
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      return getRowActivableSparsityPattern(row_id);
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
@@ -264,6 +283,18 @@ namespace pinocchio
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return row_active_indexes[size_t(row_id)];
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
+    {
+      return this->compliance();
     }
 
     /// \brief Returns the vector of active rows

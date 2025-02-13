@@ -26,6 +26,8 @@
 #include "pinocchio/serialization/constraints-model.hpp"
 #include "pinocchio/serialization/constraints-data.hpp"
 
+#include "pinocchio/serialization/eigen-storage.hpp"
+
 #include "pinocchio/multibody/sample-models.hpp"
 
 #include <iostream>
@@ -992,7 +994,6 @@ struct initConstraint<pinocchio::JointLimitConstraintModel>
     // uppon construction of the constraint model.
     ConstraintModel cmodel =
       JointLimitAndFrictionConstraintModelInitializer<ConstraintModel>::run(model);
-    cmodel.margin().setRandom();
     cmodel.baumgarte_corrector_parameters().Kd = 1.0;
     cmodel.baumgarte_corrector_parameters().Kp = 3.14;
     return cmodel;
@@ -1222,6 +1223,17 @@ BOOST_AUTO_TEST_CASE(test_constraint_model_variant)
     cmodel.compliance().setRandom();
   }
   generic_test(cmodels, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_vector");
+}
+
+BOOST_AUTO_TEST_CASE(eigen_storage)
+{
+  typedef pinocchio::EigenStorageTpl<Eigen::MatrixXd> EigenStorage;
+
+  EigenStorage storage(15, 8, 15, 8);
+  storage.map().setRandom();
+  storage.resize(10, 5);
+
+  generic_test(storage, TEST_SERIALIZATION_FOLDER "/Container", "eigen_storage");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

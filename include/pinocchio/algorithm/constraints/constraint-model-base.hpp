@@ -39,10 +39,9 @@ namespace pinocchio
     typedef typename traits<Derived>::ConstraintSet ConstraintSet;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
-      BaumgarteCorrectorVectorParametersRef;
-    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
-      BaumgarteCorrectorVectorParametersConstRef;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeConstRef
+      ActiveComplianceVectorTypeConstRef;
     // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
     //   BaumgarteCorrectorVectorParametersRef;
     // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
@@ -184,9 +183,16 @@ namespace pinocchio
     }
 
     /// \brief Returns the colwise sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::Index row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::Index row_id) const
     {
-      return derived().getRowSparsityPattern(row_id);
+      return derived().getRowActivableSparsityPattern(row_id);
+    }
+
+    /// \brief Returns the colwise sparsity associated with a given row of the active set of
+    /// cosntraints
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::Index row_id) const
+    {
+      return derived().getRowActiveSparsityPattern(row_id);
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
@@ -195,9 +201,28 @@ namespace pinocchio
       return derived().getRowActiveIndexes(row_id);
     }
 
+    /// \brief Returns the active compliance internally stored in the constraint and corresponding
+    /// to the active set contained in cdata
+    ActiveComplianceVectorTypeConstRef getActiveCompliance() const
+    {
+      return derived().getActiveCompliance_impl();
+    }
+
+    /// \brief Returns the active compliance internally stored in the constraint and corresponding
+    /// to the active set contained in cdata
+    ActiveComplianceVectorTypeRef getActiveCompliance()
+    {
+      return derived().getActiveCompliance_impl();
+    }
+
     int size() const
     {
       return derived().size();
+    }
+
+    int activeSize() const
+    {
+      return derived().activeSize();
     }
 
     ConstraintSet & set()
