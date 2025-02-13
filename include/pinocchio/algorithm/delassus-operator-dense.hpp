@@ -53,6 +53,7 @@ namespace pinocchio
     , delassus_matrix(mat)
     , mat_tmp(mat.rows(), mat.cols())
     , llt(mat)
+    , m_llt_dirty(false)
     , damping(Vector::Zero(mat.rows()))
     , compliance(Vector::Zero(mat.rows()))
     {
@@ -67,18 +68,19 @@ namespace pinocchio
     , delassus_matrix(delassus_expression.matrix(enforce_symmetry))
     , mat_tmp(delassus_expression.rows(), delassus_expression.cols())
     , llt(delassus_matrix)
+    , m_llt_dirty(false)
     , damping(delassus_expression.getDamping())
     , compliance(delassus_expression.getCompliance())
     {
-      delassus_matrix -= delassus_expression.getDamping().asDiagonal();
-      delassus_matrix -= delassus_expression.getCompliance().asDiagonal();
+      delassus_matrix -= damping.asDiagonal();
+      delassus_matrix -= compliance.asDiagonal();
     }
 
     template<typename VectorLike>
     void updateCompliance(const Eigen::MatrixBase<VectorLike> & vec)
     {
       compliance = vec;
-      updateDamping(getDamping());
+      m_llt_dirty = true;
     }
 
     void updateCompliance(const Scalar & compliance)
@@ -90,10 +92,7 @@ namespace pinocchio
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       damping = vec;
-      mat_tmp = delassus_matrix;
-      mat_tmp += vec.asDiagonal();
-      mat_tmp += compliance.asDiagonal();
-      llt.compute(mat_tmp);
+      m_llt_dirty = true;
     }
 
     void updateDamping(const Scalar & mu)
@@ -104,6 +103,7 @@ namespace pinocchio
     template<typename MatrixLike>
     void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const
     {
+      runCholeskyDecomposition(); // only if needed
       llt.solveInPlace(mat.const_cast_derived());
     }
 
@@ -203,9 +203,22 @@ namespace pinocchio
     }
 
   protected:
+    void runCholeskyDecomposition()
+    {
+      if (m_llt_dirty)
+      {
+        mat_tmp = delassus_matrix;
+        mat_tmp += damping.asDiagonal();
+        mat_tmp += compliance.asDiagonal();
+        llt.compute(mat_tmp);
+        m_llt_dirty = false;
+      }
+    }
+
     Matrix delassus_matrix;
     mutable Matrix mat_tmp;
     CholeskyDecomposition llt;
+    bool m_llt_dirty;
     Vector damping;
     Vector compliance;
 
