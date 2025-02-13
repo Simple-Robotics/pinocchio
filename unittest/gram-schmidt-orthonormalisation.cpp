@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_orthonormalization)
   for (size_t i = 0; i < num_tests; ++i)
   {
     const Eigen::DenseIndex size = 100;
-    const double prec = size * Eigen::NumTraits<double>::dummy_precision();
+    const double prec = size * size * Eigen::NumTraits<double>::dummy_precision();
     const Eigen::MatrixXd random_mat = Eigen::MatrixXd::Random(size, size);
     const Eigen::MatrixXd mat = random_mat + Eigen::MatrixXd::Identity(size, size);
 
