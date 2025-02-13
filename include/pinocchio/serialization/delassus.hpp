@@ -60,6 +60,7 @@ namespace boost
       ar & make_nvp("delassus_matrix", delassus_.delassus_matrix);
       ar & make_nvp("compliance", delassus_.compliance);
       ar & make_nvp("damping", delassus_.damping);
+      ar & make_nvp("compliance", delassus_.compliance);
 
       if (Archive::is_loading::value)
       {
