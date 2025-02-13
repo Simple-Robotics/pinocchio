@@ -53,8 +53,8 @@ namespace pinocchio
     , delassus_matrix(mat)
     , mat_tmp(mat.rows(), mat.cols())
     , llt(mat)
-    , compliance(Vector::Zero(mat.rows()))
     , damping(Vector::Zero(mat.rows()))
+    , compliance(Vector::Zero(mat.rows()))
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), mat.cols());
     }
@@ -67,8 +67,8 @@ namespace pinocchio
     , delassus_matrix(delassus_expression.matrix(enforce_symmetry))
     , mat_tmp(delassus_expression.rows(), delassus_expression.cols())
     , llt(delassus_matrix)
-    , compliance(delassus_expression.getCompliance())
     , damping(delassus_expression.getDamping())
+    , compliance(delassus_expression.getCompliance())
     {
       delassus_matrix -= delassus_expression.getDamping().asDiagonal();
       delassus_matrix -= delassus_expression.getCompliance().asDiagonal();
