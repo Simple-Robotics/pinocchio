@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.4.0] - 2025-02-12
+
 ### Added
 - Helpers for mapping heap allocation for Eigen::Map via alloca
 - Introduce EigenStorageTpl
@@ -25,6 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fix aba explicit template instantiation ([#2541](https://github.com/stack-of-tasks/pinocchio/pull/2541))
 - Fix mjcf parsing of keyframe qpos with newlines ([#2535](https://github.com/stack-of-tasks/pinocchio/pull/2535))
 - Fix sites parsing for MJCF format ([#2548](https://github.com/stack-of-tasks/pinocchio/pull/2548))
+- Fix register `std::shared_ptr<{,Geometry}{Model,Data}>` in bindings ([#2566](https://github.com/stack-of-tasks/pinocchio/pull/2566))
+- Removed useless uses of `PINOCCHIO_WITH_CXX11_SUPPORT` ([#2564](https://github.com/stack-of-tasks/pinocchio/pull/2564))
 
 
 ## [3.3.1] - 2024-12-13
@@ -1092,7 +1096,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.1...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.1.0...v3.2.0
