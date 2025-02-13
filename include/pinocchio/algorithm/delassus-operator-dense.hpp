@@ -203,7 +203,7 @@ namespace pinocchio
     }
 
   protected:
-    void runCholeskyDecomposition()
+    void runCholeskyDecomposition() const
     {
       if (m_llt_dirty)
       {
@@ -217,8 +217,8 @@ namespace pinocchio
 
     Matrix delassus_matrix;
     mutable Matrix mat_tmp;
-    CholeskyDecomposition llt;
-    bool m_llt_dirty;
+    mutable CholeskyDecomposition llt;
+    mutable bool m_llt_dirty;
     Vector damping;
     Vector compliance;
 
