@@ -5,11 +5,11 @@
 #ifndef __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
 #define __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
 
-template<typename _BaumgarteVector>
-struct BaumgarteCorrectorParametersTpl;
-
 namespace pinocchio
 {
+
+  template<typename _BaumgarteVector>
+  struct BaumgarteCorrectorParametersTpl;
 
   template<typename Derived>
   struct ConstraintModelCommonParameters
