@@ -39,9 +39,9 @@ namespace pinocchio
 
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
-    typedef Vector3 VectorConstraintSize;
+    typedef Vector6 VectorConstraintSize;
 
-    typedef Vector3 ComplianceVectorType;
+    typedef Vector6 ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
   };
@@ -77,7 +77,6 @@ namespace pinocchio
 
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
-    using typename Base::ComplianceVectorType;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
     using typename Base::Matrix36;
@@ -229,8 +228,6 @@ namespace pinocchio
     {
       return m_set;
     }
-
-    using Base::compliance;
 
     static std::string classname()
     {

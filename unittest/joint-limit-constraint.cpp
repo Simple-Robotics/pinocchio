@@ -150,6 +150,27 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
   }
 }
 
+BOOST_AUTO_TEST_CASE(cast)
+{
+  pinocchio::Model model;
+  pinocchio::buildModels::manipulator(model);
+
+  const Data data(model);
+
+  const std::string ee_name = "wrist2_joint";
+  const JointIndex ee_id = model.getJointId(ee_name);
+
+  const Model::IndexVector & ee_support = model.supports[ee_id];
+  const Model::IndexVector active_joint_ids(ee_support.begin() + 1, ee_support.end());
+  JointLimitConstraintModel cm(model, active_joint_ids);
+
+  const auto cm_cast_double = cm.cast<double>();
+  BOOST_CHECK(cm_cast_double == cm);
+
+  const auto cm_cast_long_double = cm.cast<long double>();
+  BOOST_CHECK(cm_cast_long_double.cast<double>() == cm);
+}
+
 BOOST_AUTO_TEST_CASE(constraint_jacobian)
 {
   pinocchio::Model model;

@@ -76,7 +76,6 @@ namespace pinocchio
 
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
-    using typename Base::ComplianceVectorType;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
     using typename Base::Matrix36;
@@ -229,8 +228,6 @@ namespace pinocchio
     {
       return m_set;
     }
-
-    using Base::compliance;
 
     static std::string classname()
     {

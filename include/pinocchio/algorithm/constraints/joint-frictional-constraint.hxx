@@ -72,6 +72,9 @@ namespace pinocchio
       for (const auto val : extended_support)
         sparsity_pattern[val] = true;
     }
+
+    m_compliance = ComplianceVectorType::Zero(size());
+    m_set = ConstraintSet(size());
   }
 
   template<typename Scalar, int Options>

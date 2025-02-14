@@ -1,0 +1,67 @@
+//
+// Copyright (c) 2025 INRIA
+//
+
+#ifndef __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
+#define __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
+
+namespace pinocchio
+{
+
+  template<typename Derived>
+  struct ConstraintModelCommonParameters
+  {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    typedef ConstraintModelCommonParameters<Derived> Self;
+
+    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+
+    template<typename OtherDerived>
+    friend struct ConstraintModelCommonParameters;
+
+    /// \brief Cast to NewScalar
+    template<typename NewScalar, typename OtherDerived>
+    void cast(ConstraintModelCommonParameters<OtherDerived> & other) const
+    {
+      other.m_compliance = m_compliance.template cast<NewScalar>();
+    }
+
+    /// \brief Comparison operator
+    bool operator==(const Self & other) const
+    {
+      return m_compliance == other.m_compliance;
+    }
+
+    /// \brief Comparison operator
+    bool operator!=(const Self & other) const
+    {
+      return !(*this == other);
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeConstRef compliance() const
+    {
+      return m_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeRef compliance()
+    {
+      return m_compliance;
+    }
+
+  protected:
+    /// \brief Default constructor - protected so that the class cannot be instanciated on its own.
+    ConstraintModelCommonParameters()
+    {
+    }
+
+    ComplianceVectorType m_compliance;
+  };
+
+} // namespace pinocchio
+
+#endif // __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__

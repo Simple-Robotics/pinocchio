@@ -1,9 +1,9 @@
 //
-// Copyright (c) 2019-2024 INRIA CNRS
+// Copyright (c) 2019-2025 INRIA CNRS
 //
 
-#ifndef __pinocchio_algorithm_constraints_frame_constraint_model_hpp__
-#define __pinocchio_algorithm_constraints_frame_constraint_model_hpp__
+#ifndef __pinocchio_algorithm_constraints_frame_constraint_model_base_hpp__
+#define __pinocchio_algorithm_constraints_frame_constraint_model_base_hpp__
 
 #include <algorithm>
 
@@ -12,6 +12,8 @@
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
@@ -52,7 +54,9 @@ namespace pinocchio
   ///  \brief Contact model structure containg all the info describing the rigid contact model
   ///
   template<typename Derived>
-  struct FrameConstraintModelBase : ConstraintModelBase<Derived>
+  struct FrameConstraintModelBase
+  : ConstraintModelBase<Derived>
+  , ConstraintModelCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -66,6 +70,7 @@ namespace pinocchio
       traits<FrameConstraintModelBase>::constraint_formulation_level;
 
     typedef ConstraintModelBase<Derived> Base;
+    typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
     typedef typename traits<Derived>::ConstraintModel ConstraintModel;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
 
@@ -73,16 +78,14 @@ namespace pinocchio
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
-    typedef Vector3 VectorConstraintSize;
-    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
-    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef Vector6 VectorConstraintSize;
 
     Base & base()
     {
@@ -144,8 +147,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
   protected:
-    /// \brief Compliance associated with the contact model
-    ComplianceVectorType m_compliance = ComplianceVectorType::Zero();
+    using BaseCommonParameters::m_compliance;
 
   public:
     ///
@@ -301,22 +303,20 @@ namespace pinocchio
       return colwise_span_indexes;
     }
 
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
-    {
-      return m_compliance;
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
-    {
-      return m_compliance;
-    }
-
     template<typename OtherDerived>
     friend struct FrameConstraintModelBase;
 
     using Base::derived;
+    BaseCommonParameters & base_common_parameters()
+    {
+      return static_cast<BaseCommonParameters &>(*this);
+    }
+    const BaseCommonParameters & base_common_parameters() const
+    {
+      return static_cast<const BaseCommonParameters &>(*this);
+    }
+
+    using BaseCommonParameters::compliance;
 
     ///
     ///  \brief Comparison operator
@@ -328,7 +328,10 @@ namespace pinocchio
     ///
     bool operator==(const FrameConstraintModelBase & other) const
     {
-      return base() == other.base() && joint1_id == other.joint1_id && joint2_id == other.joint2_id
+      if (this == &other)
+        return true;
+      return base() == other.base() && base_common_parameters() == other.base_common_parameters()
+             && joint1_id == other.joint1_id && joint2_id == other.joint2_id
              && joint1_placement == other.joint1_placement
              && joint2_placement == other.joint2_placement && nv == other.nv
              && corrector_parameters == other.corrector_parameters
@@ -342,7 +345,7 @@ namespace pinocchio
              && depth_joint1 == other.depth_joint1 && depth_joint2 == other.depth_joint2
              && colwise_sparsity == other.colwise_sparsity
              && colwise_span_indexes == other.colwise_span_indexes
-             && loop_span_indexes == other.loop_span_indexes && m_compliance == other.m_compliance;
+             && loop_span_indexes == other.loop_span_indexes;
     }
 
     ///
@@ -782,7 +785,9 @@ namespace pinocchio
     template<typename NewScalar, typename OtherDerived>
     void cast(FrameConstraintModelBase<OtherDerived> & res) const
     {
-      res.base() = base();
+      Base::cast(res);
+      BaseCommonParameters::template cast<NewScalar>(res);
+
       res.joint1_id = joint1_id;
       res.joint2_id = joint2_id;
       res.joint1_placement = joint1_placement.template cast<NewScalar>();
@@ -802,8 +807,6 @@ namespace pinocchio
       res.depth_joint1 = depth_joint1;
       res.depth_joint2 = depth_joint2;
       res.loop_span_indexes = loop_span_indexes;
-      res.m_compliance = m_compliance.template cast<NewScalar>();
-      ;
     }
 
   protected:
@@ -892,9 +895,12 @@ namespace pinocchio
           loop_span_indexes.push_back(col_id);
         }
       }
+
+      // Set compliance
+      m_compliance.setZero();
     }
   }; // FrameConstraintModelBase<Derived>
 
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_frame_constraint_model_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_frame_constraint_model_base_hpp__
