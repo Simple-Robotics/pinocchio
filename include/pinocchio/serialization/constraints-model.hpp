@@ -51,11 +51,9 @@ namespace boost
     void serialize(
       Archive & ar,
       ::pinocchio::ConstraintModelCommonParameters<Derived> & cmodel,
-      const unsigned int /*version*/)
+      const unsigned int version)
     {
-      typedef ::pinocchio::ConstraintModelCommonParameters<Derived> Self;
-      typedef typename Self::Base Base;
-      ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      PINOCCHIO_UNUSED_VARIABLE(version);
       typedef internal::ConstraintModelCommonParameters<Derived> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
       ar & make_nvp("m_compliance", cmodel_.m_compliance);
@@ -90,6 +88,9 @@ namespace boost
       typedef ::pinocchio::JointLimitConstraintModelTpl<Scalar, Options> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      typedef typename Self::BaseCommonParameters BaseCommonParameters;
+      ar & make_nvp(
+        "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
       ar & make_nvp("corrector_parameters", cmodel.corrector_parameters);
       typedef internal::JointLimitConstraintModelAccessor<Scalar, Options> Accessor;
@@ -131,6 +132,9 @@ namespace boost
       typedef ::pinocchio::FrictionalJointConstraintModelTpl<Scalar, Options> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      typedef typename Self::BaseCommonParameters BaseCommonParameters;
+      ar & make_nvp(
+        "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
       typedef internal::FrictionalJointConstraintModelAccessor<Scalar, Options> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
@@ -149,6 +153,9 @@ namespace boost
       typedef ::pinocchio::PointConstraintModelBase<Derived> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      typedef typename Self::BaseCommonParameters BaseCommonParameters;
+      ar & make_nvp(
+        "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
       ar & make_nvp("joint1_id", cmodel.joint1_id);
       ar & make_nvp("joint2_id", cmodel.joint2_id);
@@ -231,6 +238,9 @@ namespace boost
       typedef ::pinocchio::FrameConstraintModelBase<Derived> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+      typedef typename Self::BaseCommonParameters BaseCommonParameters;
+      ar & make_nvp(
+        "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
       // TODO: point/frame constraint models data structure are identical, factor them
       ar & make_nvp("joint1_id", cmodel.joint1_id);
