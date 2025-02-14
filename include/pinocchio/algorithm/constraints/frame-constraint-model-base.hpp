@@ -56,7 +56,7 @@ namespace pinocchio
   template<typename Derived>
   struct FrameConstraintModelBase
   : ConstraintModelBase<Derived>
-  , ConstraintModelBaseCommonParameters<Derived>
+  , ConstraintModelCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -70,7 +70,7 @@ namespace pinocchio
       traits<FrameConstraintModelBase>::constraint_formulation_level;
 
     typedef ConstraintModelBase<Derived> Base;
-    typedef ConstraintModelBaseCommonParameters<Derived> BaseCommonParameters;
+    typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
     typedef typename traits<Derived>::ConstraintModel ConstraintModel;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
 

@@ -39,10 +39,10 @@ namespace boost
     namespace internal
     {
       template<typename Derived>
-      struct ConstraintModelBaseCommonParameters
-      : public ::pinocchio::ConstraintModelBaseCommonParameters<Derived>
+      struct ConstraintModelCommonParameters
+      : public ::pinocchio::ConstraintModelCommonParameters<Derived>
       {
-        typedef ::pinocchio::ConstraintModelBaseCommonParameters<Derived> Base;
+        typedef ::pinocchio::ConstraintModelCommonParameters<Derived> Base;
         using Base::m_compliance;
       };
     } // namespace internal
@@ -50,13 +50,13 @@ namespace boost
     template<typename Archive, typename Derived>
     void serialize(
       Archive & ar,
-      ::pinocchio::ConstraintModelBaseCommonParameters<Derived> & cmodel,
+      ::pinocchio::ConstraintModelCommonParameters<Derived> & cmodel,
       const unsigned int /*version*/)
     {
-      typedef ::pinocchio::ConstraintModelBaseCommonParameters<Derived> Self;
+      typedef ::pinocchio::ConstraintModelCommonParameters<Derived> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
-      typedef internal::ConstraintModelBaseCommonParameters<Derived> Accessor;
+      typedef internal::ConstraintModelCommonParameters<Derived> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
       ar & make_nvp("m_compliance", cmodel_.m_compliance);
     }

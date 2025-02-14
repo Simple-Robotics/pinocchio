@@ -81,7 +81,7 @@ namespace pinocchio
   template<typename _Scalar, int _Options>
   struct FrictionalJointConstraintModelTpl
   : ConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
-  , ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  , ConstraintModelCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     enum
@@ -91,7 +91,7 @@ namespace pinocchio
 
     typedef FrictionalJointConstraintModelTpl Self;
     typedef ConstraintModelBase<Self> Base;
-    typedef ConstraintModelBaseCommonParameters<Self> BaseCommonParameters;
+    typedef ConstraintModelCommonParameters<Self> BaseCommonParameters;
 
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;

@@ -84,7 +84,7 @@ namespace pinocchio
   template<typename _Scalar, int _Options>
   struct JointLimitConstraintModelTpl
   : ConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
-  , ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
+  , ConstraintModelCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     typedef JointLimitConstraintModelTpl Self;
@@ -94,7 +94,7 @@ namespace pinocchio
     };
 
     typedef ConstraintModelBase<JointLimitConstraintModelTpl> Base;
-    typedef ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl> BaseCommonParameters;
+    typedef ConstraintModelCommonParameters<JointLimitConstraintModelTpl> BaseCommonParameters;
 
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;

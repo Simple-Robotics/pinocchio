@@ -9,22 +9,22 @@ namespace pinocchio
 {
 
   template<typename Derived>
-  struct ConstraintModelBaseCommonParameters
+  struct ConstraintModelCommonParameters
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef ConstraintModelBaseCommonParameters<Derived> Self;
+    typedef ConstraintModelCommonParameters<Derived> Self;
 
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     template<typename OtherDerived>
-    friend struct ConstraintModelBaseCommonParameters;
+    friend struct ConstraintModelCommonParameters;
 
     /// \brief Cast to NewScalar
     template<typename NewScalar, typename OtherDerived>
-    void cast(ConstraintModelBaseCommonParameters<OtherDerived> & other) const
+    void cast(ConstraintModelCommonParameters<OtherDerived> & other) const
     {
       other.m_compliance = m_compliance.template cast<NewScalar>();
     }
@@ -55,7 +55,7 @@ namespace pinocchio
 
   protected:
     /// \brief Default constructor - protected so that the class cannot be instanciated on its own.
-    ConstraintModelBaseCommonParameters()
+    ConstraintModelCommonParameters()
     {
     }
 
