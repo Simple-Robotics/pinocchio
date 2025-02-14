@@ -61,13 +61,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    const BaumgarteCorrectorParameters & baumgarte_parameters() const
+    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters() const
     {
       return m_baumgarte_parameters;
     }
 
     /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParameters & baumgarte_parameters()
+    BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
     {
       return m_baumgarte_parameters;
     }
