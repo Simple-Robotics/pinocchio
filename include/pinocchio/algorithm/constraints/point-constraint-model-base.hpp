@@ -2,8 +2,8 @@
 // Copyright (c) 2019-2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_constraints_point_constraint_model_hpp__
-#define __pinocchio_algorithm_constraints_point_constraint_model_hpp__
+#ifndef __pinocchio_algorithm_constraints_point_constraint_model_base_hpp__
+#define __pinocchio_algorithm_constraints_point_constraint_model_base_hpp__
 
 #include <algorithm>
 
@@ -11,7 +11,9 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
@@ -53,7 +55,9 @@ namespace pinocchio
   ///  \brief Contact model structure containg all the info describing the rigid contact model
   ///
   template<typename Derived>
-  struct PointConstraintModelBase : ConstraintModelBaseCommonParameters<Derived>
+  struct PointConstraintModelBase
+  : ConstraintModelBase<Derived>
+  , ConstraintModelBaseCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -66,7 +70,8 @@ namespace pinocchio
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<PointConstraintModelBase>::constraint_formulation_level;
 
-    typedef ConstraintModelBaseCommonParameters<Derived> Base;
+    typedef ConstraintModelBase<Derived> Base;
+    typedef ConstraintModelBaseCommonParameters<Derived> BaseCommonParameters;
     typedef typename traits<Derived>::ConstraintModel ConstraintModel;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
 
@@ -90,6 +95,16 @@ namespace pinocchio
     {
       return static_cast<const Base &>(*this);
     }
+
+    BaseCommonParameters & base_common_parameters()
+    {
+      return static_cast<BaseCommonParameters &>(*this);
+    }
+    const BaseCommonParameters & base_common_parameters() const
+    {
+      return static_cast<const BaseCommonParameters &>(*this);
+    }
+    using BaseCommonParameters::compliance;
 
     /// \brief Index of the first joint in the model tree
     JointIndex joint1_id;
@@ -142,7 +157,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
   protected:
-    using Base::m_compliance;
+    using BaseCommonParameters::m_compliance;
 
   public:
     ///
@@ -314,7 +329,10 @@ namespace pinocchio
     ///
     bool operator==(const PointConstraintModelBase & other) const
     {
-      return base() == other.base() && joint1_id == other.joint1_id && joint2_id == other.joint2_id
+      if (this == &other)
+        return true;
+      return base() == other.base() && base_common_parameters() == other.base_common_parameters()
+             && joint1_id == other.joint1_id && joint2_id == other.joint2_id
              && joint1_placement == other.joint1_placement
              && joint2_placement == other.joint2_placement && nv == other.nv
              && corrector_parameters == other.corrector_parameters
@@ -833,7 +851,9 @@ namespace pinocchio
     template<typename NewScalar, typename OtherDerived>
     void cast(PointConstraintModelBase<OtherDerived> & res) const
     {
-      Base::template cast<NewScalar>(res);
+      Base::cast(res);
+      BaseCommonParameters::template cast<NewScalar>(res);
+
       res.joint1_id = joint1_id;
       res.joint2_id = joint2_id;
       res.joint1_placement = joint1_placement.template cast<NewScalar>();
@@ -943,10 +963,10 @@ namespace pinocchio
       }
 
       // Set compliance
-      m_compliance = Vector3::Zero();
+      m_compliance.setZero();
     }
   }; // PointConstraintModelBase<Derived>
 
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_point_constraint_model_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_point_constraint_model_base_hpp__

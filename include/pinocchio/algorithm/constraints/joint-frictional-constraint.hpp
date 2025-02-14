@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hpp__
@@ -9,8 +9,9 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/box-set.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 
 namespace pinocchio
 {
@@ -79,15 +80,19 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct FrictionalJointConstraintModelTpl
-  : ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  : ConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  , ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     enum
     {
       Options = _Options
     };
-    typedef ConstraintModelBaseCommonParameters<FrictionalJointConstraintModelTpl> Base;
+
     typedef FrictionalJointConstraintModelTpl Self;
+    typedef ConstraintModelBase<Self> Base;
+    typedef ConstraintModelBaseCommonParameters<Self> BaseCommonParameters;
+
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
@@ -126,7 +131,8 @@ namespace pinocchio
     {
       typedef typename CastType<NewScalar, FrictionalJointConstraintModelTpl>::type ReturnType;
       ReturnType res;
-      Base::template cast<NewScalar>(res);
+      Base::cast(res);
+      BaseCommonParameters::template cast<NewScalar>(res);
 
       res.active_dofs = active_dofs;
       res.row_sparsity_pattern = row_sparsity_pattern;
@@ -154,6 +160,17 @@ namespace pinocchio
     {
       return static_cast<const Base &>(*this);
     }
+
+    BaseCommonParameters & base_common_parameters()
+    {
+      return static_cast<BaseCommonParameters &>(*this);
+    }
+    const BaseCommonParameters & base_common_parameters() const
+    {
+      return static_cast<const BaseCommonParameters &>(*this);
+    }
+
+    using BaseCommonParameters::compliance;
 
     template<template<typename, int> class JointCollectionTpl>
     void calc(
@@ -270,7 +287,10 @@ namespace pinocchio
     ///
     bool operator==(const FrictionalJointConstraintModelTpl & other) const
     {
-      return base() == other.base() && active_dofs == other.active_dofs
+      if (this == &other)
+        return true;
+      return base() == other.base() && base_common_parameters() == other.base_common_parameters()
+             && active_dofs == other.active_dofs
              && row_sparsity_pattern == other.row_sparsity_pattern
              && row_active_indexes == other.row_active_indexes && m_set == other.m_set;
     }
@@ -300,7 +320,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
-    using Base::m_compliance;
+    using BaseCommonParameters::m_compliance;
   };
 
   template<typename _Scalar, int _Options>

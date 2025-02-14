@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_joint_limit_constraint_hpp__
@@ -11,8 +11,9 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint-cone.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base-common-parameters.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
@@ -82,7 +83,8 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct JointLimitConstraintModelTpl
-  : ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
+  : ConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
+  , ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
     typedef JointLimitConstraintModelTpl Self;
@@ -91,7 +93,9 @@ namespace pinocchio
       Options = _Options
     };
 
-    typedef ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl> Base;
+    typedef ConstraintModelBase<JointLimitConstraintModelTpl> Base;
+    typedef ConstraintModelBaseCommonParameters<JointLimitConstraintModelTpl> BaseCommonParameters;
+
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
@@ -168,7 +172,8 @@ namespace pinocchio
     {
       typedef typename CastType<NewScalar, JointLimitConstraintModelTpl>::type ReturnType;
       ReturnType res;
-      Base::template cast<NewScalar>(res);
+      Base::cast(res);
+      BaseCommonParameters::template cast<NewScalar>(res);
 
       res.active_configuration_components = active_configuration_components;
       res.active_lower_bound_constraints = active_lower_bound_constraints;
@@ -204,6 +209,17 @@ namespace pinocchio
     {
       return static_cast<const Base &>(*this);
     }
+
+    BaseCommonParameters & base_common_parameters()
+    {
+      return static_cast<BaseCommonParameters &>(*this);
+    }
+    const BaseCommonParameters & base_common_parameters() const
+    {
+      return static_cast<const BaseCommonParameters &>(*this);
+    }
+
+    using BaseCommonParameters::compliance;
 
     template<template<typename, int> class JointCollectionTpl>
     void calc(
@@ -281,7 +297,7 @@ namespace pinocchio
     ///
     bool operator==(const JointLimitConstraintModelTpl & other) const
     {
-      return base() == other.base()
+      return base() == other.base() && base_common_parameters() == other.base_common_parameters()
              && active_configuration_components == other.active_configuration_components
              && corrector_parameters == other.corrector_parameters
              && active_lower_bound_constraints == other.active_lower_bound_constraints
@@ -411,7 +427,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
-    using Base::m_compliance;
+    using BaseCommonParameters::m_compliance;
 
     /// \brief Margin vector. For each joint, the vector specified the margin thresholh under
     MarginVectorType m_margin;
