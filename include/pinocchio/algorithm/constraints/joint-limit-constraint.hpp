@@ -51,6 +51,10 @@ namespace pinocchio
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
 
+    static constexpr bool has_baumgarte_corrector = true;
+    typedef VectorXs BaumgarteVectorType;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
     {
@@ -101,11 +105,10 @@ namespace pinocchio
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs MarginVectorType;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
-
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -184,7 +187,6 @@ namespace pinocchio
       res.row_active_indexes = row_active_indexes;
       res.row_sparsity_pattern = row_sparsity_pattern;
       res.active_configuration_components = active_configuration_components;
-      res.corrector_parameters = corrector_parameters.template cast<NewScalar>();
 
       res.m_margin = m_margin.template cast<NewScalar>();
       res.m_set = m_set.template cast<NewScalar>();
@@ -299,7 +301,6 @@ namespace pinocchio
     {
       return base() == other.base() && base_common_parameters() == other.base_common_parameters()
              && active_configuration_components == other.active_configuration_components
-             && corrector_parameters == other.corrector_parameters
              && active_lower_bound_constraints == other.active_lower_bound_constraints
              && active_lower_bound_constraints_tangent
                   == other.active_lower_bound_constraints_tangent
@@ -384,9 +385,6 @@ namespace pinocchio
       AssignmentOperatorTag<op> aot = SetTo()) const;
 
   public:
-    ///  \brief Corrector parameters
-    BaumgarteCorrectorParameters corrector_parameters;
-
     static std::string classname()
     {
       return std::string("JointLimitConstraintModel");
@@ -427,6 +425,7 @@ namespace pinocchio
     VectofOfEigenIndexVector row_active_indexes;
 
     ConstraintSet m_set;
+    using BaseCommonParameters::m_baumgarte_parameters;
     using BaseCommonParameters::m_compliance;
 
     /// \brief Margin vector. For each joint, the vector specified the margin thresholh under

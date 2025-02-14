@@ -44,6 +44,9 @@ namespace pinocchio
     typedef Vector6 ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+
+    typedef Vector6 BaumgarteVectorType;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
   };
 
   template<typename _Scalar, int _Options>
@@ -75,7 +78,6 @@ namespace pinocchio
     typedef WeldConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;

@@ -10,22 +10,43 @@
 namespace pinocchio
 {
 
-  template<typename _Scalar>
+  template<typename _BaumgarteVector>
   struct BaumgarteCorrectorParametersTpl;
 
-  template<typename _Scalar>
-  struct traits<BaumgarteCorrectorParametersTpl<_Scalar>>
+  template<typename NewScalar, typename BaumgarteVector>
+  struct CastType<NewScalar, BaumgarteCorrectorParametersTpl<BaumgarteVector>>
   {
-    typedef _Scalar Scalar;
+    enum
+    {
+      RowsAtCompileTime = BaumgarteVector::RowsAtCompileTime,
+      ColsAtCompileTime = BaumgarteVector::ColsAtCompileTime
+    };
+
+    typedef Eigen::Matrix<NewScalar, RowsAtCompileTime, ColsAtCompileTime> NewBaumgarteVector;
+    typedef BaumgarteCorrectorParametersTpl<NewBaumgarteVector> type;
   };
 
-  template<typename _Scalar>
-  struct BaumgarteCorrectorParametersTpl : NumericalBase<BaumgarteCorrectorParametersTpl<_Scalar>>
+  template<typename _BaumgarteVector>
+  struct traits<BaumgarteCorrectorParametersTpl<_BaumgarteVector>>
   {
-    typedef _Scalar Scalar;
-    typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
+    typedef _BaumgarteVector BaumgarteVector;
+    typedef typename BaumgarteVector::Scalar Scalar;
+  };
 
-    explicit BaumgarteCorrectorParametersTpl(int size = 6)
+  template<typename _BaumgarteVector>
+  struct BaumgarteCorrectorParametersTpl
+  : NumericalBase<BaumgarteCorrectorParametersTpl<_BaumgarteVector>>
+  {
+    typedef _BaumgarteVector BaumgarteVector;
+    typedef typename BaumgarteVector::Scalar Scalar;
+
+    /// \brief Default constructor which does not set Kp/Kd.
+    /// It is needed for constraints that don't have baumgarte correction.
+    BaumgarteCorrectorParametersTpl()
+    {
+    }
+
+    explicit BaumgarteCorrectorParametersTpl(int size)
     : Kp(size)
     , Kd(size)
     {
@@ -43,22 +64,32 @@ namespace pinocchio
       return !(*this == other);
     }
 
+    template<typename OtherBaumgarteVector>
+    BaumgarteCorrectorParametersTpl &
+    operator=(const BaumgarteCorrectorParametersTpl<OtherBaumgarteVector> & other)
+    {
+      Kp = other.Kp;
+      Kd = other.Kd;
+      return *this;
+    }
+
     // parameters
     /// \brief Proportional corrector value.
-    Vector6Max Kp;
+    BaumgarteVector Kp;
 
     /// \brief Damping corrector value.
-    Vector6Max Kd;
+    BaumgarteVector Kd;
 
     template<typename NewScalar>
-    BaumgarteCorrectorParametersTpl<NewScalar> cast() const
+    typename CastType<NewScalar, BaumgarteCorrectorParametersTpl>::type cast() const
     {
-      typedef BaumgarteCorrectorParametersTpl<NewScalar> ReturnType;
+      typedef typename CastType<NewScalar, BaumgarteCorrectorParametersTpl>::type ReturnType;
       ReturnType res;
       res.Kp = Kp.template cast<NewScalar>();
       res.Kd = Kd.template cast<NewScalar>();
       return res;
     }
+
   }; // struct BaumgarteCorrectorParametersTpl
 } // namespace pinocchio
 

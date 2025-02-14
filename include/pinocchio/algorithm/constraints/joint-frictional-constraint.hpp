@@ -48,6 +48,10 @@ namespace pinocchio
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
 
+    static constexpr bool has_baumgarte_corrector = false;
+    typedef Eigen::Matrix<Scalar, 0, 0> BaumgarteVectorType; // empty vector
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
     {

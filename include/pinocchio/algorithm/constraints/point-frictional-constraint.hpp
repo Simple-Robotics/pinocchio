@@ -43,6 +43,9 @@ namespace pinocchio
     typedef Vector3 ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+
+    typedef Vector3 BaumgarteVectorType;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
   };
 
   template<typename _Scalar, int _Options>
@@ -74,7 +77,6 @@ namespace pinocchio
     typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
 
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;

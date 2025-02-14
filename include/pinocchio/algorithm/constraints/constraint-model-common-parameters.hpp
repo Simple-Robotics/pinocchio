@@ -5,6 +5,9 @@
 #ifndef __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
 #define __pinocchio_algorithm_constraints_constraint_model_common_parameters_hpp__
 
+template<typename _BaumgarteVector>
+struct BaumgarteCorrectorParametersTpl;
+
 namespace pinocchio
 {
 
@@ -18,6 +21,8 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
 
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
@@ -27,12 +32,14 @@ namespace pinocchio
     void cast(ConstraintModelCommonParameters<OtherDerived> & other) const
     {
       other.m_compliance = m_compliance.template cast<NewScalar>();
+      other.m_baumgarte_parameters = m_baumgarte_parameters.template cast<NewScalar>();
     }
 
     /// \brief Comparison operator
     bool operator==(const Self & other) const
     {
-      return m_compliance == other.m_compliance;
+      return m_compliance == other.m_compliance
+             && m_baumgarte_parameters == other.m_baumgarte_parameters;
     }
 
     /// \brief Comparison operator
@@ -53,6 +60,18 @@ namespace pinocchio
       return m_compliance;
     }
 
+    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    const BaumgarteCorrectorParameters & baumgarte_parameters() const
+    {
+      return m_baumgarte_parameters;
+    }
+
+    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParameters & baumgarte_parameters()
+    {
+      return m_baumgarte_parameters;
+    }
+
   protected:
     /// \brief Default constructor - protected so that the class cannot be instanciated on its own.
     ConstraintModelCommonParameters()
@@ -60,6 +79,7 @@ namespace pinocchio
     }
 
     ComplianceVectorType m_compliance;
+    BaumgarteCorrectorParameters m_baumgarte_parameters;
   };
 
 } // namespace pinocchio
