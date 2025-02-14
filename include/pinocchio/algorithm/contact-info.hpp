@@ -86,6 +86,11 @@ namespace pinocchio
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
 
+    static constexpr bool has_baumgarte_corrector = true;
+    typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
+    typedef Vector6Max BaumgarteVectorType;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
     {
@@ -124,6 +129,7 @@ namespace pinocchio
     {
       Options = _Options
     };
+    typedef RigidConstraintModelTpl Self;
     typedef ConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>> Base;
 
     template<typename NewScalar, int NewOptions>
@@ -138,7 +144,7 @@ namespace pinocchio
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
