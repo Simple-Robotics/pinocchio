@@ -23,6 +23,10 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
     typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
     typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef
+      typename traits<Derived>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorParametersConstRef
+      BaumgarteCorrectorParametersConstRef;
 
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
@@ -49,25 +53,25 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
+    ComplianceVectorTypeRef compliance_impl()
     {
       return m_compliance;
     }
 
     /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters() const
+    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
     {
       return m_baumgarte_parameters;
     }
 
     /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
+    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
     {
       return m_baumgarte_parameters;
     }

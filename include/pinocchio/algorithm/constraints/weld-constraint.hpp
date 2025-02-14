@@ -47,6 +47,8 @@ namespace pinocchio
 
     typedef Vector6 BaumgarteVectorType;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
+    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
   };
 
   template<typename _Scalar, int _Options>

@@ -90,6 +90,8 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
     typedef Vector6Max BaumgarteVectorType;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
+    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType

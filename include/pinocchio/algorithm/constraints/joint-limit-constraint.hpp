@@ -54,6 +54,8 @@ namespace pinocchio
     static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
+    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -220,8 +222,6 @@ namespace pinocchio
     {
       return static_cast<const BaseCommonParameters &>(*this);
     }
-
-    using BaseCommonParameters::compliance;
 
     template<template<typename, int> class JointCollectionTpl>
     void calc(
