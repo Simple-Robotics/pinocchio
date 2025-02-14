@@ -970,8 +970,8 @@ struct PointAndFrameConstraintModelInitializer
     DerivedConstraintModel cmodel(model, joint1_id, SE3::Random(), joint2_id, SE3::Random());
     cmodel.name = cmodel.classname();
     cmodel.compliance().setRandom();
-    cmodel.corrector_parameters.Kp.setRandom();
-    cmodel.corrector_parameters.Kd.setRandom();
+    cmodel.baumgarte_parameters().Kp.setRandom();
+    cmodel.baumgarte_parameters().Kd.setRandom();
 
     return cmodel;
   }
@@ -993,8 +993,8 @@ struct initConstraint<pinocchio::JointLimitConstraintModel>
     ConstraintModel cmodel =
       JointLimitAndFrictionConstraintModelInitializer<ConstraintModel>::run(model);
     cmodel.margin().setRandom();
-    cmodel.corrector_parameters.Kd.setRandom();
-    cmodel.corrector_parameters.Kp.setRandom();
+    cmodel.baumgarte_parameters().Kd.setRandom();
+    cmodel.baumgarte_parameters().Kp.setRandom();
     return cmodel;
   }
 };

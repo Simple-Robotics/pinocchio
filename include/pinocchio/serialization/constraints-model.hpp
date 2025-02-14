@@ -43,6 +43,7 @@ namespace boost
       : public ::pinocchio::ConstraintModelCommonParameters<Derived>
       {
         typedef ::pinocchio::ConstraintModelCommonParameters<Derived> Base;
+        using Base::m_baumgarte_parameters;
         using Base::m_compliance;
       };
     } // namespace internal
@@ -57,6 +58,7 @@ namespace boost
       typedef internal::ConstraintModelCommonParameters<Derived> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
       ar & make_nvp("m_compliance", cmodel_.m_compliance);
+      ar & make_nvp("m_baumgarte_parameters", cmodel_.m_baumgarte_parameters);
     }
 
     namespace internal
@@ -92,7 +94,6 @@ namespace boost
       ar & make_nvp(
         "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
-      ar & make_nvp("corrector_parameters", cmodel.corrector_parameters);
       typedef internal::JointLimitConstraintModelAccessor<Scalar, Options> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
       ar & make_nvp("active_configuration_components", cmodel_.active_configuration_components);
@@ -164,7 +165,6 @@ namespace boost
       ar & make_nvp("desired_constraint_offset", cmodel.desired_constraint_offset);
       ar & make_nvp("desired_constraint_velocity", cmodel.desired_constraint_velocity);
       ar & make_nvp("desired_constraint_acceleration", cmodel.desired_constraint_acceleration);
-      ar & make_nvp("corrector_parameters", cmodel.corrector_parameters);
       ar & make_nvp("colwise_joint1_sparsity", cmodel.colwise_joint1_sparsity);
       ar & make_nvp("colwise_joint2_sparsity", cmodel.colwise_joint2_sparsity);
       ar & make_nvp("joint1_span_indexes", cmodel.joint1_span_indexes);
@@ -250,7 +250,6 @@ namespace boost
       ar & make_nvp("desired_constraint_offset", cmodel.desired_constraint_offset);
       ar & make_nvp("desired_constraint_velocity", cmodel.desired_constraint_velocity);
       ar & make_nvp("desired_constraint_acceleration", cmodel.desired_constraint_acceleration);
-      ar & make_nvp("corrector_parameters", cmodel.corrector_parameters);
       ar & make_nvp("colwise_joint1_sparsity", cmodel.colwise_joint1_sparsity);
       ar & make_nvp("colwise_joint2_sparsity", cmodel.colwise_joint2_sparsity);
       ar & make_nvp("joint1_span_indexes", cmodel.joint1_span_indexes);
