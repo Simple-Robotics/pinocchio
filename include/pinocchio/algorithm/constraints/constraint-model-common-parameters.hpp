@@ -22,7 +22,7 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
     typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
-    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
+    typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
 
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
