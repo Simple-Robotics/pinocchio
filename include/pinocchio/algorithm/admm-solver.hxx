@@ -372,7 +372,7 @@ namespace pinocchio
           Eigen::MatrixXd delassus = G_bar.matrix(enforce_symmetry);
           Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(delassus);
           Eigen::VectorXd eigvals = solver.eigenvalues();
-          Scalar true_m = eigvals.minCoeff();
+          // Scalar true_m = eigvals.minCoeff();
           Scalar true_L = eigvals.maxCoeff();
           //          if (true_m > 0)
           //          {
