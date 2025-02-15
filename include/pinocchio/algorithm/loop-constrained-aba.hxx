@@ -579,9 +579,8 @@ namespace pinocchio
       const JointIndex joint1_id = cmodel.joint1_id;
       const JointIndex joint2_id = cmodel.joint2_id;
 
-      const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
-        cmodel.corrector;
-      typename ConstraintData::Motion & contact_vel_err = cdata.contact_velocity_error;
+      const auto & corrector = cmodel.corrector;
+      auto & contact_velocity_error = cdata.contact_velocity_error;
 
       SE3 & oMc1 = cdata.oMc1;
       oMc1 = data.oMi[joint1_id] * cmodel.joint1_placement;
@@ -602,7 +601,7 @@ namespace pinocchio
       if (cmodel.type == CONTACT_6D)
       {
         cdata.contact_placement_error = -log6(c1Mc2);
-        contact_vel_err = vc1 - vc2_in_frame1;
+        contact_velocity_error = vc1 - vc2_in_frame1;
         const Matrix6 A1 = oMc1.toActionMatrixInverse();
         const Matrix6 A1tA1 = A1.transpose() * A1;
         data.oYaba[joint1_id].noalias() += mu * A1tA1;
@@ -617,7 +616,7 @@ namespace pinocchio
         else
         {
           cdata.contact_acceleration_desired.toVector().noalias() =
-            -(corrector.Kd.asDiagonal() * contact_vel_err.toVector())
+            -(corrector.Kd.asDiagonal() * contact_velocity_error.toVector())
             - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.toVector());
         }
 
@@ -657,7 +656,7 @@ namespace pinocchio
         else
         {
           cdata.contact_acceleration_desired.linear().noalias() =
-            -(corrector.Kd.asDiagonal() * contact_vel_err.linear())
+            -(corrector.Kd.asDiagonal() * contact_velocity_error.linear())
             - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.linear());
           cdata.contact_acceleration_desired.angular().setZero();
         }
