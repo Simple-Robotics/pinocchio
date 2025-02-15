@@ -131,13 +131,14 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants)
   rcm1.joint2_placement.setRandom();
 
   contact_models.push_back(rcm1);
-  contact_datas.push_back(RigidConstraintData(rcm1));
+  contact_datas.push_back(rcm1.createData());
 
   const double mu0 = 1e-5;
-  ProximalSettings prox_settings(1e-14, mu0, 100);
+  ProximalSettings prox_settings_ref(1e-14, mu0, 100);
+  ProximalSettings prox_settings(prox_settings_ref);
 
   initConstraintDynamics(model, data_ref, contact_models);
-  constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings);
+  constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
   initLcaba(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
