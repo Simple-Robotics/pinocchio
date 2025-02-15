@@ -125,8 +125,7 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants)
   const VectorXd tau = VectorXd::Random(model.nv);
 
   RigidConstraintModel rcm1 = RigidConstraintModel(
-    CONTACT_6D, model, model.getJointId("joint12"), model.getJointId("joint17"),
-    LOCAL_WORLD_ALIGNED);
+    CONTACT_6D, model, model.getJointId("joint12"), model.getJointId("joint17"), LOCAL);
   rcm1.joint1_placement.setRandom();
   rcm1.joint2_placement.setRandom();
 
