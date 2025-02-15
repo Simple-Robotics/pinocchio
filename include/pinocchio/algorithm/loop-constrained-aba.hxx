@@ -620,8 +620,13 @@ namespace pinocchio
             - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.toVector());
         }
 
+        cdata.contact_acceleration_desired -= oMc1.actInv(data.oa[joint1_id]);
+        cdata.contact_acceleration_desired -= cdata.contact_velocity_error.cross(vc2_in_frame1);
+
         if (joint2_id > 0)
         {
+          cdata.contact_acceleration_desired += oMc1.actInv(data.oa[joint2_id]);
+
           const Matrix6 A2 = -A1; // only for 6D case. also used below for computing A2tA2 and A1tA2
           data.oYaba[joint2_id].noalias() += mu * A1tA1;
           data.of[joint2_id].toVector().noalias() +=
