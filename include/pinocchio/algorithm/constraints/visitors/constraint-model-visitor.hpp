@@ -887,9 +887,9 @@ namespace pinocchio
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteVectorType BaumgarteVectorType;
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
-        BaumgarteCorrectorParametersConstRef BaumgarteReturnType;
-      return BaumgarteCorrectorParametersVisitor<BaumgarteVectorType, BaumgarteReturnType>::run(
-        cmodel);
+        ConstBaumgarteCorrectorParameters ConstBaumgarteCorrectorParameters;
+      return BaumgarteCorrectorParametersVisitor<
+        BaumgarteVectorType, ConstBaumgarteCorrectorParameters>::run(cmodel);
     }
 
     template<
@@ -904,9 +904,9 @@ namespace pinocchio
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteVectorType BaumgarteVectorType;
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
-        BaumgarteCorrectorParametersRef BaumgarteReturnType;
-      return BaumgarteCorrectorParametersVisitor<BaumgarteVectorType, BaumgarteReturnType>::run(
-        cmodel);
+        BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+      return BaumgarteCorrectorParametersVisitor<
+        BaumgarteVectorType, BaumgarteCorrectorParameters>::run(cmodel);
     }
 
   } // namespace visitors
