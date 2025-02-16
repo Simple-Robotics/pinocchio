@@ -20,6 +20,46 @@ namespace pinocchio
 {
   namespace python
   {
+    namespace internal
+    {
+
+      template<bool HasBaumgarteCorrector>
+      struct BaumgarteCorrectorGetterSetter
+      {
+        template<typename VectorOut, typename VectorIn>
+        static VectorOut getParameter(const VectorIn &)
+        {
+          assert(false && "Should not be reached");
+          return ::pinocchio::visitors::internal::NoRun<VectorOut>::run();
+        }
+
+        template<typename VectorParameter, typename VectorNewParameter>
+        static void setParameter(const VectorParameter &, const VectorNewParameter &)
+        {
+          assert(false && "Should not be reached");
+        }
+      };
+
+      template<>
+      struct BaumgarteCorrectorGetterSetter<true>
+      {
+        template<typename VectorOut, typename VectorIn>
+        static VectorOut getParameter(const VectorIn & param)
+        {
+          return param;
+        }
+
+        template<typename VectorParameter, typename VectorNewParameter>
+        static void setParameter(
+          const Eigen::MatrixBase<VectorParameter> & param,
+          const Eigen::MatrixBase<VectorNewParameter> & new_param)
+        {
+          param.const_cast_derived() = new_param;
+        }
+      };
+
+    } // namespace internal
+
     namespace bp = boost::python;
 
     template<class ConstraintModelDerived>
@@ -62,6 +102,66 @@ namespace pinocchio
                 self.compliance() = new_vector;
               }),
             "Compliance of the constraint.")
+          .add_property(
+            "baumgarte_corrector_parameters_kp",
+            bp::make_function( //
+              +[](const Self & self) -> context::VectorXs {
+                static constexpr bool has_baumgarte_corrector =
+                  traits<Self>::has_baumgarte_corrector;
+                if (!has_baumgarte_corrector)
+                {
+                  std::stringstream ss;
+                  ss << self.shortname() << " has no baumgarte corrector parameters.\n";
+                  PINOCCHIO_THROW(std::invalid_argument, ss.str());
+                }
+                typedef internal::BaumgarteCorrectorGetterSetter<has_baumgarte_corrector> Getter;
+                return Getter::template getParameter<context::VectorXs>(
+                  self.baumgarte_corrector_parameters().Kp);
+              }),
+            bp::make_function( //
+              +[](Self & self, const context::VectorXs & new_kp) {
+                static constexpr bool has_baumgarte_corrector =
+                  traits<Self>::has_baumgarte_corrector;
+                if (!has_baumgarte_corrector)
+                {
+                  std::stringstream ss;
+                  ss << self.shortname() << " has no baumgarte corrector parameters.\n";
+                  PINOCCHIO_THROW(std::invalid_argument, ss.str());
+                }
+                typedef internal::BaumgarteCorrectorGetterSetter<has_baumgarte_corrector> Setter;
+                return Setter::setParameter(self.baumgarte_corrector_parameters().Kp, new_kp);
+              }),
+            "Proportional term of baumgarte corrector of the constraint.")
+          .add_property(
+            "baumgarte_corrector_parameters_kd",
+            bp::make_function( //
+              +[](const Self & self) -> context::VectorXs {
+                static constexpr bool has_baumgarte_corrector =
+                  traits<Self>::has_baumgarte_corrector;
+                if (!has_baumgarte_corrector)
+                {
+                  std::stringstream ss;
+                  ss << self.shortname() << " has no baumgarte corrector parameters.\n";
+                  PINOCCHIO_THROW(std::invalid_argument, ss.str());
+                }
+                typedef internal::BaumgarteCorrectorGetterSetter<has_baumgarte_corrector> Getter;
+                return Getter::template getParameter<context::VectorXs>(
+                  self.baumgarte_corrector_parameters().Kd);
+              }),
+            bp::make_function( //
+              +[](Self & self, const context::VectorXs & new_kd) {
+                static constexpr bool has_baumgarte_corrector =
+                  traits<Self>::has_baumgarte_corrector;
+                if (!has_baumgarte_corrector)
+                {
+                  std::stringstream ss;
+                  ss << self.shortname() << " has no baumgarte corrector parameters.\n";
+                  PINOCCHIO_THROW(std::invalid_argument, ss.str());
+                }
+                typedef internal::BaumgarteCorrectorGetterSetter<has_baumgarte_corrector> Setter;
+                return Setter::setParameter(self.baumgarte_corrector_parameters().Kd, new_kd);
+              }),
+            "Damping term of baumgarte corrector of the constraint.")
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
           .def(

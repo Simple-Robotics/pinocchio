@@ -20,39 +20,6 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    template<typename BaumgarteCorrectorParameters>
-    struct BaumgarteCorrectorParametersPythonVisitor
-    : public boost::python::def_visitor<
-        BaumgarteCorrectorParametersPythonVisitor<BaumgarteCorrectorParameters>>
-    {
-      typedef typename BaumgarteCorrectorParameters::Scalar Scalar;
-      typedef typename BaumgarteCorrectorParameters::Vector6Max Vector6Max;
-      typedef BaumgarteCorrectorParameters Self;
-
-    public:
-      template<class PyClass>
-      void visit(PyClass & cl) const
-      {
-        cl.def(bp::init<int>(bp::args("self", "size"), "Default constructor."))
-
-          .def_readwrite("Kp", &Self::Kp, "Proportional corrector value.")
-          .def_readwrite("Kd", &Self::Kd, "Damping corrector value.")
-
-          .def(CastVisitor<Self>())
-          .def(ExposeConstructorByCastVisitor<
-               Self, ::pinocchio::context::RigidConstraintModel::BaumgarteCorrectorParameters>())
-          .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>());
-      }
-
-      static void expose()
-      {
-        eigenpy::enableEigenPySpecific<Vector6Max>();
-        bp::class_<BaumgarteCorrectorParameters>(
-          "BaumgarteCorrectorParameters", "Paramaters of the Baumgarte Corrector.", bp::no_init)
-          .def(BaumgarteCorrectorParametersPythonVisitor());
-      }
-    };
-
     template<typename RigidConstraintModel>
     struct RigidConstraintModelPythonVisitor
     : public boost::python::def_visitor<RigidConstraintModelPythonVisitor<RigidConstraintModel>>
@@ -61,8 +28,6 @@ namespace pinocchio
       typedef typename RigidConstraintModel::SE3 SE3;
       typedef RigidConstraintModel Self;
       typedef typename RigidConstraintModel::ContactData ContactData;
-      typedef
-        typename RigidConstraintModel::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
 
       typedef ModelTpl<Scalar, RigidConstraintModel::Options, JointCollectionDefaultTpl> Model;
       typedef DataTpl<Scalar, RigidConstraintModel::Options, JointCollectionDefaultTpl> Data;
@@ -143,8 +108,6 @@ namespace pinocchio
           .def(CastVisitor<RigidConstraintModel>())
           .def(ExposeConstructorByCastVisitor<
                RigidConstraintModel, ::pinocchio::context::RigidConstraintModel>());
-
-        BaumgarteCorrectorParametersPythonVisitor<BaumgarteCorrectorParameters>::expose();
       }
 
       static ContactData createData(const Self & self)
