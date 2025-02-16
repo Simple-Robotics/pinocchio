@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2024 INRIA CNRS
+// Copyright (c) 2019-2025 INRIA CNRS
 //
 
 #ifndef __pinocchio_algorithm_constraints_point_constraint_data_hpp__
@@ -65,6 +65,10 @@ namespace pinocchio
     /// \brief Constraint acceleration biais
     Vector3 constraint_acceleration_biais_term;
 
+    Vector3 & contraint_residual = constraint_position_error;
+    Vector3 & dcontraint_residual = constraint_velocity_error;
+    Vector3 & ddcontraint_residual = constraint_acceleration_error;
+
     //    VectorOfMatrix6 extended_motion_propagators_joint1;
     //    VectorOfMatrix6 lambdas_joint1;
     //    VectorOfMatrix6 extended_motion_propagators_joint2;
@@ -78,6 +82,16 @@ namespace pinocchio
     {
     }
 
+    /// \brief Copy constructor
+    PointConstraintDataBase(const PointConstraintDataBase & other)
+    {
+      *this = other;
+    }
+
+    /// \brief Constructor from a given ConstraintModel
+    ///
+    /// \param[in] constraint_model input constraint model
+    ///
     explicit PointConstraintDataBase(const ConstraintModel & constraint_model)
     : constraint_force(Vector3::Zero())
     , oMc1(SE3::Identity())
@@ -104,6 +118,21 @@ namespace pinocchio
     //    , dac_da(constraint_model.size(), constraint_model.nv)
     {
       PINOCCHIO_UNUSED_VARIABLE(constraint_model);
+    }
+
+    /// \brief Assignment operator
+    PointConstraintDataBase & operator=(const PointConstraintDataBase & other)
+    {
+      constraint_force = other.constraint_force;
+      oMc1 = other.oMc1;
+      oMc2 = other.oMc2;
+      c1Mc2 = other.c1Mc2;
+      constraint_position_error = other.constraint_position_error;
+      constraint_velocity_error = other.constraint_velocity_error;
+      constraint_acceleration_error = other.constraint_acceleration_error;
+      constraint_acceleration_biais_term = other.constraint_acceleration_biais_term;
+
+      return *this;
     }
 
     bool operator==(const PointConstraintDataBase & other) const
