@@ -881,7 +881,7 @@ namespace pinocchio
       template<typename S, int O> class ConstraintCollectionTpl>
     typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
       BaumgarteCorrectorParametersConstRef
-      baumgarteCorrectorParametersConstRef(
+      getBaumgarteCorrectorParameters(
         const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
@@ -898,7 +898,7 @@ namespace pinocchio
       template<typename S, int O> class ConstraintCollectionTpl>
     typename traits<
       ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::BaumgarteCorrectorParametersRef
-    baumgarteCorrectorParametersRef(
+    getBaumgarteCorrectorParameters(
       ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
