@@ -39,10 +39,10 @@ namespace pinocchio
     static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
     typedef Eigen::Ref<VectorXs> BaumgarteVectorTypeRef;
-    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorTypeRef> BaumgarteCorrectorParametersRef;
+    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorTypeRef> BaumgarteCorrectorParameters;
     typedef Eigen::Ref<const VectorXs> BaumgarteVectorTypeConstRef;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorTypeConstRef>
-      BaumgarteCorrectorParametersConstRef;
+      ConstBaumgarteCorrectorParameter;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -92,9 +92,9 @@ namespace pinocchio
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef typename traits<Self>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
-    typedef typename traits<Self>::BaumgarteCorrectorParametersConstRef
-      BaumgarteCorrectorParametersConstRef;
+    typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef
+      typename traits<Self>::ConstBaumgarteCorrectorParameter ConstBaumgarteCorrectorParameter;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -249,16 +249,16 @@ namespace pinocchio
       return ::pinocchio::visitors::compliance(*this);
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters() const
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    ConstBaumgarteCorrectorParameter baumgarte_corrector_parameters() const
     {
-      return ::pinocchio::visitors::baumgarteCorrectorParametersConstRef(*this);
+      return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters()
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParameters baumgarte_corrector_parameters()
     {
-      return ::pinocchio::visitors::baumgarteCorrectorParametersRef(*this);
+      return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
 
     /// \brief Returns the size of the constraint
