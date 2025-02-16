@@ -58,6 +58,8 @@ namespace pinocchio
 
     bool operator==(const BaumgarteCorrectorParametersTpl & other) const
     {
+      if (this == &other)
+        return true;
       return Kp == other.Kp && Kd == other.Kd;
     }
 
