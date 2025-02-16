@@ -59,6 +59,20 @@ namespace pinocchio
       Kd.setZero();
     }
 
+    /// \brief Constructor from VectorType.
+    /// It is needed for the generic constraint model.
+    template<typename Vector1Like, typename Vector2Like>
+    BaumgarteCorrectorParametersTpl(
+      const Eigen::MatrixBase<Vector1Like> & Kp, const Eigen::MatrixBase<Vector2Like> & Kd)
+    : Kp(Kp)
+    , Kd(Kd)
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        (this->Kp.array() >= Scalar(0)).all(), "Kp should only contain non negative quantities.");
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        (this->Kd.array() >= Scalar(0)).all(), "Kp should only contain non negative quantities.");
+    }
+
     /// \brief Get reference to baumgarte parameters.
     /// It is needed for the generic constraint model.
     template<typename OtherBaumgarteVector>
@@ -117,12 +131,6 @@ namespace pinocchio
       return res;
     }
 
-  protected:
-    /// \brief Constructor from BaumgarteVector.
-    /// It is needed for the generic constraint model.
-    BaumgarteCorrectorParametersTpl(const BaumgarteVector & Kp, const BaumgarteVector & Kd)
-    : Kp(Kp)
-    , Kd(Kd)
     {
     }
 
