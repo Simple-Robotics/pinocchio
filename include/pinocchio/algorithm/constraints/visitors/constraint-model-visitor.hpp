@@ -766,8 +766,6 @@ namespace pinocchio
     struct ConstraintModelComplianceVisitor
     : ConstraintUnaryVisitorBase<ConstraintModelComplianceVisitor<ReturnType>, ReturnType>
     {
-      typedef ConstraintUnaryVisitorBase<ConstraintModelComplianceVisitor<ReturnType>, ReturnType>
-        Base;
       typedef NoArg ArgsType;
 
       template<typename ConstraintModelDerived>
@@ -779,25 +777,6 @@ namespace pinocchio
       static ReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         return ::pinocchio::make_ref(cmodel.compliance());
-      }
-
-      template<
-        typename Scalar,
-        int Options,
-        template<typename S, int O> class ConstraintCollectionTpl>
-      static ReturnType
-      run(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
-      {
-        return Base::run(cmodel.derived());
-      }
-
-      template<
-        typename Scalar,
-        int Options,
-        template<typename S, int O> class ConstraintCollectionTpl>
-      static ReturnType run(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
-      {
-        return Base::run(cmodel.derived());
       }
     };
 
