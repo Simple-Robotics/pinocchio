@@ -47,7 +47,7 @@ namespace pinocchio
         type;
     };
 
-    static constexpr bool has_baumgarte_correction = true;
+    static constexpr bool has_baumgarte_corrector = true;
 
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
       ConstraintFormulationLevel::VELOCITY_LEVEL;
@@ -106,7 +106,6 @@ namespace pinocchio
     {
       return static_cast<const BaseCommonParameters &>(*this);
     }
-    using BaseCommonParameters::compliance;
 
     /// \brief Index of the first joint in the model tree
     JointIndex joint1_id;
