@@ -19,10 +19,12 @@ namespace pinocchio
     enum
     {
       RowsAtCompileTime = BaumgarteVector::RowsAtCompileTime,
-      ColsAtCompileTime = BaumgarteVector::ColsAtCompileTime
+      ColsAtCompileTime = BaumgarteVector::ColsAtCompileTime,
+      Options = BaumgarteVector::Options
     };
 
-    typedef Eigen::Matrix<NewScalar, RowsAtCompileTime, ColsAtCompileTime> NewBaumgarteVector;
+    typedef Eigen::Matrix<NewScalar, RowsAtCompileTime, ColsAtCompileTime, Options>
+      NewBaumgarteVector;
     typedef BaumgarteCorrectorParametersTpl<NewBaumgarteVector> type;
   };
 
