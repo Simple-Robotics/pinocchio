@@ -21,6 +21,7 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+
     typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
     typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
     typedef
@@ -64,13 +65,13 @@ namespace pinocchio
       return m_compliance;
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
     BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
     {
       return m_baumgarte_parameters;
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
     BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
     {
       return m_baumgarte_parameters;

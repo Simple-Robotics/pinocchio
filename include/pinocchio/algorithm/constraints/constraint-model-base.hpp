@@ -212,13 +212,13 @@ namespace pinocchio
       return derived().compliance_impl();
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
     BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters() const
     {
       return derived().baumgarte_corrector_parameters_impl();
     }
 
-    /// \brief Returns the baumgarte parameters internally stored in the constraint model
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
     BaumgarteCorrectorParametersRef baumgarte_corrector_parameters()
     {
       return derived().baumgarte_corrector_parameters_impl();
