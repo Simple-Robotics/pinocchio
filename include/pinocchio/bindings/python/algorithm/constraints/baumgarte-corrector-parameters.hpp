@@ -42,11 +42,13 @@ namespace pinocchio
           .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>());
       }
 
-      static void expose()
+      static void expose(const std::string & classname)
       {
         // eigenpy::enableEigenPySpecific<VectorType>();
+        if (eigenpy::check_registration<BaumgarteCorrectorParameters>())
+          return;
         bp::class_<BaumgarteCorrectorParameters>(
-          "BaumgarteCorrectorParameters", "Paramaters of the Baumgarte Corrector.", bp::no_init)
+          classname.c_str(), "Paramaters of the Baumgarte Corrector.", bp::no_init)
           .def(BaumgarteCorrectorParametersPythonVisitor());
       }
     };
