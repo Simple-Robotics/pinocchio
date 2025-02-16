@@ -40,9 +40,10 @@ namespace pinocchio
     typedef VectorXs BaumgarteVectorType;
     typedef Eigen::Ref<VectorXs> BaumgarteVectorTypeRef;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorTypeRef> BaumgarteCorrectorParameters;
+    typedef BaumgarteCorrectorParameters BaumgarteCorrectorParametersRef;
     typedef Eigen::Ref<const VectorXs> BaumgarteVectorTypeConstRef;
     typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorTypeConstRef>
-      ConstBaumgarteCorrectorParameter;
+      BaumgarteCorrectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -93,8 +94,9 @@ namespace pinocchio
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
     typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
-    typedef
-      typename traits<Self>::ConstBaumgarteCorrectorParameter ConstBaumgarteCorrectorParameter;
+    typedef typename traits<Self>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
+    typedef typename traits<Self>::BaumgarteCorrectorParametersConstRef
+      BaumgarteCorrectorParametersConstRef;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -250,7 +252,7 @@ namespace pinocchio
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    ConstBaumgarteCorrectorParameter baumgarte_corrector_parameters() const
+    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters() const
     {
       return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
