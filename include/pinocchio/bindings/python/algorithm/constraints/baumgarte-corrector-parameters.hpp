@@ -30,12 +30,13 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<int>(bp::args("self", "size"), "Default constructor."))
+        cl
+          // .def(bp::init<int>(bp::args("self", "size"), "Default constructor."))
 
           .def_readwrite("Kp", &Self::Kp, "Proportional corrector value.")
           .def_readwrite("Kd", &Self::Kd, "Damping corrector value.")
 
-          .def(CastVisitor<Self>())
+          // .def(CastVisitor<Self>())
           // .def(ExposeConstructorByCastVisitor<
           //      Self, ::pinocchio::context::RigidConstraintModel::BaumgarteCorrectorParameters>())
           .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>());
