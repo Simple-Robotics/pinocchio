@@ -9,6 +9,7 @@
 
 #include "pinocchio/bindings/python/utils/cast.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
+#include "pinocchio/bindings/python/utils/comparable.hpp"
 
 namespace pinocchio
 {
