@@ -1,9 +1,9 @@
 //
-// Copyright (c) 2020-2024 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_baumgarte_corrector_parameters_hpp__
-#define __pinocchio_algorithm_baumgarte_corrector_parameters_hpp__
+#ifndef __pinocchio_algorithm_constraints_baumgarte_corrector_parameters_hpp__
+#define __pinocchio_algorithm_constraints_baumgarte_corrector_parameters_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
 
@@ -93,4 +93,4 @@ namespace pinocchio
   }; // struct BaumgarteCorrectorParametersTpl
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_baumgarte_corrector_parameters_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_baumgarte_corrector_parameters_hpp__
