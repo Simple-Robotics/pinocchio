@@ -837,12 +837,12 @@ namespace pinocchio
       template<typename ConstraintModelDerived>
       static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.baumgarte_corrector_parameters().template get_const_ref<BaumgarteVector>();
+        return cmodel.baumgarte_corrector_parameters().template ref<BaumgarteVector>();
       }
       template<typename ConstraintModelDerived>
       static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.baumgarte_corrector_parameters().template get_ref<BaumgarteVector>();
+        return cmodel.baumgarte_corrector_parameters().template ref<BaumgarteVector>();
       }
     };
 

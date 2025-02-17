@@ -75,7 +75,7 @@ namespace pinocchio
     /// \brief Get reference to baumgarte parameters.
     /// It is needed for the generic constraint model.
     template<typename OtherVectorType>
-    BaumgarteCorrectorParametersTpl<Eigen::Ref<OtherVectorType>> get_ref()
+    BaumgarteCorrectorParametersTpl<Eigen::Ref<OtherVectorType>> ref()
     {
       typedef BaumgarteCorrectorParametersTpl<Eigen::Ref<OtherVectorType>> ReturnType;
       ReturnType res(::pinocchio::make_ref(Kp), ::pinocchio::make_ref(Kd));
@@ -85,7 +85,7 @@ namespace pinocchio
     /// \brief Get const reference to baumgarte parameters.
     /// It is needed for the generic constraint model.
     template<typename OtherVectorType>
-    BaumgarteCorrectorParametersTpl<Eigen::Ref<const OtherVectorType>> get_const_ref() const
+    BaumgarteCorrectorParametersTpl<Eigen::Ref<const OtherVectorType>> ref() const
     {
       typedef BaumgarteCorrectorParametersTpl<Eigen::Ref<const OtherVectorType>> ReturnType;
       ReturnType res(::pinocchio::make_const_ref(Kp), ::pinocchio::make_const_ref(Kd));
