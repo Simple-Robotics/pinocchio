@@ -73,21 +73,56 @@ namespace pinocchio
     }
 
     PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-    buildConstraintModelsFromMJCF(Model & model, const bp::object & filename)
+    buildBilateralConstraintModelsFromMJCF(Model & model, const bp::object & filename)
     {
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) constraint_models;
-      ::pinocchio::mjcf::buildConstraintModelsFromXML(path(filename), model, constraint_models);
-      return constraint_models;
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+      bilateral_constraint_models;
+      ::pinocchio::mjcf::buildConstraintModelsFromXML(
+        path(filename), model, bilateral_constraint_models);
+      return bilateral_constraint_models;
     }
 
     PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-    &buildConstraintModelsFromMJCF(
+    &buildBilateralConstraintModelsFromMJCF(
       Model & model,
       const bp::object & filename,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) & constraint_models)
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+        & bilateral_constraint_models)
     {
-      ::pinocchio::mjcf::buildConstraintModelsFromXML(path(filename), model, constraint_models);
-      return constraint_models;
+      ::pinocchio::mjcf::buildConstraintModelsFromXML(
+        path(filename), model, bilateral_constraint_models);
+      return bilateral_constraint_models;
+    }
+
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
+    buildWeldConstraintModelsFromMJCF(Model & model, const bp::object & filename)
+    {
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) weld_constraint_models;
+      ::pinocchio::mjcf::buildConstraintModelsFromXML(
+        path(filename), model, weld_constraint_models);
+      return weld_constraint_models;
+    }
+
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
+    &buildWeldConstraintModelsFromMJCF(
+      Model & model,
+      const bp::object & filename,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) & weld_constraint_models)
+    {
+      ::pinocchio::mjcf::buildConstraintModelsFromXML(
+        path(filename), model, weld_constraint_models);
+      return weld_constraint_models;
+    }
+
+    void buildAllConstraintModelsFromMJCF(
+      Model & model,
+      const bp::object & filename,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+        & bilateral_constraint_models,
+      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) & weld_constraint_models)
+    {
+      ::pinocchio::mjcf::buildConstraintModelsFromXML(
+        path(filename), model, bilateral_constraint_models, weld_constraint_models);
     }
 
     void exposeMJCFModel()
@@ -146,22 +181,43 @@ namespace pinocchio
         "specified name as well as a constraint list if some are present in the MJCF file.");
 
       bp::def(
-        "buildConstraintModelsFromMJCF",
+        "buildBilateralConstraintModelsFromMJCF",
         static_cast<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) (*)(
-          Model &, const bp::object &)>(pinocchio::python::buildConstraintModelsFromMJCF),
+          Model &, const bp::object &)>(pinocchio::python::buildBilateralConstraintModelsFromMJCF),
         bp::args("mjcf_filename", "model"),
         "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.");
 
       bp::def(
-        "buildConstraintModelsFromMJCF",
-        static_cast<
-          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
+        "buildBilateralConstraintModelsFromMJCF",
+        static_cast < PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
           & (*)(Model &, const bp::object &,
-                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)>(
-          pinocchio::python::buildConstraintModelsFromMJCF),
-        bp::args("mjcf_filename", "model", "constraint_models"),
+                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)
+              > (pinocchio::python::buildBilateralConstraintModelsFromMJCF),
+        bp::args("mjcf_filename", "model", "bilateral_constraint_models"),
         "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.",
         bp::return_internal_reference<3>());
+
+      bp::def(
+        "buildWeldConstraintModelsFromMJCF",
+        static_cast<PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) (*)(
+          Model &, const bp::object &)>(pinocchio::python::buildWeldConstraintModelsFromMJCF),
+        bp::args("mjcf_filename", "model"),
+        "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.");
+
+      bp::def(
+        "buildWeldConstraintModelsFromMJCF",
+        static_cast < PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel)
+          & (*)(Model &, const bp::object &,
+                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) &)
+              > (pinocchio::python::buildWeldConstraintModelsFromMJCF),
+        bp::args("mjcf_filename", "model", "weld_constraint_models"),
+        "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.",
+        bp::return_internal_reference<3>());
+
+      bp::def(
+        "buildAllConstraintModelsFromMJCF", pinocchio::python::buildAllConstraintModelsFromMJCF,
+        bp::args("mjcf_filename", "model", "bilateral_constraint_models", "weld_constraint_models"),
+        "Parse the MJCF file given in input and fill constaint models vectors.");
     }
   } // namespace python
 } // namespace pinocchio
