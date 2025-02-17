@@ -105,8 +105,9 @@ namespace pinocchio
             BaumgarteCorrectorParametersRef;
 
           typedef typename std::conditional<
-            std::is_reference_v<BaumgarteCorrectorParametersRef>, bp::return_internal_reference<>,
-            bp::with_custodian_and_ward_postcall<0, 1>>::type ReturnPolicy;
+            std::is_reference<BaumgarteCorrectorParametersRef>::value,
+            bp::return_internal_reference<>, bp::with_custodian_and_ward_postcall<0, 1>>::type
+            ReturnPolicy;
 
           cl.add_property(
             "baumgarte_corrector_parameters",
