@@ -511,6 +511,8 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/delassus-operator.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/proximal.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/algorithms.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/baumgarte-corrector-parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data-inheritance.hpp
@@ -521,7 +523,6 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraints-models.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraints-variant.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/coulomb-friction-cone.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/context.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/pybind11-all.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/pybind11.hpp

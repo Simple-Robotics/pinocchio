@@ -422,6 +422,16 @@ namespace pinocchio
     typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Matrix) ReturnType;
     return ReturnType(mat);
   }
+
+  template<typename T>
+  struct is_eigen_ref : std::false_type
+  {
+  };
+
+  template<typename PlainObjectType, int Options, typename StrideType>
+  struct is_eigen_ref<Eigen::Ref<PlainObjectType, Options, StrideType>> : std::true_type
+  {
+  };
 } // namespace pinocchio
 
 #endif // #ifndef __pinocchio_math_matrix_hpp__

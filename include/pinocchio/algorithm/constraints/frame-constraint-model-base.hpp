@@ -46,6 +46,9 @@ namespace pinocchio
         InputMatrixPlain::Options>
         type;
     };
+
+    static constexpr bool has_baumgarte_corrector = true;
+
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
       ConstraintFormulationLevel::VELOCITY_LEVEL;
   };
@@ -77,7 +80,7 @@ namespace pinocchio
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+    typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -117,9 +120,6 @@ namespace pinocchio
     /// \brief Desired constraint velocity at acceleration level
     Vector6 desired_constraint_acceleration;
 
-    ///  \brief Corrector parameters
-    BaumgarteCorrectorParameters corrector_parameters;
-
     /// \brief Colwise sparsity pattern associated with joint 1.
     BooleanVector colwise_joint1_sparsity;
 
@@ -147,6 +147,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
   protected:
+    using BaseCommonParameters::m_baumgarte_parameters;
     using BaseCommonParameters::m_compliance;
 
   public:
@@ -187,7 +188,6 @@ namespace pinocchio
     , desired_constraint_offset(Vector6::Zero())
     , desired_constraint_velocity(Vector6::Zero())
     , desired_constraint_acceleration(Vector6::Zero())
-    , corrector_parameters(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
@@ -217,7 +217,6 @@ namespace pinocchio
     , desired_constraint_offset(Vector6::Zero())
     , desired_constraint_velocity(Vector6::Zero())
     , desired_constraint_acceleration(Vector6::Zero())
-    , corrector_parameters(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
@@ -245,7 +244,6 @@ namespace pinocchio
     , desired_constraint_offset(Vector6::Zero())
     , desired_constraint_velocity(Vector6::Zero())
     , desired_constraint_acceleration(Vector6::Zero())
-    , corrector_parameters(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
@@ -273,7 +271,6 @@ namespace pinocchio
     , desired_constraint_offset(Vector6::Zero())
     , desired_constraint_velocity(Vector6::Zero())
     , desired_constraint_acceleration(Vector6::Zero())
-    , corrector_parameters(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , loop_span_indexes((size_t)model.nv)
@@ -316,8 +313,6 @@ namespace pinocchio
       return static_cast<const BaseCommonParameters &>(*this);
     }
 
-    using BaseCommonParameters::compliance;
-
     ///
     ///  \brief Comparison operator
     ///
@@ -334,7 +329,6 @@ namespace pinocchio
              && joint1_id == other.joint1_id && joint2_id == other.joint2_id
              && joint1_placement == other.joint1_placement
              && joint2_placement == other.joint2_placement && nv == other.nv
-             && corrector_parameters == other.corrector_parameters
              && desired_constraint_offset == other.desired_constraint_offset
              && desired_constraint_velocity == other.desired_constraint_velocity
              && desired_constraint_acceleration == other.desired_constraint_acceleration
@@ -796,7 +790,6 @@ namespace pinocchio
       res.desired_constraint_velocity = desired_constraint_velocity.template cast<NewScalar>();
       res.desired_constraint_acceleration =
         desired_constraint_acceleration.template cast<NewScalar>();
-      res.corrector_parameters = corrector_parameters.template cast<NewScalar>();
       res.colwise_joint1_sparsity = colwise_joint1_sparsity;
       res.colwise_joint2_sparsity = colwise_joint2_sparsity;
       res.joint1_span_indexes = joint1_span_indexes;
@@ -896,8 +889,9 @@ namespace pinocchio
         }
       }
 
-      // Set compliance
+      // Set compliance and baumgarte parameters
       m_compliance.setZero();
+      m_baumgarte_parameters = BaumgarteCorrectorParameters(size());
     }
   }; // FrameConstraintModelBase<Derived>
 

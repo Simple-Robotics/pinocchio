@@ -79,7 +79,6 @@ namespace pinocchio
           .PINOCCHIO_ADD_PROPERTY(
             T, desired_constraint_acceleration,
             "Desired constraint velocity at acceleration level.")
-          .PINOCCHIO_ADD_PROPERTY(T, corrector_parameters, "Corrector parameters.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
           .PINOCCHIO_ADD_PROPERTY(
@@ -178,7 +177,6 @@ namespace pinocchio
           .PINOCCHIO_ADD_PROPERTY(
             T, desired_constraint_acceleration,
             "Desired constraint velocity at acceleration level.")
-          .PINOCCHIO_ADD_PROPERTY(T, corrector_parameters, "Corrector parameters.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_joint1_sparsity, "Colwise sparsity pattern associated with joint 1.")
           .PINOCCHIO_ADD_PROPERTY(

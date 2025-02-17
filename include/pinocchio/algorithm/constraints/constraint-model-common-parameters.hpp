@@ -8,6 +8,9 @@
 namespace pinocchio
 {
 
+  template<typename _BaumgarteVector>
+  struct BaumgarteCorrectorParametersTpl;
+
   template<typename Derived>
   struct ConstraintModelCommonParameters
   {
@@ -19,6 +22,13 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
+    typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
+    typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef
+      typename traits<Derived>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorParametersConstRef
+      BaumgarteCorrectorParametersConstRef;
+
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
 
@@ -27,12 +37,14 @@ namespace pinocchio
     void cast(ConstraintModelCommonParameters<OtherDerived> & other) const
     {
       other.m_compliance = m_compliance.template cast<NewScalar>();
+      other.m_baumgarte_parameters = m_baumgarte_parameters.template cast<NewScalar>();
     }
 
     /// \brief Comparison operator
     bool operator==(const Self & other) const
     {
-      return m_compliance == other.m_compliance;
+      return m_compliance == other.m_compliance
+             && m_baumgarte_parameters == other.m_baumgarte_parameters;
     }
 
     /// \brief Comparison operator
@@ -42,15 +54,27 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
+    ComplianceVectorTypeRef compliance_impl()
     {
       return m_compliance;
+    }
+
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
+    {
+      return m_baumgarte_parameters;
+    }
+
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
+    {
+      return m_baumgarte_parameters;
     }
 
   protected:
@@ -60,6 +84,7 @@ namespace pinocchio
     }
 
     ComplianceVectorType m_compliance;
+    BaumgarteCorrectorParameters m_baumgarte_parameters;
   };
 
 } // namespace pinocchio
