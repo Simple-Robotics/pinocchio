@@ -37,8 +37,8 @@ namespace pinocchio
       typedef typename Self::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
-      typedef typename Self::ComplianceVectorTypeRef ComplianceVectorTypeRef;
-      typedef typename Self::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+      typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+      typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     public:
       template<class PyClass>
