@@ -5,6 +5,7 @@
 #ifndef __pinocchio_python_algorithm_constraints_model_base_hpp__
 #define __pinocchio_python_algorithm_constraints_model_base_hpp__
 
+#include <iostream>
 #include <boost/python.hpp>
 #include <eigenpy/exception.hpp>
 #include <eigenpy/eigen-to-python.hpp>
@@ -16,6 +17,7 @@
 
 #include "pinocchio/bindings/python/fwd.hpp"
 #include "pinocchio/bindings/python/utils/macros.hpp"
+#include "pinocchio/bindings/python/utils/eigen.hpp"
 #include "pinocchio/bindings/python/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
@@ -121,6 +123,15 @@ namespace pinocchio
                 self.baumgarte_corrector_parameters() = copy;
               }),
             "Baumgarte parameters associated with the constraint.");
+
+          typedef typename BaumgarteCorrectorParameters::VectorType BaumgarteVectorType;
+          const std::string BaumgarteVectorType_name = getEigenTypeName<BaumgarteVectorType>();
+
+          const std::string BaumgarteCorrectorParameter_classname =
+            "BaumgarteCorrectorParameters_" + BaumgarteVectorType_name;
+
+          BaumgarteCorrectorParametersPythonVisitor<BaumgarteCorrectorParameters>::expose(
+            BaumgarteCorrectorParameter_classname);
         }
       }
 
