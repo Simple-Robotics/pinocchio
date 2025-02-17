@@ -101,9 +101,9 @@ namespace pinocchio
 
         if (::pinocchio::traits<ConstraintModelDerived>::has_baumgarte_corrector)
         {
-          typedef typename ConstraintModelDerived::BaumgarteCorrectorParameters
+          typedef typename traits<ConstraintModelDerived>::BaumgarteCorrectorParameters
             BaumgarteCorrectorParameters;
-          typedef typename ConstraintModelDerived::BaumgarteCorrectorParametersRef
+          typedef typename traits<ConstraintModelDerived>::BaumgarteCorrectorParametersRef
             BaumgarteCorrectorParametersRef;
 
           typedef typename std::conditional<
