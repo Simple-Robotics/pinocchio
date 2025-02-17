@@ -835,9 +835,9 @@ namespace pinocchio
 
           // The constraints below are not supported and will be ignored with the following
           // warning: joint, flex, distance, weld
-          if (type != "connect")
+          if ((type != "connect") && (type != "weld"))
           {
-            // TODO(jcarpent): support extra constraint types such as joint, flex, distance, weld.
+            // TODO(jcarpent): support extra constraint types such as joint, flex, distance.
             continue;
           }
 
@@ -848,27 +848,58 @@ namespace pinocchio
           auto body1 = v.second.get_optional<std::string>("<xmlattr>.body1");
           if (body1)
             eq.body1 = *body1;
-          else
-            PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Equality constraint needs a first body");
 
           // get the name of second body
           auto body2 = v.second.get_optional<std::string>("<xmlattr>.body2");
           if (body2)
             eq.body2 = *body2;
 
+          // get the name of first site
+          auto site1 = v.second.get_optional<std::string>("<xmlattr>.site1");
+          if (site1)
+            eq.site1 = *site1;
+
+          // get the name of second site
+          auto site2 = v.second.get_optional<std::string>("<xmlattr>.site2");
+          if (site2)
+            eq.site2 = *site2;
+
           // get the name of the constraint (if it exists)
           auto name = v.second.get_optional<std::string>("<xmlattr>.name");
           if (name)
             eq.name = *name;
-          else
-            eq.name = eq.body1 + "_" + eq.body2 + "_constraint";
 
+          // TODO: argument torqscale present in MJCF for energy base solve
           // get the anchor position
           auto anchor = v.second.get_optional<std::string>("<xmlattr>.anchor");
           if (anchor)
             eq.anchor = internal::getVectorFromStream<3>(*anchor);
 
-          mapOfEqualities.insert(std::make_pair(eq.name, eq));
+          // get the relative pose
+          auto relpose = v.second.get_optional<std::string>("<xmlattr>.relpose");
+          if (relpose)
+          {
+            Eigen::Matrix<double, 7, 1> pos_quat = internal::getVectorFromStream<7>(*relpose);
+            Eigen::Vector4d quat_vec = pos_quat.tail(4);
+            Eigen::Quaterniond quaternion(pos_quat(3), pos_quat(4), pos_quat(5), pos_quat(6));
+            if (quat_vec.isZero(0))
+              // weird default behavior from Mujoco
+              // If quat is four 0, use the relpose in the reference configuration
+              // then relpose is ignored
+              // See: https://mujoco.readthedocs.io/en/latest/XMLreference.html#equality-weld
+              eq.use_ref_relpose = true;
+            else
+            {
+              // We will use relpose argument so we store it as SE3 lacement
+              eq.use_ref_relpose = false;
+              quaternion.normalize();
+              eq.relpose.translation() = pos_quat.head(3);
+              eq.relpose.rotation() = quaternion.toRotationMatrix();
+            }
+          }
+
+          mapOfEqualities.insert(
+            std::make_pair(eq.name + eq.body1 + eq.site1 + eq.body2 + eq.site2, eq));
         }
       }
 
@@ -1239,7 +1270,8 @@ namespace pinocchio
       void MjcfGraph::parseContactInformation(
         const Model & model,
         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-          & constraint_models)
+          & bilateral_constraint_models,
+        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) & weld_constraint_models)
       {
         Data data(model);
         Eigen::VectorXd qref;
@@ -1274,32 +1306,66 @@ namespace pinocchio
         for (const auto & entry : mapOfEqualities)
         {
           const MjcfEquality & eq = entry.second;
-
-          SE3 jointPlacement;
-          jointPlacement.setIdentity();
-          jointPlacement.translation() = eq.anchor;
-
-          // Get Joint Indices from the model
-          const JointIndex body1 = mjcfVisitor.getParentId(eq.body1);
-          const SE3 & oMi1 = data.oMi[body1];
-          const SE3 oMc1 = oMi1 * jointPlacement;
-
-          // when body2 is not specified, we link to the world
-          if (eq.body2 == "")
+          // Retireve parent joints and relative pose
+          SE3 i1Mc, i2Mc;
+          JointIndex joint1, joint2;
+          if (eq.body1 == "")
           {
-            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, 0, oMc1);
-            constraint_models.push_back(bpcm);
+            if ((eq.site1 == "") || (eq.site2 == ""))
+            {
+              std::stringstream ss;
+              ss << "Body 1 or both site1 and site2 must be specified for constraint"
+                 << entry.first;
+              PINOCCHIO_THROW_PRETTY(std::invalid_argument, ss.str());
+            }
+            // It is Mujoco site convention common for weld or connect
+            const Frame & frame1 = model.frames[model.getFrameId(eq.site1)];
+            const Frame & frame2 = model.frames[model.getFrameId(eq.site2)];
+            joint1 = frame1.parentJoint;
+            joint2 = frame2.parentJoint;
+            i1Mc = frame1.placement;
+            i2Mc = frame2.placement;
           }
           else
           {
-            // We compute the placement of the point constraint with respect to the 2nd joint
-            // This is similar to what is done in
-            // https://mujoco.readthedocs.io/en/stable/XMLreference.html#equality-connect
-            const JointIndex body2 = mjcfVisitor.getParentId(eq.body2);
-            const SE3 & oMi2 = data.oMi[body2];
-            const SE3 i2Mc2 = oMi2.inverse() * oMc1;
-            BilateralPointConstraintModel bpcm(model, body1, jointPlacement, body2, i2Mc2);
-            constraint_models.push_back(bpcm);
+            joint1 = mjcfVisitor.getParentId(eq.body1);
+            // Body 2 default to world joint
+            joint2 = (eq.body2 == "") ? mjcfVisitor.getParentId(eq.body2) : 0;
+            const SE3 & oMi1 = data.oMi[joint1];
+            if (eq.type == "connect")
+            {
+              // For connect, anchor is relative to joint1
+              i1Mc.setIdentity();
+              i1Mc.translation() = eq.anchor;
+              // Constaint relative to joint 2 is obtaint thanks to qref pose
+              i2Mc = (joint2 == 0) ? oMi1 * i1Mc : data.oMi[joint2].inverse() * oMi1 * i1Mc;
+            }
+            else if (eq.type == "weld")
+            {
+              // For weld constraint, anchor is relative to joint2
+              i2Mc.setIdentity();
+              i2Mc.translation() = eq.anchor;
+              // Constraint location relative to joint 1 is calculated given the relative pose i1Mi2
+              // Using weird default behavior of mujoco, use relpose or relative pose in
+              // configuration qref
+              SE3 i1Mi2 = eq.use_ref_relpose
+                            ? ((joint2 == 0) ? oMi1.inverse() : oMi1.inverse() * data.oMi[joint2])
+                            : eq.relpose;
+              i1Mc = i1Mi2 * i2Mc;
+            }
+          }
+
+          // Create the constraints
+          if (eq.type == "connect")
+          {
+            BilateralPointConstraintModel bpcm(model, joint1, i1Mc, joint2, i2Mc);
+            bilateral_constraint_models.push_back(bpcm);
+          }
+          else if (eq.type == "weld")
+          {
+            // TODO: must take the scale factor into account
+            WeldConstraintModel wcm(model, joint1, i1Mc, joint2, i2Mc);
+            weld_constraint_models.push_back(wcm);
           }
         }
       }

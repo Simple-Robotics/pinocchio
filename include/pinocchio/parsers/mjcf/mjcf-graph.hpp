@@ -10,6 +10,7 @@
 #include "pinocchio/multibody/joint/joints.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
+#include "pinocchio/algorithm/constraints/weld-constraint.hpp"
 #include "pinocchio/multibody/liegroup/liegroup.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
@@ -444,18 +445,22 @@ namespace pinocchio
         // Name of the second body participating in the constraint (optional, default: world)
         std::string body2;
 
+        // Name of the first site participating in the constraint
+        std::string site1;
+        // Name of the second site participating in the constraint (optional, default: world)
+        std::string site2;
+
         // Coordinates of the 3D anchor point where the two bodies are connected.
         // Specified relative to the local coordinate frame of the first body.
         Eigen::Vector3d anchor = Eigen::Vector3d::Zero();
 
-        // TODO: implement when weld is introduced
-        // This attribute specifies the relative pose (3D position followed by 4D quaternion
-        // orientation) of body2 relative to body1. If the quaternion part (i.e., last 4 components
-        // of the vector) are all zeros, as in the default setting, this attribute is ignored and
-        // the relative pose is the one corresponding to the model reference pose in qpos0. The
-        // unusual default is because all equality constraint types share the same default for their
-        // numeric parameters.
-        // Eigen::VectorXd relativePose = Eigen::VectorXd::Zero(7);
+        // Relative pose of the weld position where the two bodies are welded.
+        // Specified relative to the local coordinate frame of the first body.
+        SE3 relpose = SE3::Identity();
+
+        // The default value of relpose is not a valid position and trigger.
+        // a speciual event
+        bool use_ref_relpose = false;
       };
 
       /// @brief The graph which contains all information taken from the mjcf file
@@ -654,11 +659,13 @@ namespace pinocchio
 
         /// @brief Parse the equality constraints and add them to the model
         /// @param model Model to add the constraints to
-        /// @param constraint_models Vector of contact models to add the constraints to
+        /// @param bilateral_constraint_models Vector of contact models to add the constraints to
+        /// @param weld_constraint_models Vector of contact models to add the constraints to
         void parseContactInformation(
           const Model & model,
           PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel)
-            & constraint_models);
+            & bilateral_constraint_models,
+          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(WeldConstraintModel) & weld_constraint_models);
 
         /// @brief Fill geometry model with all the info taken from the mjcf model file
         /// @param type Type of geometry to parse (COLLISION or VISUAL)
