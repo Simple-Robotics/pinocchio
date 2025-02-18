@@ -181,7 +181,7 @@ namespace pinocchio
     /// \brief Check whether lb <= ub for all components
     bool isValid() const
     {
-      (m_lb.array() <= m_ub.array).all();
+      return (m_lb.array() <= m_ub.array).all();
     }
 
     /// \brief Project the value given as input for the given row index.
