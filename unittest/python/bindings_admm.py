@@ -29,13 +29,12 @@ class TestADMM(TestCase):
             model, constraint_models, q0, v0, tau0, fext, dt
         )
         delassus = pin.DelassusOperatorDense(delassus_matrix)
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.ADMMContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
         solver.setLanczosSize(g.size)
-        solver.solve(delassus, g, constraint_models, dt, compliance)
+        solver.solve(delassus, g, constraint_models, dt)
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
     def test_cassie(self, display=False, stat_record=True):
@@ -99,7 +98,6 @@ class TestADMM(TestCase):
             "constraint problem is of wrong size.",
         )
 
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.ADMMContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
@@ -111,7 +109,6 @@ class TestADMM(TestCase):
             g,
             constraint_models,
             dt,
-            compliance,
             None,
             None,
             None,

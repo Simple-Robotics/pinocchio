@@ -26,12 +26,11 @@ class TestPGS(TestCase):
         fext = [pin.Force.Zero() for i in range(model.njoints)]
         dt = 1e-3
         delassus, g = self.setupTest(model, constraint_models, q0, v0, tau0, fext, dt)
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.PGSContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
-        solver.solve(delassus, g, constraint_models, dt, compliance)
+        solver.solve(delassus, g, constraint_models, dt)
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
     def test_cassie(self, display=False, stat_record=True):
@@ -92,13 +91,12 @@ class TestPGS(TestCase):
             "constraint problem is of wrong size.",
         )
 
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.PGSContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
 
-        has_converged = solver.solve(delassus, g, constraint_models, dt, compliance)
+        has_converged = solver.solve(delassus, g, constraint_models, dt)
         self.assertTrue(has_converged, "Solver did not converge.")
         print(solver.getIterationCount())
         print(solver.getAbsoluteConvergenceResidual())
