@@ -39,7 +39,7 @@ namespace boost
     namespace internal
     {
       template<typename Derived>
-      struct ConstraintModelCommonParameters
+      struct ConstraintModelCommonParametersAccessor
       : public ::pinocchio::ConstraintModelCommonParameters<Derived>
       {
         typedef ::pinocchio::ConstraintModelCommonParameters<Derived> Base;
@@ -55,7 +55,7 @@ namespace boost
       const unsigned int version)
     {
       PINOCCHIO_UNUSED_VARIABLE(version);
-      typedef internal::ConstraintModelCommonParameters<Derived> Accessor;
+      typedef internal::ConstraintModelCommonParametersAccessor<Derived> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
       ar & make_nvp("m_compliance", cmodel_.m_compliance);
       ar & make_nvp("m_baumgarte_parameters", cmodel_.m_baumgarte_parameters);
