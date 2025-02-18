@@ -32,8 +32,8 @@ namespace pinocchio
     {
       if (hasCollisionModel())
       {
-        PINOCCHIO_THROW(
-          collision_data != nullptr, std::logic_error,
+        PINOCCHIO_THROW_IF(
+          collision_data == nullptr, std::logic_error,
           "A collision model was provided but no pointer to collision GeometryData to borrow.");
       }
       else

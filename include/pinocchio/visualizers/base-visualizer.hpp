@@ -156,8 +156,8 @@ namespace pinocchio
 
       const GeometryModel & collisionModel() const
       {
-        PINOCCHIO_THROW(
-          hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
+        PINOCCHIO_THROW_IF(
+          !hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
         return *m_collisionModel;
       }
 
@@ -192,15 +192,15 @@ namespace pinocchio
 
       GeometryData & collisionData()
       {
-        PINOCCHIO_THROW(
-          hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
+        PINOCCHIO_THROW_IF(
+          !hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
         return *m_collisionData;
       }
 
       const GeometryData & collisionData() const
       {
-        PINOCCHIO_THROW(
-          hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
+        PINOCCHIO_THROW_IF(
+          !hasCollisionModel(), std::logic_error, "No collision model in the visualizer.");
         return *m_collisionData;
       }
 
