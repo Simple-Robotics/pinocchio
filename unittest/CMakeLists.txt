@@ -41,6 +41,7 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
       EXTRA
       COLLISION
       PARALLEL
+      VISUALIZERS
       PYTHON_PARSER
       PARSERS_OPTIONAL
       EXTRA_OPTIONAL
@@ -97,6 +98,10 @@ function(ADD_PINOCCHIO_UNIT_TEST name)
 
   if(unit_test_EXTRA OR (unit_test_EXTRA_OPTIONAL AND TARGET ${PROJECT_NAME}_extra))
     target_link_libraries(${TEST_NAME} PUBLIC ${PROJECT_NAME}_extra)
+  endif()
+
+  if(unit_test_VISUALIZERS)
+    target_link_libraries(${TEST_NAME} PUBLIC ${PROJECT_NAME}_visualizers)
   endif()
 
   if(unit_test_PYTHON_PARSER)
@@ -257,6 +262,8 @@ if(BUILD_WITH_EXTRA_SUPPORT)
     EXTRA
     COLLISION_OPTIONAL)
 endif()
+
+add_pinocchio_unit_test(visualizer VISUALIZERS)
 
 if(BUILD_WITH_PYTHON_PARSER_SUPPORT)
   add_pinocchio_unit_test(python_parser PYTHON_PARSER)
