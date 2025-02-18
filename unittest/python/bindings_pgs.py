@@ -40,14 +40,18 @@ class TestPGS(TestCase):
         model_path = model_dir / "closed_chain.xml"
         constraint_models = pin.StdVec_ConstraintModel()
 
-        # Parsing model, constraint models (bilateral constraints) and geometry model from xml description
-        model, bilateral_constraint_models, geom_model, visual_model = (
+        # Parsing model, constraint models and geometry model from xml description
+        model, constraint_models_dict, geom_model, visual_model = (
             pin.buildModelsFromMJCF(model_path)
         )
 
-        # Adding bilateral constraints to the list of constraints
-        for bpcm in bilateral_constraint_models:
-            constraint_models.append(pin.ConstraintModel(bpcm))
+        # Adding all constraintds would be
+        for constraint_models_vect in constraint_models_dict.values():
+            for cm in constraint_models_vect:
+                constraint_models.append(pin.ConstraintModel(cm))
+        # Adding only bilateral constraints to the list of constraints
+        # for bpcm in constraint_models_dict['bilateral']:
+        #     constraint_models.append(pin.ConstraintModel(bpcm))
 
         # adding joint limit constraints
         active_joints_limits = [i for i in range(1, model.njoints)]
@@ -77,7 +81,8 @@ class TestPGS(TestCase):
 
         self.assertTrue(
             delassus.shape[0]
-            == (3 * len(bilateral_constraint_models))
+            == (3 * len(constraint_models_dict["bilateral"]))
+            + (6 * len(constraint_models_dict["weld"]))
             + (3 * len(contact_constraints))
             + (model.upperPositionLimit != np.inf).sum()
             - 4 * 3
