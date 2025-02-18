@@ -1217,6 +1217,10 @@ BOOST_AUTO_TEST_CASE(test_constraint_model_variant)
   }
 
   // test vector of constraints
+  for (ConstraintModel & cmodel : cmodels)
+  {
+    cmodel.compliance().setRandom();
+  }
   generic_test(cmodels, TEST_SERIALIZATION_FOLDER "/Constraint", "cmodel_vector");
 }
 
