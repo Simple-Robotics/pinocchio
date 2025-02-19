@@ -49,11 +49,11 @@ class TestADMM(TestCase):
         )
 
         # Adding all constraintds would be
-        for constraint_models_vect in constraint_models_dict.values():
-            for cm in constraint_models_vect:
+        for typed_constraint_models in constraint_models_dict.values():
+            for cm in typed_constraint_models:
                 constraint_models.append(pin.ConstraintModel(cm))
         # Adding only bilateral constraints to the list of constraints
-        # for bpcm in constraint_models_dict['bilateral']:
+        # for bpcm in constraint_models_dict['bilateral_point_constraint_models']:
         #     constraint_models.append(pin.ConstraintModel(bpcm))
 
         # adding joint limit constraints
