@@ -883,15 +883,15 @@ namespace pinocchio
             Eigen::Vector4d quat_vec = pos_quat.tail(4);
             Eigen::Quaterniond quaternion(pos_quat(3), pos_quat(4), pos_quat(5), pos_quat(6));
             if (quat_vec.isZero(0))
-              // weird default behavior from Mujoco
-              // If quat is four 0, use the relpose in the reference configuration
+              // Weird default behavior from Mujoco
+              // If quat is four 0, use the relpose in the reference configuration qref
               // then relpose is ignored
               // See: https://mujoco.readthedocs.io/en/latest/XMLreference.html#equality-weld
-              eq.use_ref_relpose = true;
+              eq.use_qref_relpose = true;
             else
             {
-              // We will use relpose argument so we store it as SE3 lacement
-              eq.use_ref_relpose = false;
+              // We will use relpose argument so we store it as SE3 placement
+              eq.use_qref_relpose = false;
               quaternion.normalize();
               eq.relpose.translation() = pos_quat.head(3);
               eq.relpose.rotation() = quaternion.toRotationMatrix();
@@ -1329,27 +1329,29 @@ namespace pinocchio
           else
           {
             joint1 = mjcfVisitor.getParentId(eq.body1);
-            // Body 2 default to world joint
-            joint2 = (eq.body2 == "") ? mjcfVisitor.getParentId(eq.body2) : 0;
             const SE3 & oMi1 = data.oMi[joint1];
+            // Body 2 default to world joint
+            joint2 = (eq.body2 == "") ? 0 : mjcfVisitor.getParentId(eq.body2);
+            const SE3 & oMi2 = data.oMi[joint2];
             if (eq.type == "connect")
             {
               // For connect, anchor is relative to joint1
               i1Mc.setIdentity();
               i1Mc.translation() = eq.anchor;
               // Constaint relative to joint 2 is obtaint thanks to qref pose
-              i2Mc = (joint2 == 0) ? oMi1 * i1Mc : data.oMi[joint2].inverse() * oMi1 * i1Mc;
+              i2Mc = (joint2 == 0) ? oMi1 * i1Mc : oMi2.inverse() * oMi1 * i1Mc;
             }
             else if (eq.type == "weld")
             {
               // For weld constraint, anchor is relative to joint2
               i2Mc.setIdentity();
               i2Mc.translation() = eq.anchor;
-              // Constraint location relative to joint 1 is calculated given the relative pose i1Mi2
-              // Using weird default behavior of mujoco, use relpose or relative pose in
-              // configuration qref
-              SE3 i1Mi2 = eq.use_ref_relpose
-                            ? ((joint2 == 0) ? oMi1.inverse() : oMi1.inverse() * data.oMi[joint2])
+              // Constraint location relative to joint 1: i1Mc is calculated using i2Mc and given
+              // the relative pose i1Mi2.
+              // Using weird default behavior of mujoco, use qref relative pose if quat is four 0
+              // and relpose argument otherwise
+              SE3 i1Mi2 = eq.use_qref_relpose
+                            ? ((joint2 == 0) ? oMi1.inverse() : oMi1.inverse() * oMi2)
                             : eq.relpose;
               i1Mc = i1Mi2 * i2Mc;
             }
@@ -1363,7 +1365,6 @@ namespace pinocchio
           }
           else if (eq.type == "weld")
           {
-            // TODO: must take the scale factor into account
             WeldConstraintModel wcm(model, joint1, i1Mc, joint2, i2Mc);
             weld_constraint_models.push_back(wcm);
           }

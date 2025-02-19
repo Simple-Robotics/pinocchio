@@ -29,13 +29,12 @@ class TestADMM(TestCase):
             model, constraint_models, q0, v0, tau0, fext, dt
         )
         delassus = pin.DelassusOperatorDense(delassus_matrix)
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.ADMMContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
         solver.setRelativePrecision(1e-14)
         solver.setLanczosSize(g.size)
-        solver.solve(delassus, g, constraint_models, dt, compliance)
+        solver.solve(delassus, g, constraint_models, dt)
 
     @unittest.skipUnless(coal_found, "Needs Coal.")
     def test_cassie(self, display=False, stat_record=True):
@@ -44,14 +43,18 @@ class TestADMM(TestCase):
         model_path = model_dir / "closed_chain.xml"
         constraint_models = pin.StdVec_ConstraintModel()
 
-        # Parsing model, constraint models (bilateral constraints) and geometry model from xml description
-        model, bilateral_constraint_models, geom_model, visual_model = (
+        # Parsing model, constraint models and geometry model from xml description
+        model, constraint_models_dict, geom_model, visual_model = (
             pin.buildModelsFromMJCF(model_path)
         )
 
-        # Adding bilateral constraints to the list of constraints
-        for bpcm in bilateral_constraint_models:
-            constraint_models.append(pin.ConstraintModel(bpcm))
+        # Adding all constraintds would be
+        for typed_constraint_models in constraint_models_dict.values():
+            for cm in typed_constraint_models:
+                constraint_models.append(pin.ConstraintModel(cm))
+        # Adding only bilateral constraints to the list of constraints
+        # for bpcm in constraint_models_dict['bilateral_point_constraint_models']:
+        #     constraint_models.append(pin.ConstraintModel(bpcm))
 
         # adding joint limit constraints
         active_joints_limits = [i for i in range(1, model.njoints)]
@@ -84,7 +87,8 @@ class TestADMM(TestCase):
 
         self.assertTrue(
             delassus.matrix().shape[0]
-            == (3 * len(bilateral_constraint_models))
+            == (3 * len(constraint_models_dict["bilateral_point_constraint_models"]))
+            + (6 * len(constraint_models_dict["weld_constraint_models"]))
             + (3 * len(contact_constraints))
             + (model.upperPositionLimit != np.inf).sum()
             - 4 * 3
@@ -94,7 +98,6 @@ class TestADMM(TestCase):
             "constraint problem is of wrong size.",
         )
 
-        compliance = np.zeros_like(g)
         dim_pb = g.shape[0]
         solver = pin.ADMMContactSolver(dim_pb)
         solver.setAbsolutePrecision(1e-13)
@@ -106,7 +109,6 @@ class TestADMM(TestCase):
             g,
             constraint_models,
             dt,
-            compliance,
             None,
             None,
             None,

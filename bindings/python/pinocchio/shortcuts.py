@@ -302,8 +302,16 @@ def _buildModelsFromMJCF(
 
     lst = [model]
     if constraints:
-        constraint_models = pin.buildConstraintModelsFromMJCF(model, filename)
-        lst.append(constraint_models)
+        bilateral_constraint_models = pin.buildBilateralConstraintModelsFromMJCF(
+            model, filename
+        )
+        weld_constraint_models = pin.buildWeldConstraintModelsFromMJCF(model, filename)
+        lst.append(
+            {
+                "bilateral_point_constraint_models": bilateral_constraint_models,
+                "weld_constraint_models": weld_constraint_models,
+            }
+        )
 
     if not hasattr(geometry_types, "__iter__"):
         geometry_types = [geometry_types]

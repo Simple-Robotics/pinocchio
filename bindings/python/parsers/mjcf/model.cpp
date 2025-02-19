@@ -193,7 +193,7 @@ namespace pinocchio
           & (*)(Model &, const bp::object &,
                 PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(BilateralPointConstraintModel) &)
               > (pinocchio::python::buildBilateralConstraintModelsFromMJCF),
-        bp::args("mjcf_filename", "model", "bilateral_constraint_models"),
+        bp::args("mjcf_filename", "model", "bilateral_point_constraint_models"),
         "Parse the MJCF file given in input and return a list of pinocchio CosntraintModel.",
         bp::return_internal_reference<3>());
 
@@ -216,7 +216,8 @@ namespace pinocchio
 
       bp::def(
         "buildAllConstraintModelsFromMJCF", pinocchio::python::buildAllConstraintModelsFromMJCF,
-        bp::args("mjcf_filename", "model", "bilateral_constraint_models", "weld_constraint_models"),
+        bp::args(
+          "mjcf_filename", "model", "bilateral_point_constraint_models", "weld_constraint_models"),
         "Parse the MJCF file given in input and fill constaint models vectors.");
     }
   } // namespace python
