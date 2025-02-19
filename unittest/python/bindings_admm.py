@@ -87,8 +87,8 @@ class TestADMM(TestCase):
 
         self.assertTrue(
             delassus.matrix().shape[0]
-            == (3 * len(constraint_models_dict["bilateral"]))
-            + (6 * len(constraint_models_dict["weld"]))
+            == (3 * len(constraint_models_dict["bilateral_point_constraint_models"]))
+            + (6 * len(constraint_models_dict["weld_constraint_models"]))
             + (3 * len(contact_constraints))
             + (model.upperPositionLimit != np.inf).sum()
             - 4 * 3
