@@ -33,8 +33,8 @@ class TestMJCFBindingsWithMujoco(unittest.TestCase):
         model_dir = current_dir / "../models/"
         model_path = model_dir / "closed_chain.xml"
         model_pin = pin.buildModelFromMJCF(model_path, model_pin)
-        bilateral_constraint_models_pin = (
-            pin.buildBilateralConstraintModelsFromMJCF(model_pin, model_path)
+        bilateral_constraint_models_pin = pin.buildBilateralConstraintModelsFromMJCF(
+            model_pin, model_path
         )
         weld_constraint_models_pin = pin.buildWeldConstraintModelsFromMJCF(
             model_pin, model_path
