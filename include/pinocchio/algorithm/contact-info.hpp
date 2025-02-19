@@ -147,6 +147,9 @@ namespace pinocchio
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
     typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
+    typedef typename traits<Self>::BaumgarteCorrectorParametersConstRef
+      BaumgarteCorrectorParametersConstRef;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
@@ -408,6 +411,18 @@ namespace pinocchio
     VectorXs & compliance()
     {
       return m_compliance;
+    }
+
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
+    {
+      return corrector;
+    }
+
+    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
+    {
+      return corrector;
     }
 
     ///

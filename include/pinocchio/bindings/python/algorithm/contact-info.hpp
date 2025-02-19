@@ -13,6 +13,8 @@
 #include "pinocchio/bindings/python/utils/macros.hpp"
 #include "pinocchio/bindings/python/utils/comparable.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
+#include "pinocchio/bindings/python/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/bindings/python/utils/eigen.hpp"
 
 namespace pinocchio
 {
@@ -76,7 +78,6 @@ namespace pinocchio
             Self, desired_contact_velocity, "Desired contact spatial velocity.")
           .PINOCCHIO_ADD_PROPERTY(
             Self, desired_contact_acceleration, "Desired contact spatial acceleration.")
-          .PINOCCHIO_ADD_PROPERTY(Self, corrector, "Corrector parameters.")
 
           .PINOCCHIO_ADD_PROPERTY(
             Self, colwise_joint1_sparsity, "Sparsity pattern associated to joint 1.")
@@ -97,6 +98,40 @@ namespace pinocchio
             "calc", (void(Self::*)(const Model &, const Data &, ContactData &) const) & Self::calc,
             bp::args("self", "model", "data", "constraint_data"))
           .def("jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"));
+
+        if (::pinocchio::traits<Self>::has_baumgarte_corrector)
+        {
+          typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+          typedef
+            typename traits<Self>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
+
+          typedef typename std::conditional<
+            std::is_reference<BaumgarteCorrectorParametersRef>::value,
+            bp::return_internal_reference<>, bp::with_custodian_and_ward_postcall<0, 1>>::type
+            ReturnPolicy;
+
+          cl.add_property(
+            "corrector",
+            bp::make_function( //
+              +[](Self & self) -> BaumgarteCorrectorParametersRef {
+                return self.baumgarte_corrector_parameters();
+              },
+              ReturnPolicy()),
+            bp::make_function( //
+              +[](Self & self, const BaumgarteCorrectorParameters & copy) {
+                self.baumgarte_corrector_parameters() = copy;
+              }),
+            "Baumgarte parameters associated with the constraint.");
+
+          typedef typename BaumgarteCorrectorParameters::VectorType BaumgarteVectorType;
+          const std::string BaumgarteVectorType_name = getEigenTypeName<BaumgarteVectorType>();
+
+          const std::string BaumgarteCorrectorParameter_classname =
+            "BaumgarteCorrectorParameters_" + BaumgarteVectorType_name;
+
+          BaumgarteCorrectorParametersPythonVisitor<BaumgarteCorrectorParameters>::expose(
+            BaumgarteCorrectorParameter_classname);
+        }
       }
 
       static void expose()
