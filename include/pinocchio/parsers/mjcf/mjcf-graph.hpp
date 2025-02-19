@@ -459,8 +459,8 @@ namespace pinocchio
         SE3 relpose = SE3::Identity();
 
         // The default value of relpose is not a valid position and trigger.
-        // a speciual event
-        bool use_ref_relpose = false;
+        // a special event where relative pose is calculated in qref
+        bool use_qref_relpose = true;
       };
 
       /// @brief The graph which contains all information taken from the mjcf file
