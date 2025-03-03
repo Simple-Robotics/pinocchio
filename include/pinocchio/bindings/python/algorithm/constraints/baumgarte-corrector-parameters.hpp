@@ -48,7 +48,7 @@ namespace pinocchio
         if (eigenpy::check_registration<BaumgarteCorrectorParameters>())
           return;
         bp::class_<BaumgarteCorrectorParameters>(
-          classname.c_str(), "Paramaters of the Baumgarte Corrector.", bp::no_init)
+          classname.c_str(), "Parameters of the Baumgarte Corrector.", bp::no_init)
           .def(BaumgarteCorrectorParametersPythonVisitor());
       }
     };
