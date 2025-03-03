@@ -13,7 +13,7 @@
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
-#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -89,9 +89,10 @@ namespace pinocchio
     static constexpr bool has_baumgarte_corrector = true;
     typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
     typedef Vector6Max BaumgarteVectorType;
-    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
-    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
-    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
+    typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
+      BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersRef;
+    typedef const BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -146,10 +147,12 @@ namespace pinocchio
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
-    typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
-    typedef typename traits<Self>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
-    typedef typename traits<Self>::BaumgarteCorrectorParametersConstRef
-      BaumgarteCorrectorParametersConstRef;
+    typedef
+      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
@@ -186,7 +189,7 @@ namespace pinocchio
     Motion desired_contact_acceleration;
 
     ///  \brief Corrector parameters
-    BaumgarteCorrectorParameters corrector;
+    BaumgarteCorrectorVectorParameters corrector;
 
     /// \brief Colwise sparsity pattern associated with joint 1.
     BooleanVector colwise_joint1_sparsity;
@@ -414,13 +417,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
+    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
     {
       return corrector;
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
+    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
     {
       return corrector;
     }

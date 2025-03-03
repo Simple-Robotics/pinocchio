@@ -2,10 +2,10 @@
 // Copyright (c) 2025 INRIA
 //
 
-#ifndef __pinocchio_python_algorithm_constraints_baumgarte_corrector_parameters_hpp__
-#define __pinocchio_python_algorithm_constraints_baumgarte_corrector_parameters_hpp__
+#ifndef __pinocchio_python_algorithm_constraints_baumgarte_corrector_vector_parameters_hpp__
+#define __pinocchio_python_algorithm_constraints_baumgarte_corrector_vector_parameters_hpp__
 
-#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
 #include "pinocchio/bindings/python/utils/cast.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
@@ -17,14 +17,14 @@ namespace pinocchio
   {
     namespace bp = boost::python;
 
-    template<typename BaumgarteCorrectorParameters>
-    struct BaumgarteCorrectorParametersPythonVisitor
+    template<typename BaumgarteCorrectorVectorParameters>
+    struct BaumgarteCorrectorVectorParametersPythonVisitor
     : public boost::python::def_visitor<
-        BaumgarteCorrectorParametersPythonVisitor<BaumgarteCorrectorParameters>>
+        BaumgarteCorrectorVectorParametersPythonVisitor<BaumgarteCorrectorVectorParameters>>
     {
-      typedef typename BaumgarteCorrectorParameters::Scalar Scalar;
-      typedef typename BaumgarteCorrectorParameters::VectorType VectorType;
-      typedef BaumgarteCorrectorParameters Self;
+      typedef typename BaumgarteCorrectorVectorParameters::Scalar Scalar;
+      typedef typename BaumgarteCorrectorVectorParameters::VectorType VectorType;
+      typedef BaumgarteCorrectorVectorParameters Self;
 
     public:
       template<class PyClass>
@@ -38,22 +38,24 @@ namespace pinocchio
 
           // .def(CastVisitor<Self>())
           // .def(ExposeConstructorByCastVisitor<
-          //      Self, ::pinocchio::context::RigidConstraintModel::BaumgarteCorrectorParameters>())
+          //      Self,
+          //      ::pinocchio::context::RigidConstraintModel::BaumgarteCorrectorVectorParameters>())
           .def(ComparableVisitor<Self, pinocchio::is_floating_point<Scalar>::value>());
       }
 
       static void expose(const std::string & classname)
       {
         // eigenpy::enableEigenPySpecific<VectorType>();
-        if (eigenpy::check_registration<BaumgarteCorrectorParameters>())
+        if (eigenpy::check_registration<BaumgarteCorrectorVectorParameters>())
           return;
-        bp::class_<BaumgarteCorrectorParameters>(
+        bp::class_<BaumgarteCorrectorVectorParameters>(
           classname.c_str(), "Parameters of the Baumgarte Corrector.", bp::no_init)
-          .def(BaumgarteCorrectorParametersPythonVisitor());
+          .def(BaumgarteCorrectorVectorParametersPythonVisitor());
       }
     };
 
   } // namespace python
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_python_algorithm_constraints_baumgarte_corrector_parameters_hpp__
+#endif // ifndef
+       // __pinocchio_python_algorithm_constraints_baumgarte_corrector_vector_parameters_hpp__

@@ -14,7 +14,7 @@
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
-#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -53,9 +53,10 @@ namespace pinocchio
 
     static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
-    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
-    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
-    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
+    typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
+      BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersRef;
+    typedef const BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
@@ -107,7 +108,7 @@ namespace pinocchio
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs MarginVectorType;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Self>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;

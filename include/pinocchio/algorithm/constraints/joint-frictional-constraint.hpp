@@ -50,9 +50,10 @@ namespace pinocchio
 
     static constexpr bool has_baumgarte_corrector = false;
     typedef Eigen::Matrix<Scalar, 0, 0> BaumgarteVectorType; // empty vector
-    typedef BaumgarteCorrectorParametersTpl<BaumgarteVectorType> BaumgarteCorrectorParameters;
-    typedef BaumgarteCorrectorParameters & BaumgarteCorrectorParametersRef;
-    typedef const BaumgarteCorrectorParameters & BaumgarteCorrectorParametersConstRef;
+    typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
+      BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersRef;
+    typedef const BaumgarteCorrectorVectorParameters & BaumgarteCorrectorVectorParametersConstRef;
 
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType

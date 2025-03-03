@@ -292,7 +292,7 @@ namespace pinocchio
       RigidConstraintData & contact_data = contact_datas[contact_id];
       const int contact_dim = contact_model.size();
 
-      const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
+      const typename RigidConstraintModel::BaumgarteCorrectorVectorParameters & corrector =
         contact_model.corrector;
       const typename RigidConstraintData::Motion & contact_acceleration_desired =
         contact_data.contact_acceleration_desired;

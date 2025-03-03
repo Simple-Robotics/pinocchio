@@ -9,7 +9,7 @@ namespace pinocchio
 {
 
   template<typename _BaumgarteVector>
-  struct BaumgarteCorrectorParametersTpl;
+  struct BaumgarteCorrectorVectorParametersTpl;
 
   template<typename Derived>
   struct ConstraintModelCommonParameters
@@ -23,11 +23,12 @@ namespace pinocchio
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
     typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
-    typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
-    typedef
-      typename traits<Derived>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
-    typedef typename traits<Derived>::BaumgarteCorrectorParametersConstRef
-      BaumgarteCorrectorParametersConstRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
+      BaumgarteCorrectorVectorParameters;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
 
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
@@ -66,13 +67,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters_impl() const
+    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
     {
       return m_baumgarte_parameters;
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters_impl()
+    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
     {
       return m_baumgarte_parameters;
     }
@@ -84,7 +85,7 @@ namespace pinocchio
     }
 
     ComplianceVectorType m_compliance;
-    BaumgarteCorrectorParameters m_baumgarte_parameters;
+    BaumgarteCorrectorVectorParameters m_baumgarte_parameters;
   };
 
 } // namespace pinocchio

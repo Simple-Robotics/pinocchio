@@ -28,7 +28,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-dynamics.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-dynamics.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constrained-problem-data.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/point-bilateral-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/weld-constraint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/constraints/box-set.hpp
@@ -516,7 +516,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/delassus-operator.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/proximal.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/algorithms.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/baumgarte-corrector-parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/box-set.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data-base.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/algorithm/constraints/constraint-data.hpp

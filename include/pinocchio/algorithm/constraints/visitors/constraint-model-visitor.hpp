@@ -806,72 +806,81 @@ namespace pinocchio
       return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
     }
 
-    /// \brief BaumgarteCorrectorParametersGetter - default behavior for false for
+    /// \brief BaumgarteCorrectorVectorParametersGetter - default behavior for false for
     /// HasBaumgarteCorrector
-    template<bool HasBaumgarteCorrector, typename BaumgarteVector, typename BaumgarteReturnType>
-    struct BaumgarteCorrectorParametersGetter
+    template<
+      bool HasBaumgarteCorrector,
+      typename BaumgarteVector,
+      typename BaumgarteVectorReturnType>
+    struct BaumgarteCorrectorVectorParametersGetter
     {
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType
+      run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
         ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
-        return internal::NoRun<BaumgarteReturnType>::run();
+        return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
         ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
-        return internal::NoRun<BaumgarteReturnType>::run();
+        return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
     };
 
-    /// \brief BaumgarteCorrectorParametersGetter - partial specialization for true for
+    /// \brief BaumgarteCorrectorVectorParametersGetter - partial specialization for true for
     /// HasBaumgarteCorrector
-    template<typename BaumgarteVector, typename BaumgarteReturnType>
-    struct BaumgarteCorrectorParametersGetter<true, BaumgarteVector, BaumgarteReturnType>
+    template<typename BaumgarteVector, typename BaumgarteVectorReturnType>
+    struct BaumgarteCorrectorVectorParametersGetter<
+      true,
+      BaumgarteVector,
+      BaumgarteVectorReturnType>
     {
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType
+      run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.baumgarte_corrector_parameters().template ref<BaumgarteVector>();
+        return cmodel.baumgarte_corrector_vector_parameters().template ref<BaumgarteVector>();
       }
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return cmodel.baumgarte_corrector_parameters().template ref<BaumgarteVector>();
+        return cmodel.baumgarte_corrector_vector_parameters().template ref<BaumgarteVector>();
       }
     };
 
     /**
-     * @brief      BaumgarteCorrectorParametersVisitor visitor
+     * @brief      BaumgarteCorrectorVectorParametersVisitor visitor
      */
-    template<typename BaumgarteVectorType, typename BaumgarteReturnType>
-    struct BaumgarteCorrectorParametersVisitor
+    template<typename BaumgarteVectorType, typename BaumgarteVectorReturnType>
+    struct BaumgarteCorrectorVectorParametersVisitor
     : ConstraintUnaryVisitorBase<
-        BaumgarteCorrectorParametersVisitor<BaumgarteVectorType, BaumgarteReturnType>,
-        BaumgarteReturnType>
+        BaumgarteCorrectorVectorParametersVisitor<BaumgarteVectorType, BaumgarteVectorReturnType>,
+        BaumgarteVectorReturnType>
     {
       typedef NoArg ArgsType;
 
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType
+      algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         static constexpr bool has_baumgarte_corrector =
           traits<ConstraintModelDerived>::has_baumgarte_corrector;
-        return BaumgarteCorrectorParametersGetter<
-          has_baumgarte_corrector, BaumgarteVectorType, BaumgarteReturnType>::run(cmodel);
+        return BaumgarteCorrectorVectorParametersGetter<
+          has_baumgarte_corrector, BaumgarteVectorType, BaumgarteVectorReturnType>::run(cmodel);
       }
       template<typename ConstraintModelDerived>
-      static BaumgarteReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      static BaumgarteVectorReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         static constexpr bool has_baumgarte_corrector =
           traits<ConstraintModelDerived>::has_baumgarte_corrector;
-        return BaumgarteCorrectorParametersGetter<
-          has_baumgarte_corrector, BaumgarteVectorType, BaumgarteReturnType>::run(cmodel);
+        return BaumgarteCorrectorVectorParametersGetter<
+          has_baumgarte_corrector, BaumgarteVectorType, BaumgarteVectorReturnType>::run(cmodel);
       }
     };
 
@@ -880,15 +889,15 @@ namespace pinocchio
       int Options,
       template<typename S, int O> class ConstraintCollectionTpl>
     typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
-      BaumgarteCorrectorParametersConstRef
-      getBaumgarteCorrectorParameters(
+      BaumgarteCorrectorVectorParametersConstRef
+      getBaumgarteCorrectorVectorParameters(
         const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteVectorType BaumgarteVectorType;
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteCorrectorParametersConstRefs BaumgarteCorrectorParametersConstRefs;
-      return BaumgarteCorrectorParametersVisitor<
+      return BaumgarteCorrectorVectorParametersVisitor<
         BaumgarteVectorType, BaumgarteCorrectorParametersConstRefs>::run(cmodel);
     }
 
@@ -896,16 +905,16 @@ namespace pinocchio
       typename Scalar,
       int Options,
       template<typename S, int O> class ConstraintCollectionTpl>
-    typename traits<
-      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::BaumgarteCorrectorParametersRef
-    getBaumgarteCorrectorParameters(
-      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
+      BaumgarteCorrectorVectorParametersRef
+      getBaumgarteCorrectorVectorParameters(
+        ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteVectorType BaumgarteVectorType;
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
-      return BaumgarteCorrectorParametersVisitor<
+      return BaumgarteCorrectorVectorParametersVisitor<
         BaumgarteVectorType, BaumgarteCorrectorParameters>::run(cmodel);
     }
 

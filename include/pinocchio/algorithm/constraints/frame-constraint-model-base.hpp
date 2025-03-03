@@ -14,7 +14,7 @@
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
-#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -80,7 +80,8 @@ namespace pinocchio
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
-    typedef typename traits<Derived>::BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
+      BaumgarteCorrectorVectorParameters;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -891,7 +892,7 @@ namespace pinocchio
 
       // Set compliance and baumgarte parameters
       m_compliance.setZero();
-      m_baumgarte_parameters = BaumgarteCorrectorParameters(size());
+      m_baumgarte_parameters = BaumgarteCorrectorVectorParameters(size());
     }
   }; // FrameConstraintModelBase<Derived>
 

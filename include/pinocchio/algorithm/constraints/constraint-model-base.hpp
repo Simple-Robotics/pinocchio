@@ -35,10 +35,10 @@ namespace pinocchio
     typedef typename traits<Derived>::ConstraintSet ConstraintSet;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef
-      typename traits<Derived>::BaumgarteCorrectorParametersRef BaumgarteCorrectorParametersRef;
-    typedef typename traits<Derived>::BaumgarteCorrectorParametersConstRef
-      BaumgarteCorrectorParametersConstRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
 
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
     //    typedef Eigen::Matrix<Eigen::DenseIndex,Eigen::Dynamic,1,Options> IndexVector;
@@ -213,15 +213,15 @@ namespace pinocchio
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersConstRef baumgarte_corrector_parameters() const
+    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
     {
-      return derived().baumgarte_corrector_parameters_impl();
+      return derived().baumgarte_corrector_vector_parameters_impl();
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParametersRef baumgarte_corrector_parameters()
+    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters()
     {
-      return derived().baumgarte_corrector_parameters_impl();
+      return derived().baumgarte_corrector_vector_parameters_impl();
     }
 
     ConstraintModelBase & base()
