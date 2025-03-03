@@ -8,6 +8,10 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/common/model-entity.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+
+template<typename Scalar>
+struct BaumgarteCorrectorParametersTpl;
 
 namespace pinocchio
 {
@@ -39,6 +43,11 @@ namespace pinocchio
       BaumgarteCorrectorVectorParametersRef;
     typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
       BaumgarteCorrectorVectorParametersConstRef;
+    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
+    //   BaumgarteCorrectorVectorParametersRef;
+    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
+    //   BaumgarteCorrectorVectorParametersConstRef;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     typedef Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> BooleanVector;
     //    typedef Eigen::Matrix<Eigen::DenseIndex,Eigen::Dynamic,1,Options> IndexVector;
@@ -212,16 +221,28 @@ namespace pinocchio
       return derived().compliance_impl();
     }
 
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    // {
+    //   return derived().baumgarte_corrector_vector_parameters_impl();
+    // }
+    //
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters()
+    // {
+    //   return derived().baumgarte_corrector_vector_parameters_impl();
+    // }
+
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters() const
     {
-      return derived().baumgarte_corrector_vector_parameters_impl();
+      return derived().baumgarte_corrector_parameters_impl();
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters()
+    BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
     {
-      return derived().baumgarte_corrector_vector_parameters_impl();
+      return derived().baumgarte_corrector_parameters_impl();
     }
 
     ConstraintModelBase & base()

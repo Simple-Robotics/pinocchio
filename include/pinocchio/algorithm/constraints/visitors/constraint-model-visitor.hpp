@@ -33,6 +33,19 @@ namespace pinocchio
         }
       };
 
+      // Specialization for reference types
+      template<typename T>
+      struct NoRun<T &>
+      {
+        static T & run()
+        {
+          assert(false && "Should never happen.");
+          // Hacky way to not have to return something real. The system should throw before.
+          T * null_ptr = nullptr;
+          return *null_ptr;
+        }
+      };
+
       template<>
       struct NoRun<void>
       {
@@ -819,7 +832,7 @@ namespace pinocchio
       run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        ss << cmodel.shortname() << "does not have baumgarte vector corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
@@ -827,7 +840,7 @@ namespace pinocchio
       static BaumgarteVectorReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        ss << cmodel.shortname() << "does not have baumgarte vector corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
@@ -916,6 +929,100 @@ namespace pinocchio
         BaumgarteCorrectorParameters BaumgarteCorrectorParameters;
       return BaumgarteCorrectorVectorParametersVisitor<
         BaumgarteVectorType, BaumgarteCorrectorParameters>::run(cmodel);
+    }
+
+    /// \brief BaumgarteCorrectorParametersGetter - default behavior for false for
+    /// HasBaumgarteCorrector
+    template<bool HasBaumgarteCorrector, typename BaumgarteReturnType>
+    struct BaumgarteCorrectorParametersGetter
+    {
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        std::stringstream ss;
+        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        PINOCCHIO_THROW(std::invalid_argument, ss.str());
+        return internal::NoRun<BaumgarteReturnType>::run();
+      }
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        std::stringstream ss;
+        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        PINOCCHIO_THROW(std::invalid_argument, ss.str());
+        return internal::NoRun<BaumgarteReturnType>::run();
+      }
+    };
+
+    /// \brief BaumgarteCorrectorParametersGetter - partial specialization for true for
+    /// HasBaumgarteCorrector
+    template<typename BaumgarteReturnType>
+    struct BaumgarteCorrectorParametersGetter<true, BaumgarteReturnType>
+    {
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.baumgarte_corrector_parameters();
+      }
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.baumgarte_corrector_parameters();
+      }
+    };
+
+    /**
+     * @brief      BaumgarteCorrectorParametersVisitor visitor
+     */
+    template<typename BaumgarteReturnType>
+    struct BaumgarteCorrectorParametersVisitor
+    : ConstraintUnaryVisitorBase<
+        BaumgarteCorrectorParametersVisitor<BaumgarteReturnType>,
+        BaumgarteReturnType>
+    {
+      typedef NoArg ArgsType;
+
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        static constexpr bool has_baumgarte_corrector =
+          traits<ConstraintModelDerived>::has_baumgarte_corrector;
+        return BaumgarteCorrectorParametersGetter<
+          has_baumgarte_corrector, BaumgarteReturnType>::run(cmodel);
+      }
+
+      template<typename ConstraintModelDerived>
+      static BaumgarteReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        static constexpr bool has_baumgarte_corrector =
+          traits<ConstraintModelDerived>::has_baumgarte_corrector;
+        return BaumgarteCorrectorParametersGetter<
+          has_baumgarte_corrector, BaumgarteReturnType>::run(cmodel);
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    const BaumgarteCorrectorParametersTpl<Scalar> & getBaumgarteCorrectorParameters(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+      typedef const BaumgarteCorrectorParameters & ReturnType;
+      return BaumgarteCorrectorParametersVisitor<ReturnType>::run(cmodel);
+    }
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    BaumgarteCorrectorParametersTpl<Scalar> & getBaumgarteCorrectorParameters(
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+      typedef BaumgarteCorrectorParameters & ReturnType;
+      return BaumgarteCorrectorParametersVisitor<ReturnType>::run(cmodel);
     }
 
   } // namespace visitors

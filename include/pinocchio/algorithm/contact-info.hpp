@@ -417,13 +417,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
+    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
     {
       return corrector;
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
+    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters()
     {
       return corrector;
     }

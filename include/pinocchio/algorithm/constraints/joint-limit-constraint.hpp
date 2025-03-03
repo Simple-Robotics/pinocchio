@@ -15,6 +15,7 @@
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -108,7 +109,10 @@ namespace pinocchio
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs MarginVectorType;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
+    // typedef
+    //   typename traits<Self>::BaumgarteCorrectorVectorParameters
+    //   BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;

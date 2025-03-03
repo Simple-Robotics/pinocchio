@@ -11,24 +11,29 @@ namespace pinocchio
   template<typename _BaumgarteVector>
   struct BaumgarteCorrectorVectorParametersTpl;
 
+  template<typename _Scalar>
+  struct BaumgarteCorrectorParametersTpl;
+
   template<typename Derived>
   struct ConstraintModelCommonParameters
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     typedef ConstraintModelCommonParameters<Derived> Self;
+    typedef typename traits<Derived>::Scalar Scalar;
 
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
 
-    typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
-    typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
-      BaumgarteCorrectorVectorParameters;
-    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
-      BaumgarteCorrectorVectorParametersRef;
-    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
-      BaumgarteCorrectorVectorParametersConstRef;
+    // typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
+    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
+    //   BaumgarteCorrectorVectorParameters;
+    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
+    //   BaumgarteCorrectorVectorParametersRef;
+    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
+    //   BaumgarteCorrectorVectorParametersConstRef;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     template<typename OtherDerived>
     friend struct ConstraintModelCommonParameters;
@@ -66,14 +71,26 @@ namespace pinocchio
       return m_compliance;
     }
 
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
+    // {
+    //   return m_baumgarte_vector_parameters;
+    // }
+    //
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
+    // {
+    //   return m_baumgarte_vector_parameters;
+    // }
+
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
+    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl() const
     {
       return m_baumgarte_parameters;
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
+    BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl()
     {
       return m_baumgarte_parameters;
     }
@@ -85,7 +102,8 @@ namespace pinocchio
     }
 
     ComplianceVectorType m_compliance;
-    BaumgarteCorrectorVectorParameters m_baumgarte_parameters;
+    BaumgarteCorrectorParameters m_baumgarte_parameters;
+    // BaumgarteCorrectorVectorParameters m_baumgarte_vector_parameters;
   };
 
 } // namespace pinocchio

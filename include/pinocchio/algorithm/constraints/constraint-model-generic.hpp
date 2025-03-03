@@ -10,6 +10,7 @@
 #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 
 namespace pinocchio
 {
@@ -94,12 +95,14 @@ namespace pinocchio
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef
-      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
-    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
-      BaumgarteCorrectorVectorParametersRef;
-    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
-      BaumgarteCorrectorVectorParametersConstRef;
+    // typedef
+    //   typename traits<Self>::BaumgarteCorrectorVectorParameters
+    //   BaumgarteCorrectorVectorParameters;
+    // typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
+    //   BaumgarteCorrectorVectorParametersRef;
+    // typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
+    //   BaumgarteCorrectorVectorParametersConstRef;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
@@ -254,16 +257,28 @@ namespace pinocchio
       return ::pinocchio::visitors::compliance(*this);
     }
 
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    // {
+    //   return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
+    // }
+    //
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParameters baumgarte_corrector_vector_parameters()
+    // {
+    //   return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
+    // }
+
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters() const
     {
-      return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
+      return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParameters baumgarte_corrector_vector_parameters()
+    BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
     {
-      return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
+      return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
 
     /// \brief Returns the size of the constraint
