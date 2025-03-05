@@ -1188,6 +1188,11 @@ BOOST_AUTO_TEST_CASE(build_model_no_root_joint)
   BOOST_CHECK_EQUAL(model_m.nq, 29);
 }
 
+double degreesToRadian(double degrees)
+{
+  return degrees * (M_PI / 180.0);
+}
+
 BOOST_AUTO_TEST_CASE(slide_joint_limits)
 {
   std::istringstream xmlData(R"(
@@ -1195,7 +1200,7 @@ BOOST_AUTO_TEST_CASE(slide_joint_limits)
                 <worldbody>
                     <body name="link0">
                         <body name="link1" pos="0 0 0">
-                            <joint name="joint1" type="slide" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                            <joint name="joint1" type="slide" axis="1 0 0" range="-16.34 17.2" margin="1.2345" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
                         </body>
                     </body>
                 </worldbody>
@@ -1206,6 +1211,12 @@ BOOST_AUTO_TEST_CASE(slide_joint_limits)
   pinocchio::Model model_m;
   pinocchio::mjcf::buildModel(namefile.name(), model_m);
 
+  Eigen::VectorXd lower_position_limit(model_m.lowerPositionLimit);
+  lower_position_limit << -degreesToRadian(16.34);
+  Eigen::VectorXd upper_position_limit(model_m.upperPositionLimit);
+  upper_position_limit << degreesToRadian(17.2);
+  Eigen::VectorXd position_limit_margin(model_m.positionLimitMargin);
+  position_limit_margin << degreesToRadian(1.2345);
   Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
   min_dry_friction << -11.6;
   Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
@@ -1215,6 +1226,9 @@ BOOST_AUTO_TEST_CASE(slide_joint_limits)
   Eigen::VectorXd max_effort(model_m.upperEffortLimit);
   max_effort << 4.8;
 
+  BOOST_CHECK(lower_position_limit == model_m.lowerPositionLimit);
+  BOOST_CHECK(upper_position_limit == model_m.upperPositionLimit);
+  BOOST_CHECK(position_limit_margin == model_m.positionLimitMargin);
   BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
   BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
   BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
@@ -1228,7 +1242,7 @@ BOOST_AUTO_TEST_CASE(hinge_joint_limits)
                 <worldbody>
                     <body name="link0">
                         <body name="link1" pos="0 0 0">
-                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" margin="1.2345" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
                         </body>
                     </body>
                 </worldbody>
@@ -1239,6 +1253,12 @@ BOOST_AUTO_TEST_CASE(hinge_joint_limits)
   pinocchio::Model model_m;
   pinocchio::mjcf::buildModel(namefile.name(), model_m);
 
+  Eigen::VectorXd lower_position_limit(model_m.lowerPositionLimit);
+  lower_position_limit << -degreesToRadian(16.34);
+  Eigen::VectorXd upper_position_limit(model_m.upperPositionLimit);
+  upper_position_limit << degreesToRadian(17.2);
+  Eigen::VectorXd position_limit_margin(model_m.positionLimitMargin);
+  position_limit_margin << degreesToRadian(1.2345);
   Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
   min_dry_friction << -11.6;
   Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
@@ -1248,6 +1268,9 @@ BOOST_AUTO_TEST_CASE(hinge_joint_limits)
   Eigen::VectorXd max_effort(model_m.upperEffortLimit);
   max_effort << 4.8;
 
+  BOOST_CHECK(lower_position_limit == model_m.lowerPositionLimit);
+  BOOST_CHECK(upper_position_limit == model_m.upperPositionLimit);
+  BOOST_CHECK(position_limit_margin == model_m.positionLimitMargin);
   BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
   BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
   BOOST_CHECK(min_effort == model_m.lowerEffortLimit);
@@ -1261,9 +1284,9 @@ BOOST_AUTO_TEST_CASE(hinge_and_slide_joints_limits)
                 <worldbody>
                     <body name="link0">
                         <body name="link1" pos="0 0 0">
-                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
+                            <joint name="joint1" type="hinge" axis="1 0 0" range="-16.34 17.2" margin="1.2345" actuatorfrcrange="1.5 4.8" frictionloss="11.6"/>
                             <body name="link2" pos="0 0 0">
-                              <joint name="joint2" type="slide" axis="1 0 0" range="-16.34 17.2" actuatorfrcrange="-6.87 -4.8" frictionloss="0.17"/>
+                              <joint name="joint2" type="slide" axis="1 0 0" range="-18.32 19.1" margin="2.3366" actuatorfrcrange="-6.87 -4.8" frictionloss="0.17"/>
                             </body>
                         </body>
                     </body>
@@ -1275,6 +1298,12 @@ BOOST_AUTO_TEST_CASE(hinge_and_slide_joints_limits)
   pinocchio::Model model_m;
   pinocchio::mjcf::buildModel(namefile.name(), model_m);
 
+  Eigen::VectorXd lower_position_limit(model_m.lowerPositionLimit);
+  lower_position_limit << -degreesToRadian(16.34), -degreesToRadian(18.32);
+  Eigen::VectorXd upper_position_limit(model_m.upperPositionLimit);
+  upper_position_limit << degreesToRadian(17.2), degreesToRadian(19.1);
+  Eigen::VectorXd position_limit_margin(model_m.positionLimitMargin);
+  position_limit_margin << degreesToRadian(1.2345), degreesToRadian(2.3366);
   Eigen::VectorXd min_dry_friction(model_m.lowerDryFrictionLimit);
   min_dry_friction << -11.6, -0.17;
   Eigen::VectorXd max_dry_friction(model_m.upperDryFrictionLimit);
@@ -1284,6 +1313,9 @@ BOOST_AUTO_TEST_CASE(hinge_and_slide_joints_limits)
   Eigen::VectorXd max_effort(model_m.upperEffortLimit);
   max_effort << 4.8, -4.8;
 
+  BOOST_CHECK(lower_position_limit == model_m.lowerPositionLimit);
+  BOOST_CHECK(upper_position_limit == model_m.upperPositionLimit);
+  BOOST_CHECK(position_limit_margin == model_m.positionLimitMargin);
   BOOST_CHECK(min_dry_friction == model_m.lowerDryFrictionLimit);
   BOOST_CHECK(max_dry_friction == model_m.upperDryFrictionLimit);
   BOOST_CHECK(min_effort == model_m.lowerEffortLimit);

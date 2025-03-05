@@ -130,6 +130,8 @@ namespace pinocchio
             "lowerPositionLimit", &Model::lowerPositionLimit, "Limit for joint lower position.")
           .def_readwrite(
             "upperPositionLimit", &Model::upperPositionLimit, "Limit for joint upper position.")
+          .def_readwrite(
+            "positionLimitMargin", &Model::positionLimitMargin, "Margin for joint position limit.")
 
           .def_readwrite("frames", &Model::frames, "Vector of frames contained in the model.")
 
@@ -172,6 +174,17 @@ namespace pinocchio
             "placement relative to its parent joint and its name.\n"
             "This signature also takes as input effort, velocity limits as well as the bounds on "
             "the joint configuration.\n"
+            "The user should also provide the friction and damping related to the joint.")
+          .def(
+            "addJoint", &ModelPythonVisitor::addJoint3,
+            bp::args(
+              "self", "parent_id", "joint_model", "joint_placement", "joint_name", "min_effort",
+              "max_effort", "min_velocity", "max_velocity", "min_config", "max_config",
+              "config_limit_margin", "min_friction", "max_friction", "damping"),
+            "Adds a joint to the kinematic tree with given bounds. The joint is defined by its "
+            "placement relative to its parent joint and its name.\n"
+            "This signature also takes as input effort, velocity limits, bounds on "
+            "the joint configuration as well as margin on these bounds.\n"
             "The user should also provide the friction and damping related to the joint.")
           .def(
             "addJointFrame", &Model::addJointFrame,
@@ -299,6 +312,29 @@ namespace pinocchio
         return model.addJoint(
           parent_id, jmodel, joint_placement, joint_name, min_effort, max_effort, min_velocity,
           max_velocity, min_config, max_config, min_friction, max_friction, damping);
+      }
+
+      static JointIndex addJoint3(
+        Model & model,
+        JointIndex parent_id,
+        const JointModel & jmodel,
+        const SE3 & joint_placement,
+        const std::string & joint_name,
+        const VectorXs & min_effort,
+        const VectorXs & max_effort,
+        const VectorXs & min_velocity,
+        const VectorXs & max_velocity,
+        const VectorXs & min_config,
+        const VectorXs & max_config,
+        const VectorXs & config_limit_margin,
+        const VectorXs & min_friction,
+        const VectorXs & max_friction,
+        const VectorXs & damping)
+      {
+        return model.addJoint(
+          parent_id, jmodel, joint_placement, joint_name, min_effort, max_effort, min_velocity,
+          max_velocity, min_config, max_config, config_limit_margin, min_friction, max_friction,
+          damping);
       }
 
       ///

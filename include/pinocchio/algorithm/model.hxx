@@ -181,6 +181,7 @@ namespace pinocchio
           jmodel_in.jointVelocitySelector(modelAB.upperVelocityLimit),
           jmodel_in.jointConfigSelector(modelAB.lowerPositionLimit),
           jmodel_in.jointConfigSelector(modelAB.upperPositionLimit),
+          jmodel_in.jointConfigSelector(modelAB.positionLimitMargin),
           jmodel_in.jointVelocitySelector(modelAB.lowerDryFrictionLimit),
           jmodel_in.jointVelocitySelector(modelAB.upperDryFrictionLimit),
           jmodel_in.jointVelocitySelector(modelAB.damping));
@@ -614,6 +615,7 @@ namespace pinocchio
           joint_input_model.jointVelocitySelector(input_model.upperVelocityLimit),
           joint_input_model.jointConfigSelector(input_model.lowerPositionLimit),
           joint_input_model.jointConfigSelector(input_model.upperPositionLimit),
+          joint_input_model.jointConfigSelector(input_model.positionLimitMargin),
           joint_input_model.jointVelocitySelector(input_model.lowerDryFrictionLimit),
           joint_input_model.jointVelocitySelector(input_model.upperDryFrictionLimit),
           joint_input_model.jointVelocitySelector(input_model.damping));

@@ -203,6 +203,9 @@ namespace pinocchio
     /// \brief Upper joint configuration limit
     ConfigVectorType upperPositionLimit;
 
+    /// \brief Joint configuration limit margin
+    ConfigVectorType positionLimitMargin;
+
     /// \brief Vector of operational frames registered on the model.
     FrameVector frames;
 
@@ -382,6 +385,28 @@ namespace pinocchio
 
     ///
     /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
+    /// std::string &)
+    /// Deprecated in favor of the constructor using min and max effort/velocity
+    ///
+    /// \param[in] max_effort Maximal joint torque.
+    /// \param[in] max_velocity Maximal joint velocity.
+    /// \param[in] min_config Lower joint configuration.
+    /// \param[in] max_config Upper joint configuration.
+    /// \param[in] config_limit_margin Joint configuration limit margin.
+    ///
+    JointIndex addJoint(
+      const JointIndex parent,
+      const JointModel & joint_model,
+      const SE3 & joint_placement,
+      const std::string & joint_name,
+      const VectorXs & max_effort,
+      const VectorXs & max_velocity,
+      const VectorXs & min_config,
+      const VectorXs & max_config,
+      const VectorXs & config_limit_margin);
+
+    ///
+    /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
     /// std::string &,const VectorXs &,const VectorXs &,const VectorXs &,const VectorXs &)
     /// Deprecated in favor of the constructor using min and max effort/velocity
     ///
@@ -404,6 +429,55 @@ namespace pinocchio
       const VectorXs & max_config,
       const VectorXs & min_friction,
       const VectorXs & max_friction,
+      const VectorXs & damping);
+
+    ///
+    /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
+    /// std::string &,const VectorXs &,const VectorXs &,const VectorXs &,const VectorXs &)
+    /// Deprecated in favor of the constructor using min and max effort/velocity
+    ///
+    /// \param[in] config_limit_margin Joint configuration limit margin.
+    /// \param[in] min_effort Minimal joint torque.
+    /// \param[in] min_velocity Minimal joint velocity.
+    /// \param[in] min_friction Minimal joint friction parameters.
+    /// \param[in] max_friction Maximal joint friction parameters.
+    /// \param[in] damping Joint damping parameters.
+    ///
+    JointIndex addJoint(
+      const JointIndex parent,
+      const JointModel & joint_model,
+      const SE3 & joint_placement,
+      const std::string & joint_name,
+      const VectorXs & min_effort,
+      const VectorXs & max_effort,
+      const VectorXs & min_velocity,
+      const VectorXs & max_velocity,
+      const VectorXs & min_config,
+      const VectorXs & max_config,
+      const VectorXs & config_limit_margin,
+      const VectorXs & min_friction,
+      const VectorXs & max_friction,
+      const VectorXs & damping);
+
+    ///
+    /// \copydoc ModelTpl::addJoint(const JointIndex,const JointModel &,const SE3 &,const
+    /// std::string &,const VectorXs &,const VectorXs &,const VectorXs &,const VectorXs &)
+    ///
+    /// \param[in] config_limit_margin Joint configuration limit margin.
+    /// \param[in] friction Joint friction parameters.
+    /// \param[in] damping Joint damping parameters.
+    ///
+    JointIndex addJoint(
+      const JointIndex parent,
+      const JointModel & joint_model,
+      const SE3 & joint_placement,
+      const std::string & joint_name,
+      const VectorXs & max_effort,
+      const VectorXs & max_velocity,
+      const VectorXs & min_config,
+      const VectorXs & max_config,
+      const VectorXs & config_limit_margin,
+      const VectorXs & friction,
       const VectorXs & damping);
 
     ///

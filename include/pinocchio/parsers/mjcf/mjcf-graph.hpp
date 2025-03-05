@@ -200,6 +200,8 @@ namespace pinocchio
         Eigen::VectorXd maxConfig;
         // Min position
         Eigen::VectorXd minConfig;
+        // Position margin
+        Eigen::VectorXd configLimitMargin;
 
         // Join Stiffness
         Eigen::VectorXd springStiffness;
@@ -228,6 +230,7 @@ namespace pinocchio
           maxEffort = Eigen::VectorXd::Constant(1, infty);
           minConfig = Eigen::VectorXd::Constant(1, -infty);
           maxConfig = Eigen::VectorXd::Constant(1, infty);
+          configLimitMargin = Eigen::VectorXd::Constant(1, 0);
           springStiffness = Eigen::VectorXd::Constant(1, v);
           springReference = Eigen::VectorXd::Constant(1, v);
           minDryFriction = Eigen::VectorXd::Constant(1, 0.);

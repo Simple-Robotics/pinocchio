@@ -28,6 +28,7 @@ namespace pinocchio
     const context::VectorXs &,
     const context::VectorXs &,
     const context::VectorXs &,
+    const context::VectorXs &,
     const context::VectorXs &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI JointIndex

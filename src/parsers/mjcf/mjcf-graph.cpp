@@ -127,6 +127,7 @@ namespace pinocchio
         ret.maxVel = Vector::Constant(Nv, infty);
         ret.maxConfig = Vector::Constant(Nq, 1.01);
         ret.minConfig = Vector::Constant(Nq, -1.01);
+        ret.configLimitMargin = Vector::Constant(Nq, 0.);
         ret.maxDryFriction = Vector::Constant(Nv, 0.);
         ret.minDryFriction = Vector::Constant(Nv, 0.);
         ret.damping = Vector::Constant(Nv, 0.);
@@ -141,6 +142,7 @@ namespace pinocchio
       {
         assert(range.maxEffort.size() == Nv);
         assert(range.minConfig.size() == Nq);
+        assert(range.configLimitMargin.size() == Nq);
 
         RangeJoint ret(*this);
         ret.minEffort.conservativeResize(minEffort.size() + Nv);
@@ -156,6 +158,8 @@ namespace pinocchio
         ret.minConfig.tail(Nq) = range.minConfig;
         ret.maxConfig.conservativeResize(maxConfig.size() + Nq);
         ret.maxConfig.tail(Nq) = range.maxConfig;
+        ret.configLimitMargin.conservativeResize(configLimitMargin.size() + Nq);
+        ret.configLimitMargin.tail(Nq) = range.configLimitMargin;
 
         ret.damping.conservativeResize(damping.size() + Nv);
         ret.damping.tail(Nv) = range.damping;
@@ -193,7 +197,7 @@ namespace pinocchio
         if (ax)
           axis = internal::getVectorFromStream<3>(*ax);
 
-        // Range
+        // Config limits (upper/lower)
         auto range_ = el.get_optional<std::string>("<xmlattr>.range");
         bool has_range_limits = false;
         if (range_)
@@ -203,6 +207,16 @@ namespace pinocchio
           range.maxConfig[0] = currentCompiler.convertAngle(rangeT(1));
           has_range_limits = true;
         }
+
+        // Config limit margins
+        auto margin_ = el.get_optional<double>("<xmlattr>.margin");
+        if (margin_)
+        {
+          PINOCCHIO_THROW_PRETTY_IF(
+            *margin_ < 0, std::invalid_argument, "Negative joint limit margin.");
+          range.configLimitMargin.array() = currentCompiler.convertAngle(*margin_);
+        }
+
         // Effort limit
         range_ = el.get_optional<std::string>("<xmlattr>.actuatorfrcrange");
         if (range_)
@@ -1031,8 +1045,8 @@ namespace pinocchio
         mjcfVisitor.addJointAndBody(
           jType, joint.axis, parentFrameId, jointInParent, joint.jointName, inert, bodyInJoint,
           currentBody.bodyName, range.minEffort, range.maxEffort, range.minVel, range.maxVel,
-          range.minConfig, range.maxConfig, range.minDryFriction, range.maxDryFriction,
-          range.damping);
+          range.minConfig, range.maxConfig, range.configLimitMargin, range.minDryFriction,
+          range.maxDryFriction, range.damping);
 
         // Add armature info
         JointIndex j_id = mjcfVisitor.getJointId(joint.jointName);
@@ -1151,8 +1165,8 @@ namespace pinocchio
           joint_id = mjcfVisitor.model.addJoint(
             frame.parentJoint, jointM, frame.placement * firstJointPlacement, jointName,
             rangeCompo.minEffort, rangeCompo.maxEffort, rangeCompo.minVel, rangeCompo.maxVel,
-            rangeCompo.minConfig, rangeCompo.maxConfig, rangeCompo.minDryFriction,
-            rangeCompo.maxDryFriction, rangeCompo.damping);
+            rangeCompo.minConfig, rangeCompo.maxConfig, rangeCompo.configLimitMargin,
+            rangeCompo.minDryFriction, rangeCompo.maxDryFriction, rangeCompo.damping);
           FrameIndex jointFrameId = mjcfVisitor.model.addJointFrame(joint_id, (int)parentFrameId);
           mjcfVisitor.appendBodyToJoint(jointFrameId, inertia, bodyInJoint, nameOfBody);
 
