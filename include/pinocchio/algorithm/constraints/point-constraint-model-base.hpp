@@ -943,6 +943,7 @@ namespace pinocchio
       std::reverse(joint2_span_indexes.begin(), joint2_span_indexes.end());
       colwise_span_indexes.reserve((size_t)model.nv);
       colwise_sparsity.resize(model.nv);
+      colwise_sparsity.setZero();
       loop_span_indexes.reserve((size_t)model.nv);
       for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
       {
