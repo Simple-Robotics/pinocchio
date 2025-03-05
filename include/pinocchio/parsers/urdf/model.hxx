@@ -170,7 +170,7 @@ namespace pinocchio
           const VectorConstRef & min_config,
           const VectorConstRef & max_config,
           const VectorConstRef & min_dry_friction,
-          const VectorConstRef & max_dryfriction,
+          const VectorConstRef & max_dry_friction,
           const VectorConstRef & damping)
         {
           JointIndex joint_id;
@@ -181,7 +181,7 @@ namespace pinocchio
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelFreeFlyer(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           case Self::REVOLUTE:
             joint_id = addJoint<
@@ -189,7 +189,7 @@ namespace pinocchio
               typename JointCollection::JointModelRZ,
               typename JointCollection::JointModelRevoluteUnaligned>(
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           case Self::CONTINUOUS:
             joint_id = addJoint<
@@ -197,7 +197,7 @@ namespace pinocchio
               typename JointCollection::JointModelRUBZ,
               typename JointCollection::JointModelRevoluteUnboundedUnaligned>(
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           case Self::PRISMATIC:
             joint_id = addJoint<
@@ -205,19 +205,19 @@ namespace pinocchio
               typename JointCollection::JointModelPZ,
               typename JointCollection::JointModelPrismaticUnaligned>(
               axis, frame, placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           case Self::PLANAR:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelPlanar(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           case Self::SPHERICAL:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelSpherical(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
-              max_velocity, min_config, max_config, min_dry_friction, max_dryfriction, damping);
+              max_velocity, min_config, max_config, min_dry_friction, max_dry_friction, damping);
             break;
           default:
             PINOCCHIO_CHECK_INPUT_ARGUMENT(false, "The joint type is not correct.");
