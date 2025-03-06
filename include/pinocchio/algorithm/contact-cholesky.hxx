@@ -276,7 +276,7 @@ namespace pinocchio
     for (const ConstraintModel & constraint_model : contact_models)
     {
       const int cdim = constraint_model.size();
-      compliance.template segment(cindex, cdim) = constraint_model.compliance();
+      compliance.segment(cindex, cdim) = constraint_model.compliance();
       cindex += cdim;
     }
 
