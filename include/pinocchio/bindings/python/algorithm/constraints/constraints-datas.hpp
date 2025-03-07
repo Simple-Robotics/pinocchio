@@ -71,10 +71,7 @@ namespace pinocchio
                 self.constraint_residual);
             },
             bp::with_custodian_and_ward_postcall<0, 1>()),
-          "")
-        .PINOCCHIO_ADD_PROPERTY(
-          context::JointLimitConstraintData, active_set_indexes,
-          "Indexes of the active constraints set.");
+          "");
     }
   } // namespace python
 } // namespace pinocchio
