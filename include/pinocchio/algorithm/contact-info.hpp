@@ -1064,6 +1064,39 @@ namespace pinocchio
   };
 
   ///
+  /// \brief Computes the sum of the active sizes of the constraints contained in the input
+  /// `contact_models` vector.
+  template<template<typename T> class Holder, class ConstraintModel, class ConstraintModelAllocator>
+  Eigen::DenseIndex getTotalConstraintActiveSize(
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models)
+  {
+    Eigen::DenseIndex total_size = 0;
+    for (const auto & wrapper : constraint_models)
+    {
+      const ConstraintModel & constraint_model = wrapper;
+      total_size += constraint_model.activeSize();
+    }
+
+    return total_size;
+  }
+
+  ///
+  /// \brief Computes the sum of the active sizes of the constraints contained in the input
+  /// `contact_models` vector.
+  template<class ConstraintModel, class ConstraintModelAllocator>
+  Eigen::DenseIndex getTotalConstraintActiveSize(
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models)
+  {
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+    typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+    WrappedConstraintModelVector wrapped_constraint_models(
+      contact_models.cbegin(), contact_models.cend());
+
+    return getTotalConstraintActiveSize(wrapped_constraint_models);
+  }
+
+  ///
   /// \brief Computes the sum of the sizes of the constraints contained in the input
   /// `contact_models` vector.
   template<template<typename T> class Holder, class ConstraintModel, class ConstraintModelAllocator>

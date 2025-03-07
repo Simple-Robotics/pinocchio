@@ -616,8 +616,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -642,8 +643,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -677,8 +678,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -755,8 +756,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -781,8 +783,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -821,8 +823,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -899,8 +901,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -925,8 +928,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -965,8 +968,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1034,8 +1037,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -1060,8 +1064,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1103,8 +1107,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1172,8 +1176,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -1198,8 +1203,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1236,8 +1241,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1308,8 +1313,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -1334,8 +1340,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
     g_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_against_lower_bound.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd constraint_velocity = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);
@@ -1357,7 +1363,7 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
     Eigen::VectorXd dual_solution = admm_solver.getDualSolution();
 
     BOOST_CHECK(std::fabs(primal_solution.dot(dual_solution)) <= 1e-8);
-    BOOST_CHECK(std::abs(constraint_velocity(1)) < 1e-6);
+    BOOST_CHECK(std::abs(constraint_velocity[0]) < 1e-6);
     BOOST_CHECK(
       (dual_solution
        - (G_plain * primal_solution.cwiseProduct(time_scaling) + g_tilde_against_lower_bound))
@@ -1376,8 +1382,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
     g_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
     g_tilde_move_away.const_cast_derived().array() *= time_scaling.array() / dt;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     ADMMContactSolver admm_solver(int(delassus_matrix_plain.rows()));
     admm_solver.setAbsolutePrecision(1e-13);
     admm_solver.setRelativePrecision(1e-14);

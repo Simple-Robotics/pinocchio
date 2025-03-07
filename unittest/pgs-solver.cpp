@@ -524,8 +524,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
@@ -642,8 +643,9 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
   crba(model, data, q0, Convention::WORLD);
 
   data.q_in = q0;
-  const auto & cmodel = constraint_models[0];
+  auto & cmodel = constraint_models[0];
   auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
   chol.resize(model, constraint_models);
