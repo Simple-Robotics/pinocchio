@@ -243,7 +243,7 @@ namespace pinocchio
 
     int activeSize() const
     {
-      return m_set.size();
+      return int(m_set.size());
     }
 
     Base & base()

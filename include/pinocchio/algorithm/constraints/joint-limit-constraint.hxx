@@ -287,7 +287,7 @@ namespace pinocchio
     PINOCCHIO_UNUSED_VARIABLE(model);
     PINOCCHIO_UNUSED_VARIABLE(data);
     // Fill the constraint residual for all active constraints.
-    std::size_t active_size = activeSize();
+    std::size_t active_size = std::size_t(activeSize());
     auto & activable_constraint_residual = cdata.activable_constraint_residual;
     auto & constraint_residual = cdata.constraint_residual;
 
