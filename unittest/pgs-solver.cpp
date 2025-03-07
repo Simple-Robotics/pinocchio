@@ -66,7 +66,7 @@ struct TestBoxTpl
     // Cholesky of the Delassus matrix
     crba(model, data, q0, Convention::WORLD);
     ContactCholeskyDecomposition chol(model, constraint_models);
-    chol.resize(model, constraint_models, constraint_datas);
+    chol.resize(model, constraint_models);
     chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
@@ -528,14 +528,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
   const DelassusOperatorDense delassus(G);
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -546,8 +546,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -579,8 +579,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away * dt;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -646,14 +646,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
   const DelassusOperatorDense delassus(G);
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -664,8 +664,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -697,8 +697,8 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away * dt;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize(cdata));
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);

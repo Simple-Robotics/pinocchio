@@ -60,7 +60,7 @@ struct TestBoxTpl
     // Cholesky of the Delassus matrix
     crba(model, data, q0, Convention::WORLD);
     ContactCholeskyDecomposition chol(model, constraint_models);
-    chol.resize(model, constraint_models, constraint_datas);
+    chol.resize(model, constraint_models);
     chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
     // std::cout << "chol.getDamping() :   " << chol.getDamping().transpose() << std::endl;
 
@@ -500,7 +500,7 @@ BOOST_AUTO_TEST_CASE(dry_friction_box)
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
@@ -620,14 +620,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -759,14 +759,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_revolute_xyz)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -903,14 +903,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider_xyz)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1038,14 +1038,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1176,14 +1176,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_freeflyer)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
@@ -1312,14 +1312,14 @@ BOOST_AUTO_TEST_CASE(joint_limit_composite)
   auto & cdata = constraint_datas[0];
   cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
-  chol.resize(model, constraint_models, constraint_datas);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   auto G_expression = chol.getDelassusCholeskyExpression();
   const auto G_plain = G_expression.matrix();
   const Eigen::MatrixXd delassus_matrix_plain = G_expression.matrix();
 
-  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(cdata), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
