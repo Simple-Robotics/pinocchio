@@ -470,7 +470,7 @@ namespace pinocchio
       const JointIndex & joint_id = contact_model.joint1_id;
       int con_dim = contact_model.size();
 
-      const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
+      const typename RigidConstraintModel::BaumgarteCorrectorVectorParameters & corrector =
         contact_model.corrector;
       typename RigidConstraintData::Motion & contact_acc_err =
         contact_datas[i].contact_acceleration_error;
@@ -668,7 +668,7 @@ namespace pinocchio
       typename RigidConstraintData::Motion & vc2 = contact_datas[i].contact2_velocity;
       const JointIndex & joint_id = contact_model.joint1_id;
       int con_dim = contact_model.size();
-      const typename RigidConstraintModel::BaumgarteCorrectorParameters & corrector =
+      const typename RigidConstraintModel::BaumgarteCorrectorVectorParameters & corrector =
         contact_model.corrector;
       typename RigidConstraintData::Motion & contact_acc_err =
         contact_datas[i].contact_acceleration_error;

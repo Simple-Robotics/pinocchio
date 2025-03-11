@@ -38,6 +38,8 @@ namespace pinocchio
 
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
       ConstraintFormulationLevel::POSITION_LEVEL;
+    static constexpr bool has_baumgarte_corrector = true;
+    static constexpr bool has_baumgarte_corrector_vector = false;
 
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
@@ -56,10 +58,7 @@ namespace pinocchio
     typedef EigenStorageTpl<VectorXs> EigenStorageVector;
     typedef typename EigenStorageVector::RefMapType ActiveComplianceVectorTypeRef;
     typedef typename EigenStorageVector::ConstRefMapType ActiveComplianceVectorTypeConstRef;
-    // typedef Eigen::Ref<ComplianceVectorType>  ActiveComplianceVectorTypeRef;
-    // typedef Eigen::Ref<const ComplianceVectorType> ActiveComplianceVectorTypeConstRef;
 
-    static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
       BaumgarteCorrectorVectorParameters;
@@ -102,64 +101,41 @@ namespace pinocchio
   , ConstraintModelCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
-    typedef JointLimitConstraintModelTpl Self;
     enum
     {
       Options = _Options
     };
 
+    typedef JointLimitConstraintModelTpl Self;
     typedef ConstraintModelBase<JointLimitConstraintModelTpl> Base;
     typedef ConstraintModelCommonParameters<JointLimitConstraintModelTpl> BaseCommonParameters;
 
-    typedef std::vector<JointIndex> JointIndexVector;
-    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
-    typedef typename traits<Self>::EigenStorageVector EigenStorageVector;
-    typedef VectorXs VectorConstraintSize;
-    typedef VectorXs MarginVectorType;
-    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
-    typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
-    typedef
-      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
-    // typedef
-    //   typename traits<Self>::BaumgarteCorrectorVectorParameters
-    //   BaumgarteCorrectorVectorParameters;
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+    template<typename NewScalar, int NewOptions>
+    friend struct JointLimitConstraintModelTpl;
 
     static const ConstraintFormulationLevel constraint_formulation_level =
       traits<JointLimitConstraintModelTpl>::constraint_formulation_level;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::EigenStorageVector EigenStorageVector;
+    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef
+      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+    typedef
+      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+
+    typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
+    typedef BoxSetTpl<Scalar, Options> BoxSet;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 
     typedef std::vector<BooleanVector> VectorOfBooleanVector;
     typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
-
-    typedef JointLimitConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
-    typedef BoxSetTpl<Scalar, Options> BoxSet;
-
-    //    typedef JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
-    //    typedef JointModelRevoluteTpl<Scalar, Options, 1> JointModelRY;
-    //    typedef JointModelRevoluteTpl<Scalar, Options, 2> JointModelRZ;
-    //    typedef JointModelRevoluteUnalignedTpl<Scalar, Options> JointModelRevoluteUnaligned;
-    //
-    //    typedef JointModelPrismaticTpl<Scalar, Options, 0> JointModelPX;
-    //    typedef JointModelPrismaticTpl<Scalar, Options, 1> JointModelPY;
-    //    typedef JointModelPrismaticTpl<Scalar, Options, 2> JointModelPZ;
-    //    typedef JointModelPrismaticUnalignedTpl<Scalar, Options> JointModelPrismaticUnaligned;
-
-    //    typedef boost::mpl::vector<
-    //      JointModelRX,
-    //      JointModelRY,
-    //      JointModelRZ,
-    //      JointModelRevoluteUnaligned,
-    //      JointModelPX,
-    //      JointModelPY,
-    //      JointModelPZ,
-    //      JointModelPrismaticUnaligned>
-    //      ValidJointTypes;
+    typedef std::vector<JointIndex> JointIndexVector;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
 
     JointLimitConstraintModelTpl()
     : active_compliance_storage(size(), 1)
@@ -197,9 +173,6 @@ namespace pinocchio
     {
       init(model, activable_joints, lb, ub);
     }
-
-    template<typename NewScalar, int NewOptions>
-    friend struct JointLimitConstraintModelTpl;
 
     /// \brief Cast operator
     template<typename NewScalar>

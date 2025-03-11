@@ -33,6 +33,8 @@ namespace pinocchio
 
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
       ConstraintFormulationLevel::VELOCITY_LEVEL;
+    static constexpr bool has_baumgarte_corrector = false;
+    static constexpr bool has_baumgarte_corrector_vector = false;
 
     typedef FrictionalJointConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
@@ -51,7 +53,6 @@ namespace pinocchio
     typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
-    static constexpr bool has_baumgarte_corrector = false;
     typedef Eigen::Matrix<Scalar, 0, 0> BaumgarteVectorType; // empty vector
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
       BaumgarteCorrectorVectorParameters;
@@ -103,27 +104,29 @@ namespace pinocchio
     typedef ConstraintModelBase<Self> Base;
     typedef ConstraintModelCommonParameters<Self> BaseCommonParameters;
 
-    typedef std::vector<JointIndex> JointIndexVector;
-    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
-    typedef VectorXs VectorConstraintSize;
-    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    template<typename NewScalar, int NewOptions>
+    friend struct FrictionalJointConstraintModelTpl;
+
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<FrictionalJointConstraintModelTpl>::constraint_formulation_level;
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
     typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef
       typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
 
-    static const ConstraintFormulationLevel constraint_formulation_level =
-      traits<FrictionalJointConstraintModelTpl>::constraint_formulation_level;
+    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
+    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 
     typedef std::vector<BooleanVector> VectorOfBooleanVector;
     typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
-
-    typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
-    typedef BoxSetTpl<Scalar, Options> ConstraintSet;
+    typedef std::vector<JointIndex> JointIndexVector;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
 
     FrictionalJointConstraintModelTpl()
     {
@@ -136,9 +139,6 @@ namespace pinocchio
     {
       init(model, active_joints);
     }
-
-    template<typename NewScalar, int NewOptions>
-    friend struct FrictionalJointConstraintModelTpl;
 
     /// \brief Cast operator
     template<typename NewScalar>

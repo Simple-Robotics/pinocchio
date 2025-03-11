@@ -26,6 +26,11 @@ namespace pinocchio
   template<typename Derived>
   struct traits<FrameConstraintModelBase<Derived>>
   {
+    static constexpr ConstraintFormulationLevel constraint_formulation_level =
+      ConstraintFormulationLevel::VELOCITY_LEVEL;
+    static constexpr bool has_baumgarte_corrector = true;
+    static constexpr bool has_baumgarte_corrector_vector = true;
+
     template<typename InputMatrix>
     struct JacobianMatrixProductReturnType
     {
@@ -47,11 +52,6 @@ namespace pinocchio
         InputMatrixPlain::Options>
         type;
     };
-
-    static constexpr bool has_baumgarte_corrector = true;
-
-    static constexpr ConstraintFormulationLevel constraint_formulation_level =
-      ConstraintFormulationLevel::VELOCITY_LEVEL;
   };
 
   ///
@@ -70,34 +70,33 @@ namespace pinocchio
       Options = traits<Derived>::Options
     };
 
-    static const ConstraintFormulationLevel constraint_formulation_level =
-      traits<FrameConstraintModelBase>::constraint_formulation_level;
-
     typedef ConstraintModelBase<Derived> Base;
     typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
-    typedef typename traits<Derived>::ConstraintModel ConstraintModel;
+
+    template<typename OtherDerived>
+    friend struct FrameConstraintModelBase;
+
+    static const ConstraintFormulationLevel constraint_formulation_level =
+      traits<FrameConstraintModelBase>::constraint_formulation_level;
     typedef typename traits<Derived>::ConstraintData ConstraintData;
+    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeConstRef
+      ActiveComplianceVectorTypeConstRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
+      BaumgarteCorrectorVectorParameters;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+
+    using Base::derived;
+    using typename Base::BooleanVector;
+    using typename Base::EigenIndexVector;
 
     typedef SE3Tpl<Scalar, Options> SE3;
     typedef MotionTpl<Scalar, Options> Motion;
     typedef ForceTpl<Scalar, Options> Force;
-    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
-    //   BaumgarteCorrectorVectorParameters;
-    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
-
-    using typename Base::BooleanVector;
-    using typename Base::EigenIndexVector;
-    typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
-    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Vector6 VectorConstraintSize;
-    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
-    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
-    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-    typedef typename traits<Derived>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
-    typedef typename traits<Derived>::ActiveComplianceVectorTypeConstRef
-      ActiveComplianceVectorTypeConstRef;
 
     Base & base()
     {
@@ -106,6 +105,15 @@ namespace pinocchio
     const Base & base() const
     {
       return static_cast<const Base &>(*this);
+    }
+
+    BaseCommonParameters & base_common_parameters()
+    {
+      return static_cast<BaseCommonParameters &>(*this);
+    }
+    const BaseCommonParameters & base_common_parameters() const
+    {
+      return static_cast<const BaseCommonParameters &>(*this);
     }
 
     /// \brief Index of the first joint in the model tree
@@ -156,8 +164,10 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
   protected:
-    using BaseCommonParameters::m_baumgarte_parameters;
     using BaseCommonParameters::m_compliance;
+    // CHOICE: right now we use the scalar Baumgarte
+    // using BaseCommonParameters::m_baumgarte_vector_parameters;
+    using BaseCommonParameters::m_baumgarte_parameters;
 
   public:
     ///
@@ -325,19 +335,6 @@ namespace pinocchio
     ActiveComplianceVectorTypeRef getActiveCompliance_impl()
     {
       return this->compliance();
-    }
-
-    template<typename OtherDerived>
-    friend struct FrameConstraintModelBase;
-
-    using Base::derived;
-    BaseCommonParameters & base_common_parameters()
-    {
-      return static_cast<BaseCommonParameters &>(*this);
-    }
-    const BaseCommonParameters & base_common_parameters() const
-    {
-      return static_cast<const BaseCommonParameters &>(*this);
     }
 
     ///
@@ -923,7 +920,9 @@ namespace pinocchio
       }
 
       // Set compliance and baumgarte parameters
-      m_compliance.setZero();
+      m_compliance = ComplianceVectorType::Zero(size());
+      // CHOICE: right now we use the scalar Baumgarte
+      // m_baumgarte_vector_parameters = BaumgarteCorrectorVectorParameters(size());
       m_baumgarte_parameters = BaumgarteCorrectorParameters();
     }
   }; // FrameConstraintModelBase<Derived>

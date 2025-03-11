@@ -37,7 +37,6 @@ namespace pinocchio
     typedef ConstraintModel Model;
     typedef ConstraintData Data;
 
-    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Vector6 VectorConstraintSize;
 
@@ -75,23 +74,21 @@ namespace pinocchio
     {
       Options = _Options
     };
+
     typedef FrameConstraintModelBase<WeldConstraintModelTpl> Base;
 
     template<typename NewScalar, int NewOptions>
     friend struct WeldConstraintModelTpl;
 
-    typedef WeldConstraintModelTpl ConstraintModel;
     typedef WeldConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
-    using typename Base::Matrix36;
     using typename Base::Matrix6;
     using typename Base::Motion;
     using typename Base::SE3;
-    using typename Base::Vector3;
     using typename Base::Vector6;
     using typename Base::VectorConstraintSize;
 

@@ -19,36 +19,41 @@ namespace pinocchio
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    template<typename OtherDerived>
+    friend struct ConstraintModelCommonParameters;
+
     typedef ConstraintModelCommonParameters<Derived> Self;
     typedef typename traits<Derived>::Scalar Scalar;
-
     typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
-
-    // typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
-    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
-    //   BaumgarteCorrectorVectorParameters;
-    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
-    //   BaumgarteCorrectorVectorParametersRef;
-    // typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
-    //   BaumgarteCorrectorVectorParametersConstRef;
+    typedef typename traits<Derived>::BaumgarteVectorType BaumgarteVectorType;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParameters
+      BaumgarteCorrectorVectorParameters;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Derived>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
-
-    template<typename OtherDerived>
-    friend struct ConstraintModelCommonParameters;
 
     /// \brief Cast to NewScalar
     template<typename NewScalar, typename OtherDerived>
     void cast(ConstraintModelCommonParameters<OtherDerived> & other) const
     {
       other.m_compliance = m_compliance.template cast<NewScalar>();
+
+      // CHOICE: right now we use the scalar Baumgarte
+      // other.m_baumgarte_vector_parameters = m_baumgarte_vector_parameters.template
+      // cast<NewScalar>();
       other.m_baumgarte_parameters = m_baumgarte_parameters.template cast<NewScalar>();
     }
 
     /// \brief Comparison operator
     bool operator==(const Self & other) const
     {
+      // CHOICE: right now we use the scalar Baumgarte
+      // return m_compliance == other.m_compliance
+      //        && m_baumgarte_vector_parameters == other.m_baumgarte_vector_parameters;
       return m_compliance == other.m_compliance
              && m_baumgarte_parameters == other.m_baumgarte_parameters;
     }
@@ -71,12 +76,13 @@ namespace pinocchio
       return m_compliance;
     }
 
+    // CHOICE: right now we use the scalar Baumgarte
     // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
     // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
     // {
     //   return m_baumgarte_vector_parameters;
     // }
-    //
+
     // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
     // BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
     // {
@@ -102,8 +108,9 @@ namespace pinocchio
     }
 
     ComplianceVectorType m_compliance;
-    BaumgarteCorrectorParameters m_baumgarte_parameters;
+    // CHOICE: right now we use the scalar Baumgarte
     // BaumgarteCorrectorVectorParameters m_baumgarte_vector_parameters;
+    BaumgarteCorrectorParameters m_baumgarte_parameters;
   };
 
 } // namespace pinocchio

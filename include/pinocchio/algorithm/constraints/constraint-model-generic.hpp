@@ -26,6 +26,10 @@ namespace pinocchio
     {
       Options = _Options
     };
+
+    static constexpr bool has_baumgarte_corrector = true;
+    static constexpr bool has_baumgarte_corrector_vector = true;
+
     typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
     typedef ConstraintData Data;
     typedef boost::blank ConstraintSet;
@@ -40,7 +44,6 @@ namespace pinocchio
     typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
-    static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
     typedef Eigen::Ref<VectorXs> BaumgarteVectorTypeRef;
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorTypeRef>
@@ -101,13 +104,12 @@ namespace pinocchio
     typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef
       typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
-    // typedef
-    //   typename traits<Self>::BaumgarteCorrectorVectorParameters
-    //   BaumgarteCorrectorVectorParameters;
-    // typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
-    //   BaumgarteCorrectorVectorParametersRef;
-    // typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
-    //   BaumgarteCorrectorVectorParametersConstRef;
+    typedef
+      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     using typename Base::BooleanVector;
@@ -270,37 +272,38 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeConstRef compliance() const
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return ::pinocchio::visitors::compliance(*this);
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ComplianceVectorTypeRef compliance()
+    ComplianceVectorTypeRef compliance_impl()
     {
       return ::pinocchio::visitors::compliance(*this);
     }
 
+    // CHOICE: right now we use the scalar Baumgarte
     // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
-    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
     // {
     //   return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
     // }
-    //
+
     // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
-    // BaumgarteCorrectorVectorParameters baumgarte_corrector_vector_parameters()
+    // BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
     // {
     //   return ::pinocchio::visitors::getBaumgarteCorrectorVectorParameters(*this);
     // }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters() const
+    const BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl() const
     {
       return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }
 
     /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
+    BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl()
     {
       return ::pinocchio::visitors::getBaumgarteCorrectorParameters(*this);
     }

@@ -13,6 +13,7 @@
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
+#include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
 namespace pinocchio
@@ -72,6 +73,8 @@ namespace pinocchio
 
     static constexpr ConstraintFormulationLevel constraint_formulation_level =
       ConstraintFormulationLevel::VELOCITY_LEVEL;
+    static constexpr bool has_baumgarte_corrector = true;
+    static constexpr bool has_baumgarte_corrector_vector = true;
 
     typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
@@ -80,9 +83,8 @@ namespace pinocchio
     typedef ConstraintModel Model;
     typedef ConstraintData Data;
 
-    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
-    typedef Vector3 VectorConstraintSize;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef VectorXs VectorConstraintSize;
 
     typedef VectorXs ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
@@ -91,7 +93,6 @@ namespace pinocchio
     typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
-    static constexpr bool has_baumgarte_corrector = true;
     typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
     typedef Vector6Max BaumgarteVectorType;
     typedef BaumgarteCorrectorVectorParametersTpl<BaumgarteVectorType>
@@ -137,8 +138,9 @@ namespace pinocchio
     {
       Options = _Options
     };
+
     typedef RigidConstraintModelTpl Self;
-    typedef ConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>> Base;
+    typedef ConstraintModelBase<Self> Base;
 
     template<typename NewScalar, int NewOptions>
     friend struct RigidConstraintModelTpl;
@@ -149,28 +151,30 @@ namespace pinocchio
     typedef RigidConstraintDataTpl<Scalar, Options> ContactData;
     typedef RigidConstraintDataTpl<Scalar, Options> ConstraintData;
 
-    typedef SE3Tpl<Scalar, Options> SE3;
-    typedef MotionTpl<Scalar, Options> Motion;
-    typedef ForceTpl<Scalar, Options> Force;
-    typedef
-      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
-    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
-      BaumgarteCorrectorVectorParametersRef;
-    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
-      BaumgarteCorrectorVectorParametersConstRef;
-    using typename Base::BooleanVector;
-    using typename Base::EigenIndexVector;
-    typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
-    typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
-    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
-    typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
-    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
     typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
     typedef
       typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+    typedef
+      typename traits<Self>::BaumgarteCorrectorVectorParameters BaumgarteCorrectorVectorParameters;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersRef
+      BaumgarteCorrectorVectorParametersRef;
+    typedef typename traits<Self>::BaumgarteCorrectorVectorParametersConstRef
+      BaumgarteCorrectorVectorParametersConstRef;
+    typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
+
+    using typename Base::BooleanVector;
+    using typename Base::EigenIndexVector;
+    typedef SE3Tpl<Scalar, Options> SE3;
+    typedef MotionTpl<Scalar, Options> Motion;
+    typedef ForceTpl<Scalar, Options> Force;
+    typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
+    typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
+    typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
+    typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
 
     ///  \brief Type of the contact.
     ContactType type;
@@ -198,9 +202,6 @@ namespace pinocchio
 
     /// \brief Desired contact spatial acceleration
     Motion desired_contact_acceleration;
-
-    ///  \brief Corrector parameters
-    BaumgarteCorrectorVectorParameters corrector;
 
     /// \brief Colwise sparsity pattern associated with joint 1.
     BooleanVector colwise_joint1_sparsity;
@@ -230,6 +231,14 @@ namespace pinocchio
 
     /// \brief Compliance associated with the contact model
     ComplianceVectorType m_compliance;
+
+    // ///  \brief Corrector parameters
+    // Reference for retrocompatibility
+    BaumgarteCorrectorVectorParameters corrector;
+    // For the new API it is either one of:
+    // BaumgarteCorrectorParameters m_baumgarte_parameters;
+    // BaumgarteCorrectorVectorParameters m_baumgarte_vector_parameters;
+    // Actually it is the scalar one
 
   protected:
     ///
@@ -274,13 +283,13 @@ namespace pinocchio
     , desired_contact_placement(SE3::Identity())
     , desired_contact_velocity(Motion::Zero())
     , desired_contact_acceleration(Motion::Zero())
-    , corrector(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
     , m_compliance(VectorXs::Zero(size()))
+    , corrector(size())
     {
       init(model);
     }
@@ -311,13 +320,13 @@ namespace pinocchio
     , desired_contact_placement(SE3::Identity())
     , desired_contact_velocity(Motion::Zero())
     , desired_contact_acceleration(Motion::Zero())
-    , corrector(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
     , m_compliance(VectorXs::Zero(size()))
+    , corrector(size())
     {
       init(model);
     }
@@ -346,13 +355,13 @@ namespace pinocchio
     , desired_contact_placement(SE3::Identity())
     , desired_contact_velocity(Motion::Zero())
     , desired_contact_acceleration(Motion::Zero())
-    , corrector(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
     , m_compliance(VectorXs::Zero(size()))
+    , corrector(size())
     {
       init(model);
     }
@@ -382,13 +391,13 @@ namespace pinocchio
     , desired_contact_placement(SE3::Identity())
     , desired_contact_velocity(Motion::Zero())
     , desired_contact_acceleration(Motion::Zero())
-    , corrector(size())
     , colwise_joint1_sparsity(model.nv)
     , colwise_joint2_sparsity(model.nv)
     , joint1_span_indexes((size_t)model.njoints)
     , joint2_span_indexes((size_t)model.njoints)
     , loop_span_indexes((size_t)model.nv)
     , m_compliance(VectorXs::Zero(size()))
+    , corrector(size())
     {
       init(model);
     }
@@ -422,18 +431,6 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
-    {
-      return this->compliance();
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
-    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
-    {
-      return this->compliance();
-    }
-
-    /// \brief Returns the compliance internally stored in the constraint model
     ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
@@ -445,17 +442,53 @@ namespace pinocchio
       return m_compliance;
     }
 
-    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters() const
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
     {
       return corrector;
     }
 
-    /// \brief Returns the Baumgarte parameters internally stored in the constraint model
-    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters()
+    /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
     {
       return corrector;
     }
+
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersConstRef baumgarte_corrector_vector_parameters_impl() const
+    // {
+    //   return m_baumgarte_vector_parameters;
+    // }
+
+    // /// \brief Returns the Baumgarte vector parameters internally stored in the constraint model
+    // BaumgarteCorrectorVectorParametersRef baumgarte_corrector_vector_parameters_impl()
+    // {
+    //   return m_baumgarte_vector_parameters;
+    // }
+
+    // /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    // const BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl() const
+    // {
+    //   return m_baumgarte_parameters;
+    // }
+
+    // /// \brief Returns the Baumgarte parameters internally stored in the constraint model
+    // BaumgarteCorrectorParameters & baumgarte_corrector_parameters_impl()
+    // {
+    //   return m_baumgarte_parameters;
+    // }
 
     ///
     ///  \brief Comparison operator
@@ -955,13 +988,13 @@ namespace pinocchio
       res.desired_contact_placement = desired_contact_placement.template cast<NewScalar>();
       res.desired_contact_velocity = desired_contact_velocity.template cast<NewScalar>();
       res.desired_contact_acceleration = desired_contact_acceleration.template cast<NewScalar>();
-      res.corrector = corrector.template cast<NewScalar>();
       res.colwise_joint1_sparsity = colwise_joint1_sparsity;
       res.colwise_joint2_sparsity = colwise_joint2_sparsity;
       res.nv = nv;
       res.depth_joint1 = depth_joint1;
       res.depth_joint2 = depth_joint2;
       res.loop_span_indexes = loop_span_indexes;
+      res.corrector = corrector.template cast<NewScalar>();
 
       return res;
     }

@@ -74,12 +74,12 @@ namespace pinocchio
     {
       Options = _Options
     };
+
     typedef PointConstraintModelBase<FrictionalPointConstraintModelTpl> Base;
 
     template<typename NewScalar, int NewOptions>
     friend struct FrictionalPointConstraintModelTpl;
 
-    typedef FrictionalPointConstraintModelTpl ConstraintModel;
     typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
 

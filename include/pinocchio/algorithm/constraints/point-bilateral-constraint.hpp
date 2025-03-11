@@ -74,12 +74,12 @@ namespace pinocchio
     {
       Options = _Options
     };
+
     typedef PointConstraintModelBase<BilateralPointConstraintModelTpl> Base;
 
     template<typename NewScalar, int NewOptions>
     friend struct BilateralPointConstraintModelTpl;
 
-    typedef BilateralPointConstraintModelTpl ConstraintModel;
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
