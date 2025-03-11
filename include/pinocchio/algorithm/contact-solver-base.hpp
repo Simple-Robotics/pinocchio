@@ -27,8 +27,18 @@ namespace pinocchio
 
     struct SolverStats
     {
+      SolverStats()
+      : it(0)
+      {
+      }
+
       explicit SolverStats(const int max_it)
       : it(0)
+      {
+        reserve(max_it);
+      }
+
+      void reserve(const int max_it)
       {
         primal_feasibility.reserve(size_t(max_it));
         dual_feasibility.reserve(size_t(max_it));

@@ -38,7 +38,7 @@ namespace pinocchio
     , time_scaling_acc_to_constraints(VectorXs::Zero(problem_size))
     , time_scaling_constraints_to_pos(VectorXs::Zero(problem_size))
     , gs(VectorXs::Zero(problem_size))
-    , stats(Base::max_it)
+    , stats()
     {
     }
 

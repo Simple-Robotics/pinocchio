@@ -216,6 +216,7 @@ namespace pinocchio
 
     if (stat_record)
     {
+      stats.reserve(this->max_it);
       stats.reset();
     }
 

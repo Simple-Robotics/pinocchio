@@ -214,9 +214,20 @@ namespace pinocchio
     //
     struct ADMMSolverStats : Base::SolverStats
     {
+      ADMMSolverStats()
+      : Base::SolverStats()
+      , cholesky_update_count(0)
+      {
+      }
+
       explicit ADMMSolverStats(const int max_it)
       : Base::SolverStats(max_it)
       , cholesky_update_count(0)
+      {
+        reserve(max_it);
+      }
+
+      void reserve(const int max_it)
       {
         dual_feasibility_admm.reserve(size_t(max_it));
         dual_feasibility_constraint.reserve(size_t(max_it));
@@ -302,7 +313,7 @@ namespace pinocchio
     , primal_feasibility_vector_bar(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector(VectorXs::Zero(problem_dim))
     , dual_feasibility_vector_bar(VectorXs::Zero(problem_dim))
-    , stats(Base::max_it)
+    , stats()
     {
     }
 
