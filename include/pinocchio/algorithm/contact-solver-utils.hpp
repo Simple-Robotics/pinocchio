@@ -34,7 +34,8 @@ namespace pinocchio
         const ForceVectorLike & force,
         ResultVectorLike & result)
       {
-        result = cmodel.set().project(force);
+        cmodel.set().project(force, result);
+        // result = cmodel.set().project(force);
         //        assert(set.dual().isInside(result, Scalar(1e-12)));
       }
 
