@@ -147,7 +147,8 @@ namespace pinocchio
       return m_diagonal.size();
     }
 
-    void setDiagonal(const Eigen::Ref<const VectorLike> & x)
+    template<typename DiagonalVectorType>
+    void setDiagonal(const Eigen::MatrixBase<DiagonalVectorType> & x)
     {
       m_diagonal = x;
       m_squared_diagonal.array() = x.array() * x.array();
