@@ -582,14 +582,10 @@ namespace pinocchio
       const auto & corrector = cmodel.corrector;
       auto & contact_velocity_error = cdata.contact_velocity_error;
 
+      cmodel.calc(model, data, cdata);
       SE3 & oMc1 = cdata.oMc1;
-      oMc1 = data.oMi[joint1_id] * cmodel.joint1_placement;
-
       SE3 & oMc2 = cdata.oMc2;
-      oMc2 = data.oMi[joint2_id] * cmodel.joint2_placement;
-
       SE3 & c1Mc2 = cdata.c1Mc2;
-      c1Mc2 = oMc1.actInv(oMc2);
 
       vc1 = oMc1.actInv(data.ov[joint1_id]);
       if (joint2_id > 0)
