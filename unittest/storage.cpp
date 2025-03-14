@@ -60,6 +60,20 @@ BOOST_AUTO_TEST_CASE(eigen_storage_matrix)
   BOOST_CHECK(storage.map().topLeftCorner(rows, cols).isOnes(0.));
 }
 
+BOOST_AUTO_TEST_CASE(cast)
+{
+  const Eigen::DenseIndex rows = 10, cols = 20;
+
+  EigenStorageMatrix storage(rows, cols);
+  storage.map().setConstant(1.895);
+
+  const auto storage_cast_double = storage.cast<double>();
+  BOOST_CHECK(storage_cast_double.map() == storage.map());
+
+  const auto storage_cast_long_double = storage.cast<long double>();
+  BOOST_CHECK(storage_cast_long_double.cast<double>().map() == storage.map());
+}
+
 BOOST_AUTO_TEST_CASE(eigen_storage_row_matrix)
 {
   const Eigen::DenseIndex rows = 10, cols = 20;

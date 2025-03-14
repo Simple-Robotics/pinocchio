@@ -155,7 +155,7 @@ namespace pinocchio
     Scalar max_violation = Scalar(0);
     for (const ConstraintModel & cmodel : constraint_models)
     {
-      const auto csize = cmodel.size();
+      const auto csize = cmodel.activeSize();
 
       SegmentType drift_segment = drift.segment(cindex, csize);
       typedef ZeroInitialGuessMaxConstraintViolationVisitor<SegmentType, Scalar> Algo;

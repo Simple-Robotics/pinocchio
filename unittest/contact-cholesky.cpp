@@ -1731,6 +1731,218 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_model_generic)
   BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
 }
 
+BOOST_AUTO_TEST_CASE(contact_cholesky_dynamic_size)
+{
+  using namespace Eigen;
+  using namespace pinocchio;
+
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  pinocchio::Data data(model);
+
+  // First, test not activable limits on joints
+  {
+    model.lowerPositionLimit.setConstant(-std::numeric_limits<double>::max());
+    model.upperPositionLimit.setConstant(std::numeric_limits<double>::max());
+    VectorXd q = pinocchio::neutral(model);
+    data.q_in = q;
+
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
+
+    JointLimitConstraintModel::JointIndexVector joint_indices;
+    for (int i = 1; i < model.njoints; ++i)
+    {
+      joint_indices.push_back((Model::JointIndex)i);
+    }
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
+    model.positionLimitMargin.setZero();
+    constraint_models.push_back(joint_limit_constraint_model);
+    // No activable joint limits
+    BOOST_CHECK(constraint_models[0].size() == 0);
+
+    const std::string RF_name = "rleg6_joint";
+    const std::string LF_name = "lleg6_joint";
+
+    BilateralPointConstraintModel ci_RF(
+      model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Identity());
+    constraint_models.push_back(ci_RF);
+    BilateralPointConstraintModel ci_LF(
+      model, 0, SE3::Identity(), model.getJointId(LF_name), SE3::Identity());
+    constraint_models.push_back(ci_LF);
+
+    for (const auto & cm : constraint_models)
+      constraint_datas.push_back(cm.createData());
+
+    crba(model, data, q, Convention::WORLD);
+
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
+    {
+      JointLimitConstraintModel * jlcm =
+        boost::get<JointLimitConstraintModel>(&constraint_models[i]);
+      if (jlcm != nullptr)
+      {
+        JointLimitConstraintData * jlcd =
+          boost::get<JointLimitConstraintData>(&constraint_datas[i]);
+        jlcm->resize(model, data, *jlcd);
+      }
+      constraint_models[i].calc(model, data, constraint_datas[i]);
+    }
+
+    // No active joint limits
+    BOOST_CHECK(constraint_models[0].activeSize() == 0);
+    // Size of bilateral constraints should be 3
+    BOOST_CHECK(constraint_models[1].activeSize() == 3);
+    BOOST_CHECK(constraint_models[2].activeSize() == 3);
+
+    ContactCholeskyDecomposition contact_chol_decomposition, contact_chol_decomposition_ref;
+    contact_chol_decomposition.resize(model, constraint_models);
+
+    const double mu = 1e-10;
+    contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+
+    // Only bilateral constraints should be active
+    BOOST_CHECK(contact_chol_decomposition.constraintDim() == 6);
+
+    // BOOST_CHECK(contact_chol_decomposition.D.isApprox(contact_chol_decomposition_ref.D));
+    // BOOST_CHECK(contact_chol_decomposition.Dinv.isApprox(contact_chol_decomposition_ref.Dinv));
+    // BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
+  }
+
+  // Second, test activable but unactive limits on joints
+  {
+    model.lowerPositionLimit.setConstant(-1e4);
+    model.upperPositionLimit.setConstant(1e4);
+    VectorXd q = pinocchio::neutral(model);
+    data.q_in = q;
+
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
+
+    JointLimitConstraintModel::JointIndexVector joint_indices;
+    for (int i = 1; i < model.njoints; ++i)
+    {
+      joint_indices.push_back((Model::JointIndex)i);
+    }
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
+    model.positionLimitMargin.setZero();
+    constraint_models.push_back(joint_limit_constraint_model);
+    // Activable joint limits (only the rotation part of the freeflyer is not activable)
+    BOOST_CHECK(constraint_models[0].size() == 2 * (model.nv - 3));
+
+    const std::string RF_name = "rleg6_joint";
+    const std::string LF_name = "lleg6_joint";
+
+    BilateralPointConstraintModel ci_RF(
+      model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Identity());
+    constraint_models.push_back(ci_RF);
+    BilateralPointConstraintModel ci_LF(
+      model, 0, SE3::Identity(), model.getJointId(LF_name), SE3::Identity());
+    constraint_models.push_back(ci_LF);
+
+    for (const auto & cm : constraint_models)
+      constraint_datas.push_back(cm.createData());
+
+    crba(model, data, q, Convention::WORLD);
+
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
+    {
+      JointLimitConstraintModel * jlcm =
+        boost::get<JointLimitConstraintModel>(&constraint_models[i]);
+      if (jlcm != nullptr)
+      {
+        JointLimitConstraintData * jlcd =
+          boost::get<JointLimitConstraintData>(&constraint_datas[i]);
+        jlcm->resize(model, data, *jlcd);
+      }
+      constraint_models[i].calc(model, data, constraint_datas[i]);
+    }
+
+    // No active joint limits
+    BOOST_CHECK(constraint_models[0].activeSize() == 0);
+
+    ContactCholeskyDecomposition contact_chol_decomposition, contact_chol_decomposition_ref;
+    contact_chol_decomposition.resize(model, constraint_models);
+
+    const double mu = 1e-10;
+    contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+
+    // Only bilateral constraints should be active
+    BOOST_CHECK(contact_chol_decomposition.constraintDim() == 6);
+
+    // BOOST_CHECK(contact_chol_decomposition.D.isApprox(contact_chol_decomposition_ref.D));
+    // BOOST_CHECK(contact_chol_decomposition.Dinv.isApprox(contact_chol_decomposition_ref.Dinv));
+    // BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
+  }
+
+  // Third, test only active lower limits on joints
+  {
+    model.lowerPositionLimit.setConstant(0);
+    model.upperPositionLimit.setConstant(1e4);
+    VectorXd q = pinocchio::neutral(model);
+    data.q_in = q;
+
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) constraint_models;
+    PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) constraint_datas;
+
+    JointLimitConstraintModel::JointIndexVector joint_indices;
+    for (int i = 1; i < model.njoints; ++i)
+    {
+      joint_indices.push_back((Model::JointIndex)i);
+    }
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
+    model.positionLimitMargin.setZero();
+    constraint_models.push_back(joint_limit_constraint_model);
+    // Activable joint limits (only the rotation part of the freeflyer is not activable)
+    BOOST_CHECK(constraint_models[0].size() == 2 * (model.nv - 3));
+
+    const std::string RF_name = "rleg6_joint";
+    const std::string LF_name = "lleg6_joint";
+
+    BilateralPointConstraintModel ci_RF(
+      model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Identity());
+    constraint_models.push_back(ci_RF);
+    BilateralPointConstraintModel ci_LF(
+      model, 0, SE3::Identity(), model.getJointId(LF_name), SE3::Identity());
+    constraint_models.push_back(ci_LF);
+
+    for (const auto & cm : constraint_models)
+      constraint_datas.push_back(cm.createData());
+
+    crba(model, data, q, Convention::WORLD);
+
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
+    {
+      JointLimitConstraintModel * jlcm =
+        boost::get<JointLimitConstraintModel>(&constraint_models[i]);
+      if (jlcm != nullptr)
+      {
+        JointLimitConstraintData * jlcd =
+          boost::get<JointLimitConstraintData>(&constraint_datas[i]);
+        jlcm->resize(model, data, *jlcd);
+      }
+      constraint_models[i].calc(model, data, constraint_datas[i]);
+    }
+
+    // Active joint limits (only the the rotation part of the freeflyer is not active)
+    BOOST_CHECK(constraint_models[0].activeSize() == (model.nv - 3));
+
+    ContactCholeskyDecomposition contact_chol_decomposition, contact_chol_decomposition_ref;
+    contact_chol_decomposition.resize(model, constraint_models);
+
+    const double mu = 1e-10;
+    contact_chol_decomposition.compute(model, data, constraint_models, constraint_datas, mu);
+
+    // Bilateral constraints and lower limits should be active (except for the rotation part of the
+    // freeflyer)
+    BOOST_CHECK(contact_chol_decomposition.constraintDim() == 6 + (model.nv - 3));
+
+    // BOOST_CHECK(contact_chol_decomposition.D.isApprox(contact_chol_decomposition_ref.D));
+    // BOOST_CHECK(contact_chol_decomposition.Dinv.isApprox(contact_chol_decomposition_ref.Dinv));
+    // BOOST_CHECK(contact_chol_decomposition.U.isApprox(contact_chol_decomposition_ref.U));
+  }
+}
+
 BOOST_AUTO_TEST_CASE(contact_cholesky_model_with_compliance)
 {
   using namespace Eigen;

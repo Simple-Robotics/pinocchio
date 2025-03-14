@@ -137,6 +137,7 @@ namespace pinocchio
     ///        This structure provides runners to call the right visitor according to the number of
     ///        arguments.
     ///
+
     template<typename ConstraintModelVisitorDerived, typename ReturnType = void>
     struct ConstraintUnaryVisitorBase
     {
@@ -481,7 +482,7 @@ namespace pinocchio
         ConstraintModelCreateDataVisitor<Scalar, Options, ConstraintCollectionTpl>,
         typename ConstraintCollectionTpl<Scalar, Options>::ConstraintDataVariant>
     {
-      typedef visitors::NoArg ArgsType;
+      typedef NoArg ArgsType;
       typedef ConstraintCollectionTpl<Scalar, Options> ConstraintCollection;
       typedef typename ConstraintCollection::ConstraintModelVariant ConstraintModelVariant;
       typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
@@ -501,8 +502,8 @@ namespace pinocchio
     ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl>
     createData(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
     {
-      return ConstraintModelCreateDataVisitor<Scalar, Options, ConstraintCollectionTpl>::run(
-        cmodel);
+      typedef ConstraintModelCreateDataVisitor<Scalar, Options, ConstraintCollectionTpl> Algo;
+      return Algo::run(cmodel);
     }
 
     template<
@@ -569,6 +570,30 @@ namespace pinocchio
     }
 
     /**
+     * @brief      ConstraintModelActiveSizeVisitor visitor
+     */
+    template<typename Scalar, int Options>
+    struct ConstraintModelActiveSizeVisitor
+    : visitors::ConstraintUnaryVisitorBase<ConstraintModelActiveSizeVisitor<Scalar, Options>, int>
+    {
+
+      typedef NoArg ArgsType;
+
+      template<typename ConstraintModel>
+      static int algo(const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel)
+      {
+        return cmodel.activeSize();
+      }
+    };
+
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
+    int activeSize(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef ConstraintModelActiveSizeVisitor<Scalar, Options> Algo;
+      return Algo::run(cmodel);
+    }
+
+    /**
      * @brief      ConstraintModelGetRowActiveIndexesVisitor visitor
      */
     template<typename Scalar, int Options>
@@ -600,12 +625,12 @@ namespace pinocchio
     }
 
     /**
-     * @brief      ConstraintModelGetRowSparsityPatternVisitor visitor
+     * @brief      ConstraintModelGetRowActivableSparsityPatternVisitor visitor
      */
     template<typename Scalar, int Options>
-    struct ConstraintModelGetRowSparsityPatternVisitor
+    struct ConstraintModelGetRowActivableSparsityPatternVisitor
     : visitors::ConstraintUnaryVisitorBase<
-        ConstraintModelGetRowSparsityPatternVisitor<Scalar, Options>,
+        ConstraintModelGetRowActivableSparsityPatternVisitor<Scalar, Options>,
         const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> &>
     {
       typedef const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & ReturnType;
@@ -617,16 +642,47 @@ namespace pinocchio
         const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
         const Eigen::DenseIndex row_id)
       {
-        return cmodel.getRowSparsityPattern(row_id);
+        return cmodel.getRowActivableSparsityPattern(row_id);
       }
     };
 
     template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
-    const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & getRowSparsityPattern(
+    const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & getRowActivableSparsityPattern(
       const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
       const Eigen::DenseIndex row_id)
     {
-      typedef ConstraintModelGetRowSparsityPatternVisitor<Scalar, Options> Algo;
+      typedef ConstraintModelGetRowActivableSparsityPatternVisitor<Scalar, Options> Algo;
+      return Algo::run(cmodel, typename Algo::ArgsType(row_id));
+    }
+
+    /**
+     * @brief      ConstraintModelGetRowActiveSparsityPatternVisitor visitor
+     */
+    template<typename Scalar, int Options>
+    struct ConstraintModelGetRowActiveSparsityPatternVisitor
+    : visitors::ConstraintUnaryVisitorBase<
+        ConstraintModelGetRowActiveSparsityPatternVisitor<Scalar, Options>,
+        const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> &>
+    {
+      typedef const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & ReturnType;
+
+      typedef boost::fusion::vector<const Eigen::DenseIndex> ArgsType;
+
+      template<typename ConstraintModel>
+      static ReturnType algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const Eigen::DenseIndex row_id)
+      {
+        return cmodel.getRowActiveSparsityPattern(row_id);
+      }
+    };
+
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
+    const Eigen::Matrix<bool, Eigen::Dynamic, 1, Options> & getRowActiveSparsityPattern(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const Eigen::DenseIndex row_id)
+    {
+      typedef ConstraintModelGetRowActiveSparsityPatternVisitor<Scalar, Options> Algo;
       return Algo::run(cmodel, typename Algo::ArgsType(row_id));
     }
 
@@ -784,12 +840,12 @@ namespace pinocchio
       template<typename ConstraintModelDerived>
       static ReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return ::pinocchio::make_const_ref(cmodel.compliance());
+        return cmodel.compliance();
       }
       template<typename ConstraintModelDerived>
       static ReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
-        return ::pinocchio::make_ref(cmodel.compliance());
+        return cmodel.compliance();
       }
     };
 
@@ -803,7 +859,8 @@ namespace pinocchio
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         ComplianceVectorTypeConstRef ReturnType;
-      return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
+      typedef ConstraintModelComplianceVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
     }
 
     template<
@@ -816,7 +873,57 @@ namespace pinocchio
     {
       typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
         ComplianceVectorTypeRef ReturnType;
-      return ConstraintModelComplianceVisitor<ReturnType>::run(cmodel);
+      typedef ConstraintModelComplianceVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
+    }
+
+    /**
+     * @brief      ConstraintModelActiveComplianceVisitor visitor
+     */
+    template<typename ReturnType>
+    struct ConstraintModelActiveComplianceVisitor
+    : ConstraintUnaryVisitorBase<ConstraintModelActiveComplianceVisitor<ReturnType>, ReturnType>
+    {
+      typedef NoArg ArgsType;
+
+      template<typename ConstraintModelDerived>
+      static ReturnType algo(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.getActiveCompliance();
+      }
+      template<typename ConstraintModelDerived>
+      static ReturnType algo(ConstraintModelBase<ConstraintModelDerived> & cmodel)
+      {
+        return cmodel.getActiveCompliance();
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    typename traits<
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::ComplianceVectorTypeConstRef
+    getActiveCompliance(const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
+        ComplianceVectorTypeConstRef ReturnType;
+      typedef ConstraintModelActiveComplianceVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
+    }
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    typename traits<
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::ComplianceVectorTypeRef
+    getActiveCompliance(ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel)
+    {
+      typedef typename traits<ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl>>::
+        ComplianceVectorTypeRef ReturnType;
+      typedef ConstraintModelActiveComplianceVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
     }
 
     /// \brief BaumgarteCorrectorVectorParametersGetter - default behavior for false for
@@ -1010,7 +1117,8 @@ namespace pinocchio
     {
       typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
       typedef const BaumgarteCorrectorParameters & ReturnType;
-      return BaumgarteCorrectorParametersVisitor<ReturnType>::run(cmodel);
+      typedef BaumgarteCorrectorParametersVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
     }
 
     template<
@@ -1022,7 +1130,8 @@ namespace pinocchio
     {
       typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
       typedef BaumgarteCorrectorParameters & ReturnType;
-      return BaumgarteCorrectorParametersVisitor<ReturnType>::run(cmodel);
+      typedef BaumgarteCorrectorParametersVisitor<ReturnType> Algo;
+      return Algo::run(cmodel);
     }
 
   } // namespace visitors

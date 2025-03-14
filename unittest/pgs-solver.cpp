@@ -66,6 +66,7 @@ struct TestBoxTpl
     // Cholesky of the Delassus matrix
     crba(model, data, q0, Convention::WORLD);
     ContactCholeskyDecomposition chol(model, constraint_models);
+    chol.resize(model, constraint_models);
     chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
     const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
@@ -521,31 +522,33 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
   const DelassusOperatorDense delassus(G);
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
   // External torques push the slider against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound =
       constraint_jacobian * v_free_against_lower_bound * dt;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -574,16 +577,11 @@ BOOST_AUTO_TEST_CASE(joint_limit_slider)
 
   // External torques push the slider away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away * dt;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -643,31 +641,33 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   // Cholesky of the Delassus matrix
   crba(model, data, q0, Convention::WORLD);
+
+  data.q_in = q0;
+  auto & cmodel = constraint_models[0];
+  auto & cdata = constraint_datas[0];
+  cmodel.resize(model, data, cdata);
+  cmodel.calc(model, data, cdata);
   ContactCholeskyDecomposition chol(model, constraint_models);
+  chol.resize(model, constraint_models);
   chol.compute(model, data, constraint_models, constraint_datas, 1e-10);
 
   const Eigen::MatrixXd delassus_matrix_plain = chol.getDelassusCholeskyExpression().matrix();
   const auto & G = delassus_matrix_plain;
   const DelassusOperatorDense delassus(G);
 
-  Eigen::MatrixXd constraint_jacobian(joint_limit_constraint_model.size(), model.nv);
+  Eigen::MatrixXd constraint_jacobian(cmodel.activeSize(), model.nv);
   constraint_jacobian.setZero();
   getConstraintsJacobian(model, data, constraint_models, constraint_datas, constraint_jacobian);
 
   // External torques push the slider against the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_against_lower_bound =
       constraint_jacobian * v_free_against_lower_bound * dt;
     const Eigen::VectorXd g_tilde_against_lower_bound =
       g_against_lower_bound + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);
@@ -696,16 +696,11 @@ BOOST_AUTO_TEST_CASE(joint_limit_translation)
 
   // External torques push the slider away from the lower bound
   {
-    data.q_in = q0;
-    const auto & cmodel = constraint_models[0];
-    auto & cdata = constraint_datas[0];
-    cmodel.calc(model, data, cdata);
-
     const Eigen::VectorXd g_move_away = constraint_jacobian * v_free_move_away * dt;
     const Eigen::VectorXd g_tilde_move_away = g_move_away + cdata.constraint_residual;
 
-    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.size());
-    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.size());
+    Eigen::VectorXd dual_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
+    Eigen::VectorXd primal_solution = Eigen::VectorXd::Zero(cmodel.activeSize());
     PGSContactSolver pgs_solver(int(delassus_matrix_plain.rows()));
     pgs_solver.setAbsolutePrecision(1e-13);
     pgs_solver.setRelativePrecision(1e-14);

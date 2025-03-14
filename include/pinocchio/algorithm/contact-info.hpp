@@ -82,9 +82,14 @@ namespace pinocchio
 
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Vector3 VectorConstraintSize;
-    typedef Vector3 ComplianceVectorType;
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+
+    typedef VectorXs ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+
+    typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
     static constexpr bool has_baumgarte_corrector = true;
     typedef Eigen::Matrix<Scalar, -1, 1, Eigen::ColMajor, 6> Vector6Max;
@@ -160,6 +165,12 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef
+      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
 
     ///  \brief Type of the contact.
     ContactType type;
@@ -218,7 +229,7 @@ namespace pinocchio
     size_t depth_joint1, depth_joint2;
 
     /// \brief Compliance associated with the contact model
-    VectorXs m_compliance;
+    ComplianceVectorType m_compliance;
 
   protected:
     ///
@@ -391,10 +402,16 @@ namespace pinocchio
     }
 
     /// \brief Returns the colwise sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_sparsity;
+    }
+
+    /// \brief Returns the sparsity associated with a given row
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      return getRowActivableSparsityPattern(row_id);
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
@@ -405,13 +422,25 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    const VectorXs & compliance() const
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ComplianceVectorTypeConstRef compliance_impl() const
     {
       return m_compliance;
     }
 
     /// \brief Returns the compliance internally stored in the constraint model
-    VectorXs & compliance()
+    ComplianceVectorTypeRef compliance_impl()
     {
       return m_compliance;
     }
@@ -905,6 +934,11 @@ namespace pinocchio
       return -1;
     }
 
+    int activeSize() const
+    {
+      return size();
+    }
+
     /// \returns An expression of *this with the Scalar type casted to NewScalar.
     template<typename NewScalar>
     RigidConstraintModelTpl<NewScalar, Options> cast() const
@@ -1028,6 +1062,39 @@ namespace pinocchio
       }
     }
   };
+
+  ///
+  /// \brief Computes the sum of the active sizes of the constraints contained in the input
+  /// `contact_models` vector.
+  template<template<typename T> class Holder, class ConstraintModel, class ConstraintModelAllocator>
+  Eigen::DenseIndex getTotalConstraintActiveSize(
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models)
+  {
+    Eigen::DenseIndex total_size = 0;
+    for (const auto & wrapper : constraint_models)
+    {
+      const ConstraintModel & constraint_model = wrapper;
+      total_size += constraint_model.activeSize();
+    }
+
+    return total_size;
+  }
+
+  ///
+  /// \brief Computes the sum of the active sizes of the constraints contained in the input
+  /// `contact_models` vector.
+  template<class ConstraintModel, class ConstraintModelAllocator>
+  Eigen::DenseIndex getTotalConstraintActiveSize(
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models)
+  {
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+    typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+    WrappedConstraintModelVector wrapped_constraint_models(
+      contact_models.cbegin(), contact_models.cend());
+
+    return getTotalConstraintActiveSize(wrapped_constraint_models);
+  }
 
   ///
   /// \brief Computes the sum of the sizes of the constraints contained in the input

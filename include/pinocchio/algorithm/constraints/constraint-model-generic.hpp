@@ -37,6 +37,9 @@ namespace pinocchio
     typedef Eigen::Ref<ComplianceVectorType> ComplianceVectorTypeRef;
     typedef Eigen::Ref<const ComplianceVectorType> ComplianceVectorTypeConstRef;
 
+    typedef ComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef ComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
+
     static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
     typedef Eigen::Ref<VectorXs> BaumgarteVectorTypeRef;
@@ -95,6 +98,9 @@ namespace pinocchio
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
     typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
     typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef
+      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
     // typedef
     //   typename traits<Self>::BaumgarteCorrectorVectorParameters
     //   BaumgarteCorrectorVectorParameters;
@@ -157,9 +163,27 @@ namespace pinocchio
     }
 
     /// \brief Returns the sparsity pattern associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::DenseIndex row_id) const
     {
-      return ::pinocchio::visitors::getRowSparsityPattern(*this, row_id);
+      return ::pinocchio::visitors::getRowActivableSparsityPattern(*this, row_id);
+    }
+
+    /// \brief Returns the sparsity pattern associated with a given row
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      return ::pinocchio::visitors::getRowActiveSparsityPattern(*this, row_id);
+    }
+
+    /// \brief Returns the compliance associated to the current active set
+    ActiveComplianceVectorTypeConstRef getActiveCompliance() const
+    {
+      return ::pinocchio::visitors::getActiveCompliance(*this);
+    }
+
+    /// \brief Returns the compliance associated to the current active set
+    ActiveComplianceVectorTypeRef getActiveCompliance()
+    {
+      return ::pinocchio::visitors::getActiveCompliance(*this);
     }
 
     /// \brief Runs the underlying jacobian multiplication with a matrix.
@@ -285,6 +309,12 @@ namespace pinocchio
     int size() const
     {
       return ::pinocchio::visitors::size(*this);
+    }
+
+    /// \brief Returns the size of the active constraints
+    int activeSize() const
+    {
+      return ::pinocchio::visitors::activeSize(*this);
     }
 
     boost::blank & set()

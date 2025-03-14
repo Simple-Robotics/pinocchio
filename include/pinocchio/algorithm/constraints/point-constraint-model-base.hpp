@@ -91,6 +91,12 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Vector3 VectorConstraintSize;
+    typedef typename traits<Derived>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Derived>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef typename traits<Derived>::ActiveComplianceVectorTypeConstRef
+      ActiveComplianceVectorTypeConstRef;
 
     Base & base()
     {
@@ -299,10 +305,16 @@ namespace pinocchio
     }
 
     /// \brief Returns the colwise sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_sparsity;
+    }
+
+    /// \brief Returns the sparsity associated with a given row
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      return getRowActivableSparsityPattern(row_id);
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
@@ -310,6 +322,18 @@ namespace pinocchio
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
       return colwise_span_indexes;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
+    {
+      return this->compliance();
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
+    {
+      return this->compliance();
     }
 
     template<typename OtherDerived>
@@ -842,6 +866,11 @@ namespace pinocchio
     static int size()
     {
       return 3;
+    }
+
+    static int activeSize()
+    {
+      return size();
     }
 
     /// \returns An expression of *this with the Scalar type casted to NewScalar.

@@ -138,7 +138,7 @@ namespace pinocchio
       // TODO Remove when API is stabilized
       PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
       PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) empty_contact_models;
+      std::vector<ConstraintModel> empty_contact_models;
       PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       resize(model, empty_contact_models);
     }
@@ -249,10 +249,12 @@ namespace pinocchio
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
     {
-      typedef std::reference_wrapper<const ConstraintModel> WrappedType;
-      typedef std::vector<WrappedType> WrappedTypeVector;
+      typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+      typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelTypeVector;
 
-      WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
+      WrappedConstraintModelTypeVector wrapped_contact_models(
+        contact_models.cbegin(), contact_models.cend());
+
       resize(model, wrapped_contact_models);
     }
 
@@ -261,13 +263,16 @@ namespace pinocchio
     ///
     /// \param[in] model Model of the kinematic tree
     /// \param[in] contact_models Vector of ConstraintModel
+    /// \param[in] contact_datas Vector of ConstraintData
     ///
     template<
       typename S1,
       int O1,
       template<typename, int> class JointCollectionTpl,
       class ConstraintModel,
-      class ConstraintAllocator>
+      class ConstraintAllocator,
+      class ConstraintData,
+      class ConstraintDataAllocator>
     PINOCCHIO_DEPRECATED void allocate(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
       const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
@@ -414,14 +419,18 @@ namespace pinocchio
     ///
     /// \param[in] model Model of the dynamical system
     /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian
-    /// of the kinematic tree \param[in] contact_models Vector containing the contact models (which
-    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.) \param[out]
-    /// contact_datas Vector containing the contact data related to the contact_models. \param[in]
-    /// mu Positive regularization factor allowing to enforce the definite property of the KKT
-    /// matrix.
+    /// of the kinematic tree
+    /// \param[in] contact_models Vector containing the contact models (which
+    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+    /// \param[in,out] contact_datas Vector containing the contact data related to the
+    /// contact_models.
+    /// \param[in] mu Positive regularization factor allowing to enforce the definite property of
+    /// the KKT matrix.
     ///
     /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed
     /// first. This can be achieved by simply calling pinocchio::crba.
+    /// The `resize` method should have been called before calling this method if the size of the
+    /// constraints changed.
     ///
     // TODO Remove when API is stabilized
     PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
@@ -447,18 +456,22 @@ namespace pinocchio
     ///
     /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
     ///        related to the system mass matrix and the Jacobians of the contact patches contained
-    ///        in the vector of RigidConstraintModel named contact_models.
+    ///        in the vector of ConstraintModel named contact_models.
     ///
     /// \param[in] model Model of the dynamical system
     /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian
-    /// of the kinematic tree \param[in] contact_models Vector containing the contact models (which
-    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.) \param[in,out]
-    /// contact_datas Vector containing the contact data related to the contact_models. \param[in]
-    /// mu Positive regularization factor allowing to enforce the definite property of the KKT
-    /// matrix.
+    /// of the kinematic tree
+    /// \param[in] contact_models Vector containing the contact models (which
+    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+    /// \param[in,out] contact_datas Vector containing the contact data related to the
+    /// contact_models.
+    /// \param[in] mu Positive regularization factor allowing to enforce the definite property of
+    /// the KKT matrix.
     ///
     /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed
     /// first. This can be achieved by simply calling pinocchio::crba.
+    /// The `resize` method should have been called before calling this method if the size of the
+    /// constraints changed.
     ///
     template<
       typename S1,
@@ -483,18 +496,22 @@ namespace pinocchio
     ///
     /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
     ///        related to the system mass matrix and the Jacobians of the contact patches contained
-    ///        in the vector of RigidConstraintModel named contact_models.
+    ///        in the vector of ConstraintModel named contact_models.
     ///
     /// \param[in] model Model of the dynamical system
     /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian
-    /// of the kinematic tree \param[in] contact_models Vector containing the contact models (which
-    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.) \param[in,out]
-    /// contact_datas Vector containing the contact data related to the contact_models. \param[in]
-    /// mus Vector of positive regularization factor allowing to enforce the definite property of
+    /// of the kinematic tree
+    /// \param[in] contact_models Vector containing the contact models (which
+    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+    /// \param[in,out] contact_datas Vector containing the contact data related to the
+    /// contact_models.
+    /// \param[in] mu Positive regularization factor allowing to enforce the definite property of
     /// the KKT matrix.
     ///
     /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed
     /// first. This can be achieved by simply calling pinocchio::crba.
+    /// The `resize` method should have been called before calling this method if the size of the
+    /// constraints changed.
     ///
     template<
       typename S1,
@@ -530,18 +547,22 @@ namespace pinocchio
     ///
     /// \brief Computes the Cholesky decompostion of the augmented matrix containing the KKT matrix
     ///        related to the system mass matrix and the Jacobians of the contact patches contained
-    ///        in the vector of RigidConstraintModel named contact_models.
+    ///        in the vector of onstraintModel named contact_models.
     ///
     /// \param[in] model Model of the dynamical system
     /// \param[in] data Data related to model containing the computed mass matrix and the Jacobian
-    /// of the kinematic tree \param[in] contact_models Vector containing the contact models (which
-    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.) \param[in,out]
-    /// contact_datas Vector containing the contact data related to the contact_models. \param[in]
-    /// mus Vector of positive regularization factor allowing to enforce the definite property of
+    /// of the kinematic tree
+    /// \param[in] contact_models Vector containing the contact models (which
+    /// frame is in contact and the type of contact: ponctual, 6D rigid, etc.)
+    /// \param[in,out] contact_datas Vector containing the contact data related to the
+    /// contact_models.
+    /// \param[in] mu Positive regularization factor allowing to enforce the definite property of
     /// the KKT matrix.
     ///
     /// \remarks The mass matrix and the Jacobians of the dynamical system should have been computed
     /// first. This can be achieved by simply calling pinocchio::crba.
+    /// The `resize` method should have been called before calling this method if the size of the
+    /// constraints changed.
     ///
     template<
       typename S1,

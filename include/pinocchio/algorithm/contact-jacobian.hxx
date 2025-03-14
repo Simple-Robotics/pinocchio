@@ -58,7 +58,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
 
-    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
+    const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), constraint_size);
 
     for (auto & force : joint_forces)
@@ -68,7 +68,7 @@ namespace pinocchio
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
       const ConstraintModel & cmodel = constraint_models[ee_id];
-      const auto constraint_size = cmodel.size();
+      const auto constraint_size = cmodel.activeSize();
       const ConstraintData & cdata = constraint_datas[ee_id];
 
       const auto constraint_force = constraint_forces.segment(row_id, constraint_size);
@@ -100,7 +100,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.size(), size_t(model.njoints));
 
     MotionMatrix & constraint_motions = constraint_motions_.const_cast_derived();
-    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
+    const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions.rows(), constraint_size);
 
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
@@ -133,7 +133,7 @@ namespace pinocchio
     auto & constraint_data = constraint_data_.derived();
 
     assert(model.check(data) && "data is not consistent with model.");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_model.size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_model.activeSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
 
     constraint_model.calc(model, data, constraint_data);
@@ -160,7 +160,7 @@ namespace pinocchio
     typedef ConstraintModel ContraintModel;
     typedef ConstraintData ContraintData;
 
-    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
+    const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
 
@@ -171,7 +171,7 @@ namespace pinocchio
       const ContraintModel & cmodel = constraint_models[k];
       ContraintData & cdata = constraint_datas[k];
 
-      getConstraintJacobian(model, data, cmodel, cdata, J.middleRows(row_id, cmodel.size()));
+      getConstraintJacobian(model, data, cmodel, cdata, J.middleRows(row_id, cmodel.activeSize()));
 
       row_id += cmodel.size();
     }
@@ -228,7 +228,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ResultMatrixType> & res_)
   {
 
-    const Eigen::DenseIndex constraint_size = getTotalConstraintSize(constraint_models);
+    const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     ResultMatrixType & res = res_.const_cast_derived();
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(rhs.rows(), constraint_size);
@@ -241,7 +241,7 @@ namespace pinocchio
     {
       const ConstraintModel & cmodel = constraint_models[constraint_id];
       const ConstraintData & cdata = constraint_datas[constraint_id];
-      const auto constraint_size = cmodel.size();
+      const auto constraint_size = cmodel.activeSize();
 
       const auto rhs_block = rhs.middleRows(row_id, constraint_size);
       cmodel.jacobianTransposeMatrixProduct(model, data, cdata, rhs_block, res, AddTo());
@@ -280,7 +280,9 @@ namespace pinocchio
     WrappedConstraintDataVector wrapped_constraint_datas(
       constraint_datas.begin(), constraint_datas.end());
 
-    evalConstraintJacobianTransposeMatrixProduct(model, data, wrapped_constraint_models, wrapped_constraint_datas, rhs.derived(), res_.const_cast_derived());
+    evalConstraintJacobianTransposeMatrixProduct(
+      model, data, wrapped_constraint_models, wrapped_constraint_datas, rhs.derived(),
+      res_.const_cast_derived());
   }
 
 } // namespace pinocchio

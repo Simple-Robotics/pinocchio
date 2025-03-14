@@ -71,9 +71,6 @@ namespace pinocchio
                "Contructor from given joint index vector "
                "implied in the constraint."))
         .def(
-          "margin", +[](const Self & self) -> context::VectorXs { return self.margin(); },
-          bp::args("self"), "Returns the margin internally stored in the constraint model.")
-        .def(
           "getActiveLowerBoundConstraints", &Self::getActiveLowerBoundConstraints,
           bp::return_value_policy<bp::copy_const_reference>(),
           "Returns the vector of configuration vector index for active lower bounds.")
@@ -88,7 +85,11 @@ namespace pinocchio
         .def(
           "getActiveUpperBoundConstraintsTangent", &Self::getActiveUpperBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
-          "Returns the vector of tangent vector index for active upper bounds.");
+          "Returns the vector of tangent vector index for active upper bounds.")
+        .def(
+          "getActiveSetIndexes", &Self::getActiveSetIndexes,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Indexes of the active constraints set.");
       return cl;
     }
   } // namespace python

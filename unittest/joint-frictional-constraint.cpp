@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
   const Model::IndexVector active_joint_ids(RF_support.begin() + 1, RF_support.end());
 
   FrictionalJointConstraintModel constraint(model, active_joint_ids);
+  FrictionalJointConstraintData constraint_data = constraint.createData();
 
   // Check size
   {
@@ -67,7 +68,7 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
     {
       const Eigen::DenseIndex dof_id = active_dofs[row_id];
       const BooleanVector & row_sparsity_pattern =
-        constraint.getRowSparsityPattern(Eigen::DenseIndex(row_id));
+        constraint.getRowActivableSparsityPattern(Eigen::DenseIndex(row_id));
       const EigenIndexVector & row_active_indexes =
         constraint.getRowActiveIndexes(Eigen::DenseIndex(row_id));
 

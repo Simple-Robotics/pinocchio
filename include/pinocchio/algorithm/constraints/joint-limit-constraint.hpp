@@ -16,6 +16,7 @@
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
+#include "pinocchio/container/storage.hpp"
 
 namespace pinocchio
 {
@@ -51,6 +52,12 @@ namespace pinocchio
     typedef VectorXs ComplianceVectorType;
     typedef ComplianceVectorType & ComplianceVectorTypeRef;
     typedef const ComplianceVectorType & ComplianceVectorTypeConstRef;
+
+    typedef EigenStorageTpl<VectorXs> EigenStorageVector;
+    typedef typename EigenStorageVector::RefMapType ActiveComplianceVectorTypeRef;
+    typedef typename EigenStorageVector::ConstRefMapType ActiveComplianceVectorTypeConstRef;
+    // typedef Eigen::Ref<ComplianceVectorType>  ActiveComplianceVectorTypeRef;
+    // typedef Eigen::Ref<const ComplianceVectorType> ActiveComplianceVectorTypeConstRef;
 
     static constexpr bool has_baumgarte_corrector = true;
     typedef VectorXs BaumgarteVectorType;
@@ -106,9 +113,15 @@ namespace pinocchio
 
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
+    typedef typename traits<Self>::EigenStorageVector EigenStorageVector;
     typedef VectorXs VectorConstraintSize;
     typedef VectorXs MarginVectorType;
     typedef typename traits<Self>::ComplianceVectorType ComplianceVectorType;
+    typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
+    typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+    typedef typename traits<Self>::ActiveComplianceVectorTypeRef ActiveComplianceVectorTypeRef;
+    typedef
+      typename traits<Self>::ActiveComplianceVectorTypeConstRef ActiveComplianceVectorTypeConstRef;
     // typedef
     //   typename traits<Self>::BaumgarteCorrectorVectorParameters
     //   BaumgarteCorrectorVectorParameters;
@@ -149,15 +162,25 @@ namespace pinocchio
     //      ValidJointTypes;
 
     JointLimitConstraintModelTpl()
+    : active_compliance_storage(size(), 1)
+    , active_compliance(active_compliance_storage.map())
     {
+    }
+
+    JointLimitConstraintModelTpl(const JointLimitConstraintModelTpl & other)
+    : active_compliance(active_compliance_storage.map())
+    {
+      *this = other;
     }
 
     template<template<typename, int> class JointCollectionTpl>
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const JointIndexVector & active_joints)
+      const JointIndexVector & activable_joints)
+    : active_compliance_storage(size(), 1)
+    , active_compliance(active_compliance_storage.map())
     {
-      init(model, active_joints, model.lowerPositionLimit, model.upperPositionLimit);
+      init(model, activable_joints, model.lowerPositionLimit, model.upperPositionLimit);
     }
 
     template<
@@ -166,11 +189,13 @@ namespace pinocchio
       typename VectorUpperConfiguration>
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const JointIndexVector & active_joints,
+      const JointIndexVector & activable_joints,
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
+    : active_compliance_storage(size(), 1)
+    , active_compliance(active_compliance_storage.map())
     {
-      init(model, active_joints, lb, ub);
+      init(model, activable_joints, lb, ub);
     }
 
     template<typename NewScalar, int NewOptions>
@@ -185,17 +210,23 @@ namespace pinocchio
       Base::cast(res);
       BaseCommonParameters::template cast<NewScalar>(res);
 
-      res.active_configuration_components = active_configuration_components;
+      res.activable_configuration_components = activable_configuration_components;
+      res.activable_lower_bound_constraints = activable_lower_bound_constraints;
+      res.activable_lower_bound_constraints_tangent = activable_lower_bound_constraints_tangent;
+      res.activable_upper_bound_constraints = activable_upper_bound_constraints;
+      res.activable_upper_bound_constraints_tangent = activable_upper_bound_constraints_tangent;
+      res.activable_configuration_limits =
+        activable_configuration_limits.template cast<NewScalar>();
+      res.row_activable_indexes = row_activable_indexes;
+      res.row_activable_sparsity_pattern = row_activable_sparsity_pattern;
+
+      res.active_set_indexes = active_set_indexes;
       res.active_lower_bound_constraints = active_lower_bound_constraints;
       res.active_lower_bound_constraints_tangent = active_lower_bound_constraints_tangent;
       res.active_upper_bound_constraints = active_upper_bound_constraints;
       res.active_upper_bound_constraints_tangent = active_upper_bound_constraints_tangent;
-      res.active_configuration_limits = active_configuration_limits.template cast<NewScalar>();
-      res.row_active_indexes = row_active_indexes;
-      res.row_sparsity_pattern = row_sparsity_pattern;
-      res.active_configuration_components = active_configuration_components;
-
-      res.m_margin = m_margin.template cast<NewScalar>();
+      res.active_compliance_storage = active_compliance_storage.template cast<NewScalar>();
+      res.active_compliance = res.active_compliance_storage.map();
       res.m_set = m_set.template cast<NewScalar>();
       return res;
     }
@@ -207,7 +238,12 @@ namespace pinocchio
 
     int size() const
     {
-      return int(row_active_indexes.size());
+      return int(row_activable_indexes.size());
+    }
+
+    int activeSize() const
+    {
+      return int(m_set.size());
     }
 
     Base & base()
@@ -228,48 +264,120 @@ namespace pinocchio
       return static_cast<const BaseCommonParameters &>(*this);
     }
 
+    /// \brief Resize the constraint by computing the current active set.
+    template<template<typename, int> class JointCollectionTpl>
+    void resize(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata);
+
+    /// \brief Compute the constraint residual for the active constraints. It assumes that the
+    /// active set has been computed by calling `resize` beforehand.
     template<template<typename, int> class JointCollectionTpl>
     void calc(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata) const;
 
+    /// \brief Returns the vector of the active indexes associated with a given row
+    /// This vector is computed when calling the calc method.
+    const std::vector<std::size_t> & getActiveSetIndexes() const
+    {
+      return active_set_indexes;
+    }
+
     /// \brief Returns the sparsity associated with a given row
-    const BooleanVector & getRowSparsityPattern(const Eigen::DenseIndex row_id) const
+    const BooleanVector & getRowActivableSparsityPattern(const Eigen::DenseIndex row_id) const
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
-      return row_sparsity_pattern[size_t(row_id)];
+      return row_activable_sparsity_pattern[std::size_t(row_id)];
+    }
+
+    /// \brief Returns the sparsity associated with a given row
+    /// This vector is computed when calling the calc method.
+    const BooleanVector & getRowActiveSparsityPattern(const Eigen::DenseIndex row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < activeSize());
+      return row_activable_sparsity_pattern[active_set_indexes[std::size_t(row_id)]];
+    }
+
+    /// \brief Returns the vector of the activable indexes associated with a given row
+    const EigenIndexVector & getRowActivableIndexes(const Eigen::DenseIndex row_id) const
+    {
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
+      return row_activable_indexes[size_t(row_id)];
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
+    /// This vector is computed when calling the calc method.
     const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
     {
-      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < size());
-      return row_active_indexes[size_t(row_id)];
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(row_id < activeSize());
+      return row_activable_indexes[active_set_indexes[std::size_t(row_id)]];
+    }
+
+    /// \brief Returns the vector of configuration vector index for activable lower bounds
+    const EigenIndexVector & getActivableLowerBoundConstraints() const
+    {
+      return activable_lower_bound_constraints;
     }
 
     /// \brief Returns the vector of configuration vector index for active lower bounds
+    /// This vector is computed when calling the calc method.
     const EigenIndexVector & getActiveLowerBoundConstraints() const
     {
       return active_lower_bound_constraints;
     }
 
+    /// \brief Returns the vector of tangent vector index for activable lower bounds
+    const EigenIndexVector & getActivableLowerBoundConstraintsTangent() const
+    {
+      return activable_lower_bound_constraints_tangent;
+    }
+
     /// \brief Returns the vector of tangent vector index for active lower bounds
+    /// This vector is computed when calling the calc method.
     const EigenIndexVector & getActiveLowerBoundConstraintsTangent() const
     {
       return active_lower_bound_constraints_tangent;
     }
 
+    /// \brief Returns the vector of configuration vector index for activable upper bounds
+    const EigenIndexVector & getActivableUpperBoundConstraints() const
+    {
+      return activable_upper_bound_constraints;
+    }
+
     /// \brief Returns the vector of configuration vector index for active upper bounds
+    /// This vector is computed when calling the calc method.
     const EigenIndexVector & getActiveUpperBoundConstraints() const
     {
       return active_upper_bound_constraints;
     }
 
+    /// \brief Returns the vector of tangent vector index for activable upper bounds
+    const EigenIndexVector & getActivableUpperBoundConstraintsTangent() const
+    {
+      return activable_upper_bound_constraints_tangent;
+    }
+
     /// \brief Returns the vector of tangent vector index for active upper bounds
+    /// This vector is computed when calling the calc method.
     const EigenIndexVector & getActiveUpperBoundConstraintsTangent() const
     {
       return active_upper_bound_constraints_tangent;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
+    {
+      return active_compliance;
+    }
+
+    /// \brief Returns the compliance internally stored in the constraint model
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
+    {
+      return active_compliance;
     }
 
     const ConstraintSet & set() const
@@ -280,18 +388,6 @@ namespace pinocchio
     ConstraintSet & set()
     {
       return m_set;
-    }
-
-    /// \brief Returns the margin internally stored in the constraint model
-    const MarginVectorType & margin() const
-    {
-      return m_margin;
-    }
-
-    /// \brief Returns the margin internally stored in the constraint model
-    MarginVectorType & margin()
-    {
-      return m_margin;
     }
 
     ///
@@ -305,22 +401,53 @@ namespace pinocchio
     bool operator==(const JointLimitConstraintModelTpl & other) const
     {
       return base() == other.base() && base_common_parameters() == other.base_common_parameters()
-             && active_configuration_components == other.active_configuration_components
+             && activable_configuration_components == other.activable_configuration_components
+             && activable_lower_bound_constraints == other.activable_lower_bound_constraints
+             && activable_lower_bound_constraints_tangent
+                  == other.activable_lower_bound_constraints_tangent
+             && activable_upper_bound_constraints == other.activable_upper_bound_constraints
+             && activable_upper_bound_constraints_tangent
+                  == other.activable_upper_bound_constraints_tangent
+             && activable_configuration_limits == other.activable_configuration_limits
+             && row_activable_indexes == other.row_activable_indexes
+             && row_activable_sparsity_pattern == other.row_activable_sparsity_pattern
              && active_lower_bound_constraints == other.active_lower_bound_constraints
              && active_lower_bound_constraints_tangent
                   == other.active_lower_bound_constraints_tangent
              && active_upper_bound_constraints == other.active_upper_bound_constraints
              && active_upper_bound_constraints_tangent
                   == other.active_upper_bound_constraints_tangent
-             && active_configuration_limits == other.active_configuration_limits
-             && row_active_indexes == other.row_active_indexes
-             && row_sparsity_pattern == other.row_sparsity_pattern && m_set == other.m_set
-             && m_margin == other.m_margin;
+             && active_set_indexes == other.active_set_indexes
+             && active_compliance == other.active_compliance && m_compliance == other.m_compliance
+             && m_set == other.m_set;
     }
 
     bool operator!=(const JointLimitConstraintModelTpl & other) const
     {
       return !(*this == other);
+    }
+
+    JointLimitConstraintModelTpl & operator=(const JointLimitConstraintModelTpl & other)
+    {
+      if (this != &other)
+      {
+        base_common_parameters() = other.base_common_parameters();
+        activable_configuration_components = other.activable_configuration_components;
+        activable_lower_bound_constraints = other.activable_lower_bound_constraints;
+        activable_lower_bound_constraints_tangent = other.activable_lower_bound_constraints_tangent;
+        activable_upper_bound_constraints = other.activable_upper_bound_constraints;
+        activable_upper_bound_constraints_tangent = other.activable_upper_bound_constraints_tangent;
+        activable_configuration_limits = other.activable_configuration_limits;
+        row_activable_indexes = other.row_activable_indexes;
+        row_activable_sparsity_pattern = other.row_activable_sparsity_pattern;
+        active_lower_bound_constraints = other.active_lower_bound_constraints;
+        active_lower_bound_constraints_tangent = other.active_lower_bound_constraints_tangent;
+        active_upper_bound_constraints = other.active_upper_bound_constraints;
+        active_upper_bound_constraints_tangent = other.active_upper_bound_constraints_tangent;
+        active_set_indexes = other.active_set_indexes;
+        m_set = other.m_set;
+      }
+      return *this;
     }
 
     // Jacobian operations
@@ -406,35 +533,47 @@ namespace pinocchio
       typename VectorUpperConfiguration>
     void init(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const JointIndexVector & active_joints,
+      const JointIndexVector & activable_joints,
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub);
 
     //    /// \brief Check whether the active joints are bound to the joint types contained in
     //    /// SupportedJointTypes.
     //    template<template<typename, int> class JointCollectionTpl>
-    //    static int check_active_joints(
+    //    static int check_activable_joints(
     //      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    //      const JointIndexVector & active_joints);
+    //      const JointIndexVector & activable_joints);
 
     /// \brief Selected dof in the configuration vector
-    EigenIndexVector active_configuration_components;
+    EigenIndexVector activable_configuration_components;
     /// \brief Active lower bound constraints
-    EigenIndexVector active_lower_bound_constraints, active_lower_bound_constraints_tangent;
+    EigenIndexVector activable_lower_bound_constraints, activable_lower_bound_constraints_tangent;
     /// \brief Active upper bound constraints
-    EigenIndexVector active_upper_bound_constraints, active_upper_bound_constraints_tangent;
+    EigenIndexVector activable_upper_bound_constraints, activable_upper_bound_constraints_tangent;
     /// \brief Lower and upper limit values for active constraints
-    BoxSet active_configuration_limits;
+    // TODO: this should be removed (not used anymore)
+    BoxSet activable_configuration_limits;
 
-    VectorOfBooleanVector row_sparsity_pattern;
-    VectofOfEigenIndexVector row_active_indexes;
+    /// \brief Vector containing the indexes of the constraints in the active set.
+    std::vector<std::size_t> active_set_indexes;
+
+    /// \brief Active lower bound constraints that are active in the current configuration
+    /// These vectors are computed during the call to the calc method.
+    EigenIndexVector active_lower_bound_constraints, active_lower_bound_constraints_tangent;
+    /// \brief Active upper bound constraints that are active in the current configuration
+    /// These vectors are computed during the call to the calc method.
+    EigenIndexVector active_upper_bound_constraints, active_upper_bound_constraints_tangent;
+
+    VectorOfBooleanVector row_activable_sparsity_pattern;
+    VectofOfEigenIndexVector row_activable_indexes;
 
     ConstraintSet m_set;
     using BaseCommonParameters::m_baumgarte_parameters;
     using BaseCommonParameters::m_compliance;
 
-    /// \brief Margin vector. For each joint, the vector specified the margin thresholh under
-    MarginVectorType m_margin;
+    /// \brief Compliance of the active constraints
+    EigenStorageVector active_compliance_storage;
+    typename EigenStorageVector::RefMapType active_compliance;
   };
 
   template<typename _Scalar, int _Options>
@@ -452,13 +591,30 @@ namespace pinocchio
     typedef JointLimitConstraintModelTpl<Scalar, Options> ConstraintModel;
     typedef typename ConstraintModel::VectorXs VectorXs;
 
+    typedef typename ConstraintModel::EigenStorageVector EigenStorageVector;
+    typedef typename ConstraintModel::Base::BooleanVector BooleanVector;
+    typedef typename ConstraintModel::Base::EigenIndexVector EigenIndexVector;
+
+    typedef std::vector<BooleanVector> VectorOfBooleanVector;
+    typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
+
     JointLimitConstraintDataTpl()
+    : constraint_residual(constraint_residual_storage.map())
     {
     }
 
-    explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
-    : constraint_residual(constraint_model.size())
+    JointLimitConstraintDataTpl(const JointLimitConstraintDataTpl & other)
+    : constraint_residual(constraint_residual_storage.map())
     {
+      *this = other;
+    }
+
+    explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
+    : activable_constraint_residual(constraint_model.size())
+    , constraint_residual_storage(constraint_model.size(), 1)
+    , constraint_residual(constraint_residual_storage.map())
+    {
+      constraint_residual_storage.resize(0);
     }
 
     bool operator==(const JointLimitConstraintDataTpl & other) const
@@ -473,8 +629,22 @@ namespace pinocchio
       return !(*this == other);
     }
 
-    /// \brief Residual of the constraint
-    VectorXs constraint_residual;
+    JointLimitConstraintDataTpl & operator=(const JointLimitConstraintDataTpl & other)
+    {
+      if (this != &other)
+      {
+        constraint_residual_storage = other.constraint_residual_storage;
+        activable_constraint_residual = other.activable_constraint_residual;
+      }
+      return *this;
+    }
+
+    /// \brief Residual of all the activable constraints
+    VectorXs activable_constraint_residual;
+
+    /// \brief Residual of the active constraints
+    EigenStorageVector constraint_residual_storage;
+    typename EigenStorageVector::RefMapType constraint_residual;
 
     static std::string classname()
     {

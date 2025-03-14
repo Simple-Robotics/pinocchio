@@ -88,7 +88,7 @@ namespace pinocchio
 
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto size = cmodel.size();
+        const auto size = cmodel.activeSize();
         SegmentType1 force_segment = x.derived().segment(index, size);
         SegmentType2 res = x_proj.segment(index, size);
 
@@ -198,7 +198,7 @@ namespace pinocchio
 
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto size = cmodel.size();
+        const auto size = cmodel.activeSize();
         SegmentType1 force_segment = x.derived().segment(index, size);
         SegmentType2 scale_segment = scale.derived().segment(index, size);
         SegmentType3 res = x_proj.segment(index, size);
@@ -342,7 +342,7 @@ namespace pinocchio
 
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto size = cmodel.size();
+        const auto size = cmodel.activeSize();
 
         SegmentType1 velocity_segment = x.segment(index, size);
         SegmentType2 res_segment = x_proj.segment(index, size);
@@ -500,7 +500,7 @@ namespace pinocchio
 
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto size = cmodel.size();
+        const auto size = cmodel.activeSize();
 
         SegmentType1 velocity_segment = velocities.segment(index, size);
         SegmentType2 force_segment = forces.segment(index, size);
@@ -602,7 +602,7 @@ namespace pinocchio
       Eigen::DenseIndex index = 0;
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto size = cmodel.size();
+        const auto size = cmodel.activeSize();
 
         SegmentType1 velocity_segment = velocities.segment(index, size);
         SegmentType2 result_segment = correction.segment(index, size);
@@ -792,7 +792,7 @@ namespace pinocchio
       Eigen::DenseIndex cindex = 0;
       for (const ConstraintModel & cmodel : constraint_models)
       {
-        const auto csize = cmodel.size();
+        const auto csize = cmodel.activeSize();
 
         SegmentType time_scaling_segment = time_scaling.segment(cindex, csize);
         typedef GetTimeScalingFromConstraint<Scalar, SegmentType> Algo;
