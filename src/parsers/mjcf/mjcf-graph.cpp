@@ -557,26 +557,30 @@ namespace pinocchio
         auto file = el.get_optional<std::string>("<xmlattr>.file");
         auto name_ = el.get_optional<std::string>("<xmlattr>.name");
         auto type = el.get_optional<std::string>("<xmlattr>.type");
+        auto builtin = el.get_optional<std::string>("<xmlattr>.builtin");
 
         std::string name;
         if (name_)
           name = *name_;
         else if (type && *type == "skybox")
           name = *type;
-        if (!file)
+        if (*builtin == "none")
         {
-          std::cout << "Warning - Only texture with files are supported" << std::endl;
-          if (name.empty())
-            PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Textures need a name.");
-        }
-        else
-        {
-          fs::path filePath(*file);
-          name = getName(el, filePath);
+          if (!file)
+          {
+            std::cout << "Warning - Only texture with files are supported" << std::endl;
+            if (name.empty())
+              PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Textures need a name.");
+          }
+          else
+          {
+            fs::path filePath(*file);
+            name = getName(el, filePath);
 
-          text.filePath =
-            updatePath(compilerInfo.strippath, compilerInfo.texturedir, modelPath, filePath)
-              .string();
+            text.filePath =
+              updatePath(compilerInfo.strippath, compilerInfo.texturedir, modelPath, filePath)
+                .string();
+          }
         }
         auto str_v = el.get_optional<std::string>("<xmlattr>.type");
         if (str_v)
