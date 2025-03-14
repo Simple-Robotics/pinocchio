@@ -193,6 +193,83 @@ namespace pinocchio
     //  Eigen::MatrixXd visited;
   };
 
+  /// @brief This callback appends collision pairs when the broad phase finds them in collision.
+  /// A narrow phase pass must then be run on all appended collision pairs to complete the full
+  /// collision detection check.
+  struct CollisionCallBackCollect : CollisionCallBackBase
+  {
+    /// @brief Default constructor.
+    /// This constructor allocates pair_indexes depending on geometry_model and geometry_data.
+    CollisionCallBackCollect(const GeometryModel & geometry_model, GeometryData & geometry_data)
+    : CollisionCallBackBase(geometry_model, geometry_data)
+    {
+      this->pair_indexes.reserve(geometry_model.collisionPairs.size());
+    }
+
+    /// @brief Constructor based on a given max_num_pairs.
+    CollisionCallBackCollect(
+      const GeometryModel & geometry_model, GeometryData & geometry_data, const int max_num_pairs)
+    : CollisionCallBackBase(geometry_model, geometry_data)
+    {
+      this->pair_indexes.reserve(max_num_pairs);
+    }
+
+    /// @brief This method is called at the beginning of any broad phase call.
+    void init()
+    {
+      this->pair_indexes.clear();
+    }
+
+    /// @brief This method is called when two leafs of the broad phase are found to be in collision
+    /// (i.e. when two AABBs of a geometry_model's geometries are colliding).
+    bool collide(hpp::fcl::CollisionObject * o1, hpp::fcl::CollisionObject * o2)
+    {
+      assert(!stop() && "must never happened");
+
+      CollisionObject & co1 = reinterpret_cast<CollisionObject &>(*o1);
+      CollisionObject & co2 = reinterpret_cast<CollisionObject &>(*o2);
+
+      const Eigen::DenseIndex go1_index = (Eigen::DenseIndex)co1.geometryObjectIndex;
+      const Eigen::DenseIndex go2_index = (Eigen::DenseIndex)co2.geometryObjectIndex;
+
+      const GeometryModel & geometry_model = this->getGeometryModel();
+
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        go1_index < (Eigen::DenseIndex)geometry_model.ngeoms && go1_index >= 0);
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        go2_index < (Eigen::DenseIndex)geometry_model.ngeoms && go2_index >= 0);
+
+      const int pair_index_ = geometry_model.collisionPairMapping(go1_index, go2_index);
+      if (pair_index_ == -1)
+        return false;
+
+      const PairIndex pair_index = PairIndex(pair_index_);
+      const GeometryData & geometry_data = this->getGeometryData();
+      const CollisionPair & cp = geometry_model.collisionPairs[pair_index];
+      const bool do_collision_check =
+        geometry_data.activeCollisionPairs[pair_index]
+        && !(
+          geometry_model.geometryObjects[cp.first].disableCollision
+          || geometry_model.geometryObjects[cp.second].disableCollision);
+
+      if (do_collision_check)
+      {
+        this->pair_indexes.push_back(pair_index);
+      }
+
+      return false;
+    }
+
+    bool stop() const final
+    {
+      return false;
+    }
+
+    /// @brief Vector of pairs that where found in collision by the broad phase.
+    /// These pairs must then be sent to the narrow phase for a complete collision detection check.
+    std::vector<PairIndex> pair_indexes;
+  };
+
 } // namespace pinocchio
 
 /* --- Details -------------------------------------------------------------------- */
