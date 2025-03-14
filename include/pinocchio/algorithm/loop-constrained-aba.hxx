@@ -552,6 +552,12 @@ namespace pinocchio
         typedef typename ConstraintModel::Matrix36 Matrix36;
 
         cdata.contact_force.setZero();
+
+        cmodel.calc(model, data, cdata);
+
+        SE3 & oMc1 = cdata.oMc1;
+        SE3 & oMc2 = cdata.oMc2;
+        SE3 & c1Mc2 = cdata.c1Mc2;
         typename ConstraintData::Motion & vc1 = cdata.contact1_velocity;
         typename ConstraintData::Motion & vc2 = cdata.contact2_velocity;
         const JointIndex joint1_id = cmodel.joint1_id;
@@ -560,12 +566,10 @@ namespace pinocchio
         const auto & corrector = cmodel.corrector;
         auto & contact_velocity_error = cdata.contact_velocity_error;
 
-        cmodel.calc(model, data, cdata);
-        SE3 & oMc1 = cdata.oMc1;
-        SE3 & oMc2 = cdata.oMc2;
-        SE3 & c1Mc2 = cdata.c1Mc2;
-
-        vc1 = oMc1.actInv(data.ov[joint1_id]);
+        if (joint1_id > 0)
+          vc1 = oMc1.actInv(data.ov[joint1_id]);
+        else
+          vc1.setZero();
         if (joint2_id > 0)
           vc2 = oMc2.actInv(data.ov[joint2_id]);
         else
@@ -717,6 +721,7 @@ namespace pinocchio
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::JointIndex JointIndex;
+    typedef typename ConstraintModel::Matrix36 Matrix36;
 
     data.u = tau;
     data.oa_gf[0] = -model.gravity;
@@ -805,28 +810,34 @@ namespace pinocchio
         }
         else
         {
+          contact_acc_err.linear() = -cdata.contact_acceleration_desired.linear();
+          if (joint1_id > 0)
+            contact_acc_err.linear() += cdata.oMc1.actInv(data.oa[joint1_id]).linear();
           if (joint2_id > 0)
-            contact_acc_err.linear() =
-              cdata.oMc1.actInv(data.oa[joint1_id]).linear()
-              - cdata.c1Mc2.rotation() * cdata.oMc2.actInv(data.oa[joint2_id]).linear()
-              - cdata.contact_acceleration_desired.linear();
-          else
-            contact_acc_err.linear() = cdata.oMc1.actInv(data.oa[joint1_id]).linear()
-                                       - cdata.contact_acceleration_desired.linear();
+            contact_acc_err.linear() -=
+              cdata.c1Mc2.rotation() * cdata.oMc2.actInv(data.oa[joint2_id]).linear();
 
           cdata.contact_force.linear() += mu * contact_acc_err.linear();
 
-          data.of[joint1_id] += cdata.oMc1.act(Force(mu * contact_acc_err.toVector()));
+          if (joint1_id > 0)
+            data.of[joint1_id] += cdata.oMc1.act(Force(mu * contact_acc_err.toVector()));
 
           if (joint2_id > 0)
-            data.of[joint2_id].toVector().noalias() -=
-              cdata.oMc2.toActionMatrixInverse().template topRows<3>().transpose()
-              * (cdata.c1Mc2.rotation().transpose() * (mu * contact_acc_err.linear()));
+          {
+            const Matrix36 A2 =
+              -cdata.c1Mc2.rotation() * (cdata.oMc2.toActionMatrixInverse().template topRows<3>());
+
+            data.of[joint2_id].toVector().noalias() +=
+              A2.transpose() * (mu * contact_acc_err.linear());
+          }
         }
-        Scalar c_err_residual = contact_acc_err.toVector().template lpNorm<Eigen::Infinity>();
-        if (settings.absolute_residual < c_err_residual)
-          settings.absolute_residual = c_err_residual;
+
+        const Scalar constraint_residual_norm =
+          contact_acc_err.toVector().template lpNorm<Eigen::Infinity>();
+        if (settings.absolute_residual < constraint_residual_norm)
+          settings.absolute_residual = constraint_residual_norm;
       }
+
       if (settings.absolute_residual < settings.absolute_accuracy)
         break;
 
