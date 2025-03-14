@@ -514,6 +514,177 @@ namespace pinocchio
     }
   };
 
+  namespace internal
+  {
+    template<typename ConstraintModel>
+    struct LCABAConstraintCalcStep
+    {
+      typedef typename ConstraintModel::ConstraintData ConstraintData;
+      typedef typename ConstraintModel::Scalar Scalar;
+
+      template<typename Model, typename Data>
+      static void run(
+        const Model & model,
+        Data & data,
+        const ConstraintModel & cmodel,
+        ConstraintData & cdata,
+        const Scalar mu);
+    };
+
+    template<typename Scalar, int Options>
+    struct LCABAConstraintCalcStep<RigidConstraintModelTpl<Scalar, Options>>
+    {
+      typedef RigidConstraintModelTpl<Scalar, Options> ConstraintModel;
+      typedef typename ConstraintModel::ConstraintData ConstraintData;
+
+      template<typename Model, typename Data>
+      static void run(
+        const Model & model,
+        Data & data,
+        const ConstraintModel & cmodel,
+        ConstraintData & cdata,
+        const Scalar mu)
+      {
+        typedef typename Data::SE3 SE3;
+        typedef typename Model::JointIndex JointIndex;
+        typedef std::pair<JointIndex, JointIndex> JointPair;
+        typedef typename Data::Matrix6 Matrix6;
+        typedef typename ConstraintModel::Matrix36 Matrix36;
+
+        cdata.contact_force.setZero();
+        typename ConstraintData::Motion & vc1 = cdata.contact1_velocity;
+        typename ConstraintData::Motion & vc2 = cdata.contact2_velocity;
+        const JointIndex joint1_id = cmodel.joint1_id;
+        const JointIndex joint2_id = cmodel.joint2_id;
+
+        const auto & corrector = cmodel.corrector;
+        auto & contact_velocity_error = cdata.contact_velocity_error;
+
+        cmodel.calc(model, data, cdata);
+        SE3 & oMc1 = cdata.oMc1;
+        SE3 & oMc2 = cdata.oMc2;
+        SE3 & c1Mc2 = cdata.c1Mc2;
+
+        vc1 = oMc1.actInv(data.ov[joint1_id]);
+        if (joint2_id > 0)
+          vc2 = oMc2.actInv(data.ov[joint2_id]);
+        else
+          vc2.setZero();
+        const Motion vc2_in_frame1 = c1Mc2.act(vc2);
+
+        if (cmodel.type == CONTACT_6D)
+        {
+          cdata.contact_placement_error = -log6(c1Mc2);
+          contact_velocity_error = vc1 - vc2_in_frame1;
+          const Matrix6 A1 = oMc1.toActionMatrixInverse();
+          const Matrix6 A1tA1 = A1.transpose() * A1;
+          data.oYaba[joint1_id].noalias() += mu * A1tA1;
+
+          // Baumgarte
+          if (check_expression_if_real<Scalar, false>(
+                isZero(corrector.Kp, static_cast<Scalar>(0.))
+                && isZero(corrector.Kd, static_cast<Scalar>(0.))))
+          {
+            cdata.contact_acceleration_desired.setZero();
+          }
+          else
+          {
+            cdata.contact_acceleration_desired.toVector().noalias() =
+              -(corrector.Kd.asDiagonal() * contact_velocity_error.toVector())
+              - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.toVector());
+          }
+
+          cdata.contact_acceleration_desired -= oMc1.actInv(data.oa[joint1_id]);
+          cdata.contact_acceleration_desired -= cdata.contact_velocity_error.cross(vc2_in_frame1);
+
+          if (joint2_id > 0)
+          {
+            cdata.contact_acceleration_desired += oMc1.actInv(data.oa[joint2_id]);
+
+            const Matrix6 A2 =
+              -A1; // only for 6D case. also used below for computing A2tA2 and A1tA2
+            data.oYaba[joint2_id].noalias() += mu * A1tA1;
+            data.of[joint2_id].toVector().noalias() +=
+              A2.transpose()
+              * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
+
+            const JointPair jp = joint1_id < joint2_id ? JointPair{joint1_id, joint2_id}
+                                                       : JointPair{joint2_id, joint1_id};
+            assert(data.joint_cross_coupling.exist(jp) && "Must never happen");
+            data.joint_cross_coupling.get(jp) -= mu * A1tA1;
+          }
+          else
+          {
+            cdata.contact_acceleration_desired.toVector().noalias() -=
+              A1 * model.gravity.toVector();
+          }
+
+          data.of[joint1_id].toVector().noalias() +=
+            A1.transpose()
+            * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
+        }
+        else if (cmodel.type == CONTACT_3D)
+        {
+          const Matrix36 & A1 = oMc1.toActionMatrixInverse().template topRows<3>();
+          data.oYaba[joint1_id].noalias() += mu * A1.transpose() * A1;
+
+          if (check_expression_if_real<Scalar, false>(
+                isZero(corrector.Kp, static_cast<Scalar>(0.))
+                && isZero(corrector.Kd, static_cast<Scalar>(0.))))
+          {
+            cdata.contact_acceleration_desired.setZero();
+          }
+          else
+          {
+            cdata.contact_acceleration_desired.linear().noalias() =
+              -(corrector.Kd.asDiagonal() * contact_velocity_error.linear())
+              - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.linear());
+            cdata.contact_acceleration_desired.angular().setZero();
+          }
+
+          cdata.contact_acceleration_desired.linear().noalias() -=
+            vc1.angular().cross(vc1.linear());
+          if (joint2_id > 0)
+          {
+            const Matrix36 A2 =
+              -c1Mc2.rotation()
+              * (oMc2.toActionMatrixInverse().template topRows<3>()); // TODO:remove memalloc
+
+            cdata.contact_acceleration_desired.linear().noalias() +=
+              c1Mc2.rotation() * vc2.angular().cross(vc2.linear());
+            data.oYaba[joint2_id].noalias() += mu * A2.transpose() * A2;
+            data.of[joint2_id].toVector().noalias() +=
+              A2.transpose()
+              * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
+
+            if (joint1_id < joint2_id)
+            {
+              data.joint_cross_coupling.get({joint1_id, joint2_id}).noalias() +=
+                mu * A1.transpose() * A2;
+            }
+            else
+            {
+              data.joint_cross_coupling.get({joint2_id, joint1_id}).noalias() +=
+                mu * A2.transpose() * A1;
+            }
+          }
+          else
+          {
+            cdata.contact_acceleration_desired.linear().noalias() -= A1 * model.gravity.toVector();
+          }
+
+          data.of[joint1_id].toVector().noalias() +=
+            A1.transpose()
+            * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
+        }
+        else
+        {
+          assert(false && "Must never happen");
+        }
+      }
+    };
+  } // namespace internal
+
   template<
     typename Scalar,
     int Options,
@@ -544,10 +715,8 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       tau.size(), model.nv, "The joint torque vector is not of right size");
 
-    typedef typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex JointIndex;
-    typedef std::pair<JointIndex, JointIndex> JointPair;
-    typedef Data::Matrix6 Matrix6;
-    typedef typename ConstraintModel::Matrix36 Matrix36;
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
 
     data.u = tau;
     data.oa_gf[0] = -model.gravity;
@@ -572,133 +741,10 @@ namespace pinocchio
     for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
       ConstraintData & cdata = constraint_datas[i];
-      cdata.contact_force.setZero();
       const ConstraintModel & cmodel = constraint_models[i];
-      typename ConstraintData::Motion & vc1 = cdata.contact1_velocity;
-      typename ConstraintData::Motion & vc2 = cdata.contact2_velocity;
-      const JointIndex joint1_id = cmodel.joint1_id;
-      const JointIndex joint2_id = cmodel.joint2_id;
 
-      const auto & corrector = cmodel.corrector;
-      auto & contact_velocity_error = cdata.contact_velocity_error;
-
-      cmodel.calc(model, data, cdata);
-      SE3 & oMc1 = cdata.oMc1;
-      SE3 & oMc2 = cdata.oMc2;
-      SE3 & c1Mc2 = cdata.c1Mc2;
-
-      vc1 = oMc1.actInv(data.ov[joint1_id]);
-      if (joint2_id > 0)
-        vc2 = oMc2.actInv(data.ov[joint2_id]);
-      else
-        vc2.setZero();
-      const Motion vc2_in_frame1 = c1Mc2.act(vc2);
-
-      if (cmodel.type == CONTACT_6D)
-      {
-        cdata.contact_placement_error = -log6(c1Mc2);
-        contact_velocity_error = vc1 - vc2_in_frame1;
-        const Matrix6 A1 = oMc1.toActionMatrixInverse();
-        const Matrix6 A1tA1 = A1.transpose() * A1;
-        data.oYaba[joint1_id].noalias() += mu * A1tA1;
-
-        // Baumgarte
-        if (check_expression_if_real<Scalar, false>(
-              isZero(corrector.Kp, static_cast<Scalar>(0.))
-              && isZero(corrector.Kd, static_cast<Scalar>(0.))))
-        {
-          cdata.contact_acceleration_desired.setZero();
-        }
-        else
-        {
-          cdata.contact_acceleration_desired.toVector().noalias() =
-            -(corrector.Kd.asDiagonal() * contact_velocity_error.toVector())
-            - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.toVector());
-        }
-
-        cdata.contact_acceleration_desired -= oMc1.actInv(data.oa[joint1_id]);
-        cdata.contact_acceleration_desired -= cdata.contact_velocity_error.cross(vc2_in_frame1);
-
-        if (joint2_id > 0)
-        {
-          cdata.contact_acceleration_desired += oMc1.actInv(data.oa[joint2_id]);
-
-          const Matrix6 A2 = -A1; // only for 6D case. also used below for computing A2tA2 and A1tA2
-          data.oYaba[joint2_id].noalias() += mu * A1tA1;
-          data.of[joint2_id].toVector().noalias() +=
-            A2.transpose()
-            * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
-
-          const JointPair jp = joint1_id < joint2_id ? JointPair{joint1_id, joint2_id}
-                                                     : JointPair{joint2_id, joint1_id};
-          assert(data.joint_cross_coupling.exist(jp) && "Must never happen");
-          data.joint_cross_coupling.get(jp) -= mu * A1tA1;
-        }
-        else
-        {
-          cdata.contact_acceleration_desired.toVector().noalias() -= A1 * model.gravity.toVector();
-        }
-
-        data.of[joint1_id].toVector().noalias() +=
-          A1.transpose()
-          * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
-      }
-      else if (cmodel.type == CONTACT_3D)
-      {
-        const Matrix36 & A1 = oMc1.toActionMatrixInverse().topRows<3>();
-        data.oYaba[joint1_id].noalias() += mu * A1.transpose() * A1;
-
-        if (check_expression_if_real<Scalar, false>(
-              isZero(corrector.Kp, static_cast<Scalar>(0.))
-              && isZero(corrector.Kd, static_cast<Scalar>(0.))))
-        {
-          cdata.contact_acceleration_desired.setZero();
-        }
-        else
-        {
-          cdata.contact_acceleration_desired.linear().noalias() =
-            -(corrector.Kd.asDiagonal() * contact_velocity_error.linear())
-            - (corrector.Kp.asDiagonal() * cdata.contact_placement_error.linear());
-          cdata.contact_acceleration_desired.angular().setZero();
-        }
-
-        cdata.contact_acceleration_desired.linear().noalias() -= vc1.angular().cross(vc1.linear());
-        if (joint2_id > 0)
-        {
-          const Matrix36 A2 =
-            -c1Mc2.rotation() * (oMc2.toActionMatrixInverse().topRows<3>()); // TODO:remove memalloc
-
-          cdata.contact_acceleration_desired.linear().noalias() +=
-            c1Mc2.rotation() * vc2.angular().cross(vc2.linear());
-          data.oYaba[joint2_id].noalias() += mu * A2.transpose() * A2;
-          data.of[joint2_id].toVector().noalias() +=
-            A2.transpose()
-            * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
-
-          if (joint1_id < joint2_id)
-          {
-            data.joint_cross_coupling.get({joint1_id, joint2_id}).noalias() +=
-              mu * A1.transpose() * A2;
-          }
-          else
-          {
-            data.joint_cross_coupling.get({joint2_id, joint1_id}).noalias() +=
-              mu * A2.transpose() * A1;
-          }
-        }
-        else
-        {
-          cdata.contact_acceleration_desired.linear().noalias() -= A1 * model.gravity.toVector();
-        }
-
-        data.of[joint1_id].toVector().noalias() +=
-          A1.transpose()
-          * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
-      }
-      else
-      {
-        assert(false && "Must never happen");
-      }
+      typedef internal::LCABAConstraintCalcStep<ConstraintModel> CalcStep;
+      CalcStep::run(model, data, cmodel, cdata, mu);
     }
 
     typedef LCABABackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
