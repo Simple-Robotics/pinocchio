@@ -582,6 +582,11 @@ namespace pinocchio
                 .string();
           }
         }
+        else
+        {
+          if (name.empty())
+            PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Textures need a name.");
+        }
         auto str_v = el.get_optional<std::string>("<xmlattr>.type");
         if (str_v)
           text.textType = *str_v;
