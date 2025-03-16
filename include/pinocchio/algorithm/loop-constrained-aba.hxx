@@ -754,7 +754,7 @@ namespace pinocchio
 
     typedef LCABABackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
 
-    const std::vector<JointIndex> elimination_order = data.elimination_order;
+    const auto & elimination_order = data.elimination_order;
 
     for (JointIndex i : elimination_order)
     {
