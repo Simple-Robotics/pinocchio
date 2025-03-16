@@ -610,7 +610,7 @@ namespace pinocchio
             data.oYaba[joint2_id].noalias() += mu * A1tA1;
             data.of[joint2_id].toVector().noalias() +=
               A2.transpose()
-              * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
+              * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.toVector());
 
             const JointPair jp = joint1_id < joint2_id ? JointPair{joint1_id, joint2_id}
                                                        : JointPair{joint2_id, joint1_id};
@@ -625,7 +625,7 @@ namespace pinocchio
 
           data.of[joint1_id].toVector().noalias() +=
             A1.transpose()
-            * (cdata.contact_force.toVector() - mu * cdata.contact_acceleration_desired.toVector());
+            * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.toVector());
         }
         else if (cmodel.type == CONTACT_3D)
         {
@@ -659,7 +659,7 @@ namespace pinocchio
             data.oYaba[joint2_id].noalias() += mu * A2.transpose() * A2;
             data.of[joint2_id].toVector().noalias() +=
               A2.transpose()
-              * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
+              * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.linear());
 
             if (joint1_id < joint2_id)
             {
@@ -679,7 +679,7 @@ namespace pinocchio
 
           data.of[joint1_id].toVector().noalias() +=
             A1.transpose()
-            * (cdata.contact_force.linear() - mu * cdata.contact_acceleration_desired.linear());
+            * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.linear());
         }
         else
         {
