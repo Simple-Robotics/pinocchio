@@ -84,7 +84,7 @@ void check_A1_and_A2(
   const BilateralPointConstraintModel & cmodel,
   BilateralPointConstraintData & cdata)
 {
-  const BilateralPointConstraintModel::Matrix36 A1_world = cmodel.getA1(cdata, WorldFrame());
+  const BilateralPointConstraintModel::Matrix36 A1_world = cmodel.getA1(cdata, WorldFrameTag());
   BilateralPointConstraintModel::Matrix36 A1_world_ref =
     -cdata.oMc1.toActionMatrixInverse().topRows<3>();
   A1_world_ref.rightCols<3>() +=
@@ -92,13 +92,13 @@ void check_A1_and_A2(
 
   BOOST_CHECK(A1_world.isApprox(A1_world_ref));
 
-  const BilateralPointConstraintModel::Matrix36 A2_world = cmodel.getA2(cdata, WorldFrame());
+  const BilateralPointConstraintModel::Matrix36 A2_world = cmodel.getA2(cdata, WorldFrameTag());
   const BilateralPointConstraintModel::Matrix36 A2_world_ref =
     cdata.c1Mc2.rotation() * cdata.oMc2.toActionMatrixInverse().topRows<3>();
 
   BOOST_CHECK(A2_world.isApprox(A2_world_ref));
 
-  const BilateralPointConstraintModel::Matrix36 A1_local = cmodel.getA1(cdata, LocalFrame());
+  const BilateralPointConstraintModel::Matrix36 A1_local = cmodel.getA1(cdata, LocalFrameTag());
   BilateralPointConstraintModel::Matrix36 A1_local_ref =
     -cmodel.joint1_placement.toActionMatrixInverse().topRows<3>();
   A1_local_ref.rightCols<3>() +=
@@ -106,7 +106,7 @@ void check_A1_and_A2(
 
   BOOST_CHECK(A1_local.isApprox(A1_local_ref));
 
-  const BilateralPointConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrame());
+  const BilateralPointConstraintModel::Matrix36 A2_local = cmodel.getA2(cdata, LocalFrameTag());
   const BilateralPointConstraintModel::Matrix36 A2_local_ref =
     cdata.c1Mc2.rotation() * cmodel.joint2_placement.toActionMatrixInverse().topRows<3>();
 
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
       cm.computeConstraintSpatialInertia(placement_with_correction, diagonal_inertia);
     BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
 
-    const auto A1 = cm.getA1(cd, LocalFrame());
+    const auto A1 = cm.getA1(cd, LocalFrameTag());
     const pinocchio::SE3::Matrix6 spatial_inertia_ref =
       A1.transpose() * diagonal_inertia.asDiagonal() * A1;
 
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
       cm.computeConstraintSpatialInertia(placement_with_correction, diagonal_inertia);
     BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
 
-    const auto A1 = cm.getA1(cd, LocalFrame());
+    const auto A1 = cm.getA1(cd, LocalFrameTag());
     const pinocchio::SE3::Matrix6 spatial_inertia_ref =
       A1.transpose() * diagonal_inertia.asDiagonal() * A1;
 

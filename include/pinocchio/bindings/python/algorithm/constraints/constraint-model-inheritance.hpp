@@ -45,15 +45,16 @@ namespace pinocchio
       typedef typename T::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
+
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
         cl.def(bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
-            bp::arg("joint1_placement"), bp::arg("joint2_id"), bp::arg("joint2_placement")),
-            "Contructor from given joint index and placement for the two joints "
-            "implied in the constraint."))
+                 (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
+                  bp::arg("joint1_placement"), bp::arg("joint2_id"), bp::arg("joint2_placement")),
+                 "Contructor from given joint index and placement for the two joints "
+                 "implied in the constraint."))
           .def(bp::init<const Model &, JointIndex, const SE3 &>(
             (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
             "Contructor from given joint index and placement of the first joint "
@@ -92,46 +93,50 @@ namespace pinocchio
             T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          .def("getA1", &getA1, bp::args("self", "constraint_data", "reference_frame"),
+          .def(
+            "getA1", &getA1, bp::args("self", "constraint_data", "reference_frame"),
             "Returns the constraint projector associated with joint 1. "
             "This matrix transforms a spatial velocity expressed in a reference frame "
             "to the first component of the constraint associated with joint 1.")
-          .def("getA2", &getA2, bp::args("self", "constraint_data", "reference_frame"),
+          .def(
+            "getA2", &getA2, bp::args("self", "constraint_data", "reference_frame"),
             "Returns the constraint projector associated with joint 2. "
             "This matrix transforms a spatial velocity expressed in a reference frame "
-            "to the first component of the constraint associated with joint 2.")
-          ;
+            "to the first component of the constraint associated with joint 2.");
       }
 
-      static context::Matrix6s getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      static context::Matrix6s
+      getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
       {
         context::Matrix6s res;
-        switch(rf) {
-          case WORLD:
-            res = self.getA1(constraint_data, WorldFrame());
-          case LOCAL:
-            res = self.getA1(constraint_data, LocalFrame());
-          case LOCAL_WORLD_ALIGNED:
-            res = self.getA1(constraint_data, LocalWorldAlignedFrame());
+        switch (rf)
+        {
+        case WORLD:
+          res = self.getA1(constraint_data, WorldFrameTag());
+        case LOCAL:
+          res = self.getA1(constraint_data, LocalFrameTag());
+        case LOCAL_WORLD_ALIGNED:
+          res = self.getA1(constraint_data, LocalWorldAlignedFrameTag());
         }
         return res;
       }
 
-      static context::Matrix6s getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      static context::Matrix6s
+      getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
       {
         context::Matrix6s res;
-        switch(rf) {
-          case WORLD:
-            res = self.getA2(constraint_data, WorldFrame());
-          case LOCAL:
-            res = self.getA2(constraint_data, LocalFrame());
-          case LOCAL_WORLD_ALIGNED:
-            res = self.getA2(constraint_data, LocalWorldAlignedFrame());
+        switch (rf)
+        {
+        case WORLD:
+          res = self.getA2(constraint_data, WorldFrameTag());
+        case LOCAL:
+          res = self.getA2(constraint_data, LocalFrameTag());
+        case LOCAL_WORLD_ALIGNED:
+          res = self.getA2(constraint_data, LocalWorldAlignedFrameTag());
         }
         return res;
       }
     };
-
 
     template<class T>
     struct ConstraintModelInheritancePythonVisitor<T, PointConstraintModelBase<T>>
@@ -143,6 +148,7 @@ namespace pinocchio
       typedef typename T::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
+
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -190,61 +196,71 @@ namespace pinocchio
             T, colwise_sparsity, "Sparsity pattern associated to the constraint.")
           .PINOCCHIO_ADD_PROPERTY(
             T, colwise_span_indexes, "Indexes of the columns spanned by the constraints.")
-          .def("getA1", &getA1, bp::args("self", "constraint_data", "reference_frame"),
+          .def(
+            "getA1", &getA1, bp::args("self", "constraint_data", "reference_frame"),
             "Returns the constraint projector associated with joint 1. "
             "This matrix transforms a spatial velocity expressed in a reference frame "
             "to the first component of the constraint associated with joint 1.")
-          .def("getA2", &getA2, bp::args("self", "constraint_data", "reference_frame"),
+          .def(
+            "getA2", &getA2, bp::args("self", "constraint_data", "reference_frame"),
             "Returns the constraint projector associated with joint 2. "
             "This matrix transforms a spatial velocity expressed in a reference frame "
             "to the first component of the constraint associated with joint 2.")
-          .def("computeConstraintSpatialInertia", &computeConstraintSpatialInertia,
+          .def(
+            "computeConstraintSpatialInertia", &computeConstraintSpatialInertia,
             bp::args("self", "placement", "diagonal_constraint_inertia"),
-            "This function computes the spatial inertia associated with the constraint."
-          )
+            "This function computes the spatial inertia associated with the constraint.")
           // The two following methods are not exposed as they rely on allocators.
           // .def("appendConstraintDiagonalInertiaToJointInertias",
           //   &appendConstraintDiagonalInertiaToJointInertias,
-          //   bp::args("self", "model", "data", "constraint_data", "diagonal_constraint_inertia", "inertias"),
-          //   "Append the constraint diagonal inertia to the joint inertias."
+          //   bp::args("self", "model", "data", "constraint_data", "diagonal_constraint_inertia",
+          //   "inertias"), "Append the constraint diagonal inertia to the joint inertias."
           // )
           // .def("mapConstraintForceToJointForces",
           //   &mapConstraintForceToJointForces,
-          //   bp::args("self", "model", "data", "constraint_data", "constraint_forces", "joint_forces"),
-          //   "Map the constraint forces (aka constraint Lagrange multipliers) to the forces supported by the joints."
+          //   bp::args("self", "model", "data", "constraint_data", "constraint_forces",
+          //   "joint_forces"), "Map the constraint forces (aka constraint Lagrange multipliers) to
+          //   the forces supported by the joints."
           // )
           ;
       }
 
-      static context::Matrix36s getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      static context::Matrix36s
+      getA1(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
       {
         context::Matrix36s res;
-        switch(rf) {
-          case WORLD:
-            res = self.getA1(constraint_data, WorldFrame());
-          case LOCAL:
-            res = self.getA1(constraint_data, LocalFrame());
-          case LOCAL_WORLD_ALIGNED:
-            res = self.getA1(constraint_data, LocalWorldAlignedFrame());
+        switch (rf)
+        {
+        case WORLD:
+          res = self.getA1(constraint_data, WorldFrameTag());
+        case LOCAL:
+          res = self.getA1(constraint_data, LocalFrameTag());
+        case LOCAL_WORLD_ALIGNED:
+          res = self.getA1(constraint_data, LocalWorldAlignedFrameTag());
         }
         return res;
       }
 
-      static context::Matrix36s getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
+      static context::Matrix36s
+      getA2(const T & self, const ConstraintData & constraint_data, ReferenceFrame rf)
       {
         context::Matrix36s res;
-        switch(rf) {
-          case WORLD:
-            res = self.getA2(constraint_data, WorldFrame());
-          case LOCAL:
-            res = self.getA2(constraint_data, LocalFrame());
-          case LOCAL_WORLD_ALIGNED:
-            res = self.getA2(constraint_data, LocalWorldAlignedFrame());
+        switch (rf)
+        {
+        case WORLD:
+          res = self.getA2(constraint_data, WorldFrameTag());
+        case LOCAL:
+          res = self.getA2(constraint_data, LocalFrameTag());
+        case LOCAL_WORLD_ALIGNED:
+          res = self.getA2(constraint_data, LocalWorldAlignedFrameTag());
         }
         return res;
       }
 
-      static context::Matrix6s computeConstraintSpatialInertia(const T & self, const context::SE3 & placement, const context::Vector3s & diagonal_constraint_inertia)
+      static context::Matrix6s computeConstraintSpatialInertia(
+        const T & self,
+        const context::SE3 & placement,
+        const context::Vector3s & diagonal_constraint_inertia)
       {
         return self.computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
       }

@@ -84,22 +84,22 @@ void check_A1_and_A2(
   const WeldConstraintModel & cmodel,
   WeldConstraintData & cdata)
 {
-  const WeldConstraintModel::Matrix6 A1_world = cmodel.getA1(cdata, WorldFrame());
+  const WeldConstraintModel::Matrix6 A1_world = cmodel.getA1(cdata, WorldFrameTag());
   WeldConstraintModel::Matrix6 A1_world_ref = -cdata.oMc1.toActionMatrixInverse();
 
   BOOST_CHECK(A1_world.isApprox(A1_world_ref));
 
-  const WeldConstraintModel::Matrix6 A2_world = cmodel.getA2(cdata, WorldFrame());
+  const WeldConstraintModel::Matrix6 A2_world = cmodel.getA2(cdata, WorldFrameTag());
   const WeldConstraintModel::Matrix6 A2_world_ref = -A1_world_ref;
 
   BOOST_CHECK(A2_world.isApprox(A2_world_ref));
 
-  const WeldConstraintModel::Matrix6 A1_local = cmodel.getA1(cdata, LocalFrame());
+  const WeldConstraintModel::Matrix6 A1_local = cmodel.getA1(cdata, LocalFrameTag());
   WeldConstraintModel::Matrix6 A1_local_ref = -cmodel.joint1_placement.toActionMatrixInverse();
 
   BOOST_CHECK(A1_local.isApprox(A1_local_ref));
 
-  const WeldConstraintModel::Matrix6 A2_local = cmodel.getA2(cdata, LocalFrame());
+  const WeldConstraintModel::Matrix6 A2_local = cmodel.getA2(cdata, LocalFrameTag());
   const WeldConstraintModel::Matrix6 A2_local_ref =
     (cdata.c1Mc2 * cmodel.joint2_placement.inverse()).toActionMatrix();
 
@@ -142,7 +142,7 @@ void check_A1_and_A2(
 //      cm.computeConstraintSpatialInertia(placement, diagonal_inertia);
 //    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
 //
-//    const auto A1 = cm.getA1(cd, LocalFrame());
+//    const auto A1 = cm.getA1(cd, LocalFrameTag());
 //    const pinocchio::SE3::Matrix6 spatial_inertia_ref =
 //      A1.transpose() * diagonal_inertia.asDiagonal() * A1;
 //
@@ -158,7 +158,7 @@ void check_A1_and_A2(
 //      cm.computeConstraintSpatialInertia(placement, diagonal_inertia);
 //    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
 //
-//    const auto A1 = cm.getA1(cd, LocalFrame());
+//    const auto A1 = cm.getA1(cd, LocalFrameTag());
 //    const pinocchio::SE3::Matrix6 spatial_inertia_ref =
 //      A1.transpose() * diagonal_inertia.asDiagonal() * A1;
 //

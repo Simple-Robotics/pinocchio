@@ -58,9 +58,9 @@ namespace pinocchio
   {
   };
 
-  using WorldFrame = ReferenceFrameTag<WORLD>;
-  using LocalFrame = ReferenceFrameTag<LOCAL>;
-  using LocalWorldAlignedFrame = ReferenceFrameTag<LOCAL_WORLD_ALIGNED>;
+  using WorldFrameTag = ReferenceFrameTag<WORLD>;
+  using LocalFrameTag = ReferenceFrameTag<LOCAL>;
+  using LocalWorldAlignedFrameTag = ReferenceFrameTag<LOCAL_WORLD_ALIGNED>;
 
   ///
   /// \brief List of Kinematics Level supported by Pinocchio.

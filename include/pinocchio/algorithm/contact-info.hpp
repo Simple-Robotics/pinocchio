@@ -563,7 +563,7 @@ namespace pinocchio
       Matrix36 res;
       typedef typename SE3::Vector3 Vector3;
 
-      if (std::is_same<ReferenceFrameTag<rf>, WorldFrame>::value)
+      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
       {
 #define INTERNAL_LOOP(axis_id, v3_in, res)                                                         \
   CartesianAxis<axis_id>::cross(v3_in, v_tmp);                                                     \
@@ -578,7 +578,7 @@ namespace pinocchio
 
 #undef INTERNAL_LOOP
       }
-      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrame>::value)
+      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
       {
 #define INTERNAL_LOOP(axis_id, v3_in, res)                                                         \
   CartesianAxis<axis_id>::cross(v3_in, v_tmp);                                                     \
@@ -607,7 +607,7 @@ namespace pinocchio
       Matrix36 res;
       typedef typename SE3::Vector3 Vector3;
 
-      if (std::is_same<ReferenceFrameTag<rf>, WorldFrame>::value)
+      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
       {
 #define INTERNAL_LOOP(axis_id, v3_in, res)                                                         \
   CartesianAxis<axis_id>::cross(v3_in, v_tmp);                                                     \
@@ -623,7 +623,7 @@ namespace pinocchio
 
 #undef INTERNAL_LOOP
       }
-      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrame>::value)
+      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
       {
         const SE3 & j2Mc2 = this->joint2_placement;
         const SE3 & c1Mc2 = cdata.c1Mc2;
@@ -738,8 +738,8 @@ namespace pinocchio
       //      complexity_strategy_1 = 6 * res.cols() * 36 + constraint_dim * 36 * res.cols(),
       //      complexity_strategy_2 = 36 * constraint_dim * 6 + constraint_dim * 36 * res.cols();
 
-      const Matrix36 A1 = getA1(cdata, WorldFrame());
-      const Matrix36 A2 = getA2(cdata, WorldFrame());
+      const Matrix36 A1 = getA1(cdata, WorldFrameTag());
+      const Matrix36 A2 = getA2(cdata, WorldFrameTag());
       for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
@@ -905,7 +905,7 @@ namespace pinocchio
       assert(this->type == CONTACT_3D);
 
       // Todo: optimize code
-      const Matrix36 A1 = getA1(cdata, LocalFrame()), A2 = getA2(cdata, LocalFrame());
+      const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
       joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
       joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
     }
@@ -932,20 +932,20 @@ namespace pinocchio
 
       if (this->joint1_id != 0 && this->joint2_id != 0)
       {
-        const Matrix36 A1 = getA1(cdata, LocalFrame()), A2 = getA2(cdata, LocalFrame());
+        const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
         constraint_value.const_cast_derived().noalias() =
           A1 * joint_accelerations[this->joint1_id].toVector()
           + A2 * joint_accelerations[this->joint2_id].toVector();
       }
       else if (this->joint1_id != 0)
       {
-        const Matrix36 A1 = getA1(cdata, LocalFrame());
+        const Matrix36 A1 = getA1(cdata, LocalFrameTag());
         constraint_value.const_cast_derived().noalias() =
           A1 * joint_accelerations[this->joint1_id].toVector();
       }
       else if (this->joint2_id != 0)
       {
-        const Matrix36 A2 = getA2(cdata, LocalFrame());
+        const Matrix36 A2 = getA2(cdata, LocalFrameTag());
         constraint_value.const_cast_derived().noalias() =
           A2 * joint_accelerations[this->joint2_id].toVector();
       }
