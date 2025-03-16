@@ -801,14 +801,15 @@ namespace pinocchio
             contact_acc_err =
               cdata.oMc1.actInv((data.oa[joint1_id])) - cdata.contact_acceleration_desired;
 
-          cdata.contact_force.toVector().noalias() += mu * contact_acc_err.toVector();
+          const auto mu_lambda = Force(mu * contact_acc_err.toVector());
+          cdata.contact_force += mu_lambda;
 
-          data.of[joint1_id] += cdata.oMc1.act(Force(mu * contact_acc_err.toVector()));
+          data.of[joint1_id] += cdata.oMc1.act(mu_lambda);
 
           if (joint2_id > 0)
-            data.of[joint2_id] -= cdata.oMc1.act(Force(mu * contact_acc_err.toVector()));
+            data.of[joint2_id] -= cdata.oMc1.act(mu_lambda);
         }
-        else
+        else if (cmodel.type == CONTACT_3D)
         {
           contact_acc_err.linear() = -cdata.contact_acceleration_desired.linear();
           if (joint1_id > 0)
@@ -817,18 +818,18 @@ namespace pinocchio
             contact_acc_err.linear() -=
               cdata.c1Mc2.rotation() * cdata.oMc2.actInv(data.oa[joint2_id]).linear();
 
-          cdata.contact_force.linear() += mu * contact_acc_err.linear();
+          const auto mu_lambda = Force(mu * contact_acc_err.toVector());
+          cdata.contact_force.linear() += mu_lambda.linear();
 
           if (joint1_id > 0)
-            data.of[joint1_id] += cdata.oMc1.act(Force(mu * contact_acc_err.toVector()));
+            data.of[joint1_id] += cdata.oMc1.act(mu_lambda);
 
           if (joint2_id > 0)
           {
             const Matrix36 A2 =
               -cdata.c1Mc2.rotation() * (cdata.oMc2.toActionMatrixInverse().template topRows<3>());
 
-            data.of[joint2_id].toVector().noalias() +=
-              A2.transpose() * (mu * contact_acc_err.linear());
+            data.of[joint2_id].toVector().noalias() += A2.transpose() * mu_lambda.linear();
           }
         }
 
