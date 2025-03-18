@@ -594,6 +594,37 @@ namespace pinocchio
     }
 
     /**
+     * @brief      ConstraintModelGetRowActivableIndexesVisitor visitor
+     */
+    template<typename Scalar, int Options>
+    struct ConstraintModelGetRowActivableIndexesVisitor
+    : visitors::ConstraintUnaryVisitorBase<
+        ConstraintModelGetRowActivableIndexesVisitor<Scalar, Options>,
+        const std::vector<Eigen::DenseIndex> &>
+    {
+      typedef const std::vector<Eigen::DenseIndex> & ReturnType;
+
+      typedef boost::fusion::vector<const Eigen::DenseIndex> ArgsType;
+
+      template<typename ConstraintModel>
+      static ReturnType algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const Eigen::DenseIndex row_id)
+      {
+        return cmodel.getRowActivableIndexes(row_id);
+      }
+    };
+
+    template<typename Scalar, int Options, template<typename, int> class ConstraintCollectionTpl>
+    const std::vector<Eigen::DenseIndex> & getRowActivableIndexes(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const Eigen::DenseIndex row_id)
+    {
+      typedef ConstraintModelGetRowActivableIndexesVisitor<Scalar, Options> Algo;
+      return Algo::run(cmodel, typename Algo::ArgsType(row_id));
+    }
+
+    /**
      * @brief      ConstraintModelGetRowActiveIndexesVisitor visitor
      */
     template<typename Scalar, int Options>

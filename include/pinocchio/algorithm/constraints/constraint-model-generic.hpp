@@ -159,6 +159,12 @@ namespace pinocchio
     }
 
     /// \brief Returns the vector of the active indexes associated with a given row
+    const EigenIndexVector & getRowActivableIndexes(const Eigen::DenseIndex row_id) const
+    {
+      return ::pinocchio::visitors::getRowActivableIndexes(*this, row_id);
+    }
+
+    /// \brief Returns the vector of the active indexes associated with a given row
     const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
     {
       return ::pinocchio::visitors::getRowActiveIndexes(*this, row_id);
@@ -177,13 +183,13 @@ namespace pinocchio
     }
 
     /// \brief Returns the compliance associated to the current active set
-    ActiveComplianceVectorTypeConstRef getActiveCompliance() const
+    ActiveComplianceVectorTypeConstRef getActiveCompliance_impl() const
     {
       return ::pinocchio::visitors::getActiveCompliance(*this);
     }
 
     /// \brief Returns the compliance associated to the current active set
-    ActiveComplianceVectorTypeRef getActiveCompliance()
+    ActiveComplianceVectorTypeRef getActiveCompliance_impl()
     {
       return ::pinocchio::visitors::getActiveCompliance(*this);
     }
