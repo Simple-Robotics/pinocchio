@@ -68,7 +68,6 @@ namespace pinocchio
                 self.compliance() = new_vector;
               }),
             "Compliance of the constraint.")
-
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
           .def(
