@@ -67,29 +67,48 @@ namespace pinocchio
       typedef typename context::JointLimitConstraintModel::JointIndexVector JointIndexVector;
       typedef typename context::JointLimitConstraintModel Self;
       cl.def(bp::init<const context::Model &, const JointIndexVector &>(
-               (bp::arg("self"), bp::arg("model"), bp::arg("active_joints")),
+               (bp::arg("self"), bp::arg("model"), bp::arg("activable_joints")),
                "Contructor from given joint index vector "
                "implied in the constraint."))
+        .def(
+          "getActiveSetIndexes", &Self::getActiveSetIndexes,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Indexes of the active constraints set.")
+        .def(
+          "getActivableLowerBoundConstraints", &Self::getActivableLowerBoundConstraints,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of configuration vector index for activable lower bounds.")
         .def(
           "getActiveLowerBoundConstraints", &Self::getActiveLowerBoundConstraints,
           bp::return_value_policy<bp::copy_const_reference>(),
           "Returns the vector of configuration vector index for active lower bounds.")
         .def(
-          "getActiveLowerBoundConstraintsTangent", &Self::getActiveLowerBoundConstraintsTangent,
+          "getActivableUpperBoundConstraints", &Self::getActivableUpperBoundConstraints,
           bp::return_value_policy<bp::copy_const_reference>(),
-          "Returns the vector of tangent vector index for active lower bounds.")
+          "Returns the vector of configuration vector index for activable upper bounds.")
         .def(
           "getActiveUpperBoundConstraints", &Self::getActiveUpperBoundConstraints,
           bp::return_value_policy<bp::copy_const_reference>(),
           "Returns the vector of configuration vector index for active upper bounds.")
         .def(
+          "getActivableLowerBoundConstraintsTangent",
+          &Self::getActivableLowerBoundConstraintsTangent,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of tangent configuration vector index for activable lower bounds.")
+        .def(
+          "getActiveLowerBoundConstraintsTangent", &Self::getActiveLowerBoundConstraintsTangent,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of tangent configuration vector index for active lower bounds.")
+        .def(
+          "getActivableUpperBoundConstraintsTangent",
+          &Self::getActivableUpperBoundConstraintsTangent,
+          bp::return_value_policy<bp::copy_const_reference>(),
+          "Returns the vector of tangent configuration vector index for activable upper bounds.")
+        .def(
           "getActiveUpperBoundConstraintsTangent", &Self::getActiveUpperBoundConstraintsTangent,
           bp::return_value_policy<bp::copy_const_reference>(),
-          "Returns the vector of tangent vector index for active upper bounds.")
-        .def(
-          "getActiveSetIndexes", &Self::getActiveSetIndexes,
-          bp::return_value_policy<bp::copy_const_reference>(),
-          "Indexes of the active constraints set.");
+          "Returns the vector of tangent configuration vector index for active upper bounds.");
+      // resize
       return cl;
     }
   } // namespace python

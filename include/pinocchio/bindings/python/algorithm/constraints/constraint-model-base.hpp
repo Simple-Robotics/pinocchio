@@ -71,6 +71,9 @@ namespace pinocchio
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
           .def(
+            "active_size", +[](const Self & self) -> int { return self.activeSize(); },
+            "Constraint active size.")
+          .def(
             "calc", &calc, bp::args("self", "model", "data", "constraint_data"),
             "Evaluate the constraint values at the current state given by data and store the "
             "results.")
@@ -90,9 +93,22 @@ namespace pinocchio
             bp::args("self", "row_id"), bp::return_value_policy<bp::copy_const_reference>(),
             "Colwise sparsity associated with a given row.")
           .def(
+            "getRowActiveSparsityPattern", &Self::getRowActiveSparsityPattern,
+            bp::args("self", "row_id"), bp::return_value_policy<bp::copy_const_reference>(),
+            "Active colwise sparsity associated with a given row.")
+          .def(
+            "getRowActivableIndexes", &Self::getRowActivableIndexes, bp::args("self", "row_id"),
+            bp::return_value_policy<bp::copy_const_reference>(),
+            "Vector of the activable indexes associated with a given row.")
+          .def(
             "getRowActiveIndexes", &Self::getRowActiveIndexes, bp::args("self", "row_id"),
             bp::return_value_policy<bp::copy_const_reference>(),
             "Vector of the active indexes associated with a given row.")
+          .def(
+            "getActiveCompliance", bp::make_function(+[](const Self & self) -> context::VectorXs {
+              return self.compliance();
+            }),
+            "Vector of the active compliance internally stored in the constraint.")
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
           .def(bp::self == bp::self)
           .def(bp::self != bp::self)
