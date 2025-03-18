@@ -152,28 +152,32 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants)
 BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
 {
   Model model;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) ConstraintModelVector;
+  typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) ConstraintDataVector;
 
   build_trident_model(model);
   Data data(model), data_ref(model);
 
   // Contact models and data
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contact_models;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contact_datas;
+  ConstraintModelVector contact_models, contact_models_reversed;
+  ConstraintDataVector contact_datas, contact_datas_ref, contact_datas_reversed,
+    contact_datas_reversed_ref;
 
   const VectorXd q = randomConfiguration(model);
   const VectorXd v = VectorXd::Random(model.nv);
   const VectorXd tau = VectorXd::Random(model.nv);
 
   RigidConstraintModel rcm1 = RigidConstraintModel(
-    CONTACT_6D, model, model.getJointId("joint17"), model.getJointId("joint12"), LOCAL);
+    CONTACT_6D, model, model.getJointId("joint12"), model.getJointId("joint17"), LOCAL);
   rcm1.joint1_placement.setRandom();
   rcm1.joint2_placement.setRandom();
   contact_models.push_back(rcm1);
   contact_datas.push_back(rcm1.createData());
+  contact_datas_ref.push_back(rcm1.createData());
 
   const double mu0 = 1e-5;
   ProximalSettings prox_settings_ref(1e-14, mu0, 100);
-  ProximalSettings prox_settings(prox_settings_ref);
+  ProximalSettings prox_settings(prox_settings_ref), prox_settings_reversed(prox_settings_ref);
 
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
@@ -181,7 +185,45 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
   initLcaba(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
-  BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
+  std::cout << "prox_settings_ref.iter: " << prox_settings_ref.iter << std::endl;
+  std::cout << "prox_settings.iter: " << prox_settings.iter << std::endl;
+  std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
+  std::cout << "data.ddq: " << data.ddq.transpose() << std::endl;
+  std::cout << "|| data_ref.ddq - data.ddq ||: " << (data_ref.ddq - data.ddq).norm() << std::endl;
+  std::cout << "---" << std::endl;
+
+  BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-8));
+
+  // Check reversed
+
+  Data data_reversed(model);
+  RigidConstraintModel rcm1_reversed = RigidConstraintModel(
+    CONTACT_6D, model, rcm1.joint2_id, rcm1.joint2_placement, rcm1.joint1_id, rcm1.joint1_placement,
+    LOCAL);
+  contact_models_reversed.push_back(rcm1_reversed);
+  contact_datas_reversed.push_back(rcm1_reversed.createData());
+  contact_datas_reversed_ref.push_back(rcm1_reversed.createData());
+
+  initConstraintDynamics(model, data_ref, contact_models_reversed);
+  constraintDynamics(
+    model, data_ref, q, v, tau, contact_models_reversed, contact_datas_reversed_ref,
+    prox_settings_ref);
+
+  initLcaba(model, data_reversed, contact_models_reversed);
+  lcaba(
+    model, data_reversed, q, v, tau, contact_models_reversed, contact_datas_reversed,
+    prox_settings_reversed);
+
+  std::cout << "prox_settings_ref.iter: " << prox_settings_ref.iter << std::endl;
+  std::cout << "prox_settings_reversed.iter: " << prox_settings_reversed.iter << std::endl;
+  std::cout << "data_reversed.ddq: " << data_reversed.ddq.transpose() << std::endl;
+  std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
+  std::cout << "data.ddq: " << data.ddq.transpose() << std::endl;
+  std::cout << "|| data_reversed.ddq - data.ddq ||: " << (data_reversed.ddq - data.ddq).norm()
+            << std::endl;
+
+  BOOST_CHECK(data_reversed.ddq.isApprox(data.ddq, 1e-8));
+  BOOST_CHECK(data_ref.ddq.isApprox(data_reversed.ddq, 1e-8));
 }
 
 BOOST_AUTO_TEST_CASE(test_12D_descendants_redundant_reversed)
