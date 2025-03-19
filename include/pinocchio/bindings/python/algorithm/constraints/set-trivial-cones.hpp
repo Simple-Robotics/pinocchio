@@ -2,8 +2,8 @@
 // Copyright (c) 2022 INRIA
 //
 
-#ifndef __pinocchio_python_algorithm_constraints_set_other_cones_hpp__
-#define __pinocchio_python_algorithm_constraints_set_other_cones_hpp__
+#ifndef __pinocchio_python_algorithm_constraints_set_trivial_cones_hpp__
+#define __pinocchio_python_algorithm_constraints_set_trivial_cones_hpp__
 
 #include "pinocchio/algorithm/constraints/null-set.hpp"
 #include "pinocchio/algorithm/constraints/unbounded-set.hpp"
@@ -48,4 +48,4 @@ namespace pinocchio
   } // namespace python
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_python_algorithm_constraints_set_other_cones_hpp__
+#endif // ifndef __pinocchio_python_algorithm_constraints_set_trivial_cones_hpp__

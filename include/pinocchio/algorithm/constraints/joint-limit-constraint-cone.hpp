@@ -111,8 +111,8 @@ namespace pinocchio
     bool isInside(const Eigen::MatrixBase<VectorLike> & x, const Scalar prec = Scalar(0)) const
     {
       assert(x.size() == size());
-      return negative_orthant.isInsidex(x.head(negative_orthant.size()), prec)
-             && positive_orthant.isInsidex(x.tail(positive_orthant.size()), prec);
+      return negative_orthant.isInside(x.head(negative_orthant.size()), prec)
+             && positive_orthant.isInside(x.tail(positive_orthant.size()), prec);
     }
 
     /// \brief Project a vector x into orthant.

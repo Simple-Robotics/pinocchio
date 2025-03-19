@@ -129,7 +129,7 @@ namespace pinocchio
 
     DualCone dual() const
     {
-      return DualCone();
+      return DualCone(m_size);
     }
 
     Base & base()

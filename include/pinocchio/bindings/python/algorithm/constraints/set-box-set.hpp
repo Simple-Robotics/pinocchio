@@ -2,8 +2,8 @@
 // Copyright (c) 2024 INRIA
 //
 
-#ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
-#define __pinocchio_python_algorithm_constraints_box_set_hpp__
+#ifndef __pinocchio_python_algorithm_constraints_set_box_set_hpp__
+#define __pinocchio_python_algorithm_constraints_set_box_set_hpp__
 
 #include <eigenpy/eigenpy.hpp>
 
@@ -61,4 +61,4 @@ namespace pinocchio
   } // namespace python
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
+#endif // ifndef __pinocchio_python_algorithm_constraints_set_box_set_hpp__

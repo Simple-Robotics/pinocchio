@@ -2,8 +2,8 @@
 // Copyright (c) 2024 INRIA
 //
 
-#ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
-#define __pinocchio_python_algorithm_constraints_box_set_hpp__
+#ifndef __pinocchio_python_algorithm_constraints_set_base_hpp__
+#define __pinocchio_python_algorithm_constraints_set_base_hpp__
 
 #include <eigenpy/eigenpy.hpp>
 
@@ -19,7 +19,7 @@ namespace pinocchio
     namespace bp = boost::python;
 
     template<typename Set, typename VectorLike>
-    struct SetPythonVisitor : public boost::python::def_visitor<SetPythonVisitor<Set>>
+    struct SetPythonVisitor : public boost::python::def_visitor<SetPythonVisitor<Set, VectorLike>>
     {
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -52,4 +52,4 @@ namespace pinocchio
   } // namespace python
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
+#endif // ifndef __pinocchio_python_algorithm_constraints_set_base_hpp__
