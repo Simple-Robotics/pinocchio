@@ -39,6 +39,10 @@ namespace pinocchio
         {
           return 4.0 / 3 * pi * size.prod();
         }
+        else if (geomType == "plane")
+        {
+          return 0.0;
+        }
         else
         {
           throw std::invalid_argument("geometry type does not exist");
@@ -139,6 +143,12 @@ namespace pinocchio
           double radius = geom.size(0);
           double height = geom.size(1) * 2;
           return std::make_shared<fcl::Capsule>(radius, height);
+        }
+        else if (geom.geomType == "plane")
+        {
+          meshPath = "PLANE";
+          meshScale << 1, 1, 1;
+          return std::make_shared<fcl::Halfspace>(0, 0, 1, 0);
         }
         else
         {
@@ -415,7 +425,7 @@ namespace pinocchio
             size(1) = zaxis.norm() / 2; // to get half height
           }
         }
-        else if (geomType == "mesh")
+        else if (geomType == "mesh" || geomType == "plane")
           return;
         else
           throw std::invalid_argument("geomType does not exist");
