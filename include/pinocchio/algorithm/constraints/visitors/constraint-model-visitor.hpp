@@ -970,7 +970,7 @@ namespace pinocchio
       run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte vector corrector parameters.\n";
+        ss << cmodel.shortname() << " does not have baumgarte vector corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
@@ -978,7 +978,7 @@ namespace pinocchio
       static BaumgarteVectorReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte vector corrector parameters.\n";
+        ss << cmodel.shortname() << " does not have baumgarte vector corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteVectorReturnType>::run();
       }
@@ -1080,7 +1080,7 @@ namespace pinocchio
       static BaumgarteReturnType run(const ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        ss << cmodel.shortname() << " does not have baumgarte corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteReturnType>::run();
       }
@@ -1088,7 +1088,7 @@ namespace pinocchio
       static BaumgarteReturnType run(ConstraintModelBase<ConstraintModelDerived> & cmodel)
       {
         std::stringstream ss;
-        ss << cmodel.shortname() << "does not have baumgarte corrector parameters.\n";
+        ss << cmodel.shortname() << " does not have baumgarte corrector parameters.\n";
         PINOCCHIO_THROW(std::invalid_argument, ss.str());
         return internal::NoRun<BaumgarteReturnType>::run();
       }

@@ -41,9 +41,9 @@ namespace pinocchio
           .def(
             "ub", (Vector & (Self::*)()) & Self::ub,
             "Returns a reference to the vector of upper bounds", bp::return_internal_reference<>());
-        //   resize
-        //   conservativeresize
-        //   isvalid
+        // resize
+        // conservativeResize
+        // isvalid
       }
 
       static void expose()

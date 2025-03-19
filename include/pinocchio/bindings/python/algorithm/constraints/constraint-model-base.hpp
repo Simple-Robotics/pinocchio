@@ -71,7 +71,7 @@ namespace pinocchio
           .def(
             "size", +[](const Self & self) -> int { return self.size(); }, "Constraint size.")
           .def(
-            "active_size", +[](const Self & self) -> int { return self.activeSize(); },
+            "activeSize", +[](const Self & self) -> int { return self.activeSize(); },
             "Constraint active size.")
           .def(
             "calc", &calc, bp::args("self", "model", "data", "constraint_data"),
@@ -106,7 +106,7 @@ namespace pinocchio
             "Vector of the active indexes associated with a given row.")
           .def(
             "getActiveCompliance", bp::make_function(+[](const Self & self) -> context::VectorXs {
-              return self.compliance();
+              return self.getActiveCompliance();
             }),
             "Vector of the active compliance internally stored in the constraint.")
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS

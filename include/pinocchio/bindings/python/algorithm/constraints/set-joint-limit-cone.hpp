@@ -30,7 +30,7 @@ namespace pinocchio
           bp::args("self", "negative_orthant_size", "positive_orthant_size"),
           "Default constructor given a positive and a negative size."));
         // resize
-        // conservativeresize
+        // conservativeResize
       }
 
       static void expose()

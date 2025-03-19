@@ -30,7 +30,7 @@ namespace pinocchio
       {
         cl.def(bp::init<Eigen::DenseIndex>(bp::args("self", "size"), "Default constructor."));
         // resize
-        // conservativeresize
+        // conservativeResize
       }
 
       static void expose(const std::string & class_name, const std::string & doc_string = "")
