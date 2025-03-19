@@ -1606,6 +1606,7 @@ BOOST_AUTO_TEST_CASE(test_get_unknown_size_vector_from_stream)
   Eigen::VectorXd expected2(6);
   expected2 << 1, 2, 3, 4, 5, 6;
   BOOST_CHECK(v2 == expected2);
+}
 
 BOOST_AUTO_TEST_CASE(load_hopper)
 {
