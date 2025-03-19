@@ -56,6 +56,13 @@ namespace pinocchio
       positive_orthant.resize(positive_orthant_size);
     }
 
+    void conservativeResize(
+      const Eigen::DenseIndex negative_orthant_size, const Eigen::DenseIndex positive_orthant_size)
+    {
+      negative_orthant.conservativeResize(negative_orthant_size);
+      positive_orthant.conservativeResize(positive_orthant_size);
+    }
+
     /// \brief Cast operator
     template<typename NewScalar>
     JointLimitConstraintConeTpl<NewScalar> cast() const
