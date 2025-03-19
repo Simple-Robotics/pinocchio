@@ -564,7 +564,7 @@ namespace pinocchio
           name = *name_;
         else if (type && *type == "skybox")
           name = *type;
-        if (*builtin == "none")
+        if (!builtin || *builtin == "none")
         {
           if (!file)
           {
