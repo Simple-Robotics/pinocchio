@@ -233,11 +233,11 @@ namespace pinocchio
               if (!mat.texture.empty())
               {
                 if (
-                  currentGraph.mapOfTextures.find(geom.materialName)
+                  currentGraph.mapOfTextures.find(mat.texture)
                   == currentGraph.mapOfTextures.end())
                 {
                   std::stringstream ss;
-                  ss << "Cannot find texture for material " << geom.materialName << " for geometry "
+                  ss << "Cannot find texture " << mat.texture << " for material " << geom.materialName << " for geometry "
                      << geom.geomName;
                     std::string error_msg = ss.str();
                   PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
