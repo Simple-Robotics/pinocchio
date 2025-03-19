@@ -65,11 +65,19 @@ namespace pinocchio
     expose_constraint_model(bp::class_<context::JointLimitConstraintModel> & cl)
     {
       typedef typename context::JointLimitConstraintModel::JointIndexVector JointIndexVector;
+      typedef typename context::JointLimitConstraintModel::ConstraintData ConstraintData;
       typedef typename context::JointLimitConstraintModel Self;
       cl.def(bp::init<const context::Model &, const JointIndexVector &>(
                (bp::arg("self"), bp::arg("model"), bp::arg("activable_joints")),
                "Contructor from given joint index vector "
                "implied in the constraint."))
+        .def(
+          "resize",
+          +[](
+             Self & self, const context::Model & model, const context::Data & data,
+             ConstraintData & cdata) -> void { self.resize(model, data, cdata); },
+          bp::args("self", "model", "data", "constraint_data"),
+          "Resize the constraint given active limits.")
         .def(
           "getActiveSetIndexes", &Self::getActiveSetIndexes,
           bp::return_value_policy<bp::copy_const_reference>(),
