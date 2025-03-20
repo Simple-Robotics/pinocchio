@@ -21,12 +21,16 @@ namespace pinocchio
     template<typename Set, typename VectorLike>
     struct SetPythonVisitor : public boost::python::def_visitor<SetPythonVisitor<Set, VectorLike>>
     {
+      typedef typename Set::Scalar Scalar;
       template<class PyClass>
       void visit(PyClass & cl) const
       {
         cl.def(
-            "isInside", &Set::template isInside<VectorLike>, bp::args("self", "f"),
-            "Check whether a vector x lies within the cone.")
+            "isInside",
+            +[](const Set & self, const Eigen::MatrixBase<VectorLike> & f) -> bool {
+              return self.template isInside<VectorLike>(f, Scalar(0));
+            },
+            bp::args("self", "f"), "Resize the constraint given active limits.")
           .def(
             "project", &Set::template project<VectorLike>, bp::args("self", "f"),
             "Normal projection of a vector f onto the cone.")
