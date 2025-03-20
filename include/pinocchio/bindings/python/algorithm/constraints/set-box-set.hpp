@@ -44,8 +44,7 @@ namespace pinocchio
           .def("resize", &BoxSet::resize, bp::args("self", "size"), "Resize the set.")
           .def(
             "conservativeResize", &BoxSet::conservativeResize, bp::args("self", "size"),
-            "Resize the set following Eigen convention.")
-          .def("isValid", &BoxSet::isValid, "Check if the constraint set is well defined.");
+            "Resize the set following Eigen convention.");
       }
 
       static void expose()

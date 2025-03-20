@@ -81,11 +81,11 @@ namespace pinocchio
             "jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"),
             "Compute the constraint jacobian.")
           .def(
-            "jacobian_matrix_product", &jacobianMatrixProduct,
+            "jacobianMatrixProduct", &jacobianMatrixProduct,
             bp::args("self", "model", "data", "constraint_data", "matrix"),
             "Forward chain rule: return product between the jacobian and a matrix.")
           .def(
-            "jacobian_transpose_matrix_product", &jacobianTransposeMatrixProduct,
+            "jacobianTransposeMatrixProduct", &jacobianTransposeMatrixProduct,
             bp::args("self", "model", "data", "constraint_data", "matrix"),
             "Backward chain rule: return product between the jacobian transpose and a matrix.")
           .def(
@@ -179,7 +179,7 @@ namespace pinocchio
       static context::MatrixXs jacobian(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
-        const context::MatrixXs res(self.size(), model.nv);
+        const context::MatrixXs res(self.activeSize(), model.nv);
         self.jacobian(model, data, constraint_data, res);
         return res;
       }
@@ -191,7 +191,7 @@ namespace pinocchio
         const ConstraintData & constraint_data,
         const context::MatrixXs & matrix)
       {
-        const context::MatrixXs res(self.size(), model.nv);
+        const context::MatrixXs res(self.activeSize(), matrix.cols());
         self.jacobianMatrixProduct(model, data, constraint_data, matrix, res);
         return res;
       }
@@ -203,7 +203,7 @@ namespace pinocchio
         const ConstraintData & constraint_data,
         const context::MatrixXs & matrix)
       {
-        const context::MatrixXs res(self.size(), model.nv);
+        const context::MatrixXs res(model.nv, matrix.cols());
         self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix, res);
         return res;
       }
