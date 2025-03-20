@@ -40,10 +40,12 @@ namespace pinocchio
             "Returns a reference to the vector of lower bounds", bp::return_internal_reference<>())
           .def(
             "ub", (Vector & (Self::*)()) & Self::ub,
-            "Returns a reference to the vector of upper bounds", bp::return_internal_reference<>());
-        // resize
-        // conservativeResize
-        // isvalid
+            "Returns a reference to the vector of upper bounds", bp::return_internal_reference<>())
+          .def("resize", &BoxSet::resize, bp::args("self", "size"), "Resize the set.")
+          .def(
+            "conservativeResize", &BoxSet::conservativeResize, bp::args("self", "size"),
+            "Resize the set following Eigen convention.")
+          .def("isValid", &BoxSet::isValid, "Check if the constraint set is well defined.");
       }
 
       static void expose()

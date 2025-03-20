@@ -27,10 +27,14 @@ namespace pinocchio
       void visit(PyClass & cl) const
       {
         cl.def(bp::init<Eigen::DenseIndex, Eigen::DenseIndex>(
-          bp::args("self", "negative_orthant_size", "positive_orthant_size"),
-          "Default constructor given a positive and a negative size."));
-        // resize
-        // conservativeResize
+                 bp::args("self", "negative_orthant_size", "positive_orthant_size"),
+                 "Default constructor given a positive and a negative size."))
+          .def(
+            "resize", &JointLimitConstraintCone::resize, bp::args("self", "size"),
+            "Resize the set.")
+          .def(
+            "conservativeResize", &JointLimitConstraintCone::conservativeResize,
+            bp::args("self", "size"), "Resize the set following Eigen convention.");
       }
 
       static void expose()

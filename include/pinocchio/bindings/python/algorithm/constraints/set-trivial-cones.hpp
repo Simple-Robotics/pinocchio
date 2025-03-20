@@ -28,9 +28,11 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<Eigen::DenseIndex>(bp::args("self", "size"), "Default constructor."));
-        // resize
-        // conservativeResize
+        cl.def(bp::init<Eigen::DenseIndex>(bp::args("self", "size"), "Default constructor."))
+          .def("resize", &TrivialCone::resize, bp::args("self", "size"), "Resize the set.")
+          .def(
+            "conservativeResize", &TrivialCone::conservativeResize, bp::args("self", "size"),
+            "Resize the set following Eigen convention.");
       }
 
       static void expose(const std::string & class_name, const std::string & doc_string = "")
