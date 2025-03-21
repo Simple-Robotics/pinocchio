@@ -202,8 +202,6 @@ class TestJointsAlgo(TestCase):
 
         jlc = pin.ConstraintModel(jlc_raw).extract()
         jlc.resize(model, data, jlc.createData())
-        constraints_std_vec.append(pin.ConstraintModel(jlc))
-        constraints_list.append(jlc)
 
         frictional_points_list = []
         for col_pair, col_res, patch_res in zip(
@@ -248,6 +246,8 @@ class TestJointsAlgo(TestCase):
                     frictional_points_list.append(fp)
 
         # Sotre some values
+        self.data = data
+        self.geom_data = geom_data
         self.constraints_std_vec = constraints_std_vec
         self.constraints_list = constraints_list
         self.bilats_list = bilats_list
@@ -296,6 +296,7 @@ class TestJointsAlgo(TestCase):
 
     def test_generic_methods(self):
         ref_set = set(range(self.model.nv))
+
         for gcm, ccm in zip(self.constraints_std_vec, self.constraints_list):
             # Test hierarchy
             self.assertTrue(gcm.extract() == ccm)
@@ -339,7 +340,7 @@ class TestJointsAlgo(TestCase):
 
     def test_jacobians_methods(self):
         model = self.model
-        data = model.createData()
+        data = self.data
 
         v = np.stack([np.ones(model.nv), 2 * np.ones(model.nv)], axis=1)
         for cmodel in self.one_of_each:
