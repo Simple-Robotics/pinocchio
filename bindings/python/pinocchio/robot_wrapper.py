@@ -8,7 +8,7 @@ from .shortcuts import (
     buildModelsFromMJCF,
     buildModelsFromSdf,
     buildModelsFromUrdf,
-    createDatas,
+    createDatas
 )
 
 
