@@ -381,6 +381,18 @@ namespace pinocchio
       calc_first_order(*this, data, q.derived(), v.derived());
     }
 
+    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
+    {
+      ::pinocchio::calc_tangent_map(*this, data, blank);
+    }
+
+    template<typename ConfigVectorType>
+    void
+    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    {
+      ::pinocchio::calc_tangent_map(*this, data, q.derived());
+    }
+
     template<typename VectorLike, typename Matrix6Like>
     void calc_aba(
       JointDataDerived & data,

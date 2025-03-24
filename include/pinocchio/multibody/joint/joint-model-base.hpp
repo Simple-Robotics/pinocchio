@@ -140,6 +140,18 @@ namespace pinocchio
       derived().calc_aba(data, armature.derived(), I.const_cast_derived(), update_I);
     }
 
+    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
+    {
+      derived().calc_tangent_map(data, blank);
+    }
+
+    template<typename ConfigVectorType>
+    void
+    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    {
+      derived().calc_tangent_map(data, qs.derived());
+    }
+
     int nv() const
     {
       return derived().nv_impl();

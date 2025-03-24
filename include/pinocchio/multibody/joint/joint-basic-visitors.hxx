@@ -237,6 +237,7 @@ namespace pinocchio
         PINOCCHIO_EIGEN_CONST_CAST(Matrix6Type, I), update_I));
   }
 
+<<<<<<< HEAD
   template<typename InputType, typename ReturnType>
   struct JointMappedConfigSelectorVisitor
   : fusion::
@@ -263,6 +264,64 @@ namespace pinocchio
     }
   };
 
+=======
+  template<typename ConfigVectorType>
+  struct JointCalcTangentMapVisitor
+  : fusion::JointUnaryVisitorBase<JointCalcTangentMapVisitor<ConfigVectorType>>
+  {
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const Eigen::MatrixBase<ConfigVectorType> & q)
+    {
+      jmodel.calc_tangent_map(jdata.derived(), q.derived());
+    }
+  };
+
+  template<>
+  struct JointCalcTangentMapVisitor<Blank>
+  : fusion::JointUnaryVisitorBase<JointCalcTangentMapVisitor<Blank>>
+  {
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const Blank blank)
+    {
+      jmodel.calc_tangent_map(jdata.derived(), blank);
+    }
+  };
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename S, int O> class JointCollectionTpl,
+    typename ConfigVectorType>
+  inline void calc_tangent_map(
+    const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel,
+    JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata,
+    const Eigen::MatrixBase<ConfigVectorType> & q)
+  {
+    typedef JointCalcTangentMapVisitor<ConfigVectorType> Algo;
+
+    Algo::run(jmodel, jdata, q.derived());
+  }
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  inline void calc_tangent_map(
+    const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel,
+    JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata,
+    const Blank blank)
+  {
+    typedef JointCalcTangentMapVisitor<Blank> Algo;
+
+    Algo::run(jmodel, jdata, blank);
+  }
+
+>>>>>>> 2aabf5685 (Joint: add method related to tangent map)
   /**
    * @brief      JointNvVisitor visitor
    */
