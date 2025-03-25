@@ -99,6 +99,7 @@ namespace pinocchio
     , Dinv(0, 0)
     , UDinv(6, 0)
     , StU(0, 0)
+    , TangentMap(0, 0)
     {
     }
 
@@ -116,6 +117,7 @@ namespace pinocchio
     , Dinv(D_t::Zero(nv, nv))
     , UDinv(UD_t::Zero(6, nv))
     , StU(D_t::Zero(nv, nv))
+    , TangentMap(TangentMap_t::Zero(nq, nv))
     {
     }
 
@@ -141,6 +143,8 @@ namespace pinocchio
     D_t Dinv;
     UD_t UDinv;
     D_t StU;
+
+    TangentMap_t TangentMap;
 
     static std::string classname()
     {

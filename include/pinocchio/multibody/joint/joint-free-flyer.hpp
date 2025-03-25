@@ -232,6 +232,8 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
+    TangentMap_t TangentMap;
+
     JointDataFreeFlyerTpl()
     : joint_q(ConfigVector_t::Zero())
     , joint_v(TangentVector_t::Zero())
@@ -241,6 +243,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Identity())
     , StU(D_t::Zero())
+    , TangentMap(TangentMap_t::Zero())
     {
       joint_q[6] = Scalar(1);
     }

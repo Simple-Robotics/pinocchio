@@ -536,6 +536,8 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
+    TangentMap_t TangentMap;
+
     JointDataPrismaticUnalignedTpl()
     : joint_q(ConfigVector_t::Zero())
     , joint_v(TangentVector_t::Zero())
@@ -546,6 +548,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
+    , TangentMap(TangentMap_t::Identity())
     {
     }
 
@@ -560,6 +563,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
+    , TangentMap(TangentMap_t::Identity())
     {
     }
 

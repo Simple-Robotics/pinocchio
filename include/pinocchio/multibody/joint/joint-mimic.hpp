@@ -476,6 +476,14 @@ namespace pinocchio
     {
       return m_jdata_mimicking.StU();
     }
+    TangentMapTypeConstRef TangentMap_accessor() const
+    {
+      return m_jdata_ref.TangentMap;
+    }
+    TangentMapTypeRef TangentMap_accessor()
+    {
+      return m_jdata_ref.TangentMap;
+    }
 
     friend struct JointModelMimicTpl<_Scalar, _Options, JointCollectionTpl>;
 

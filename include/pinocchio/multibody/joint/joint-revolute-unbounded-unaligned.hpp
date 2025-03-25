@@ -88,6 +88,8 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
+    TangentMap_t TangentMap;
+
     JointDataRevoluteUnboundedUnalignedTpl()
     : joint_q(Scalar(1), Scalar(0))
     , joint_v(TangentVector_t::Zero())
@@ -98,6 +100,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
+    , TangentMap(TangentMap_t::Zero())
     {
     }
 
@@ -112,6 +115,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
+    , TangentMap(TangentMap_t::Zero())
     {
     }
 
