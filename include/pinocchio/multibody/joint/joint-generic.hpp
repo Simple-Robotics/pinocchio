@@ -398,7 +398,7 @@ namespace pinocchio
     void
     calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
     {
-      ::pinocchio::calc_tangent_map(*this, data, q.derived());
+      ::pinocchio::calc_tangent_map(*this, data, qs.derived());
     }
 
     template<typename VectorLike, typename Matrix6Like>

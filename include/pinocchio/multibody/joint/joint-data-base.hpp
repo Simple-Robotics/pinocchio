@@ -30,7 +30,7 @@
   typedef TYPENAME traits<Joint>::UDTypeConstRef UDTypeConstRef;                                   \
   typedef TYPENAME traits<Joint>::UDTypeRef UDTypeRef;                                             \
   typedef TYPENAME traits<Joint>::TangentMapTypeConstRef TangentMapTypeConstRef;                   \
-  typedef TYPENAME traits<Joint>::TangentMapTypeRef TangentMapTypeRef;
+  typedef TYPENAME traits<Joint>::TangentMapTypeRef TangentMapTypeRef
 
 #ifdef __clang__
 
