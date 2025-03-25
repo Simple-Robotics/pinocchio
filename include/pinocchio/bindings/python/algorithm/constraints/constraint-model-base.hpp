@@ -179,7 +179,8 @@ namespace pinocchio
       static context::MatrixXs jacobian(
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
-        const context::MatrixXs res(self.activeSize(), model.nv);
+        context::MatrixXs res(self.activeSize(), model.nv);
+        res.setZero();
         self.jacobian(model, data, constraint_data, res);
         return res;
       }
@@ -191,7 +192,8 @@ namespace pinocchio
         const ConstraintData & constraint_data,
         const context::MatrixXs & matrix)
       {
-        const context::MatrixXs res(self.activeSize(), matrix.cols());
+        context::MatrixXs res(self.activeSize(), matrix.cols());
+        res.setZero();
         self.jacobianMatrixProduct(model, data, constraint_data, matrix, res);
         return res;
       }
@@ -203,7 +205,8 @@ namespace pinocchio
         const ConstraintData & constraint_data,
         const context::MatrixXs & matrix)
       {
-        const context::MatrixXs res(model.nv, matrix.cols());
+        context::MatrixXs res(model.nv, matrix.cols());
+        res.setZero();
         self.jacobianTransposeMatrixProduct(model, data, constraint_data, matrix, res);
         return res;
       }
