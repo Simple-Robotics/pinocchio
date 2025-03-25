@@ -396,9 +396,9 @@ namespace pinocchio
 
     template<typename ConfigVectorType>
     void
-    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & q) const
     {
-      ::pinocchio::calc_tangent_map(*this, data, qs.derived());
+      ::pinocchio::calc_tangent_map(*this, data, q.derived());
     }
 
     template<typename VectorLike, typename Matrix6Like>
