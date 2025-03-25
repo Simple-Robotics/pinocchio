@@ -27,30 +27,75 @@ namespace pinocchio
 
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
 
+    template<typename ConstraintModel, typename ConstraintData>
     static const context::VectorXs constraintDynamics_proxy(
       const context::Model & model,
       context::Data & data,
       const context::VectorXs & q,
       const context::VectorXs & v,
       const context::VectorXs & tau,
-      const RigidConstraintModelVector & contact_models,
-      RigidConstraintDataVector & contact_datas,
+      const std::vector<ConstraintModel, Eigen::aligned_allocator<ConstraintModel>> &
+        contact_models,
+      std::vector<ConstraintData, Eigen::aligned_allocator<ConstraintData>> & contact_datas,
       context::ProximalSettings & prox_settings)
     {
       return constraintDynamics(
         model, data, q, v, tau, contact_models, contact_datas, prox_settings);
     }
 
+    template<typename ConstraintModel, typename ConstraintData>
     static const context::VectorXs constraintDynamics_proxy_default(
       const context::Model & model,
       context::Data & data,
       const context::VectorXs & q,
       const context::VectorXs & v,
       const context::VectorXs & tau,
-      const RigidConstraintModelVector & contact_models,
-      RigidConstraintDataVector & contact_datas)
+      const std::vector<ConstraintModel, Eigen::aligned_allocator<ConstraintModel>> &
+        contact_models,
+      std::vector<ConstraintData, Eigen::aligned_allocator<ConstraintData>> & contact_datas)
     {
       return constraintDynamics(model, data, q, v, tau, contact_models, contact_datas);
+    }
+
+    template<typename ConstraintModel>
+    void exposeConstraintDynamicsFor()
+    {
+
+      typedef typename ConstraintModel::ConstraintData ConstraintData;
+      typedef Eigen::aligned_allocator<ConstraintModel> ConstraintModelAllocator;
+
+      bp::def(
+        "initConstraintDynamics",
+        &initConstraintDynamics<
+          context::Scalar, context::Options, ConstraintModel, JointCollectionDefaultTpl,
+          ConstraintModelAllocator>,
+        bp::args("model", "data", "contact_models"),
+        "This function allows to allocate the memory before hand for contact dynamics algorithms.\n"
+        "This allows to avoid online memory allocation when running these algorithms.",
+        mimic_not_supported_function<>(0));
+
+      bp::def(
+        "constraintDynamics", constraintDynamics_proxy<ConstraintModel, ConstraintData>,
+        bp::args(
+          "model", "data", "q", "v", "tau", "contact_models", "contact_datas", "prox_settings"),
+        "Computes the forward dynamics with contact constraints according to a given list of "
+        "Contact information.\n"
+        "When using constraintDynamics for the first time, you should call first "
+        "initConstraintDynamics to initialize the internal memory used in the algorithm.\n"
+        "This function returns joint acceleration of the system. The contact forces are "
+        "stored in the list data.contact_forces.",
+        mimic_not_supported_function<>(0));
+
+      bp::def(
+        "constraintDynamics", constraintDynamics_proxy_default<ConstraintModel, ConstraintData>,
+        bp::args("model", "data", "q", "v", "tau", "contact_models", "contact_datas"),
+        "Computes the forward dynamics with contact constraints according to a given list of "
+        "Contact information.\n"
+        "When using constraintDynamics for the first time, you should call first "
+        "initConstraintDynamics to initialize the internal memory used in the algorithm.\n"
+        "This function returns joint acceleration of the system. The contact forces are stored in "
+        "the list data.contact_forces.",
+        mimic_not_supported_function<>(0));
     }
 
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
@@ -80,38 +125,8 @@ namespace pinocchio
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       ContactCholeskyDecompositionPythonVisitor<context::ContactCholeskyDecomposition>::expose();
 
-      bp::def(
-        "initConstraintDynamics",
-        &initConstraintDynamics<
-          context::Scalar, context::Options, RigidConstraintModel, JointCollectionDefaultTpl,
-          typename RigidConstraintModelVector::allocator_type>,
-        bp::args("model", "data", "contact_models"),
-        "This function allows to allocate the memory before hand for contact dynamics algorithms.\n"
-        "This allows to avoid online memory allocation when running these algorithms.",
-        mimic_not_supported_function<>(0));
-
-      bp::def(
-        "constraintDynamics", constraintDynamics_proxy,
-        bp::args(
-          "model", "data", "q", "v", "tau", "contact_models", "contact_datas", "prox_settings"),
-        "Computes the forward dynamics with contact constraints according to a given list of "
-        "Contact information.\n"
-        "When using constraintDynamics for the first time, you should call first "
-        "initConstraintDynamics to initialize the internal memory used in the algorithm.\n"
-        "This function returns joint acceleration of the system. The contact forces are "
-        "stored in the list data.contact_forces.",
-        mimic_not_supported_function<>(0));
-
-      bp::def(
-        "constraintDynamics", constraintDynamics_proxy_default,
-        bp::args("model", "data", "q", "v", "tau", "contact_models", "contact_datas"),
-        "Computes the forward dynamics with contact constraints according to a given list of "
-        "Contact information.\n"
-        "When using constraintDynamics for the first time, you should call first "
-        "initConstraintDynamics to initialize the internal memory used in the algorithm.\n"
-        "This function returns joint acceleration of the system. The contact forces are "
-        "stored in the list data.contact_forces.",
-        mimic_not_supported_function<>(0));
+      exposeConstraintDynamicsFor<RigidConstraintModel>();
+      // exposeConstraintDynamicsFor<WeldConstraintModel>();
 
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
     }
