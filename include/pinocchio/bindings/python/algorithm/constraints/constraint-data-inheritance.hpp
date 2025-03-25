@@ -43,8 +43,8 @@ namespace pinocchio
       void visit(PyClass & cl) const
       {
         cl.def(bp::init<>(bp::arg("self"), "Default constructor."))
-          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model"),
-            "From model constructor."))
+          .def(bp::init<const typename T::ConstraintModel &>(
+            bp::args("self", "constraint_model"), "From model constructor."))
           .PINOCCHIO_ADD_PROPERTY(T, constraint_force, "Resulting force.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc1, "Placement of the constraint frame 1 wrt WORLD.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc2, "Placement of the constraint frame 2 wrt WORLD.")
@@ -67,8 +67,8 @@ namespace pinocchio
       void visit(PyClass & cl) const
       {
         cl.def(bp::init<>(bp::arg("self"), "Default constructor."))
-          .def(bp::init<const typename T::ConstraintModel &>(bp::args("self", "constraint_model"),
-            "From model constructor."))
+          .def(bp::init<const typename T::ConstraintModel &>(
+            bp::args("self", "constraint_model"), "From model constructor."))
           .PINOCCHIO_ADD_PROPERTY(T, constraint_force, "Resulting force.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc1, "Placement of the constraint frame 1 wrt WORLD.")
           .PINOCCHIO_ADD_PROPERTY(T, oMc2, "Placement of the constraint frame 2 wrt WORLD.")
@@ -79,6 +79,9 @@ namespace pinocchio
             T, constraint_acceleration_error, "Constraint acceleration (3D) error.")
           .PINOCCHIO_ADD_PROPERTY(
             T, constraint_acceleration_biais_term, "Constraint acceleration (3D) term.");
+        .PINOCCHIO_ADD_PROPERTY(T, contraint_residual, "Constraint residual (3D) term.");
+        .PINOCCHIO_ADD_PROPERTY(T, dcontraint_residual, "Constraint dresidual (3D) term.");
+        .PINOCCHIO_ADD_PROPERTY(T, ddcontraint_residual, "Constraint ddresidual (3D) term.");
       }
     };
   } // namespace python
