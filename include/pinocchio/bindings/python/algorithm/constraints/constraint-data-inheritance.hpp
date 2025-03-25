@@ -79,9 +79,6 @@ namespace pinocchio
             T, constraint_acceleration_error, "Constraint acceleration (3D) error.")
           .PINOCCHIO_ADD_PROPERTY(
             T, constraint_acceleration_biais_term, "Constraint acceleration (3D) term.");
-        .PINOCCHIO_ADD_PROPERTY(T, contraint_residual, "Constraint residual (3D) term.");
-        .PINOCCHIO_ADD_PROPERTY(T, dcontraint_residual, "Constraint dresidual (3D) term.");
-        .PINOCCHIO_ADD_PROPERTY(T, ddcontraint_residual, "Constraint ddresidual (3D) term.");
       }
     };
   } // namespace python
