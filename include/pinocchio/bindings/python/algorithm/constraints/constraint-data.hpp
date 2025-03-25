@@ -50,7 +50,8 @@ namespace pinocchio
       {
         bp::class_<ConstraintData>("ConstraintData", "Generic Constraint Data.", bp::no_init)
           .def(bp::init<>(bp::arg("self"), "Default constructor."))
-          .def(bp::init<const ConstraintData &>(bp::args("self", "other"), "Copy constructor"))
+          .def(bp::init<const ConstraintData &>(
+            bp::args("self", "constraint_data"), "Copy constructor."))
           .def(ConstraintDataBasePythonVisitor<ConstraintData>())
           .def(PrintableVisitor<ConstraintData>())
           .def(SerializableVisitor<ConstraintData>())
