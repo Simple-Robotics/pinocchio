@@ -286,11 +286,17 @@ namespace pinocchio
   {
     PINOCCHIO_UNUSED_VARIABLE(model);
     PINOCCHIO_UNUSED_VARIABLE(data);
-    // Fill the constraint residual for all active constraints.
+
     std::size_t active_size = std::size_t(activeSize());
     auto & activable_constraint_residual = cdata.activable_constraint_residual;
     auto & constraint_residual = cdata.constraint_residual;
 
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      constraint_residual.size(), this->activeSize(),
+      "The active constraint_residual size in constraint data is different from the constraint "
+      "model active size. You should probably use cmodel.resize(model, data, cdata) first.");
+
+    // Fill the constraint residual for all active constraints.
     for (std::size_t active_row_index = 0; active_row_index < active_size; active_row_index++)
     {
       constraint_residual[int(active_row_index)] =
