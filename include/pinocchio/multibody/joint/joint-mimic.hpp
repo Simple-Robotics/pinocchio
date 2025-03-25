@@ -736,6 +736,22 @@ namespace pinocchio
            "this function");
     }
 
+    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
+    {
+      // TODO: Understand what it is
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(blank);
+    }
+
+    template<typename ConfigVectorType>
+    void
+    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    {
+      // TODO: Understand what it is
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(qs);
+    }
+
     static std::string classname()
     {
       return std::string("JointModelMimic");
