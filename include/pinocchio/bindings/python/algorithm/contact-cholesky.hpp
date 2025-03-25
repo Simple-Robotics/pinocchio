@@ -101,6 +101,17 @@ namespace pinocchio
             "Returns the matrix resulting from the decomposition.")
 
           .def(
+            "resize",
+            (void (*)(Self & self, const Model &, const RigidConstraintModelVector &))&resize,
+            (bp::arg("self"), bp::arg("model"), bp::arg("constraint_models")),
+            "Resizes the Cholesky decompostion according to the input constraint models")
+
+          .def(
+            "resize", (void (*)(Self & self, const Model &, const ConstraintModelVector &))&resize,
+            (bp::arg("self"), bp::arg("model"), bp::arg("constraint_models")),
+            "Resizes the Cholesky decompostion according to the input constraint models")
+
+          .def(
             "compute",
             (void (*)(
               Self & self, const Model &, Data &, const RigidConstraintModelVector &,
@@ -295,6 +306,15 @@ namespace pinocchio
       static Matrix solve(const Self & self, const MatrixType & mat)
       {
         return self.solve(mat);
+      }
+
+      template<typename ConstraintModel, typename ConstraintModelAllocator>
+      static void resize(
+        Self & self,
+        const Model & model,
+        const std::vector<ConstraintModel, ConstraintModelAllocator> & contact_models)
+      {
+        self.resize(model, contact_models);
       }
 
       template<
