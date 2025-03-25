@@ -33,9 +33,6 @@ namespace pinocchio
       Options = _Options
     };
 
-    typedef Eigen::Matrix<Scalar, NQ, 1, Options> ConfigVector_t;
-    typedef Eigen::Matrix<Scalar, NV, 1, Options> TangentVector_t;
-
     typedef JointDataRevoluteUnboundedUnalignedTpl<Scalar, Options> JointDataDerived;
     typedef JointModelRevoluteUnboundedUnalignedTpl<Scalar, Options> JointModelDerived;
     typedef JointMotionSubspaceRevoluteUnalignedTpl<Scalar, Options> Constraint_t;
