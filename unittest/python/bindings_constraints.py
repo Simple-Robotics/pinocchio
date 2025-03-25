@@ -373,21 +373,25 @@ class TestJointsAlgo(TestCase):
                 [np.ones(cmodel.activeSize()), 2 * np.ones(cmodel.activeSize())], axis=1
             )
 
+            if isinstance(cmodel, pin.JointLimitConstraintModel):
+                cmodel.resize(model, data, cdata)
             cmodel.calc(model, data, cdata)
             jac = cmodel.jacobian(model, data, cdata)
             sig = cmodel.jacobianMatrixProduct(model, data, cdata, v)
             tau = cmodel.jacobianTransposeMatrixProduct(model, data, cdata, lamb)
 
-            gcmodel.calc(model, data, gcdata)
-            gjac = gcmodel.jacobian(model, data, gcdata)
-            gsig = gcmodel.jacobianMatrixProduct(model, data, gcdata, v)
-            gtau = gcmodel.jacobianTransposeMatrixProduct(model, data, gcdata, lamb)
-
-            self.assertTrue(np.all(jac == gjac))
-            self.assertTrue(np.all(sig == gsig))
-            self.assertTrue(np.all(tau == gtau))
             self.assertTrue(np.all(jac @ v == sig))
             self.assertTrue(np.all(jac.T @ lamb == tau))
+
+            if not isinstance(cmodel, pin.JointLimitConstraintModel):
+                gcmodel.calc(model, data, gcdata)
+                gjac = gcmodel.jacobian(model, data, gcdata)
+                gsig = gcmodel.jacobianMatrixProduct(model, data, gcdata, v)
+                gtau = gcmodel.jacobianTransposeMatrixProduct(model, data, gcdata, lamb)
+
+                self.assertTrue(np.all(jac == gjac))
+                self.assertTrue(np.all(sig == gsig))
+                self.assertTrue(np.all(tau == gtau))
 
     def test_sets_of_constraints(self):
         # Test projection
@@ -440,6 +444,39 @@ class TestJointsAlgo(TestCase):
         p_force_in = self.fp.set.project(force_in)
         self.assertTrue(self.fp.set.isInside(force_in))
         self.assertTrue(np.all(p_force_in == force_in))
+
+    def test_constraints_data(self):
+        for cmodel in self.one_of_each:
+            cdata = cmodel.createData()
+            model_name = cmodel.shortname()
+            data_name = cdata.shortname()
+
+            if isinstance(cmodel, pin.JointLimitConstraintModel):
+                cmodel.resize(self.model, self.data, cdata)
+            cmodel.calc(self.model, self.data, cdata)
+
+            self.assertTrue(model_name[:-5] == data_name[:-4])
+            self.assertTrue(model_name[-5:] == "Model")
+            self.assertTrue(data_name[-4:] == "Data")
+
+        for cmodel in [self.bilat, self.weld]:
+            cdata = cmodel.createData()
+            cmodel.calc(self.model, self.data, cdata)
+            self.assertTrue(hasattr(cdata, "constraint_force"))
+            self.assertTrue(hasattr(cdata, "oMc1"))
+            self.assertTrue(hasattr(cdata, "oMc2"))
+            self.assertTrue(hasattr(cdata, "c1Mc2"))
+            self.assertTrue(hasattr(cdata, "constraint_position_error"))
+            self.assertTrue(hasattr(cdata, "constraint_velocity_error"))
+            self.assertTrue(hasattr(cdata, "constraint_acceleration_error"))
+            self.assertTrue(hasattr(cdata, "constraint_acceleration_biais_term"))
+            self.assertTrue(cdata.oMc1.inverse() * cdata.oMc2 == cdata.c1Mc2)
+
+        cmodel = self.jlc
+        cdata = cmodel.createData()
+        cmodel.resize(self.model, self.data, cdata)
+        cmodel.calc(self.model, self.data, cdata)
+        self.assertTrue(hasattr(cdata, "constraint_residual"))
 
 
 if __name__ == "__main__":
