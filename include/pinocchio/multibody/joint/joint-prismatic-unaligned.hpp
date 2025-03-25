@@ -687,6 +687,20 @@ namespace pinocchio
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
 
+    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(blank);
+    }
+
+    template<typename ConfigVectorType>
+    void
+    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(qs);
+    }
+
     static std::string classname()
     {
       return std::string("JointModelPrismaticUnaligned");
