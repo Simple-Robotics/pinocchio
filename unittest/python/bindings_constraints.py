@@ -194,7 +194,19 @@ class TestJointsAlgo(TestCase):
         # Create some contacts and active limits
         data = model.createData()
         geom_data = geom_model.createData()
-        q = pin.randomConfiguration(model)
+        q = np.array(
+            [
+                -0.49999217,
+                -0.36846221,
+                0.25560532,
+                -0.72022615,
+                0.66439729,
+                0.13124927,
+                -0.1504133,
+                -0.45295538,
+                1.19716179,
+            ]
+        )
         pin.forwardKinematics(model, data, q)
         pin.updateGeometryPlacements(model, data, geom_model, geom_data)
         pin.computeCollisions(model, data, geom_model, geom_data, q, False)
@@ -300,7 +312,7 @@ class TestJointsAlgo(TestCase):
         for gcm, ccm in zip(self.constraints_std_vec, self.constraints_list):
             # Test hierarchy
             self.assertTrue(gcm.extract() == ccm)
-            self.assertTrue(gcm.shortname() == ccm.classname())
+            self.assertTrue(gcm.shortname() == ccm.classname() == ccm.shortname())
             for i in range(gcm.activeSize()):
                 self.assertTrue(
                     np.all(
@@ -320,7 +332,7 @@ class TestJointsAlgo(TestCase):
                     <= ref_set
                 )
                 self.assertTrue(gcm.activeSize() <= gcm.size())
-            dummy_compliance = np.random.rand(gcm.size())
+            dummy_compliance = 0.1 * np.ones(gcm.size())
             gcm.compliance = dummy_compliance
             self.assertTrue(np.all(dummy_compliance == gcm.compliance))
             self.assertTrue(len(ccm.getActiveCompliance()) == ccm.activeSize())
@@ -352,6 +364,10 @@ class TestJointsAlgo(TestCase):
             self.assertTrue(g2cdata == gcdata)
             self.assertTrue(gcdata.extract() == cdata)
             self.assertTrue(g2cdata.extract() == cdata)
+
+            self.assertTrue(
+                gcdata.shortname() == cdata.classname() == cdata.shortname()
+            )
 
             lamb = np.stack(
                 [np.ones(cmodel.activeSize()), 2 * np.ones(cmodel.activeSize())], axis=1
