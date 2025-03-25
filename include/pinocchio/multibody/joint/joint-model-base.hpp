@@ -153,6 +153,9 @@ namespace pinocchio
       derived().calc_tangent_map(data, qs.derived());
     }
 
+    // void tangent_map_product(const JointDataDerived & data, const XXX & v, XXX &res):
+    // void cotangent_map_product(const JointDataDerived & data, const XXX & dq_star, XXX &res):
+
     int nv() const
     {
       return derived().nv_impl();
