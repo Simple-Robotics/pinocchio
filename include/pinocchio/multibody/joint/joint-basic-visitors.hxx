@@ -1001,6 +1001,34 @@ namespace pinocchio
   }
 
   /**
+   * @brief      JointTangentMapVisitor visitor
+   */
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  struct JointTangentMapVisitor
+  : boost::static_visitor<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>>
+  {
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> ReturnType;
+
+    template<typename JointDataDerived>
+    ReturnType operator()(const JointDataBase<JointDataDerived> & jdata) const
+    {
+      return ReturnType(jdata.TangentMap());
+    }
+
+    static ReturnType run(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata)
+    {
+      return boost::apply_visitor(JointTangentMapVisitor(), jdata);
+    }
+  };
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>
+  tangent_map(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata)
+  {
+    return JointTangentMapVisitor<Scalar, Options, JointCollectionTpl>::run(jdata);
+  }
+
+  /**
    * @brief      JointDataShortnameVisitor visitor
    */
   struct JointDataShortnameVisitor : boost::static_visitor<std::string>

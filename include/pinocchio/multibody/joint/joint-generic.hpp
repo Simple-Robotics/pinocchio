@@ -157,6 +157,10 @@ namespace pinocchio
     {
       return stu_inertia(*this);
     }
+    TangentMap_t TangentMap() const
+    {
+      return tangent_map(*this);
+    }
 
     JointDataTpl()
     : JointDataVariant()
@@ -215,6 +219,10 @@ namespace pinocchio
     D_t StU_accessor() const
     {
       return StU();
+    }
+    TangentMap_t TangentMap_accessor() const
+    {
+      return TangentMap();
     }
 
     static std::string classname()

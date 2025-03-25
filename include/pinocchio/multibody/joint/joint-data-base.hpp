@@ -28,7 +28,9 @@
   typedef TYPENAME traits<Joint>::DTypeConstRef DTypeConstRef;                                     \
   typedef TYPENAME traits<Joint>::DTypeRef DTypeRef;                                               \
   typedef TYPENAME traits<Joint>::UDTypeConstRef UDTypeConstRef;                                   \
-  typedef TYPENAME traits<Joint>::UDTypeRef UDTypeRef
+  typedef TYPENAME traits<Joint>::UDTypeRef UDTypeRef;                                             \
+  typedef TYPENAME traits<Joint>::TangentMapTypeConstRef TangentMapTypeConstRef;                   \
+  typedef TYPENAME traits<Joint>::TangentMapTypeRef TangentMapTypeRef;
 
 #ifdef __clang__
 
@@ -132,6 +134,14 @@
   DTypeRef StU_accessor()                                                                          \
   {                                                                                                \
     return StU;                                                                                    \
+  }                                                                                                \
+  TangentMapTypeConstRef TangentMap_accessor() const                                               \
+  {                                                                                                \
+    return TangentMap;                                                                             \
+  }                                                                                                \
+  TangentMapTypeRef TangentMap_accessor()                                                          \
+  {                                                                                                \
+    return TangentMap;                                                                             \
   }
 
 #define PINOCCHIO_JOINT_DATA_BASE_ACCESSOR_DEFAULT_RETURN_TYPE                                     \
@@ -152,7 +162,9 @@
   typedef const D_t & DTypeConstRef;                                                               \
   typedef D_t & DTypeRef;                                                                          \
   typedef const UD_t & UDTypeConstRef;                                                             \
-  typedef UD_t & UDTypeRef;
+  typedef UD_t & UDTypeRef;                                                                        \
+  typedef const TangentMap_t & TangentMapTypeConstRef;                                             \
+  typedef TangentMap_t & TangentMapTypeRef;
 
 namespace pinocchio
 {
@@ -257,7 +269,14 @@ namespace pinocchio
     {
       return derived().StU_accessor();
     }
-
+    TangentMapTypeConstRef TangentMap() const
+    {
+      return derived().TangentMap_accessor();
+    }
+    TangentMapTypeRef TangentMap()
+    {
+      return derived().TangentMap_accessor();
+    }
     std::string shortname() const
     {
       return derived().shortname();
@@ -294,7 +313,8 @@ namespace pinocchio
              && internal::comparison_eq(v(), other.v()) && internal::comparison_eq(c(), other.c())
              && internal::comparison_eq(U(), other.U())
              && internal::comparison_eq(Dinv(), other.Dinv())
-             && internal::comparison_eq(UDinv(), other.UDinv());
+             && internal::comparison_eq(UDinv(), other.UDinv())
+             && internal::comparison_eq(TangentMap(), other.TangentMap());
     }
 
     ///  \brief Default operator== implementation

@@ -34,7 +34,8 @@
     NVExtended = traits<Joint>::NVExtended                                                         \
   };                                                                                               \
   typedef TYPENAME traits<Joint>::ConfigVector_t ConfigVector_t;                                   \
-  typedef TYPENAME traits<Joint>::TangentVector_t TangentVector_t
+  typedef TYPENAME traits<Joint>::TangentVector_t TangentVector_t;                                 \
+  typedef TYPENAME traits<Joint>::TangentMap_t TangentMap_t;
 
 #ifdef __clang__
 

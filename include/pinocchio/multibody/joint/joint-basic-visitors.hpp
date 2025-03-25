@@ -491,6 +491,18 @@ namespace pinocchio
   stu_inertia(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata);
 
   /**
+   * @brief      Visit a JointDataTpl through JointTangentMapVisitor to get the mapping
+   * from v in the Lie algebra to dq in TqQ in the parameter space.
+   *
+   * @param[in]  jdata  The joint data to visit.
+   *
+   * @return     The nq x nv matric
+   */
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>
+  tangent_map(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata);
+
+  /**
    * @brief      Visit a JointDataTpl<Scalar,...> to compare it to another JointData
    *
    * @param[in]  jdata_generic  The generic joint data containing a variant.
