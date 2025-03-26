@@ -59,7 +59,9 @@ namespace pinocchio
       if (!register_symbolic_link_to_registered_type<context::AngleAxis>())
         eigenpy::expose<context::AngleAxis>();
 #endif
-
+      typedef Eigen::Matrix<context::Scalar, 7, 6, context::Options> Matrix76s;
+      typedef Eigen::Matrix<context::Scalar, 4, 3, context::Options> Matrix43s;
+      typedef Eigen::Matrix<context::Scalar, 2, 1, context::Options> Matrix21s;
       typedef Eigen::Matrix<context::Scalar, 6, 6, context::Options> Matrix6s;
       typedef Eigen::Matrix<context::Scalar, 6, 3, context::Options> Matrix63s;
       typedef Eigen::Matrix<context::Scalar, 6, 1, context::Options> Vector6s;
@@ -74,6 +76,9 @@ namespace pinocchio
       eigenpy::enableEigenPySpecific<context::Vector7s>();
       eigenpy::enableEigenPySpecific<Matrix6xs>();
       eigenpy::enableEigenPySpecific<Matrix3xs>();
+      eigenpy::enableEigenPySpecific<Matrix76s>();
+      eigenpy::enableEigenPySpecific<Matrix43s>();
+      eigenpy::enableEigenPySpecific<Matrix21s>();
     }
 
   } // namespace python
