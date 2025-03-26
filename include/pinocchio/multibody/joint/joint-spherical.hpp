@@ -638,10 +638,10 @@ namespace pinocchio
 
     EIGEN_DONT_INLINE void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
     {
+      PINOCCHIO_UNUSED_VARIABLE(blank);
       typedef typename Eigen::Quaternion<Scalar, Options> Quaternion;
-      typedef Eigen::Map<const Quaternion> ConstQuaternionMap;
 
-      ConstQuaternionMap quat(data.joint_q);
+      const Quaternion quat(data.joint_q);
 
       calc_tangent_map_impl(data, quat);
     }
