@@ -269,6 +269,7 @@ namespace pinocchio
   struct JointCalcTangentMapVisitor
   : fusion::JointUnaryVisitorBase<JointCalcTangentMapVisitor<ConfigVectorType>>
   {
+    typedef boost::fusion::vector<const ConfigVectorType &> ArgsType;
 
     template<typename JointModel>
     static void algo(
@@ -284,6 +285,7 @@ namespace pinocchio
   struct JointCalcTangentMapVisitor<Blank>
   : fusion::JointUnaryVisitorBase<JointCalcTangentMapVisitor<Blank>>
   {
+    typedef boost::fusion::vector<const Blank> ArgsType;
 
     template<typename JointModel>
     static void algo(
@@ -307,7 +309,7 @@ namespace pinocchio
   {
     typedef JointCalcTangentMapVisitor<ConfigVectorType> Algo;
 
-    Algo::run(jmodel, jdata, q.derived());
+    Algo::run(jmodel, jdata, typename Algo::ArgsType(q.derived()));
   }
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
@@ -318,7 +320,7 @@ namespace pinocchio
   {
     typedef JointCalcTangentMapVisitor<Blank> Algo;
 
-    Algo::run(jmodel, jdata, blank);
+    Algo::run(jmodel, jdata, typename Algo::ArgsType(blank));
   }
 
 >>>>>>> 2aabf5685 (Joint: add method related to tangent map)
