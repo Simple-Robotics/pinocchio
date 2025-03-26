@@ -372,7 +372,7 @@ namespace pinocchio
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
 
-    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
+    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
     {
       // TODO: Implement recursion
       PINOCCHIO_UNUSED_VARIABLE(data);
@@ -380,8 +380,8 @@ namespace pinocchio
     }
 
     template<typename ConfigVectorType>
-    void
-    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    void calc_tangent_map_impl(
+      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
     {
       // TODO: Implement recursion
       PINOCCHIO_UNUSED_VARIABLE(data);

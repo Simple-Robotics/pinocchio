@@ -144,19 +144,19 @@ namespace pinocchio
     void calc_tangent_map(JointDataDerived & data) const
     {
       const Blank blank;
-      derived().calc_tangent_map(data, blank);
+      derived().calc_tangent_map_impl(data, blank);
     }
 
     void calc_tangent_map(JointDataDerived & data, const Blank blank) const
     {
-      derived().calc_tangent_map(data, blank);
+      derived().calc_tangent_map_impl(data, blank);
     }
 
     template<typename ConfigVectorType>
     void
     calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
     {
-      derived().calc_tangent_map(data, qs.derived());
+      derived().calc_tangent_map_impl(data, qs.derived());
     }
 
     // void tangent_map_product(const JointDataDerived & data, const XXX & v, XXX &res):
