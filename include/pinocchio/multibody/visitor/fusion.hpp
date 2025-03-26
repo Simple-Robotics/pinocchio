@@ -27,41 +27,61 @@ namespace boost
   namespace fusion
   {
 
-    // Declare struct that takes at least 1 type
-    template<typename T, typename... Ts>
-    struct AppendReturnType;
-
-    // Specialization for one type V: V is the return type
-    template<typename V>
-    struct AppendReturnType<V>
+    /// \brief  Append the element T at the front of boost fusion vector V.
+    template<typename T, typename V>
+    typename result_of::push_front<V const, T>::type append(T const & t, V const & v)
     {
-      typedef V type;
-    };
-
-    // Specialization for two or more types: return as pushfront of the first type on the return
-    // type of the remainings
-    template<typename T1, typename T, typename... Ts>
-    struct AppendReturnType<T1, T, Ts...>
-    {
-      typedef
-        typename result_of::push_front<typename AppendReturnType<T, Ts...>::type const, T1>::type
-          type;
-    };
-
-    // Append of one type
-    template<typename V>
-    V append(V const & v)
-    {
-      return v;
+      return push_front(v, t);
     }
 
-    // Append of two or more types
-    template<typename T1, typename T, typename... Ts>
-    typename AppendReturnType<T1, T, Ts...>::type
-    append(T1 const & t1, T const & t, Ts const &... ts)
+    /// \brief Append the elements T1 and T2 at the front of boost fusion vector V.
+    template<typename T1, typename T2, typename V>
+    typename result_of::push_front<typename result_of::push_front<V const, T2>::type const, T1>::
+      type
+      append(T1 const & t1, T2 const & t2, V const & v)
     {
-      return push_front(append(t, ts...), t1);
+      return push_front(push_front(v, t2), t1);
     }
+
+    /// \brief Append the elements T1, T2 and T3 at the front of boost fusion vector V.
+    template<typename T1, typename T2, typename T3, typename V>
+    typename result_of::push_front<
+      typename result_of::push_front<typename result_of::push_front<V const, T3>::type const, T2>::
+        type const,
+      T1>::type
+    append(T1 const & t1, T2 const & t2, T3 const & t3, V const & v)
+    {
+      return push_front(push_front(push_front(v, t3), t2), t1);
+    }
+
+    /// \brief Append the elements T1, T2, T3 and T4 at the front of boost fusion vector V.
+    template<typename T1, typename T2, typename T3, typename T4, typename V>
+    typename result_of::push_front<
+      typename result_of::push_front<
+        typename result_of::
+          push_front<typename result_of::push_front<V const, T4>::type const, T3>::type const,
+        T2>::type const,
+      T1>::type
+    append(T1 const & t1, T2 const & t2, T3 const & t3, T4 const & t4, V const & v)
+    {
+      return push_front(push_front(push_front(push_front(v, t4), t3), t2), t1);
+    }
+
+    /// \brief Append the elements T1, T2, T3, T4 and T5 at the front of boost fusion vector V.
+    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename V>
+    typename result_of::push_front<
+      typename result_of::push_front<
+        typename result_of::push_front<
+          typename result_of::
+            push_front<typename result_of::push_front<V const, T5>::type const, T4>::type const,
+          T3>::type const,
+        T2>::type const,
+      T1>::type
+    append(T1 const & t1, T2 const & t2, T3 const & t3, T4 const & t4, T5 const & t5, V const & v)
+    {
+      return push_front(push_front(push_front(push_front(push_front(v, t5), t4), t3), t2), t1);
+    }
+
   } // namespace fusion
 } // namespace boost
 
