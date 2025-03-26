@@ -125,7 +125,6 @@ namespace pinocchio
       {
         self.calc(jdata, q, v);
       }
-
       static void
       setIndexes0(JointModelDerived & self, const int & id, const int & idx_q, const int & idx_v)
       {

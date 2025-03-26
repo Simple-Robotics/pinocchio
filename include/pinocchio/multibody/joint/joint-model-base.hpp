@@ -141,6 +141,12 @@ namespace pinocchio
       derived().calc_aba(data, armature.derived(), I.const_cast_derived(), update_I);
     }
 
+    void calc_tangent_map(JointDataDerived & data) const
+    {
+      const Blank blank;
+      derived().calc_tangent_map(data, blank);
+    }
+
     void calc_tangent_map(JointDataDerived & data, const Blank blank) const
     {
       derived().calc_tangent_map(data, blank);
