@@ -159,8 +159,16 @@ namespace pinocchio
       derived().calc_tangent_map_impl(data, qs.derived());
     }
 
-    // void tangent_map_product(const JointDataDerived & data, const XXX & v, XXX &res):
-    // void cotangent_map_product(const JointDataDerived & data, const XXX & dq_star, XXX &res):
+    // For the moment, we calculate the tangent map as a matrix and store it in JointData
+    // We could also exploit the sparsity by implementing the application of tangent map
+    // to a Lie algebra vector and the cotangent application to a tangent dq in param space
+    // However, the main application is the JointLimitConstraint and due to the
+    // the activation / deactivation of some limit the exploitation of such function
+    // would be difficult
+    // Here is the signature of the function
+    // void tangent_map_fill(const JointDataDerived & data, XXX &mat):
+    // void tangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
+    // void cotangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
 
     int nv() const
     {
