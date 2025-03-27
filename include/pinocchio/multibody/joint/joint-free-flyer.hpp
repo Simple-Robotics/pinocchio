@@ -394,20 +394,62 @@ namespace pinocchio
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
 
-    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
+    template<typename QuaternionDerived>
+    void calc_tangent_map_impl(
+      JointDataDerived & data, const typename Eigen::QuaternionBase<QuaternionDerived> & quat) const
     {
-      // TODO: Implement formula
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(blank);
+      // Linear part
+      data.TangentMap.template block<3, 3>(0, 0) = quat.matrix();
+
+      // angular part
+      data.TangentMap(3, 3) = quat.w();
+      data.TangentMap(4, 3) = quat.z();
+      data.TangentMap(5, 3) = -quat.y();
+      data.TangentMap(6, 3) = -quat.x();
+
+      data.TangentMap(3, 4) = -quat.z();
+      data.TangentMap(4, 4) = quat.w();
+      data.TangentMap(5, 4) = quat.x();
+      data.TangentMap(6, 4) = -quat.y();
+
+      data.TangentMap(3, 5) = quat.y();
+      data.TangentMap(4, 5) = -quat.x();
+      data.TangentMap(5, 5) = quat.w();
+      data.TangentMap(6, 5) = -quat.z();
     }
 
-    template<typename ConfigVectorType>
-    void calc_tangent_map_impl(
-      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+    template<typename ConfigVector>
+    EIGEN_DONT_INLINE void calc_tangent_map_impl(
+      JointDataDerived & data, const typename Eigen::PlainObjectBase<ConfigVector> & qs) const
     {
-      // TODO: Implement formula
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(qs);
+      typedef typename Eigen::Quaternion<typename ConfigVector::Scalar, ConfigVector::Options>
+        Quaternion;
+      typedef Eigen::Map<const Quaternion> ConstQuaternionMap;
+
+      ConstQuaternionMap quat(qs.template segment<4>(idx_q() + 3).data());
+
+      calc_tangent_map_impl(data, quat);
+    }
+
+    template<typename ConfigVector>
+    EIGEN_DONT_INLINE void calc_tangent_map_impl(
+      JointDataDerived & data, const typename Eigen::MatrixBase<ConfigVector> & qs) const
+    {
+      typedef typename Eigen::Quaternion<Scalar, Options> Quaternion;
+
+      const Quaternion quat(qs.template segment<4>(idx_q() + 3));
+
+      calc_tangent_map_impl(data, quat);
+    }
+
+    EIGEN_DONT_INLINE void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(blank);
+      typedef typename Eigen::Quaternion<Scalar, Options> Quaternion;
+
+      const Quaternion quat(data.joint_q.template segment<4>(3).data());
+
+      calc_tangent_map_impl(data, quat);
     }
 
     static std::string classname()
