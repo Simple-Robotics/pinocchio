@@ -273,17 +273,16 @@ namespace pinocchio
       JointDataComposite & data,
       const Eigen::MatrixBase<ConfigVectorType> & q)
     {
-      const JointIndex & i = jmodel.id();
       jmodel.calc_tangent_map(jdata.derived(), q.derived());
       data.TangentMap.block(
-        model.m_idx_q[i] - model.idx_q(), model.m_idx_v[i] - model.idx_v(), model.m_nqs[i],
-        model.m_nvs[i]) = jdata.TangentMap;
+        jmodel.idx_q() - model.idx_q(), jmodel.idx_v() - model.idx_v(), jmodel.nq(), jmodel.nv()) =
+        jdata.TangentMap();
     }
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   template<typename ConfigVectorType>
-  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map(
+  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map_impl(
     JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
   {
     assert(joints.size() > 0);
@@ -319,16 +318,15 @@ namespace pinocchio
       JointDataComposite & data,
       const Blank blank)
     {
-      const JointIndex & i = jmodel.id();
       jmodel.calc_tangent_map(jdata.derived(), blank);
       data.TangentMap.block(
-        model.m_idx_q[i] - model.idx_q(), model.m_idx_v[i] - model.idx_v(), model.m_nqs[i],
-        model.m_nvs[i]) = jdata.TangentMap;
+        jmodel.idx_q() - model.idx_q(), jmodel.idx_v() - model.idx_v(), jmodel.nq(), jmodel.nv()) =
+        jdata.TangentMap();
     }
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
-  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map(
+  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map_impl(
     JointDataDerived & data, const Blank blank) const
   {
     assert(joints.size() > 0);

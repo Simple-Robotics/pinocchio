@@ -478,11 +478,11 @@ namespace pinocchio
     }
     TangentMapTypeConstRef TangentMap_accessor() const
     {
-      return m_scaling * m_jdata_ref.TangentMap;
+      return m_jdata_ref.TangentMap;
     }
     TangentMapTypeRef TangentMap_accessor()
     {
-      return m_scaling * m_jdata_ref.TangentMap;
+      return m_jdata_ref.TangentMap;
     }
 
     friend struct JointModelMimicTpl<_Scalar, _Options, JointCollectionTpl>;
@@ -739,6 +739,7 @@ namespace pinocchio
     void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
     {
       m_jmodel_ref.calc_tangent_map_impl(data.m_jdata_ref, blank);
+      data.m_jdata_ref.TangentMap *= m_scaling;
     }
 
     template<typename ConfigVectorType>
@@ -750,6 +751,7 @@ namespace pinocchio
       ConfigVector_t q;
       AffineTransform::run(qs.head(m_jmodel_ref.nq()), m_scaling, m_offset, q);
       m_jmodel_ref.calc_tangent_map_impl(data.m_jdata_ref, q);
+      data.m_jdata_ref.TangentMap *= m_scaling;
     }
 
     static std::string classname()
