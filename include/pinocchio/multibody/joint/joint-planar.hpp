@@ -666,18 +666,31 @@ namespace pinocchio
 
     void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
     {
-      // TODO: Implement formula
-      PINOCCHIO_UNUSED_VARIABLE(data);
       PINOCCHIO_UNUSED_VARIABLE(blank);
+      // Linear
+      data.TangentMap(0, 0) = data.joint_q[2];
+      data.TangentMap(1, 0) = data.joint_q[3];
+      data.TangentMap(0, 1) = -data.joint_q[3];
+      data.TangentMap(1, 1) = data.joint_q[2];
+
+      // Angular
+      data.TangentMap(2, 2) = -data.joint_q[3];
+      data.TangentMap(3, 2) = data.joint_q[2];
     }
 
     template<typename ConfigVectorType>
     void calc_tangent_map_impl(
       JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
     {
-      // TODO: Implement formula
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(qs);
+      // Linear
+      data.TangentMap(0, 0) = qs[idx_q() + 2];
+      data.TangentMap(1, 0) = qs[idx_q() + 3];
+      data.TangentMap(0, 1) = -qs[idx_q() + 3];
+      data.TangentMap(1, 1) = qs[idx_q() + 2];
+
+      // Angular
+      data.TangentMap(2, 2) = -qs[idx_q() + 3];
+      data.TangentMap(3, 2) = qs[idx_q() + 2];
     }
 
     static std::string classname()
