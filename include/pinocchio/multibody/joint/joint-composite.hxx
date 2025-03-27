@@ -248,6 +248,101 @@ namespace pinocchio
     jdata.M = jdata.iMlast.front();
   }
 
+  // calc_tangent_map
+  template<
+    typename Scalar,
+    int Options,
+    template<typename S, int O> class JointCollectionTpl,
+    typename ConfigVectorType>
+  struct JointCompositeCalcTangentMap
+  : fusion::JointUnaryVisitorBase<
+      JointCompositeCalcTangentMap<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
+  {
+    typedef JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> JointModelComposite;
+    typedef JointDataCompositeTpl<Scalar, Options, JointCollectionTpl> JointDataComposite;
+
+    typedef boost::fusion::
+      vector<const JointModelComposite &, JointDataComposite &, const ConfigVectorType &>
+        ArgsType;
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const JointModelComposite & model,
+      JointDataComposite & data,
+      const Eigen::MatrixBase<ConfigVectorType> & q)
+    {
+      const JointIndex & i = jmodel.id();
+      jmodel.calc_tangent_map(jdata.derived(), q.derived());
+      data.TangentMap.block(
+        model.m_idx_q[i] - model.idx_q(), model.m_idx_v[i] - model.idx_v(), model.m_nqs[i],
+        model.m_nvs[i]) = jdata.TangentMap;
+    }
+  };
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  template<typename ConfigVectorType>
+  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map(
+    JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
+  {
+    assert(joints.size() > 0);
+    assert(data.joints.size() == joints.size());
+
+    typedef JointCompositeCalcTangentMap<Scalar, Options, JointCollectionTpl, ConfigVectorType>
+      Algo;
+
+    for (int i = (int)(joints.size() - 1); i >= 0; --i)
+    {
+      Algo::run(
+        joints[(size_t)i], data.joints[(size_t)i],
+        typename Algo::ArgsType(*this, data, qs.derived()));
+    }
+  }
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  struct JointCompositeCalcTangentMap<Scalar, Options, JointCollectionTpl, Blank>
+  : fusion::JointUnaryVisitorBase<
+      JointCompositeCalcTangentMap<Scalar, Options, JointCollectionTpl, Blank>>
+  {
+    typedef JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> JointModelComposite;
+    typedef JointDataCompositeTpl<Scalar, Options, JointCollectionTpl> JointDataComposite;
+
+    typedef boost::fusion::vector<const JointModelComposite &, JointDataComposite &, const Blank>
+      ArgsType;
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const JointModelComposite & model,
+      JointDataComposite & data,
+      const Blank blank)
+    {
+      const JointIndex & i = jmodel.id();
+      jmodel.calc_tangent_map(jdata.derived(), blank);
+      data.TangentMap.block(
+        model.m_idx_q[i] - model.idx_q(), model.m_idx_v[i] - model.idx_v(), model.m_nqs[i],
+        model.m_nvs[i]) = jdata.TangentMap;
+    }
+  };
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  inline void JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>::calc_tangent_map(
+    JointDataDerived & data, const Blank blank) const
+  {
+    assert(joints.size() > 0);
+    assert(data.joints.size() == joints.size());
+
+    typedef JointCompositeCalcTangentMap<Scalar, Options, JointCollectionTpl, Blank> Algo;
+
+    for (int i = (int)(joints.size() - 1); i >= 0; --i)
+    {
+      Algo::run(
+        joints[(size_t)i], data.joints[(size_t)i], typename Algo::ArgsType(*this, data, blank));
+    }
+  }
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_multibody_joint_composite_hxx__
