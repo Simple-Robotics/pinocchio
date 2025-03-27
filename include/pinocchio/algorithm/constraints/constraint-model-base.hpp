@@ -196,6 +196,12 @@ namespace pinocchio
       return derived().getRowActiveSparsityPattern(row_id);
     }
 
+    /// \brief Returns the vector of the activable indexes associated with a given row
+    const EigenIndexVector & getRowActivableIndexes(const Eigen::DenseIndex row_id) const
+    {
+      return derived().getRowActivableIndexes(row_id);
+    }
+
     /// \brief Returns the vector of the active indexes associated with a given row
     const EigenIndexVector & getRowActiveIndexes(const Eigen::DenseIndex row_id) const
     {

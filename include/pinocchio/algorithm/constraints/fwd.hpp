@@ -85,6 +85,7 @@ namespace pinocchio
   struct BoxSetTpl;
   typedef BoxSetTpl<context::Scalar> BoxSet;
 
+  // Cone sets
   template<typename Scalar, int Options = 0>
   struct UnboundedSetTpl;
   typedef UnboundedSetTpl<context::Scalar> UnboundedSet;
@@ -93,7 +94,6 @@ namespace pinocchio
   struct NullSetTpl;
   typedef NullSetTpl<context::Scalar> NullSet;
 
-  // Convex sets
   template<typename Scalar>
   struct CoulombFrictionConeTpl;
   typedef CoulombFrictionConeTpl<context::Scalar> CoulombFrictionCone;
@@ -109,6 +109,10 @@ namespace pinocchio
   template<typename Scalar>
   struct NegativeOrthantConeTpl;
   typedef NegativeOrthantConeTpl<context::Scalar> NegativeOrthantCone;
+
+  template<typename Scalar>
+  struct JointLimitConstraintConeTpl;
+  typedef JointLimitConstraintConeTpl<context::Scalar> JointLimitConstraintCone;
 
 } // namespace pinocchio
 

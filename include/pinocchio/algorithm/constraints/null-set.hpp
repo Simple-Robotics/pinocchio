@@ -40,6 +40,7 @@ namespace pinocchio
     };
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> Vector;
     typedef ConeBase<NullSetTpl> Base;
+    typedef typename traits<NullSetTpl>::DualCone DualCone;
 
     /// \brief Constructor from a given size
     ///
@@ -111,6 +112,23 @@ namespace pinocchio
     Eigen::DenseIndex size() const
     {
       return m_size;
+    }
+
+    /// \brief Resize by calling the resize method of Eigen.
+    void resize(Eigen::DenseIndex new_size)
+    {
+      m_size = new_size;
+    }
+
+    /// \brief Resize by calling the conservativeResize method of Eigen.
+    void conservativeResize(Eigen::DenseIndex new_size)
+    {
+      this->resize(new_size);
+    }
+
+    DualCone dual() const
+    {
+      return DualCone(m_size);
     }
 
     Base & base()

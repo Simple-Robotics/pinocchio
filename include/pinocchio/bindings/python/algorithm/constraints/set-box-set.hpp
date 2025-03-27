@@ -2,13 +2,14 @@
 // Copyright (c) 2024 INRIA
 //
 
-#ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
-#define __pinocchio_python_algorithm_constraints_box_set_hpp__
+#ifndef __pinocchio_python_algorithm_constraints_set_box_set_hpp__
+#define __pinocchio_python_algorithm_constraints_set_box_set_hpp__
 
 #include <eigenpy/eigenpy.hpp>
 
 #include "pinocchio/algorithm/constraints/box-set.hpp"
 
+#include "pinocchio/bindings/python/algorithm/constraints/set-base.hpp"
 #include "pinocchio/bindings/python/utils/cast.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
 
@@ -34,39 +35,26 @@ namespace pinocchio
           .def(bp::init<const Self &>(bp::args("self", "other"), "Copy constructor."))
           .def(bp::init<context::VectorXs, context::VectorXs>(
             bp::args("self", "lb", "ub"), "Constructor from lower and upper bounds."))
-
-          .def(
-            "isInside", &Self::template isInside<context::Vector3s>, bp::args("self", "f"),
-            "Check whether a vector x lies within the cone.")
-
-          .def(
-            "project", &Self::template project<context::Vector3s>, bp::args("self", "f"),
-            "Normal projection of a vector f onto the cone.")
-
-          .def("dim", &Self::dim, "Returns the dimension of the cone.")
-          .def("size", &Self::size, "Returns the size of the cone.")
-
           .def(
             "lb", (Vector & (Self::*)()) & Self::lb,
             "Returns a reference to the vector of lower bounds", bp::return_internal_reference<>())
           .def(
             "ub", (Vector & (Self::*)()) & Self::ub,
             "Returns a reference to the vector of upper bounds", bp::return_internal_reference<>())
-
-#ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
-          .def(bp::self == bp::self)
-          .def(bp::self != bp::self)
-#endif
-          ;
+          .def("resize", &BoxSet::resize, bp::args("self", "size"), "Resize the set.")
+          .def(
+            "conservativeResize", &BoxSet::conservativeResize, bp::args("self", "size"),
+            "Resize the set following Eigen convention.");
       }
 
       static void expose()
       {
         bp::class_<BoxSet>(
           "BoxSet", "Box set defined by a lower and an upper bounds [lb;ub].\n", bp::no_init)
+          .def(SetPythonVisitor<BoxSet, context::VectorXs>())
           .def(BoxSetPythonVisitor())
-          //        .def(CastVisitor<BoxSet>())
-          //        .def(ExposeConstructorByCastVisitor<BoxSet,::pinocchio::BoxSet>())
+          // .def(CastVisitor<BoxSet>())
+          // .def(ExposeConstructorByCastVisitor<BoxSet,::pinocchio::BoxSet>())
           .def(CopyableVisitor<BoxSet>());
       }
     };
@@ -74,4 +62,4 @@ namespace pinocchio
   } // namespace python
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_python_algorithm_constraints_box_set_hpp__
+#endif // ifndef __pinocchio_python_algorithm_constraints_set_box_set_hpp__

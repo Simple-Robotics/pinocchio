@@ -200,6 +200,11 @@ namespace pinocchio
       typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(DualCoulombFrictionCone)
         DualCoulombFrictionConeVector;
       typedef BoxSetTpl<context::Scalar> BoxSet;
+      typedef NullSetTpl<context::Scalar> NullSet;
+      typedef UnboundedSetTpl<context::Scalar> UnboundedSet;
+      typedef NegativeOrthantConeTpl<context::Scalar> NegativeOrthantCone;
+      typedef PositiveOrthantConeTpl<context::Scalar> PositiveOrthantCone;
+      typedef JointLimitConstraintConeTpl<context::Scalar> JointLimitConstraintCone;
 
       typedef ConstraintCollectionDefaultTpl<Scalar, Options> ConstraintCollectionDefault;
 

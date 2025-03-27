@@ -56,6 +56,13 @@ namespace pinocchio
       positive_orthant.resize(positive_orthant_size);
     }
 
+    void conservativeResize(
+      const Eigen::DenseIndex negative_orthant_size, const Eigen::DenseIndex positive_orthant_size)
+    {
+      negative_orthant.conservativeResize(negative_orthant_size);
+      positive_orthant.conservativeResize(positive_orthant_size);
+    }
+
     /// \brief Cast operator
     template<typename NewScalar>
     JointLimitConstraintConeTpl<NewScalar> cast() const
@@ -104,8 +111,8 @@ namespace pinocchio
     bool isInside(const Eigen::MatrixBase<VectorLike> & x, const Scalar prec = Scalar(0)) const
     {
       assert(x.size() == size());
-      return negative_orthant.isInsidex(x.head(negative_orthant.size()), prec)
-             && positive_orthant.isInsidex(x.tail(positive_orthant.size()), prec);
+      return negative_orthant.isInside(x.head(negative_orthant.size()), prec)
+             && positive_orthant.isInside(x.tail(positive_orthant.size()), prec);
     }
 
     /// \brief Project a vector x into orthant.

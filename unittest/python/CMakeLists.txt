@@ -29,6 +29,7 @@ set(${PROJECT_NAME}_PYTHON_TESTS
     bindings_rnea
     bindings_aba
     bindings_joint_algorithms
+    bindings_constraints
     # Solvers
     bindings_admm
     # Algo derivatives

@@ -379,6 +379,11 @@ namespace pinocchio
       return 3;
     }
 
+    int size() const
+    {
+      return dim();
+    }
+
     /// \brief Returns the dual cone associated to this.    ///
     DualCone dual() const
     {

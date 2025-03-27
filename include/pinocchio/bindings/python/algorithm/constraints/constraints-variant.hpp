@@ -53,7 +53,7 @@ namespace pinocchio
           bp::class_<T>(
             sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::init<>())
             .def(ConstraintDataBasePythonVisitor<T>())
-            .def(ConstraintModelInheritancePythonVisitor<T, typename T::Base>())
+            .def(ConstraintDataInheritancePythonVisitor<T, typename T::Base>())
             .def(PrintableVisitor<T>()));
         bp::implicitly_convertible<T, context::ConstraintData>();
       }
