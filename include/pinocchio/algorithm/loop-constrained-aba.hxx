@@ -43,7 +43,7 @@ namespace pinocchio
       data.constraints_supported_dim[joint1_id] += constraint_size;
       data.constraints_supported_dim[joint2_id] += constraint_size;
 
-      if (joint2_id > 0)
+      if (joint2_id > 0 && joint1_id > 0)
       {
         const JointPair joint_pair =
           joint1_id > joint2_id ? JointPair{joint2_id, joint1_id} : JointPair{joint1_id, joint2_id};
@@ -804,7 +804,8 @@ namespace pinocchio
           const auto mu_lambda = Force(mu * contact_acc_err.toVector());
           cdata.contact_force += mu_lambda;
 
-          data.of[joint1_id] += cdata.oMc1.act(mu_lambda);
+          if (joint1_id > 0)
+            data.of[joint1_id] += cdata.oMc1.act(mu_lambda);
 
           if (joint2_id > 0)
             data.of[joint2_id] -= cdata.oMc1.act(mu_lambda);
