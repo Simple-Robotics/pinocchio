@@ -28,6 +28,7 @@ namespace pinocchio
     typedef std::pair<JointIndex, JointIndex> JointPair;
     typedef Data::Matrix6 Matrix6;
 
+    // First step: for each joint, collect their neighbourds
     auto & neighbours = data.neighbour_links;
     neighbours.resize(static_cast<size_t>(model.njoints));
 
@@ -65,6 +66,7 @@ namespace pinocchio
       }
     }
 
+    // Second step: order the joints according to the minimum degree heuristic
     auto & elimination_order = data.elimination_order;
 
     elimination_order.clear(); // clearing in case inited once more
@@ -121,7 +123,7 @@ namespace pinocchio
           }
         }
 
-        // Remove joint_id form the list of neighbours for neighbour_j_neighbours
+        // Remove joint_id from the list of neighbours for neighbour_j_neighbours
         neighbour_j_neighbours.erase(
           std::remove(neighbour_j_neighbours.begin(), neighbour_j_neighbours.end(), joint_id),
           neighbour_j_neighbours.end());
