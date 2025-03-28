@@ -778,7 +778,7 @@ namespace pinocchio
     int iter = 0;
     for (iter = 1; iter < settings.max_iter; iter++)
     {
-      settings.absolute_residual = 0.0;
+      settings.absolute_residual = Scalar(0);
       for (JointIndex j = 1; j < (JointIndex)model.njoints; ++j)
       {
         if (data.constraints_supported_dim[j] > 0)
