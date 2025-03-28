@@ -596,20 +596,20 @@ namespace pinocchio
     void calc_tangent_map_impl(
       JointDataDerived & data, const typename Eigen::QuaternionBase<QuaternionDerived> & quat) const
     {
-      data.TangentMap(0, 0) = quat.w();
-      data.TangentMap(1, 0) = quat.z();
-      data.TangentMap(2, 0) = -quat.y();
-      data.TangentMap(3, 0) = -quat.x();
+      data.TangentMap(0, 0) = .5 * quat.w();
+      data.TangentMap(1, 0) = .5 * quat.z();
+      data.TangentMap(2, 0) = -.5 * quat.y();
+      data.TangentMap(3, 0) = -.5 * quat.x();
 
-      data.TangentMap(0, 1) = -quat.z();
-      data.TangentMap(1, 1) = quat.w();
-      data.TangentMap(2, 1) = quat.x();
-      data.TangentMap(3, 1) = -quat.y();
+      data.TangentMap(0, 1) = -.5 * quat.z();
+      data.TangentMap(1, 1) = .5 * quat.w();
+      data.TangentMap(2, 1) = .5 * quat.x();
+      data.TangentMap(3, 1) = -.5 * quat.y();
 
-      data.TangentMap(0, 2) = quat.y();
-      data.TangentMap(1, 2) = -quat.x();
-      data.TangentMap(2, 2) = quat.w();
-      data.TangentMap(3, 2) = -quat.z();
+      data.TangentMap(0, 2) = .5 * quat.y();
+      data.TangentMap(1, 2) = -.5 * quat.x();
+      data.TangentMap(2, 2) = .5 * quat.w();
+      data.TangentMap(3, 2) = -.5 * quat.z();
     }
 
     template<typename ConfigVector>

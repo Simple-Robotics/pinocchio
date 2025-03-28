@@ -402,20 +402,20 @@ namespace pinocchio
       data.TangentMap.template block<3, 3>(0, 0) = quat.matrix();
 
       // angular part
-      data.TangentMap(3, 3) = quat.w();
-      data.TangentMap(4, 3) = quat.z();
-      data.TangentMap(5, 3) = -quat.y();
-      data.TangentMap(6, 3) = -quat.x();
+      data.TangentMap(3, 3) = .5 * quat.w();
+      data.TangentMap(4, 3) = .5 * quat.z();
+      data.TangentMap(5, 3) = -.5 * quat.y();
+      data.TangentMap(6, 3) = -.5 * quat.x();
 
-      data.TangentMap(3, 4) = -quat.z();
-      data.TangentMap(4, 4) = quat.w();
-      data.TangentMap(5, 4) = quat.x();
-      data.TangentMap(6, 4) = -quat.y();
+      data.TangentMap(3, 4) = -.5 * quat.z();
+      data.TangentMap(4, 4) = .5 * quat.w();
+      data.TangentMap(5, 4) = .5 * quat.x();
+      data.TangentMap(6, 4) = -.5 * quat.y();
 
-      data.TangentMap(3, 5) = quat.y();
-      data.TangentMap(4, 5) = -quat.x();
-      data.TangentMap(5, 5) = quat.w();
-      data.TangentMap(6, 5) = -quat.z();
+      data.TangentMap(3, 5) = .5 * quat.y();
+      data.TangentMap(4, 5) = -.5 * quat.x();
+      data.TangentMap(5, 5) = .5 * quat.w();
+      data.TangentMap(6, 5) = -.5 * quat.z();
     }
 
     template<typename ConfigVector>
