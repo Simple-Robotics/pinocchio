@@ -123,13 +123,19 @@ namespace pinocchio
         helper::get_ref(data_ref),
         evalConstraintSize(helper::get_ref(constraint_models_ref)))
     , m_dirty(true)
-    , m_damping(Vector::Constant(m_size, min_damping_value))
-    , m_damping_inverse(Vector::Constant(m_size, Scalar(1) / min_damping_value))
+    , m_damping(Vector::Zero(m_size))
+    , m_compliance(Vector::Zero(m_size))
+    , m_sum_compliance_damping(Vector::Zero(m_size))
+    , m_sum_compliance_damping_inverse(Vector::Zero(m_size))
     {
       assert(model().check(data()) && "data is not consistent with model.");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         constraint_models().size(), constraint_datas().size(),
         "The sizes of contact vector models and contact vector data are not the same.");
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(
+        min_damping_value >= Scalar(0) && "The damping value should be positive.");
+
+      updateDamping(min_damping_value);
     }
 
     ///
@@ -207,10 +213,7 @@ namespace pinocchio
     void updateDamping(const Eigen::MatrixBase<VectorLike> & vec)
     {
       m_damping = vec;
-      m_damping_inverse = m_damping.cwiseInverse();
-      //      mat_tmp = delassus_matrix;
-      //      mat_tmp += vec.asDiagonal();
-      //      llt.compute(mat_tmp);
+      updateSumComplianceDamping();
     }
 
     void updateDamping(const Scalar & mu)
@@ -221,6 +224,23 @@ namespace pinocchio
     const Vector & getDamping() const
     {
       return m_damping;
+    }
+
+    template<typename VectorLike>
+    void updateCompliance(const Eigen::MatrixBase<VectorLike> & compliance_vector)
+    {
+      m_compliance = compliance_vector;
+      updateSumComplianceDamping();
+    }
+
+    void updateCompliance(const Scalar & compliance_value)
+    {
+      updateCompliance(Vector::Constant(size(), compliance_value));
+    }
+
+    const Vector & getCompliance() const
+    {
+      return m_compliance;
     }
 
     template<typename MatrixLike>
@@ -285,6 +305,12 @@ namespace pinocchio
       m_dirty = false;
     }
 
+    void updateSumComplianceDamping()
+    {
+      m_sum_compliance_damping = m_damping + m_compliance;
+      m_sum_compliance_damping_inverse = m_sum_compliance_damping.cwiseInverse();
+    }
+
     // Holders
     Eigen::DenseIndex m_size;
     ModelHolder m_model_ref;
@@ -294,7 +320,8 @@ namespace pinocchio
 
     mutable CustomData m_custom_data;
     bool m_dirty;
-    Vector m_damping, m_damping_inverse;
+    Vector m_damping, m_compliance;
+    Vector m_sum_compliance_damping, m_sum_compliance_damping_inverse;
   };
 
 } // namespace pinocchio

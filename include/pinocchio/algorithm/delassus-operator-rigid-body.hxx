@@ -108,6 +108,7 @@ namespace pinocchio
 
     const Model & model_ref = model();
 
+    // Zero-th order forward kinematics
     typedef DelassusOperatorRigidBodySystemsComputeForwardPass<
       DelassusOperatorRigidBodySystemsTpl, ConfigVectorType>
       Pass1;
@@ -155,7 +156,7 @@ namespace pinocchio
       const auto constraint_size = cmodel.size();
 
       const auto constraint_diagonal_inertia =
-        this->m_damping_inverse.segment(row_id, constraint_size);
+        this->m_sum_compliance_damping_inverse.segment(row_id, constraint_size);
 
       cmodel.appendConstraintDiagonalInertiaToJointInertias(
         model_ref, data_ref, cdata, constraint_diagonal_inertia, custom_data.Yaba_augmented);
@@ -357,7 +358,7 @@ namespace pinocchio
     }
 
     // Add damping contribution
-    res.array() += m_damping.array() * rhs.array();
+    res.array() += m_sum_compliance_damping.array() * rhs.array();
   }
 
   //  template<typename DelassusOperator>
@@ -424,7 +425,7 @@ namespace pinocchio
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
-    mat.array() *= m_damping_inverse.array();
+    mat.array() *= m_sum_compliance_damping_inverse.array();
 
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
     mapConstraintForcesToJointForces(
@@ -462,7 +463,7 @@ namespace pinocchio
       model_ref, data_ref, constraint_models_ref, constraint_datas_ref, this->m_custom_data.a,
       this->m_custom_data.tmp_vec);
 
-    mat.noalias() -= m_damping_inverse.asDiagonal() * this->m_custom_data.tmp_vec;
+    mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * this->m_custom_data.tmp_vec;
   }
 
 } // namespace pinocchio
