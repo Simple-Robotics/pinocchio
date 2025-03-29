@@ -805,6 +805,29 @@ namespace pinocchio
     template<
       template<typename, int> class JointCollectionTpl,
       typename ForceLike,
+      typename ForceAllocator,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointForces(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const Eigen::MatrixBase<ForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+
+      // Todo: optimize code
+      const Matrix36 A1 = getA1(cdata, reference_frame), A2 = getA2(cdata, reference_frame);
+      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
+      joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ForceLike,
       typename ForceAllocator>
     void mapConstraintForceToJointForces(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
@@ -813,14 +836,8 @@ namespace pinocchio
       const Eigen::MatrixBase<ForceLike> & constraint_forces,
       std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces) const
     {
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
-      PINOCCHIO_UNUSED_VARIABLE(data);
-
-      // Todo: optimize code
-      const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
-      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
-      joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
+      mapConstraintForceToJointForces(
+        model, data, cdata, constraint_forces, joint_forces, LocalFrameTag());
     }
 
     //      /// \brief Map the joint accelerations to constraint value
