@@ -30,7 +30,8 @@ namespace pinocchio
 
     // First step: for each joint, collect their neighbourds
     auto & neighbours = data.neighbour_links;
-    neighbours.resize(static_cast<size_t>(model.njoints));
+    for (auto & neighbour_elt : neighbours)
+      neighbour_elt.clear();
 
     // Get links supporting constraints
     std::fill(data.constraints_supported_dim.begin(), data.constraints_supported_dim.end(), 0);
