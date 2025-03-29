@@ -28,7 +28,7 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl,
     class ConstraitModelAllocator>
-  inline void initLcaba(
+  inline void computeJointMinimalOrdering(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraitModelAllocator> & constraint_models);

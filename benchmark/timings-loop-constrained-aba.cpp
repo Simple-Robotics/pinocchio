@@ -242,7 +242,7 @@ int main(int argc, const char ** argv)
   if (residual_benchmarking)
   {
     // Investigate the convergence of the algorithms over different proximal iterations
-    initLcaba(model, data_caba, contact_model_CL);
+    computeJointMinimalOrdering(model, data_caba, contact_model_CL);
     initConstraintDynamics(model, data_caba_ref, contact_model_CL);
     initConstraintDynamics(model, data, contact_model_CL);
 
@@ -367,7 +367,7 @@ int main(int argc, const char ** argv)
   }
   else
   {
-    initLcaba(model, data_caba, contact_model_CL);
+    computeJointMinimalOrdering(model, data_caba, contact_model_CL);
     timer.tic();
     SMOOTH(NBT)
     {

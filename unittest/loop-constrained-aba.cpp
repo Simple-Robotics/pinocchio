@@ -13,7 +13,6 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/spatial/classic-acceleration.hpp"
-#include "pinocchio/spatial/explog.hpp"
 #include "pinocchio/algorithm/loop-constrained-aba.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -104,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_6D_unconstrained)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -140,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   std::cout << "data_ref.ddq: " << data_ref.ddq.transpose() << std::endl;
@@ -182,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   std::cout << "prox_settings_ref.iter: " << prox_settings_ref.iter << std::endl;
@@ -209,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
     model, data_ref, q, v, tau, contact_models_reversed, contact_datas_reversed_ref,
     prox_settings_ref);
 
-  initLcaba(model, data_reversed, contact_models_reversed);
+  computeJointMinimalOrdering(model, data_reversed, contact_models_reversed);
   lcaba(
     model, data_reversed, q, v, tau, contact_models_reversed, contact_datas_reversed,
     prox_settings_reversed);
@@ -242,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_12D_descendants_redundant_reversed)
   const VectorXd tau = VectorXd::Random(model.nv);
 
   RigidConstraintModel rcm1 = RigidConstraintModel(
-    CONTACT_6D, model, model.getJointId("joint12"), model.getJointId("joint17"), LOCAL);
+    CONTACT_6D, model, model.getJointId("joint12"), model.getJointId("joint27"), LOCAL);
   rcm1.joint1_placement.setRandom();
   rcm1.joint2_placement.setRandom();
   contact_models.push_back(rcm1);
@@ -262,7 +261,7 @@ BOOST_AUTO_TEST_CASE(test_12D_descendants_redundant_reversed)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -298,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_6D_different_branches)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -340,7 +339,7 @@ BOOST_AUTO_TEST_CASE(test_12D_coupled_loop_common_link)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -396,7 +395,7 @@ BOOST_AUTO_TEST_CASE(test_24D_coupling_with_double_ground)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -431,7 +430,7 @@ BOOST_AUTO_TEST_CASE(test_6D_consecutive_links)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -473,7 +472,7 @@ BOOST_AUTO_TEST_CASE(test_12D_coupled_on_a_chain)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -515,7 +514,7 @@ BOOST_AUTO_TEST_CASE(test_12D_cross_coupled_on_a_chain)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -571,7 +570,7 @@ BOOST_AUTO_TEST_CASE(test_24D_cross_coupling)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -635,7 +634,7 @@ BOOST_AUTO_TEST_CASE(test_6D_cons_baumgarte)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -699,7 +698,7 @@ BOOST_AUTO_TEST_CASE(test_3D_cons_baumgarte)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
 }
@@ -741,7 +740,7 @@ BOOST_AUTO_TEST_CASE(test_loop_con_and_ground_con)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -784,7 +783,7 @@ BOOST_AUTO_TEST_CASE(test_loop_con_and_ground_con3D)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -827,7 +826,7 @@ BOOST_AUTO_TEST_CASE(test_loop_con3D_ground_con3D)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
@@ -871,7 +870,7 @@ BOOST_AUTO_TEST_CASE(test_coupled_3D_6D_loops)
   initConstraintDynamics(model, data_ref, contact_models);
   constraintDynamics(model, data_ref, q, v, tau, contact_models, contact_datas, prox_settings_ref);
 
-  initLcaba(model, data, contact_models);
+  computeJointMinimalOrdering(model, data, contact_models);
   lcaba(model, data, q, v, tau, contact_models, contact_datas, prox_settings);
 
   BOOST_CHECK(data_ref.ddq.isApprox(data.ddq, 1e-10));
