@@ -27,6 +27,7 @@ namespace pinocchio
     typedef const typename EigenStorageVector::MapType getDampingReturnType;
   };
 
+  // TODO(jcarpent): change const_cast usage.
   template<typename _ContactCholeskyDecomposition>
   struct DelassusCholeskyExpressionTpl
   : DelassusOperatorBase<DelassusCholeskyExpressionTpl<_ContactCholeskyDecomposition>>
