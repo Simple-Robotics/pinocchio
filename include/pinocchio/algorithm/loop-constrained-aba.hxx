@@ -223,16 +223,13 @@ namespace pinocchio
       const Model & model,
       Data & data)
     {
-
+      typedef typename JointModel::JointDataDerived JointData;
       typedef typename Model::JointIndex JointIndex;
       typedef typename Data::Force Force;
+      typedef typename Data::Vector6 Vector6;
       typedef typename Data::Matrix6 Matrix6;
 
-      const auto & neighbours = data.neighbour_links;
-
       typedef std::pair<JointIndex, JointIndex> JointPair;
-
-      auto & joint_cross_coupling = data.joint_cross_coupling;
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
@@ -251,17 +248,43 @@ namespace pinocchio
       jdata.StU().diagonal() += jmodel.jointVelocitySelector(model.armature);
 
       pinocchio::internal::PerformStYSInversion<Scalar>::run(jdata.StU(), jdata.Dinv());
-      auto & JDinv = jdata.UDinv();
+
+      jdata.U().noalias() = Ia * Jcols;
+      jdata.UDinv().noalias() =
+        jdata.U() * jdata.Dinv(); // TODO:check where its used when parent == 0
+      if (parent > 0)
+      {
+        Ia.noalias() -= jdata.UDinv() * jdata.U().transpose();
+        fi.toVector().noalias() +=
+          Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
+        data.oYaba[parent] += Ia;
+        data.of[parent] += fi;
+      }
+
+      // End of the classic ABA backward pass - beginning of cross-coupling handling
+      const auto & neighbours = data.neighbour_links;
+      auto & joint_cross_coupling = data.joint_cross_coupling;
+      const auto & joint_neighbours = neighbours[i];
+
+      if (joint_neighbours.size() == 0)
+        return; // We can return from this point as this joint has no neighbours
+
+      using Matrix6xNV = typename std::remove_reference<typename JointData::UDTypeRef>::type;
+      typedef Eigen::Map<Matrix6xNV> MapMatrix6xNV;
+      MapMatrix6xNV mat1_tmp = MapMatrix6xNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, 6, jmodel.nv()));
+      MapMatrix6xNV mat2_tmp = MapMatrix6xNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, 6, jmodel.nv()));
+
+      auto & JDinv = mat1_tmp;
       JDinv.noalias() = Jcols * jdata.Dinv();
 
-      data.oL[i].setIdentity();
-      data.oL[i].noalias() -= JDinv * jdata.U().transpose();
+      // oL == data.oL[i]
+      Matrix6 oL = -JDinv * jdata.U().transpose();
+      oL += Matrix6::Identity();
 
-      Motion a_tmp;
-      a_tmp.toVector().noalias() = data.oL[i] * data.oa_gf[i].toVector();
-      a_tmp.toVector().noalias() += JDinv * jmodel.jointVelocitySelector(data.u);
+      // a_tmp is a Spatial Acceleration
+      Vector6 a_tmp = oL * data.oa_gf[i].toVector();
+      a_tmp.noalias() += JDinv * jmodel.jointVelocitySelector(data.u);
 
-      const auto & joint_neighbours = neighbours[i];
       for (size_t j = 0; j < joint_neighbours.size(); j++)
       {
         const JointIndex vertex_j = joint_neighbours[j];
@@ -270,20 +293,20 @@ namespace pinocchio
             ? joint_cross_coupling.get(JointPair(vertex_j, i))
             : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose(); // avoid memalloc
 
-        auto & crosscoupling_ix_Jcols = jdata.UDinv();
+        auto & crosscoupling_ix_Jcols = mat1_tmp;
         crosscoupling_ix_Jcols.noalias() =
           crosscoupling_ij * Jcols; // Warning: UDinv() is actually edge_ij * J
 
-        auto & crosscoupling_ij_Jcols_Dinv = jdata.U();
+        auto & crosscoupling_ij_Jcols_Dinv = mat2_tmp;
         crosscoupling_ij_Jcols_Dinv.noalias() = crosscoupling_ix_Jcols * jdata.Dinv();
 
         data.oYaba[vertex_j].noalias() -=
           crosscoupling_ij_Jcols_Dinv
           * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ij * J, U() is
                                                 // actually edge_ij * J_cols * Dinv
-        data.of[vertex_j].toVector().noalias() += crosscoupling_ij * a_tmp.toVector();
+        data.of[vertex_j].toVector().noalias() += crosscoupling_ij * a_tmp;
 
-        const Matrix6 crosscoupling_ij_oL = crosscoupling_ij * data.oL[i];
+        const Matrix6 crosscoupling_ij_oL = crosscoupling_ij * oL;
         if (vertex_j == parent)
         {
           data.oYaba[parent].noalias() += crosscoupling_ij_oL + crosscoupling_ij_oL.transpose();
@@ -327,18 +350,6 @@ namespace pinocchio
                                                     // J_col, U() is edge_ij * J_col * Dinv
           }
         }
-      }
-
-      jdata.U().noalias() = Ia * Jcols;
-      jdata.UDinv().noalias() =
-        jdata.U() * jdata.Dinv(); // TODO:check where its used when parent == 0
-      if (parent > 0)
-      {
-        Ia.noalias() -= jdata.UDinv() * jdata.U().transpose();
-        fi.toVector().noalias() +=
-          Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
-        data.oYaba[parent] += Ia;
-        data.of[parent] += fi;
       }
     }
   };
