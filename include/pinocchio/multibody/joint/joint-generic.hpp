@@ -159,7 +159,7 @@ namespace pinocchio
     }
     TangentMap_t tangent_map() const
     {
-      return tangent_map(*this);
+      return pinocchio::tangent_map(*this);
     }
 
     JointDataTpl()
