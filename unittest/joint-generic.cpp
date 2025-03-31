@@ -92,8 +92,8 @@ void test_joint_methods(
     (jda.UDinv()).isApprox(jdata.UDinv()),
     std::string(error_prefix + " - Joint UDInv inertia matrix decomposition "));
   BOOST_CHECK_MESSAGE(
-    (jda.TangentMap()).isApprox(jdata.TangentMap()),
-    std::string(error_prefix + " - Joint TangentMap "));
+    (jda.tangent_map()).isApprox(jdata.tangent_map()),
+    std::string(error_prefix + " - Joint tangent_map "));
 
   // Test vxS
   typedef typename JointModel::Constraint_t Constraint_t;
@@ -143,7 +143,7 @@ void test_joint_methods(
     Eigen::VectorXd vi_tm(Eigen::VectorXd::Zero(jmodel.nv()));
     vi_tm[i] = 1.;
     const Eigen::VectorXd q_tm_plus = LieGroupType().integrate(q_tm, (vi_tm * dt).eval());
-    auto col = jdata.TangentMap().col(i);
+    auto col = jdata.tangent_map().col(i);
     BOOST_CHECK(col.isApprox((dtinv * (q_tm_plus - q_tm)).eval(), 5. * dt));
   }
 }

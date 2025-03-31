@@ -534,7 +534,7 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
-    TangentMap_t TangentMap;
+    TangentMap_t tangent_map;
 
     JointDataPlanarTpl()
     : joint_q(Scalar(0), Scalar(0), Scalar(1), Scalar(0))
@@ -545,7 +545,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
-    , TangentMap(TangentMap_t::Zero())
+    , tangent_map(TangentMap_t::Zero())
     {
     }
 
@@ -668,14 +668,14 @@ namespace pinocchio
     {
       PINOCCHIO_UNUSED_VARIABLE(blank);
       // Linear
-      data.TangentMap(0, 0) = data.joint_q[2];
-      data.TangentMap(1, 0) = data.joint_q[3];
-      data.TangentMap(0, 1) = -data.joint_q[3];
-      data.TangentMap(1, 1) = data.joint_q[2];
+      data.tangent_map(0, 0) = data.joint_q[2];
+      data.tangent_map(1, 0) = data.joint_q[3];
+      data.tangent_map(0, 1) = -data.joint_q[3];
+      data.tangent_map(1, 1) = data.joint_q[2];
 
       // Angular
-      data.TangentMap(2, 2) = -data.joint_q[3];
-      data.TangentMap(3, 2) = data.joint_q[2];
+      data.tangent_map(2, 2) = -data.joint_q[3];
+      data.tangent_map(3, 2) = data.joint_q[2];
     }
 
     template<typename ConfigVectorType>
@@ -683,14 +683,14 @@ namespace pinocchio
       JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
     {
       // Linear
-      data.TangentMap(0, 0) = qs[idx_q() + 2];
-      data.TangentMap(1, 0) = qs[idx_q() + 3];
-      data.TangentMap(0, 1) = -qs[idx_q() + 3];
-      data.TangentMap(1, 1) = qs[idx_q() + 2];
+      data.tangent_map(0, 0) = qs[idx_q() + 2];
+      data.tangent_map(1, 0) = qs[idx_q() + 3];
+      data.tangent_map(0, 1) = -qs[idx_q() + 3];
+      data.tangent_map(1, 1) = qs[idx_q() + 2];
 
       // Angular
-      data.TangentMap(2, 2) = -qs[idx_q() + 3];
-      data.TangentMap(3, 2) = qs[idx_q() + 2];
+      data.tangent_map(2, 2) = -qs[idx_q() + 3];
+      data.tangent_map(3, 2) = qs[idx_q() + 2];
     }
 
     static std::string classname()

@@ -157,7 +157,7 @@ namespace pinocchio
     {
       return stu_inertia(*this);
     }
-    TangentMap_t TangentMap() const
+    TangentMap_t tangent_map() const
     {
       return tangent_map(*this);
     }
@@ -220,9 +220,9 @@ namespace pinocchio
     {
       return StU();
     }
-    TangentMap_t TangentMap_accessor() const
+    TangentMap_t tangent_map_accessor() const
     {
-      return TangentMap();
+      return tangent_map();
     }
 
     static std::string classname()

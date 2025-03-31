@@ -30,7 +30,7 @@ namespace pinocchio
       ar & make_nvp("UDinv", joint_data.UDinv);
       ar & make_nvp("StU", joint_data.StU);
 
-      ar & make_nvp("TangentMap", joint_data.TangentMap);
+      ar & make_nvp("tangent_map", joint_data.tangent_map);
     }
   };
 } // namespace pinocchio
@@ -62,7 +62,7 @@ namespace boost
         ar & make_nvp("Dinv", joint_data.Dinv());
         ar & make_nvp("UDinv", joint_data.UDinv());
         ar & make_nvp("StU", joint_data.StU());
-        ar & make_nvp("TangentMap", joint_data.TangentMap());
+        ar & make_nvp("tangent_map", joint_data.tangent_map());
       }
 
       template<

@@ -1014,7 +1014,7 @@ namespace pinocchio
     template<typename JointDataDerived>
     ReturnType operator()(const JointDataBase<JointDataDerived> & jdata) const
     {
-      return ReturnType(jdata.TangentMap());
+      return ReturnType(jdata.tangent_map());
     }
 
     static ReturnType run(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata)

@@ -232,7 +232,7 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
-    TangentMap_t TangentMap;
+    TangentMap_t tangent_map;
 
     JointDataFreeFlyerTpl()
     : joint_q(ConfigVector_t::Zero())
@@ -243,7 +243,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Identity())
     , StU(D_t::Zero())
-    , TangentMap(TangentMap_t::Zero())
+    , tangent_map(TangentMap_t::Zero())
     {
       joint_q[6] = Scalar(1);
     }
@@ -399,23 +399,23 @@ namespace pinocchio
       JointDataDerived & data, const typename Eigen::QuaternionBase<QuaternionDerived> & quat) const
     {
       // Linear part
-      data.TangentMap.template block<3, 3>(0, 0) = quat.matrix();
+      data.tangent_map.template block<3, 3>(0, 0) = quat.matrix();
 
       // angular part
-      data.TangentMap(3, 3) = .5 * quat.w();
-      data.TangentMap(4, 3) = .5 * quat.z();
-      data.TangentMap(5, 3) = -.5 * quat.y();
-      data.TangentMap(6, 3) = -.5 * quat.x();
+      data.tangent_map(3, 3) = .5 * quat.w();
+      data.tangent_map(4, 3) = .5 * quat.z();
+      data.tangent_map(5, 3) = -.5 * quat.y();
+      data.tangent_map(6, 3) = -.5 * quat.x();
 
-      data.TangentMap(3, 4) = -.5 * quat.z();
-      data.TangentMap(4, 4) = .5 * quat.w();
-      data.TangentMap(5, 4) = .5 * quat.x();
-      data.TangentMap(6, 4) = -.5 * quat.y();
+      data.tangent_map(3, 4) = -.5 * quat.z();
+      data.tangent_map(4, 4) = .5 * quat.w();
+      data.tangent_map(5, 4) = .5 * quat.x();
+      data.tangent_map(6, 4) = -.5 * quat.y();
 
-      data.TangentMap(3, 5) = .5 * quat.y();
-      data.TangentMap(4, 5) = -.5 * quat.x();
-      data.TangentMap(5, 5) = .5 * quat.w();
-      data.TangentMap(6, 5) = -.5 * quat.z();
+      data.tangent_map(3, 5) = .5 * quat.y();
+      data.tangent_map(4, 5) = -.5 * quat.x();
+      data.tangent_map(5, 5) = .5 * quat.w();
+      data.tangent_map(6, 5) = -.5 * quat.z();
     }
 
     template<typename ConfigVector>

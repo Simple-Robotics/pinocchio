@@ -135,13 +135,13 @@
   {                                                                                                \
     return StU;                                                                                    \
   }                                                                                                \
-  TangentMapTypeConstRef TangentMap_accessor() const                                               \
+  TangentMapTypeConstRef tangent_map_accessor() const                                              \
   {                                                                                                \
-    return TangentMap;                                                                             \
+    return tangent_map;                                                                            \
   }                                                                                                \
-  TangentMapTypeRef TangentMap_accessor()                                                          \
+  TangentMapTypeRef tangent_map_accessor()                                                         \
   {                                                                                                \
-    return TangentMap;                                                                             \
+    return tangent_map;                                                                            \
   }
 
 #define PINOCCHIO_JOINT_DATA_BASE_ACCESSOR_DEFAULT_RETURN_TYPE                                     \
@@ -269,13 +269,13 @@ namespace pinocchio
     {
       return derived().StU_accessor();
     }
-    TangentMapTypeConstRef TangentMap() const
+    TangentMapTypeConstRef tangent_map() const
     {
-      return derived().TangentMap_accessor();
+      return derived().tangent_map_accessor();
     }
-    TangentMapTypeRef TangentMap()
+    TangentMapTypeRef tangent_map()
     {
-      return derived().TangentMap_accessor();
+      return derived().tangent_map_accessor();
     }
     std::string shortname() const
     {
@@ -314,7 +314,7 @@ namespace pinocchio
              && internal::comparison_eq(U(), other.U())
              && internal::comparison_eq(Dinv(), other.Dinv())
              && internal::comparison_eq(UDinv(), other.UDinv())
-             && internal::comparison_eq(TangentMap(), other.TangentMap());
+             && internal::comparison_eq(tangent_map(), other.tangent_map());
     }
 
     ///  \brief Default operator== implementation

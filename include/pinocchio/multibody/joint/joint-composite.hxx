@@ -274,9 +274,9 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorType> & q)
     {
       jmodel.calc_tangent_map(jdata.derived(), q.derived());
-      data.TangentMap.block(
+      data.tangent_map.block(
         jmodel.idx_q() - model.idx_q(), jmodel.idx_v() - model.idx_v(), jmodel.nq(), jmodel.nv()) =
-        jdata.TangentMap();
+        jdata.tangent_map();
     }
   };
 
@@ -319,9 +319,9 @@ namespace pinocchio
       const Blank blank)
     {
       jmodel.calc_tangent_map(jdata.derived(), blank);
-      data.TangentMap.block(
+      data.tangent_map.block(
         jmodel.idx_q() - model.idx_q(), jmodel.idx_v() - model.idx_v(), jmodel.nq(), jmodel.nv()) =
-        jdata.TangentMap();
+        jdata.tangent_map();
     }
   };
 

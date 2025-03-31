@@ -377,7 +377,7 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
-    TangentMap_t TangentMap;
+    TangentMap_t tangent_map;
 
     JointDataUniversalTpl()
     : joint_q(ConfigVector_t::Zero())
@@ -390,7 +390,7 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
-    , TangentMap(TangentMap_t::Identity()) // Not sure it is
+    , tangent_map(TangentMap_t::Identity()) // Not sure it is
     {
     }
 

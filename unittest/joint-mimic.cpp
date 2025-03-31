@@ -178,7 +178,7 @@ void test_joint_mimic(const JointModelBase<JointModel> & jmodel)
 
   jmodel.calc(jdata, q0);
   jmodel_mimic.calc(jdata_mimic, q0);
-  BOOST_CHECK(jdata.TangentMap.isApprox(jdata_mimic.TangentMap()));
+  BOOST_CHECK(jdata.tangent_map.isApprox(jdata_mimic.tangent_map()));
 }
 
 template<typename MimicConfigurationTransform, bool MimicIdentity>

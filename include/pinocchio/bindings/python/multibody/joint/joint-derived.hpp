@@ -161,7 +161,7 @@ namespace pinocchio
           .add_property("U", &get_U)
           .add_property("Dinv", &get_Dinv)
           .add_property("UDinv", &get_UDinv)
-          .add_property("TangentMap", &get_TangentMap)
+          .add_property("tangent_map", &get_tangent_map)
           .def("shortname", &JointDataDerived::shortname, bp::arg("self"))
 
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
@@ -209,9 +209,9 @@ namespace pinocchio
       {
         return self.UDinv_accessor();
       }
-      static typename JointDataDerived::TangentMap_t get_TangentMap(const JointDataDerived & self)
+      static typename JointDataDerived::TangentMap_t get_tangent_map(const JointDataDerived & self)
       {
-        return self.TangentMap_accessor();
+        return self.tangent_map_accessor();
       }
 
       static void expose()
