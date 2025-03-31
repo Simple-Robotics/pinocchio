@@ -23,7 +23,6 @@ namespace pinocchio
     static bp::tuple computeInverseDynamicsConstraintForces_wrapper(
       const VectorXs & c_ref,
       const context::FrictionalPointConstraintModelVector & contact_models,
-      const VectorXs & R,
       const boost::optional<VectorXs> & lambda_guess,
       ProximalSettingsTpl<Scalar> & settings,
       bool solve_ncp)
@@ -35,7 +34,7 @@ namespace pinocchio
         lambda_sol = VectorXs::Zero(R.size());
 
       const bool has_converged = computeInverseDynamicsConstraintForces(
-        contact_models, c_ref, R, lambda_sol, settings, solve_ncp);
+        contact_models, c_ref, lambda_sol, settings, solve_ncp);
       return bp::make_tuple(has_converged, bp::object(lambda_sol));
     }
 
@@ -64,14 +63,13 @@ namespace pinocchio
 #ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       bp::def(
         "computeInverseDynamicsConstraintForces", computeInverseDynamicsConstraintForces_wrapper,
-        (bp::args("contact_models", "c_ref", "R"), bp::arg("lambda_guess") = boost::none,
+        (bp::args("contact_models", "c_ref"), bp::arg("lambda_guess") = boost::none,
          bp::arg("settings"), bp::arg("solve_ncp") = true),
         "Computes the inverse dynamics with frictional contacts. Returns a tuple containing "
         "(has_converged, lambda_sol).\n\n"
         "Parameters:\n"
         "\tcontact_models: list of contact models\n"
         "\tc_ref: the reference velocity of contact points\n"
-        "\tR: vector representing the diagonal of the compliance matrix\n"
         "\tlambda_guess: optional initial guess for contact forces\n"
         "\tsettings: the settings of the proximal algorithm\n"
         "\tsolve_ncp: whether to solve the NCP (true) or CCP (false)\n");

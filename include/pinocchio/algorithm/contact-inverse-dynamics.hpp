@@ -17,7 +17,6 @@ namespace pinocchio
   ///
   /// \param[in] contact_models The vector of constraint models.
   /// \param[in] c_ref The desired constraint velocity.
-  /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in,out] lambda Vector of solution. Should be initialized with zeros or from an initial
   /// estimate.
   /// \param[in,out] settings The settings for the proximal algorithm
@@ -29,14 +28,12 @@ namespace pinocchio
     template<typename T> class Holder,
     class ConstraintModelAllocator,
     typename VectorLikeC,
-    typename VectorLikeR,
     typename VectorLikeResult>
   bool computeInverseDynamicsConstraintForces(
     const std::vector<
       Holder<const FrictionalPointConstraintModelTpl<Scalar, Options>>,
       ConstraintModelAllocator> & contact_models,
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeResult> & _lambda,
     ProximalSettingsTpl<Scalar> & settings,
     bool solve_ncp = true)
@@ -45,17 +42,25 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef FrictionalPointConstraintModelTpl<Scalar, Options> ConstraintModel;
 
+    const Eigen::Index problem_size = getTotalConstraintActiveSize(contact_models);
+    const std::size_t n_constraints = contact_models.size();
+    VectorXs R(problem_size);
+    Eigen::Index constraint_index = 0;
+    for (std::size_t i = 0; i < contact_models.size(); i++)
+    {
+      const ConstraintModel & cmodel = contact_models[(std::size_t)i];
+      R.segment(constraint_index, cmodel.activeSize()) = cmodel.getActiveCompliance();
+      constraint_index += cmodel.activeSize();
+    }
+    const VectorXs R_prox = R + VectorXs::Constant(problem_size, settings.mu);
+
     auto & lambda = _lambda.const_cast_derived();
 
     // PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_correction.size(), problem_size);
-    const std::size_t n_constraints = contact_models.size();
     PINOCCHIO_CHECK_ARGUMENT_SIZE(contact_models.size(), n_constraints);
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(lambda.size(), R.size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(lambda.size(), problem_size);
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       check_expression_if_real<Scalar>(settings.mu >= Scalar(0)), "mu has to be strictly positive");
-
-    const Eigen::Index problem_size = R.size();
-    const VectorXs R_prox = R + VectorXs::Constant(problem_size, settings.mu);
 
     assert(
       R.size() > 0 && check_expression_if_real<Scalar>(R_prox.minCoeff() >= Scalar(0))
@@ -140,7 +145,6 @@ namespace pinocchio
   ///
   /// \param[in] contact_models The vector of constraint models.
   /// \param[in] c_ref The desired constraint velocity.
-  /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in,out] lambda_sol Vector of solution. Should be initialized with zeros or from an
   /// initial estimate
   /// \param[in,out] settings The settings for the proximal algorithm
@@ -151,14 +155,12 @@ namespace pinocchio
     int Options,
     class ConstraintModelAllocator,
     typename VectorLikeC,
-    typename VectorLikeR,
     typename VectorLikeResult>
   bool computeInverseDynamicsConstraintForces(
     const std::vector<
       FrictionalPointConstraintModelTpl<Scalar, Options>,
       ConstraintModelAllocator> & contact_models,
     const Eigen::MatrixBase<VectorLikeC> & c_ref,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeResult> & lambda_sol,
     ProximalSettingsTpl<Scalar> & settings,
     bool solve_ncp = true)
@@ -171,8 +173,8 @@ namespace pinocchio
       contact_models.cbegin(), contact_models.cend());
 
     return computeInverseDynamicsConstraintForces(
-      wrapped_constraint_models, c_ref.derived(), R.derived(), lambda_sol.const_cast_derived(),
-      settings, solve_ncp);
+      wrapped_constraint_models, c_ref.derived(), lambda_sol.const_cast_derived(), settings,
+      solve_ncp);
   }
 
   ///
@@ -193,7 +195,6 @@ namespace pinocchio
   /// \param[in] dt The time step.
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] lambda_sol initial guess for the contact forces
   /// \param[in] settings The settings for the proximal algorithm
@@ -212,7 +213,6 @@ namespace pinocchio
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
     typename VectorLikeGamma,
-    typename VectorLikeR,
     typename VectorLikeLam>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(
@@ -229,7 +229,6 @@ namespace pinocchio
       Holder<FrictionalPointConstraintDataTpl<Scalar, Options>>,
       ConstraintDataAllocator> & contact_datas,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeLam> & _lambda_sol,
     ProximalSettingsTpl<Scalar> & settings,
     bool solve_ncp = true)
@@ -243,7 +242,7 @@ namespace pinocchio
 
     auto & lambda_sol = _lambda_sol.const_cast_derived();
 
-    const Eigen::Index problem_size = R.size();
+    const Eigen::Index problem_size = getTotalConstraintActiveSize(contact_models);
     const std::size_t n_constraints = contact_models.size();
 
     MatrixXs J = MatrixXs::Zero(problem_size, model.nv); // TODO: malloc
@@ -253,8 +252,7 @@ namespace pinocchio
     c_ref.noalias() = J * v_ref; // TODO should rather use the displacement
     c_ref += constraint_correction;
     c_ref /= dt; // we work with a formulation on forces
-    computeInverseDynamicsConstraintForces(
-      contact_models, c_ref, R, lambda_sol, settings, solve_ncp);
+    computeInverseDynamicsConstraintForces(contact_models, c_ref, lambda_sol, settings, solve_ncp);
 
     {
       rnea(model, data, q, v, a);
@@ -293,7 +291,6 @@ namespace pinocchio
   /// \param[in] dt The time step.
   /// \param[in] contact_models The list of contact models.
   /// \param[in] contact_datas The list of contact_datas.
-  /// \param[in] R vector representing the diagonal of the compliance matrix.
   /// \param[in] constraint_correction vector representing the constraint correction.
   /// \param[in] lambda_sol initial guess for the contact forces
   /// \param[in] settings The settings for the proximal algorithm
@@ -311,7 +308,6 @@ namespace pinocchio
     class ConstraintModelAllocator,
     class ConstraintDataAllocator,
     typename VectorLikeGamma,
-    typename VectorLikeR,
     typename VectorLikeLam>
   const typename DataTpl<Scalar, Options, JointCollectionTpl>::TangentVectorType &
   contactInverseDynamics(
@@ -327,7 +323,6 @@ namespace pinocchio
     std::vector<FrictionalPointConstraintDataTpl<Scalar, Options>, ConstraintDataAllocator> &
       contact_datas,
     const Eigen::MatrixBase<VectorLikeGamma> & constraint_correction,
-    const Eigen::MatrixBase<VectorLikeR> & R,
     const Eigen::MatrixBase<VectorLikeLam> & lambda_sol,
     ProximalSettingsTpl<Scalar> & settings,
     bool solve_ncp = true)
@@ -349,7 +344,7 @@ namespace pinocchio
 
     return contactInverseDynamics(
       model, data, q, v, a, dt, wrapped_constraint_models, wrapped_constraint_datas,
-      constraint_correction, R, lambda_sol.const_cast_derived(), settings, solve_ncp);
+      constraint_correction, lambda_sol.const_cast_derived(), settings, solve_ncp);
   }
 
 } // namespace pinocchio

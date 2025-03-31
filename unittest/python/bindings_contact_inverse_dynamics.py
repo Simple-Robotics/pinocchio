@@ -48,7 +48,7 @@ class TestContactInverseDynamics(TestCase):
             contact_model = pin.RigidConstraintModel(
                 pin.ContactType.CONTACT_3D, model, frame.parentJoint, frame.placement
             )
-
+            contact_model.compliance = 0
             contact_models_list.append(contact_model)
             contact_datas_list.append(contact_model.createData())
             cones_list.append(pin.CoulombFrictionCone(0.4))
@@ -62,7 +62,6 @@ class TestContactInverseDynamics(TestCase):
             constraint_dim += m.size()
 
         dt = 1e-3
-        R = np.zeros(constraint_dim)
         constraint_correction = np.zeros(constraint_dim)
         lambda_guess = np.zeros(constraint_dim)
         prox_settings = pin.ProximalSettings(1e-12, 1e-6, 1)
@@ -79,7 +78,6 @@ class TestContactInverseDynamics(TestCase):
             contact_models_vec,
             contact_datas_vec,
             cones_vec,
-            R,
             constraint_correction,
             prox_settings,
             lambda_guess,
@@ -96,7 +94,6 @@ class TestContactInverseDynamics(TestCase):
             contact_models_list,
             contact_datas_vec,
             cones_list,
-            R,
             constraint_correction,
             prox_settings,
             lambda_guess,
@@ -113,7 +110,6 @@ class TestContactInverseDynamics(TestCase):
             contact_models_list,
             contact_datas_list,
             cones_list,
-            R,
             constraint_correction,
             prox_settings,
             lambda_guess,
