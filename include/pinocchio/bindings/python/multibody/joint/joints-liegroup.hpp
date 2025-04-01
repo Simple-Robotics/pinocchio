@@ -8,7 +8,7 @@
 #include <boost/python.hpp>
 
 #include "pinocchio/bindings/python/fwd.hpp"
-#include "pinocchio/multibody/liegroups.hpp"
+#include "pinocchio/bindings/python/multibody/liegroups.hpp"
 
 namespace pinocchio
 {
@@ -37,6 +37,18 @@ namespace pinocchio
       static LieGroupOperation liegroup()
       {
         return LieGroupOperation(LieGroupType());
+      }
+    };
+
+    template<>
+    struct JointModelLieGroupPythonVisitor<context::JointModelComposite>
+    : public boost::python::def_visitor<
+        JointModelLieGroupPythonVisitor<context::JointModelComposite>>
+    {
+    public:
+      template<class PyClass>
+      void visit(PyClass &) const
+      {
       }
     };
 
