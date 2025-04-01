@@ -25,7 +25,8 @@ namespace pinocchio
   };                                                                                               \
   typedef TYPENAME Base::ConfigVector_t ConfigVector_t;                                            \
   typedef TYPENAME Base::TangentVector_t TangentVector_t;                                          \
-  typedef TYPENAME Base::JacobianMatrix_t JacobianMatrix_t
+  typedef TYPENAME Base::JacobianMatrix_t JacobianMatrix_t;                                        \
+  typedef TYPENAME Base::TangentMapMatrix_t TangentMapMatrix_t
 
 #define PINOCCHIO_LIE_GROUP_PUBLIC_INTERFACE(Derived)                                              \
   PINOCCHIO_LIE_GROUP_PUBLIC_INTERFACE_GENERIC(Derived, PINOCCHIO_MACRO_EMPTY_ARG)
@@ -49,7 +50,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, NQ, 1, Options> ConfigVector_t;
     typedef Eigen::Matrix<Scalar, NV, 1, Options> TangentVector_t;
     typedef Eigen::Matrix<Scalar, NV, NV, Options> JacobianMatrix_t;
-    typedef Eigen::Matrix<Scalar, NQ, NV, Options> TangentMap_t;
+    typedef Eigen::Matrix<Scalar, NQ, NV, Options> TangentMapMatrix_t;
 
     /// \name API with return value as argument
     /// \{
@@ -558,30 +559,30 @@ namespace pinocchio
      *
      * @param[in]  q    configuration vector.
      * @param[in]  op   assignment operator (SETTO, ADDTO or RMTO).
-     * @param[out] Jout the tangentmapping matrix
+     * @param[out] TM the tangentmapping matrix
      */
-    // Jout op TM
-    template<class Config_t, class JacobianOut_t>
+    template<class Config_t, class TangentMap_t>
     void tangentMap(
       const Eigen::MatrixBase<Config_t> & q,
-      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const Eigen::MatrixBase<TangentMap_t> & TM,
       AssignmentOperatorType op = SETTO) const;
 
-    // Jout op TM * Jin, it is the jacobian vector product
-    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    // Mout op TM * Min, it is the jacobian vector product
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
     void tangentMapProduct(
       const Eigen::MatrixBase<Config_t> & q,
-      const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      const Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op = SETTO) const;
 
-    // Jout op TM^T * Jin, it is the jacobian transpose vector product
-    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
-    void coTangentMap_product(
+    // Mout op TM^T * Min, it is the jacobian transpose vector product
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void coTangentMapProduct(
       const Eigen::MatrixBase<Config_t> & q,
-      const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      const Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op = SETTO) const;
+
     /**
      * @brief      Squared distance between two joint configurations.
      *
@@ -684,18 +685,18 @@ namespace pinocchio
       bool dDifferenceOnTheLeft,
       const AssignmentOperatorType op) const;
 
-    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
     void tangentMapProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
-      const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op) const;
 
-    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
     void coTangentMapProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
-      const Eigen::MatrixBase<JacobianIn_t> & Jin,
-      Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op) const;
 
     template<class ConfigL_t, class ConfigR_t, class ConfigOut_t>
