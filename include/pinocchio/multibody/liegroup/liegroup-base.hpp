@@ -49,6 +49,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, NQ, 1, Options> ConfigVector_t;
     typedef Eigen::Matrix<Scalar, NV, 1, Options> TangentVector_t;
     typedef Eigen::Matrix<Scalar, NV, NV, Options> JacobianMatrix_t;
+    typedef Eigen::Matrix<Scalar, NQ, NV, Options> TangentMap_t;
 
     /// \name API with return value as argument
     /// \{
@@ -547,6 +548,41 @@ namespace pinocchio
       const AssignmentOperatorType op = SETTO) const;
 
     /**
+     * @brief      Computes the left Tangent Mapping from the Lie algebra of the group to the
+     * parametric space tangent space TqQ.
+     *
+     * @details    The tangent mapping corresponds to the eucliean Jacobian of \f$ (\mathbf{q}
+     * \oplus \mathbf{v}\f$ with respect to \f$ \mathbf{q}\f$ in \f$ 0\f$. In other words for any
+     * vector $v$ in the Lie algebra we have \f$ TM(\mathbf{q}) v = lim_{\delta t \rightarrow 0}
+     * \frac{\mathbf{q} \oplus (v\delta t) - \mathbf{q}}{\delta t}\f$
+     *
+     * @param[in]  q    configuration vector.
+     * @param[in]  op   assignment operator (SETTO, ADDTO or RMTO).
+     * @param[out] Jout the tangentmapping matrix
+     */
+    // Jout op TM
+    template<class Config_t, class JacobianOut_t>
+    void tangentMap(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      AssignmentOperatorType op = SETTO) const;
+
+    // Jout op TM * Jin, it is the jacobian vector product
+    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    void tangentMapProduct(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<JacobianIn_t> & Jin,
+      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const AssignmentOperatorType op = SETTO) const;
+
+    // Jout op TM^T * Jin, it is the jacobian transpose vector product
+    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    void coTangentMap_product(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<JacobianIn_t> & Jin,
+      const Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const AssignmentOperatorType op = SETTO) const;
+    /**
      * @brief      Squared distance between two joint configurations.
      *
      * @param[in]  q0    the initial configuration vector.
@@ -646,6 +682,20 @@ namespace pinocchio
       const JacobianIn_t & Jin,
       JacobianOut_t & Jout,
       bool dDifferenceOnTheLeft,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<JacobianIn_t> & Jin,
+      Eigen::MatrixBase<JacobianOut_t> & Jout,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class JacobianIn_t, class JacobianOut_t>
+    void coTangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<JacobianIn_t> & Jin,
+      Eigen::MatrixBase<JacobianOut_t> & Jout,
       const AssignmentOperatorType op) const;
 
     template<class ConfigL_t, class ConfigR_t, class ConfigOut_t>
