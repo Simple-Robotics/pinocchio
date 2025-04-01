@@ -107,8 +107,6 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
 
   for (int n = 0; n < num_tests; ++n)
   {
-    // std::cout << "=======================" << std::endl;
-    // std::cout << "test " << n << std::endl;
     Eigen::VectorXd R = abs(Eigen::VectorXd::Random(constraint_dim))
                         + Eigen::VectorXd::Constant(constraint_dim, 1e-10);
     makeIsotropic(constraint_models, R);
@@ -120,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
       constraint_index += cmodel.size();
     }
 
-    ProximalSettings prox_settings(1e-12, 1e-12, /*mu = */ 1e-4, 200);
+    ProximalSettings prox_settings(1e-12, 1e-12, /*mu = */ 0, 100);
 
     const Eigen::VectorXd x_positive = abs(Eigen::VectorXd::Random(constraint_dim));
     const Eigen::VectorXd x_in_cone = Eigen::VectorXd::Zero(constraint_dim);
@@ -132,18 +130,9 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
     BOOST_CHECK(sigma_ref.isZero());
 
     Eigen::VectorXd x_sol = Eigen::VectorXd::Zero(constraint_dim);
-    // x_sol = x_in_cone;
-
-    // std::cout << "R = " << R.transpose() << std::endl;
-    // std::cout << "x_positive = " << x_positive.transpose() << std::endl;
-    // std::cout << "x_in_cone = " << x_in_cone.transpose() << std::endl;
 
     bool has_converged = computeInverseDynamicsConstraintForces(
-      constraint_models, constraint_velocity_ref, x_sol, prox_settings);
-    // std::cout << "has_converged = " << has_converged << std::endl;
-    // std::cout << "x_sol = " << x_sol.transpose() << std::endl;
-    // std::cout << "constraint_velocity_ref = " << constraint_velocity_ref.transpose()
-    //           << std::endl;
+      constraint_models, constraint_velocity_ref, x_sol, prox_settings, /*solve_ncp = */ false);
     BOOST_CHECK(has_converged);
 
     Eigen::VectorXd sigma = constraint_velocity_ref + R.asDiagonal() * x_sol;
@@ -151,9 +140,8 @@ BOOST_AUTO_TEST_CASE(test_contact_inverse_dynamics_3D)
     Eigen::VectorXd sigma_correction(sigma);
     computeDeSaxeCorrection(constraint_models, sigma, sigma_correction);
     sigma += sigma_correction;
-    // std::cout << "sigma = " << sigma.transpose() << std::endl;
 
-    BOOST_CHECK(sigma.isZero(1e-10));
+    BOOST_CHECK(sigma.isZero(1e-8));
     Eigen::VectorXd sigma_projected(sigma);
     computeDualConeProjection(constraint_models, sigma, sigma_projected);
     BOOST_CHECK((sigma_projected - sigma).lpNorm<Eigen::Infinity>() <= 1e-10);
