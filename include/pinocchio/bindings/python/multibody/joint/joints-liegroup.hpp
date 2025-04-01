@@ -26,7 +26,7 @@ namespace pinocchio
         context::Options,
         LieGroupCollectionDefaultTpl>
         LieGroupOperation;
-      typedef typename LieGroupMap::operation<JointModelDerived>::type LieGroupType;
+      typedef typename LieGroupMap::template operation<JointModelDerived>::type LieGroupType;
 
       template<class PyClass>
       void visit(PyClass & cl) const

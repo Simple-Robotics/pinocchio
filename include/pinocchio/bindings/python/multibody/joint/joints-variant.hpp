@@ -12,6 +12,7 @@
 #include "pinocchio/multibody/joint/joint-collection.hpp"
 #include "pinocchio/bindings/python/multibody/joint/joints-models.hpp"
 #include "pinocchio/bindings/python/multibody/joint/joints-datas.hpp"
+#include "pinocchio/bindings/python/multibody/joint/joints-liegroup.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
 
 namespace pinocchio
@@ -66,6 +67,7 @@ namespace pinocchio
           bp::class_<T>(
             sanitizedClassname<T>().c_str(), sanitizedClassname<T>().c_str(), bp::no_init)
             .def(JointModelBasePythonVisitor<T>())
+            .def(JointModelLieGroupPythonVisitor<T>())
             .def(PrintableVisitor<T>()));
         bp::implicitly_convertible<T, context::JointModel>();
       }
