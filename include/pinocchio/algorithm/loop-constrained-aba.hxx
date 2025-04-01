@@ -249,7 +249,6 @@ namespace pinocchio
 
       pinocchio::internal::PerformStYSInversion<Scalar>::run(jdata.StU(), jdata.Dinv());
 
-      jdata.U().noalias() = Ia * Jcols;
       jdata.UDinv().noalias() =
         jdata.U() * jdata.Dinv(); // TODO:check where its used when parent == 0
       if (parent > 0)
