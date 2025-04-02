@@ -246,7 +246,7 @@ namespace pinocchio
     }
 
     template<ArgumentPosition arg, class ConfigL_t, class ConfigR_t, class JacobianOut_t>
-    void dDifference_impl(
+    static void dDifference_impl(
       const Eigen::MatrixBase<ConfigL_t> & q0,
       const Eigen::MatrixBase<ConfigR_t> & q1,
       const Eigen::MatrixBase<JacobianOut_t> & J) const
@@ -872,18 +872,6 @@ namespace pinocchio
         Jtmp6.template topRightCorner<3, 3>() * Jout.template bottomRows<3>();
       Jout.template bottomRows<3>() =
         Jtmp6.template bottomRightCorner<3, 3>() * Jout.template bottomRows<3>();
-    }
-
-    template<class ConfigL_t, class ConfigR_t>
-    static Scalar squaredDistance_impl(
-      const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1)
-    {
-      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
-      TangentVector_t t;
-      difference_impl(q0, q1, t);
-      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-      return t.squaredNorm();
     }
 
     template<class Config_t>

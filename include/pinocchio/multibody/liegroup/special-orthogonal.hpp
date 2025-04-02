@@ -644,18 +644,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       assert(quaternion::isNormalized(quat_res));
     }
 
-    template<class ConfigL_t, class ConfigR_t>
-    static Scalar squaredDistance_impl(
-      const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1)
-    {
-      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
-      TangentVector_t t;
-      difference_impl(q0, q1, t);
-      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-      return t.squaredNorm();
-    }
-
     template<class Config_t>
     static void normalize_impl(const Eigen::MatrixBase<Config_t> & qout)
     {

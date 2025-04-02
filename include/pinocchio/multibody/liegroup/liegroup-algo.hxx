@@ -13,7 +13,7 @@ namespace pinocchio
 
   namespace details
   {
-    template<typename Algo>
+    template<typename Visitor>
     struct Dispatch
     {
       template<
@@ -25,7 +25,7 @@ namespace pinocchio
       run(const JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> & jmodel, ArgsType args)
       {
         for (size_t i = 0; i < jmodel.joints.size(); ++i)
-          Algo::run(jmodel.joints[i], args);
+          Visitor::run(jmodel.joints[i], args);
       }
     };
 
