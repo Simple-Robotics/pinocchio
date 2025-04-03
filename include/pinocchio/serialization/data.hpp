@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2024 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_multibody_data_serialization_hpp__
@@ -75,7 +75,7 @@ namespace boost
       PINOCCHIO_MAKE_DATA_NVP(ar, data, ddq);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, Yaba);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, oYaba);
-      PINOCCHIO_MAKE_DATA_NVP(ar, data, oYaba_contact);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, oYaba_augmented);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, oL);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, oK);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, u);

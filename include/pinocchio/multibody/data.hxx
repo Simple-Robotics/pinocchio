@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2024 CNRS INRIA
+// Copyright (c) 2015-2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 // Copyright (c) 2015 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 //
 
@@ -362,7 +363,7 @@ namespace pinocchio
       && data1.UDinv == data2.UDinv && data1.IS == data2.IS && data1.vxI == data2.vxI
       && data1.Ivx == data2.Ivx && data1.oinertias == data2.oinertias && data1.oYcrb == data2.oYcrb
       && data1.doYcrb == data2.doYcrb && data1.ddq == data2.ddq && data1.Yaba == data2.Yaba
-      && data1.oYaba == data2.oYaba && data1.oYaba_contact == data2.oYaba_contact
+      && data1.oYaba == data2.oYaba && data1.oYaba_augmented == data2.oYaba_augmented
       && data1.oL == data2.oL && data1.oK == data2.oK && data1.u == data2.u && data1.Ag == data2.Ag
       && data1.dAg == data2.dAg && data1.hg == data2.hg && data1.dhg == data2.dhg
       && data1.Ig == data2.Ig && data1.Fcrb == data2.Fcrb && data1.nvSubtree == data2.nvSubtree

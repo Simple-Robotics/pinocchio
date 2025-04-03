@@ -283,10 +283,10 @@ namespace pinocchio
     /// frame
     PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) oYaba; // TODO: change with dense symmetric matrix6
 
-    /// \brief Articulated Body Inertia matrix with contact apparent inertia, of a given the subtree
-    /// and expressed in the WORLD coordinate frame
+    /// \brief Articulated Body Inertia matrix with constraint augmented inertia, expressed in the
+    /// WORLD coordinate frame
     PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6)
-    oYaba_contact; // TODO: change with dense symmetric matrix6
+    oYaba_augmented; // TODO: change with dense symmetric matrix6
 
     /// \brief Acceleration propagator
     PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) oL; // TODO: change with dense symmetric matrix6
