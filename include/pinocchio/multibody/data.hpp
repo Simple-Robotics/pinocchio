@@ -118,7 +118,7 @@ namespace pinocchio
     PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
     /// \brief Vector of pinocchio::JointData associated to the pinocchio::JointModel stored in
-    /// model, encapsulated in JointDataAccessor.
+    /// model
     JointDataVector joints;
 
     /// \brief Input configuration vector
