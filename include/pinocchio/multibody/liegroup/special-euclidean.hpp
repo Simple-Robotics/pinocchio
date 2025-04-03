@@ -249,7 +249,7 @@ namespace pinocchio
     static void dDifference_impl(
       const Eigen::MatrixBase<ConfigL_t> & q0,
       const Eigen::MatrixBase<ConfigR_t> & q1,
-      const Eigen::MatrixBase<JacobianOut_t> & J) const
+      const Eigen::MatrixBase<JacobianOut_t> & J)
     {
       PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
       PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
