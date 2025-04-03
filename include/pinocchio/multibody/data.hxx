@@ -179,10 +179,6 @@ namespace pinocchio
     /* Init for CRBA */
     M.setZero();
     Minv.setZero();
-    for (JointIndex i = 0; i < (JointIndex)(model.njoints); ++i)
-    {
-      Fcrb[i].resize(6, model.nv);
-    }
 
     computeNvSubtree(model);
 
