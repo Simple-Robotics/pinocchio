@@ -31,6 +31,7 @@ namespace boost
       const unsigned int /*version*/)
     {
       PINOCCHIO_MAKE_DATA_NVP(ar, data, joints);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, joints_augmented);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, q_in);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, v_in);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, a_in);

@@ -121,6 +121,10 @@ namespace pinocchio
     /// model
     JointDataVector joints;
 
+    /// \brief Vector of pinocchio::JointData associated to the pinocchio::JointModel stored in
+    /// model augmented by constraints
+    JointDataVector joints_augmented;
+
     /// \brief Input configuration vector
     ConfigVectorType q_in;
 
