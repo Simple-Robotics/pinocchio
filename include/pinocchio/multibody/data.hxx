@@ -20,8 +20,7 @@ namespace pinocchio
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   DataTpl<Scalar, Options, JointCollectionTpl>::DataTpl(const Model & model)
-  : joints(0)
-  , q_in(neutral(model))
+  : q_in(neutral(model))
   , v_in(VectorXs::Zero(model.nv))
   , a_in(VectorXs::Zero(model.nv))
   , tau_in(VectorXs::Zero(model.nv))
