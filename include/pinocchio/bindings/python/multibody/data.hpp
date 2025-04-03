@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2024 CNRS INRIA
+// Copyright (c) 2015-2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 //
 
 #ifndef __pinocchio_python_multibody_data_hpp__
@@ -141,6 +142,9 @@ namespace pinocchio
           .ADD_DATA_PROPERTY(
             oYaba,
             "Articulated Body Inertia of the sub-tree expressed in the WORLD coordinate system.")
+          .ADD_DATA_PROPERTY(
+            oYaba_augmented, "Articulated Body Inertia matrix with constraint augmented inertia, "
+                             "expressed in the WORLD coordinate system.")
           .ADD_DATA_PROPERTY(oL, "Acceleration propagator.")
           .ADD_DATA_PROPERTY(oK, "Inverse articulated inertia.")
           .ADD_DATA_PROPERTY(M, "The joint space inertia matrix")
