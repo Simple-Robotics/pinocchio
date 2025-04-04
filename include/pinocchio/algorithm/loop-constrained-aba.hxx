@@ -200,7 +200,7 @@ namespace pinocchio
         data.oa_gf[i] += (data.ov[parent] ^ ov);
 
       data.oinertias[i] = data.oYcrb[i] = data.oMi[i].act(model.inertias[i]);
-      data.oYaba[i] = data.oYcrb[i].matrix();
+      data.oYaba_augmented[i] = data.oYcrb[i].matrix();
 
       data.oh[i] = data.oYcrb[i] * ov; // necessary for ABA derivatives
       data.of[i] = ov.cross(data.oh[i]);
@@ -233,7 +233,7 @@ namespace pinocchio
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
-      auto & Ia = data.oYaba[i];
+      auto & Ia = data.oYaba_augmented[i];
 
       auto Jcols = jmodel.jointCols(data.J);
 
@@ -256,7 +256,7 @@ namespace pinocchio
         Ia.noalias() -= jdata.UDinv() * jdata.U().transpose();
         fi.toVector().noalias() +=
           Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
-        data.oYaba[parent] += Ia;
+        data.oYaba_augmented[parent] += Ia;
         data.of[parent] += fi;
       }
 
@@ -299,7 +299,7 @@ namespace pinocchio
         auto & crosscoupling_ij_Jcols_Dinv = mat2_tmp;
         crosscoupling_ij_Jcols_Dinv.noalias() = crosscoupling_ix_Jcols * jdata.Dinv();
 
-        data.oYaba[vertex_j].noalias() -=
+        data.oYaba_augmented[vertex_j].noalias() -=
           crosscoupling_ij_Jcols_Dinv
           * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ij * J, U() is
                                                 // actually edge_ij * J_cols * Dinv
@@ -308,7 +308,8 @@ namespace pinocchio
         const Matrix6 crosscoupling_ij_oL = crosscoupling_ij * oL;
         if (vertex_j == parent)
         {
-          data.oYaba[parent].noalias() += crosscoupling_ij_oL + crosscoupling_ij_oL.transpose();
+          data.oYaba_augmented[parent].noalias() +=
+            crosscoupling_ij_oL + crosscoupling_ij_oL.transpose();
         }
         else
         {
@@ -595,7 +596,7 @@ namespace pinocchio
           contact_velocity_error = vc1 - vc2_in_frame1;
           const Matrix6 A1 = oMc1.toActionMatrixInverse();
           const Matrix6 A1tA1 = A1.transpose() * A1;
-          data.oYaba[joint1_id].noalias() += mu * A1tA1;
+          data.oYaba_augmented[joint1_id].noalias() += mu * A1tA1;
 
           // Baumgarte
           if (check_expression_if_real<Scalar, false>(
@@ -620,7 +621,7 @@ namespace pinocchio
 
             const Matrix6 A2 =
               -A1; // only for 6D case. also used below for computing A2tA2 and A1tA2
-            data.oYaba[joint2_id].noalias() += mu * A1tA1;
+            data.oYaba_augmented[joint2_id].noalias() += mu * A1tA1;
             data.of[joint2_id].toVector().noalias() +=
               A2.transpose()
               * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.toVector());
@@ -643,7 +644,7 @@ namespace pinocchio
         else if (cmodel.type == CONTACT_3D)
         {
           const Matrix36 & A1 = oMc1.toActionMatrixInverse().template topRows<3>();
-          data.oYaba[joint1_id].noalias() += mu * A1.transpose() * A1;
+          data.oYaba_augmented[joint1_id].noalias() += mu * A1.transpose() * A1;
 
           if (check_expression_if_real<Scalar, false>(
                 isZero(corrector.Kp, static_cast<Scalar>(0.))
@@ -669,7 +670,7 @@ namespace pinocchio
 
             cdata.contact_acceleration_desired.linear().noalias() +=
               c1Mc2.rotation() * vc2.angular().cross(vc2.linear());
-            data.oYaba[joint2_id].noalias() += mu * A2.transpose() * A2;
+            data.oYaba_augmented[joint2_id].noalias() += mu * A2.transpose() * A2;
             data.of[joint2_id].toVector().noalias() +=
               A2.transpose()
               * (/*cdata.contact_force.toVector()*/ -mu * cdata.contact_acceleration_desired.linear());
