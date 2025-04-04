@@ -6,7 +6,9 @@
 #define __pinocchio_algorithm_delassus_operator_linear_complexity_hxx__
 
 #include "pinocchio/algorithm/check.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
+
+#include "pinocchio/algorithm/loop-constrained-aba.hpp"
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 
