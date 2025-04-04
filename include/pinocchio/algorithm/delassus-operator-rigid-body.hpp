@@ -307,6 +307,7 @@ namespace pinocchio
     {
       m_sum_compliance_damping = m_damping + m_compliance;
       m_sum_compliance_damping_inverse = m_sum_compliance_damping.cwiseInverse();
+      m_dirty = true;
     }
 
     // Holders
