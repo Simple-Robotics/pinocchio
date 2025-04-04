@@ -211,12 +211,12 @@ BOOST_AUTO_TEST_CASE(test_compute)
 
     for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
     {
-      const CustomData & custom_data = delassus_operator.getCustomData();
-      BOOST_CHECK(custom_data.joints[joint_id].S().isApprox(data_aba.joints[joint_id].S()));
-      BOOST_CHECK(custom_data.liMi[joint_id].isApprox(data_aba.liMi[joint_id]));
+      //      const CustomData & custom_data = delassus_operator.getCustomData();
+      BOOST_CHECK(data.joints[joint_id].S().isApprox(data_aba.joints[joint_id].S()));
+      BOOST_CHECK(data.liMi[joint_id].isApprox(data_aba.liMi[joint_id]));
       //      BOOST_CHECK(custom_data.oMi[joint_id].isApprox(data_aba.oMi[joint_id])); //
       //      minimal::ABA does not compute this quantity
-      BOOST_CHECK(custom_data.Yaba[joint_id].isApprox(data_aba.Yaba[joint_id]));
+      BOOST_CHECK(data.Yaba[joint_id].isApprox(data_aba.Yaba[joint_id]));
     }
     BOOST_CHECK(delassus_operator.getCustomData().u.isApprox(data_aba.u));
 
