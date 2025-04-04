@@ -258,7 +258,7 @@ namespace pinocchio
       typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Motion) MotionVector;
       typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Matrix6Vector;
 
-      CustomData(const Model & model, const Data & data, const Eigen::DenseIndex size)
+      CustomData(const Model & model, const Data & data)
       : liMi(size_t(model.njoints), SE3::Identity())
       , oMi(size_t(model.njoints), SE3::Identity())
       , a(size_t(model.njoints), Motion::Zero())
@@ -270,7 +270,6 @@ namespace pinocchio
       , u(model.nv)
       , ddq(model.nv)
       , f(size_t(model.njoints))
-      , tmp_vec(size)
       {
       }
 
@@ -282,7 +281,6 @@ namespace pinocchio
       typename Data::JointDataVector joints_augmented;
       VectorXs u, ddq;
       ForceVector f;
-      Vector tmp_vec;
     };
 
     const CustomData & getCustomData() const
