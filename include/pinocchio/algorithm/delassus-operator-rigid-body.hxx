@@ -330,9 +330,9 @@ namespace pinocchio
         const ConstraintModel & cmodel = constraint_models_ref[ee_id];
         const ConstraintData & cdata = constraint_datas_ref[ee_id];
         const auto csize = cmodel.size();
+        const auto rhs_rows = rhs.middleRows(row_id, csize);
 
-        cmodel.jacobianTransposeMatrixProduct(
-          model_ref, data_ref, cdata, rhs.middleRows(row_id, csize), u, AddTo());
+        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, rhs_rows, u, AddTo());
 
         row_id += csize;
       }
