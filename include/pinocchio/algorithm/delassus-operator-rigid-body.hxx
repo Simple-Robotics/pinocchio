@@ -459,6 +459,9 @@ namespace pinocchio
       }
     }
 
+    typedef Eigen::Map<VectorXs> MapVectorXs;
+    MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
+
     // Make a pass over the whole set of constraints to project back the joint accelerations onto
     // the constraints
     mapJointMotionsToConstraintMotions(
