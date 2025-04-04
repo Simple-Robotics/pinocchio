@@ -64,6 +64,7 @@ namespace pinocchio
   , ddq(VectorXs::Zero(model.nv))
   , Yaba((std::size_t)model.njoints, Inertia::Matrix6::Zero())
   , oYaba((std::size_t)model.njoints, Inertia::Matrix6::Zero())
+  , oYaba_augmented((std::size_t)model.njoints, Inertia::Matrix6::Zero())
   , oL((std::size_t)model.njoints, Inertia::Matrix6::Zero())
   , oK((std::size_t)model.njoints, Inertia::Matrix6::Zero())
   , u(VectorXs::Zero(model.nv))
