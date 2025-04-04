@@ -143,6 +143,9 @@ namespace pinocchio
     ConstraintDataVector & constraint_datas_ref = constraint_datas();
     typedef typename Data::Vector3 Vector3;
 
+    // Compute joint ordering for solveInPlace
+    computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
+
     for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
       custom_data.Yaba[i] = custom_data.Yaba_augmented[i] = model_ref.inertias[i].matrix();
