@@ -496,6 +496,7 @@ namespace pinocchio
     {
       typedef typename Model::JointIndex JointIndex;
       typedef typename Data::Matrix6x Matrix6x;
+      typedef typename Data::Matrix6 Matrix6;
 
       typedef typename SizeDepType<JointModel::NV>::template ColsReturn<Matrix6x>::Type ColBlock;
       ColBlock J_cols = jmodel.jointCols(data.J);
