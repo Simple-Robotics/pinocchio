@@ -223,6 +223,13 @@ BOOST_AUTO_TEST_CASE(test_6D_descendants_reversed)
 
   BOOST_CHECK(data_reversed.ddq.isApprox(data.ddq, 1e-8));
   BOOST_CHECK(data_ref.ddq.isApprox(data_reversed.ddq, 1e-8));
+
+  // Check
+  for (JointIndex j = 1; j < size_t(model.njoints); ++j)
+  {
+    if (data.constraints_supported_dim[j] == 0)
+      BOOST_CHECK(data.neighbour_links[j].size() == 0);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_12D_descendants_redundant_reversed)
