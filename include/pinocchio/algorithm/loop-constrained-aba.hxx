@@ -789,8 +789,8 @@ namespace pinocchio
     typedef LCABAReducedBackwardStep<Scalar, Options, JointCollectionTpl> ReducedPass2;
     typedef LCABAReducedForwardStep<Scalar, Options, JointCollectionTpl> ReducedPass3;
     data.g.setZero();
-    int iter = 0;
-    for (iter = 1; iter < settings.max_iter; iter++)
+    int iter = 1;
+    for (; iter < settings.max_iter; iter++)
     {
       settings.absolute_residual = Scalar(0);
       for (JointIndex j = 1; j < (JointIndex)model.njoints; ++j)
