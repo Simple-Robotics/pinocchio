@@ -356,9 +356,9 @@ namespace pinocchio
 
   // A reduced backward sweep that only propagates the affine terms
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  struct LCABABackwardStepReduced
+  struct LCABAReducedBackwardStep
   : public fusion::JointUnaryVisitorBase<
-      LCABABackwardStepReduced<Scalar, Options, JointCollectionTpl>>
+      LCABAReducedBackwardStep<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
@@ -786,7 +786,7 @@ namespace pinocchio
         Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
     }
 
-    typedef LCABABackwardStepReduced<Scalar, Options, JointCollectionTpl> ReducedPass2;
+    typedef LCABAReducedBackwardStep<Scalar, Options, JointCollectionTpl> ReducedPass2;
     typedef LCABAReducedForwardStep<Scalar, Options, JointCollectionTpl> ReducedPass3;
     data.g.setZero();
     int iter = 0;
