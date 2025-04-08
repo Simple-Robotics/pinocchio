@@ -754,6 +754,12 @@ namespace pinocchio
       data.m_jdata_ref.tangent_map *= m_scaling;
     }
 
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<JointModel>::type lie_group_impl() const
+    {
+      return m_jmodel_ref.template lie_group_impl<LieGroupMap>();
+    }
+
     static std::string classname()
     {
       return std::string("JointModelMimic");

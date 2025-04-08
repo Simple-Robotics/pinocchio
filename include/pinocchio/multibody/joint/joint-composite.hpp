@@ -378,6 +378,10 @@ namespace pinocchio
     void calc_tangent_map_impl(
       JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const;
 
+    // Declaration: must be define after Lie group and joint visitors
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<JointDerived>::type lie_group_impl() const;
+
     int nv_impl() const
     {
       return m_nv;

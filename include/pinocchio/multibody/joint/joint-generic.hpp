@@ -401,6 +401,14 @@ namespace pinocchio
       ::pinocchio::calc_tangent_map(*this, data, q.derived());
     }
 
+    // Declaration of overload : must be define after Lie group and joint visitors
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<JointModelTpl>::type lie_group_impl() const
+    {
+      // TODO: Visiting
+      visiting::
+    }
+
     template<typename VectorLike, typename Matrix6Like>
     void calc_aba(
       JointDataDerived & data,
