@@ -674,7 +674,7 @@ namespace pinocchio
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     Eigen::MatrixBase<MatrixOut_t> & Mout,
-    const AssignmentOperatorType op) const;
+    const AssignmentOperatorType op) const
   {
     Index nv_(nv()), nq_(nq());
     PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
@@ -703,7 +703,7 @@ namespace pinocchio
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     Eigen::MatrixBase<MatrixOut_t> & Mout,
-    const AssignmentOperatorType op) const;
+    const AssignmentOperatorType op) const
   {
     Index nv_(nv()), nq_(nq());
     PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
