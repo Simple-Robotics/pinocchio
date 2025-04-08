@@ -5,8 +5,6 @@
 #ifndef __pinocchio_algorithm_loop_constrained_aba_hxx__
 #define __pinocchio_algorithm_loop_constrained_aba_hxx__
 
-#include <algorithm>
-
 /// @cond DEV
 
 namespace pinocchio
@@ -83,11 +81,23 @@ namespace pinocchio
 
     while (leaf_vertices.size() > 0)
     {
-      const auto leaf_with_least_neighbors_it =
-        ::std::min_element(leaf_vertices.begin(), leaf_vertices.end());
-      const JointIndex leaf_with_least_neighbors = *leaf_with_least_neighbors_it;
+      JointIndex joint_id_with_least_neighbors = std::numeric_limits<JointIndex>::max();
+      ;
+      size_t least_neighbours = std::numeric_limits<size_t>::max();
 
-      const JointIndex joint_id = leaf_with_least_neighbors;
+      for (const auto joint_id : leaf_vertices)
+      {
+        assert(joint_id != 0);
+        const auto leaf_num_neighours = neighbours[joint_id].size();
+        if (leaf_num_neighours < least_neighbours)
+        {
+          least_neighbours = leaf_num_neighours;
+          joint_id_with_least_neighbors = joint_id;
+        }
+      }
+
+      const JointIndex joint_id = joint_id_with_least_neighbors;
+      assert(joint_id != 0);
       leaf_vertices.remove(joint_id);
       elimination_order.push_back(joint_id);
 
