@@ -170,6 +170,20 @@ namespace pinocchio
     // void tangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
     // void cotangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
 
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<Derived>::type lie_group() const
+    {
+      return derived().lie_group_impl();
+    }
+
+    // Default implementation
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<Derived>::type lie_group_impl() const
+    {
+      typedef typename LieGroupMap::template operation<Derived>::type lgo;
+      return lgo();
+    }
+
     int nv() const
     {
       return derived().nv_impl();

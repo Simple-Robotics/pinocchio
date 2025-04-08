@@ -9,6 +9,7 @@
 #include "pinocchio/multibody/liegroup/cartesian-product.hpp"
 #include "pinocchio/multibody/liegroup/special-orthogonal.hpp"
 #include "pinocchio/multibody/liegroup/special-euclidean.hpp"
+#include "pinocchio/multibody/liegroup/liegroup-collection.hpp"
 
 #include "pinocchio/multibody/joint/fwd.hpp"
 
@@ -34,8 +35,23 @@ namespace pinocchio
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  struct LieGroupMap::operation<JointModelTpl<Scalar, Options, JointCollectionTpl>>
+  {
+    typedef CartesianProductOperationVariantTpl<
+      Scalar,
+      Options,
+      LieGroupCollectionDefaultTpl<Scalar, Option>>
+      type;
+  };
+
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>>
   {
+    typedef CartesianProductOperationVariantTpl<
+      Scalar,
+      Options,
+      LieGroupCollectionDefaultTpl<Scalar, Option>>
+      type;
   };
 
   template<typename Scalar, int Options>
