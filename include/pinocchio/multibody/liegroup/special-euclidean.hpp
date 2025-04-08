@@ -380,6 +380,120 @@ namespace pinocchio
       }
     }
 
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      AssignmentOperatorType op) const
+    {
+      switch (op)
+      {
+      case SETTO:
+        TM.setZero();
+        // Linear
+        TM(0, 0) = q[2];
+        TM(1, 0) = q[3];
+        TM(0, 1) = -q[3];
+        TM(1, 1) = q[2];
+        // Angular
+        TM(2, 2) = -q[3];
+        TM(3, 2) = q[2];
+        break;
+      case ADDTO:
+        TM(0, 0) += q[2];
+        TM(1, 0) += q[3];
+        TM(0, 1) -= q[3];
+        TM(1, 1) += q[2];
+        // Angular
+        TM(2, 2) -= q[3];
+        TM(3, 2) += q[2];
+        break;
+      case RMTO:
+        TM(0, 0) -= q[2];
+        TM(1, 0) -= q[3];
+        TM(0, 1) += q[3];
+        TM(1, 1) -= q[2];
+        // Angular
+        TM(2, 2) += q[3];
+        TM(3, 2) -= q[2];
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      typedef typename MatrixIn_t::Scalar Scalar;
+      enum
+      {
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixIn_t)::Options
+      };
+
+      Eigen::Matrix<Scalar, 2, 2, Options> R;
+      R << q[2], -q[3], q[3], q[2];
+
+      switch (op)
+      {
+      case SETTO:
+        Mout.setZero();
+        Mout.template topRows<2>() = R * Min.template topRows<2>();
+        Mout.template bottomRows<2>() = R.template rightCols<1>() * Min.template bottomRows<1>();
+        break;
+      case ADDTO:
+        Mout.template topRows<2>() += R * Min.template topRows<2>();
+        Mout.template bottomRows<2>() += R.template rightCols<1>() * Min.template bottomRows<1>();
+        break;
+      case RMTO:
+        Mout.template topRows<2>() -= R * Min.template topRows<2>();
+        Mout.template bottomRows<2>() -= R.template rightCols<1>() * Min.template bottomRows<1>();
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void coTangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      typedef typename MatrixIn_t::Scalar Scalar;
+      enum
+      {
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixIn_t)::Options
+      };
+
+      Eigen::Matrix<Scalar, 2, 2, Options> RT;
+      RT << q[2], q[3], -q[3], q[2];
+
+      switch (op)
+      {
+      case SETTO:
+        Mout.setZero();
+        Mout.template topRows<2>() = RT * Min.template topRows<2>();
+        Mout.template bottomRows<1>() = RT.template bottomRows<1>() * Min.template bottomRows<2>();
+        break;
+      case ADDTO:
+        Mout.template topRows<2>() += RT * Min.template topRows<2>();
+        Mout.template bottomRows<1>() += RT.template bottomRows<1>() * Min.template bottomRows<2>();
+        break;
+      case RMTO:
+        Mout.template topRows<2>() -= RT * Min.template topRows<2>();
+        Mout.template bottomRows<1>() -= RT.template bottomRows<1>() * Min.template bottomRows<2>();
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
@@ -787,6 +901,116 @@ namespace pinocchio
       case RMTO:
         Jexp6<RMTO>(MotionRef<const Tangent_t>(v.derived()), J.derived());
         break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      AssignmentOperatorType op) const
+    {
+      typedef typename TangentMap_t::Scalar Scalar;
+      enum
+      {
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(TangentMap_t)::Options
+      };
+
+      ConstQuaternionMap_t quat(q.derived().template tail<4>().data());
+      Eigen::Matrix<Scalar, 4, 3, Options> TMq;
+      quaternion::tangentMap(quat, TMq);
+
+      switch (op)
+      {
+      case SETTO:
+        TM.setZero();
+        TM.template topLeftCorner<3, 3>() = quat.matrix();
+        TM.template bottomRightCorner<4, 3>() = TMq;
+        break;
+      case ADDTO:
+        TM.template topLeftCorner<3, 3>() += quat.matrix();
+        TM.template bottomRightCorner<4, 3>() += TMq;
+        break;
+      case RMTO:
+        TM.template topLeftCorner<3, 3>() -= quat.matrix();
+        TM.template bottomRightCorner<4, 3>() -= TMq;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      typedef typename TangentMap_t::Scalar Scalar;
+      enum
+      {
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(TangentMap_t)::Options
+      };
+
+      ConstQuaternionMap_t quat(q.derived().template tail<4>().data());
+      Eigen::Matrix<Scalar, 4, 3, Options> TMq;
+      quaternion::tangentMap(quat, TMq);
+
+      switch (op)
+      {
+      case SETTO:
+        Mout.setZero();
+        Mout.template topRows<3>() = quat.matrix() * Min.template topRows<3>();
+        Mout.template bottomRows<4>() = TMq * Min.template bottomRows<3>();
+        break;
+      case ADDTO:
+        Mout.template topRows<3>() += quat.matrix() * Min.template topRows<3>();
+        Mout.template bottomRows<4>() += TMq * Min.template bottomRows<3>();
+        break;
+      case RMTO:
+        Mout.template topRows<3>() -= quat.matrix() * Min.template topRows<3>();
+        Mout.template bottomRows<4>() -= TMq * Min.template bottomRows<3>();
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void coTangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      typedef typename TangentMap_t::Scalar Scalar;
+      enum
+      {
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(TangentMap_t)::Options
+      };
+
+      ConstQuaternionMap_t quat(q.derived().template tail<4>().data());
+      Eigen::Matrix<Scalar, 4, 3, Options> TMq;
+      quaternion::tangentMap(quat, TMq);
+
+      switch (op)
+      {
+      case SETTO:
+        Mout.setZero();
+        Mout.template topRows<3>() = quat.matrix().transpose() * Min.template topRows<3>();
+        Mout.template bottomRows<3>() = TMq.transpose() * Min.template bottomRows<4>();
+        break;
+      case ADDTO:
+        Mout.template topRows<3>() += quat.matrix().transpose() * Min.template topRows<3>();
+        Mout.template bottomRows<3>() += TMq.transpose() * Min.template bottomRows<4>();
+        break;
+      case RMTO:
+        Mout.template topRows<3>() -= quat.matrix().transpose() * Min.template topRows<3>();
+        Mout.template bottomRows<3>() -= TMq.transpose() * Min.template bottomRows<4>();
       default:
         assert(false && "Wrong Op requesed value");
         break;

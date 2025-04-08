@@ -602,7 +602,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     {
       ConstQuaternionMap_t quat(q.derived().data());
       TangentMap_t _TM;
-      quaternion::tangent_map(quat, _TM);
+      quaternion::tangentMap(quat, _TM);
       switch (op)
       {
       case SETTO:

@@ -311,7 +311,7 @@ namespace pinocchio
     /// \param[out] TM The resulting Jacobian of the log operator.
     ///
     template<typename QuaternionLike, typename Matrix43Like>
-    inline void tangent_map(
+    inline void tangentMap(
       const Eigen::QuaternionBase<QuaternionLike> & quat, const Eigen::MatrixBase<Matrix3Like> & TM)
     {
       Matrix43Like & TMm PINOCCHIO_EIGEN_CONST_CAST(Matrix43Like, TM);
