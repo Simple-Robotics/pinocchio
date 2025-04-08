@@ -106,7 +106,7 @@ namespace pinocchio
       // If the number of children joints of parent is reaching zero, this means that parent is now
       // a leaf node.
       if (num_children[parent_id] == 0 && parent_id != 0)
-        leaf_vertices.push_back(parent_id);
+        leaf_vertices.push_front(parent_id);
 
       data.constraints_supported_dim[parent_id] += data.constraints_supported_dim[joint_id];
       const auto & joint_neighbours = neighbours[joint_id];
