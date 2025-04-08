@@ -336,6 +336,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/reference.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/shared-ptr.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/static-if.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/std-vector.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/string-generator.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/string.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/utils/template-template-parameter.hpp
