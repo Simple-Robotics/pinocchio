@@ -304,7 +304,34 @@ namespace pinocchio
         scale0 * quat0.coeffs() + scale1 * quat1.coeffs();
     }
 
-  } // namespace quaternion
+    ///
+    ///  \brief Computes the tangentmap for a unit quaternion.
+    ///
+    /// \param[in] quat A unit quaternion representing the input rotation.
+    /// \param[out] TM The resulting Jacobian of the log operator.
+    ///
+    template<typename QuaternionLike, typename Matrix43Like>
+    inline void tangent_map(
+      const Eigen::QuaternionBase<QuaternionLike> & quat, const Eigen::MatrixBase<Matrix3Like> & TM)
+    {
+      Matrix43Like & TMm PINOCCHIO_EIGEN_CONST_CAST(Matrix43Like, TM);
+      typedef typename QuaternionLike::Scalar Scalar;
 
+      TMm(0, 0) = Scalar(.5) * quat.w();
+      TMm(1, 0) = Scalar(.5) * quat.z();
+      TMm(2, 0) = Scalar(-.5) * quat.y();
+      TMm(3, 0) = Scalar(-.5) * quat.x();
+
+      TMm(0, 1) = Scalar(-.5) * quat.z();
+      TMm(1, 1) = Scalar(.5) * quat.w();
+      TMm(2, 1) = Scalar(.5) * quat.x();
+      TMm(3, 1) = Scalar(-.5) * quat.y();
+
+      TMm(0, 2) = Scalar(.5) * quat.y();
+      TMm(1, 2) = Scalar(-.5) * quat.x();
+      TMm(2, 2) = Scalar(.5) * quat.w();
+      TMm(3, 2) = Scalar(-.5) * quat.z();
+    }
+  } // namespace quaternion
 } // namespace pinocchio
 #endif // #ifndef __pinocchio_math_quaternion_hpp__

@@ -243,6 +243,34 @@ namespace pinocchio
       }
     }
 
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      AssignmentOperatorType op) const
+    {
+      switch (op)
+      {
+      case SETTO:
+        TM(0, 0) = -q[1];
+        TM(1, 0) = q[0];
+        break;
+      case ADDTO:
+        TM(0, 0) -= q[1];
+        TM(1, 0) += q[0];
+        break;
+      case RMTO:
+        TM(0, 0) += q[1];
+        TM(1, 0) -= q[0];
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+    // We use default tangentMapProduct_impl and coTangentMapProduct_impl
+    // because TM is a dense matrix for SO(2)
+
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
@@ -565,6 +593,34 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
         break;
       }
     }
+
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      AssignmentOperatorType op) const
+    {
+      ConstQuaternionMap_t quat(q.derived().data());
+      TangentMap_t _TM;
+      quaternion::tangent_map(quat, _TM);
+      switch (op)
+      {
+      case SETTO:
+        TM = _TM;
+        break;
+      case ADDTO:
+        TM += _TM;
+        break;
+      case RMTO:
+        TM -= _TM;
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+    // We use default tangentMapProduct_impl and coTangentMapProduct_impl
+    // because TM is a dense matrix for SO(3)
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     static void dIntegrateTransport_dq_impl(
