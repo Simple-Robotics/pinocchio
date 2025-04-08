@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2018-2025 INRIA
-// Copyright (c) 2016-2018 CNRS INRIA
+// Copyright (c) 2016-2018 CNRS
 //
 
 #ifndef __pinocchio_math_matrix_hpp__
@@ -382,9 +382,15 @@ namespace pinocchio
     return ReturnType(mat.const_cast_derived());
   }
 
+  /// \brief Helper to make the matrix symmetric
+  ///
+  /// \param[in,out] mat Input matrix to symmetrize.
+  /// \param[in] mode Part of the matrix to symmetrize : Eigen::Upper or Eigen::Lower
   template<typename Matrix>
   void make_symmetric(const Eigen::MatrixBase<Matrix> & mat, const int mode = Eigen::Upper)
   {
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(mode == Eigen::Upper || mode == Eigen::Lower);
+
     if (mode == Eigen::Upper)
     {
       mat.const_cast_derived().template triangularView<Eigen::StrictlyLower>() =
