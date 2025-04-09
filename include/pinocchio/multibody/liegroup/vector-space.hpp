@@ -272,10 +272,10 @@ namespace pinocchio
     // const Eigen::MatrixBase<ConfigR_t> & q1)
 
     template<class Config_t, class TangentMap_t>
-    void tangentMap_impl(
+    static void tangentMap_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op) const
+      AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -295,11 +295,11 @@ namespace pinocchio
     }
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void tangentMapProduct_impl(
+    static void tangentMapProduct_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,
-      const AssignmentOperatorType op) const
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -319,11 +319,11 @@ namespace pinocchio
     }
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void coTangentMapProduct_impl(
+    static void coTangentMapProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,
-      const AssignmentOperatorType op) const
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
