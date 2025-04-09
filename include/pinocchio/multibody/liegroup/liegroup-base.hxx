@@ -287,7 +287,7 @@ namespace pinocchio
   void LieGroupBase<Derived>::tangentMap(
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<TangentMap_t> & TM,
-    AssignmentOperatorType op = SETTO) const
+    const AssignmentOperatorType op = SETTO) const
   {
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(TangentMap_t, TangentMapMatrix_t);

@@ -384,7 +384,7 @@ namespace pinocchio
     static void tangentMap_impl(
       const Eigen::MatrixBase<Config_t> & q,
       Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op)
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -911,7 +911,7 @@ namespace pinocchio
     static void tangentMap_impl(
       const Eigen::MatrixBase<Config_t> & q,
       Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op)
+      const AssignmentOperatorType op)
     {
       typedef typename TangentMap_t::Scalar Scalar;
       enum

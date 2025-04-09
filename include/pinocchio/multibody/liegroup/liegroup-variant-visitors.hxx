@@ -799,6 +799,85 @@ namespace pinocchio
     Operation::run(lg, typename Operation::ArgsType(q, v, J, arg));
   }
 
+  template<class Config_t, class TangentMap_t>
+  struct LieGroupTangentMapVisitor
+  : visitor::LieGroupVisitorBase<LieGroupTangentMapVisitor<Config_t, TangentMap_t>>
+  {
+    typedef boost::fusion::vector<
+      const Eigen::MatrixBase<Config_t> &,
+      const Eigen::MatrixBase<TangentMap_t> &,
+      const AssignmentOperatorType>
+      ArgsType;
+
+    LieGroupTangentMapVisitor(ArgsType & args)
+    : args(args)
+    {
+    }
+    ArgsType & args;
+
+    template<typename LieGroupDerived>
+    static void algo(
+      const LieGroupBase<LieGroupDerived> & lg,
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op)
+    {
+      lg.tangentMap(q, TM op);
+    }
+  };
+
+  template<typename LieGroupCollection, class Config_t, class TangentMap_t>
+  void tangentMap(
+    const LieGroupGenericTpl<LieGroupCollection> & lg,
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<TangentMap_t> & TM,
+    const AssignmentOperatorType op)
+  {
+    typedef LieGroupTangentMapVisitor<Config_t, TangentMap_t> Operation;
+    Operation::run(lg, typename Operation::ArgsType(q, TM, op));
+  }
+
+#define PINOCCHIO_LG_TM_PROD_VISITOR(Name, _method)                                                \
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>                                    \
+  struct LieGroup##Name##Visitor                                                                   \
+  : visitor::LieGroupVisitorBase<LieGroup##Name##Visitor<Config_t, MatrixIn_t, MatrixOut_t>>       \
+  {                                                                                                \
+    typedef boost::fusion::vector<                                                                 \
+      const Eigen::MatrixBase<Config_t> &,                                                         \
+      const Eigen::MatrixBase<MatrixIn_t> &,                                                       \
+      const Eigen::MatrixBase<MatrixOut_t> &,                                                      \
+      const AssignmentOperatorType>                                                                \
+      ArgsType;                                                                                    \
+    LieGroup##Name##Visitor(ArgsType & args)                                                       \
+    : args(args)                                                                                   \
+    {                                                                                              \
+    }                                                                                              \
+    ArgsType & args;                                                                               \
+    template<typename LieGroupDerived>                                                             \
+    static void algo(                                                                              \
+      const LieGroupBase<LieGroupDerived> & lg,                                                    \
+      const Eigen::MatrixBase<Config_t> & q,                                                       \
+      const Eigen::MatrixBase<MatrixIn_t> & Min,                                                   \
+      const Eigen::MatrixBase<MatrixOut_t> & Mout,                                                 \
+      const AssignmentOperatorType op)                                                             \
+    {                                                                                              \
+      lg._method(q, Min, Mout, op);                                                                \
+    }                                                                                              \
+  };                                                                                               \
+  template<typename LieGroupCollection, class Config_t, class MatrixIn_t, class MatrixOut_t>       \
+  void _method(                                                                                    \
+    const LieGroupGenericTpl<LieGroupCollection> & lg, const Eigen::MatrixBase<Config_t> & q,      \
+    const Eigen::MatrixBase<MatrixIn_t> & Min, const Eigen::MatrixBase<MatrixOut_t> & Mout,        \
+    const AssignmentOperatorType op)                                                               \
+  {                                                                                                \
+    typedef LieGroup##Name##Visitor<Config_t, Tangent_t, MatrixIn_t, MatrixOut_t> Operation;       \
+    Operation::run(lg, typename Operation::ArgsType(q, Min, Mout, op));                            \
+  }
+
+  PINOCCHIO_LG_TM_PROD_VISITOR(TangentMapProduct, tangentMapProduct)
+  PINOCCHIO_LG_TM_PROD_VISITOR(CoTangentMapProduct, coTangentMapProduct)
+#undef PINOCCHIO_LG_TM_PROD_VISITOR
+
 } // namespace pinocchio
 
 #undef PINOCCHIO_LG_CHECK_VECTOR_SIZE

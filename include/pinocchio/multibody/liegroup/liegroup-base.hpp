@@ -565,7 +565,7 @@ namespace pinocchio
     void tangentMap(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op = SETTO) const;
+      const AssignmentOperatorType op = SETTO) const;
 
     // Mout op TM * Min, it is the jacobian vector product
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>

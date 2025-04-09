@@ -247,7 +247,7 @@ namespace pinocchio
     static void tangentMap_impl(
       const Eigen::MatrixBase<Config_t> & q,
       Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op)
+      const AssignmentOperatorType op)
     {
       switch (op)
       {
@@ -598,7 +598,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
     static void tangentMap_impl(
       const Eigen::MatrixBase<Config_t> & q,
       Eigen::MatrixBase<TangentMap_t> & TM,
-      AssignmentOperatorType op)
+      const AssignmentOperatorType op)
     {
       ConstQuaternionMap_t quat(q.derived().data());
       TangentMap_t _TM;
