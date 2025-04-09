@@ -251,6 +251,138 @@ namespace pinocchio
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(dIntegrateStepAlgo);
 
   template<typename Visitor, typename JointModel>
+  struct TangentMapStepAlgo;
+
+  template<typename LieGroup_t, typename ConfigVectorIn, typename TangentMapMatrixType>
+  struct TangentMapStep
+  : public fusion::JointUnaryVisitorBase<
+      TangentMapStep<LieGroup_t, ConfigVectorIn, TangentMapMatrixType>>
+  {
+    typedef boost::fusion::
+      vector<const ConfigVectorIn &, TangentMapMatrixType &, const AssignmentOperatorType &>
+        ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_3(TangentMapStepAlgo, TangentMapStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapStepAlgo
+  {
+    template<typename ConfigVectorIn, typename TangentVector, typename TangentMapMatrixType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMap(
+        jmodel.jointConfigSelector(q.derived()),
+        jmodel.jointQVBlock(PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM)), op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(TangentMapStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapProductStepAlgo;
+
+  template<
+    typename LieGroup_t,
+    typename ConfigVectorIn,
+    typename MatrixInType,
+    typename MatrixOutType>
+  struct TangentMapProductStep
+  : public fusion::JointUnaryVisitorBase<
+      TangentMapProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
+  {
+    typedef boost::fusion::vector<
+      const ConfigVectorIn &,
+      const MatrixInType &,
+      MatrixOutType &,
+      const AssignmentOperatorType &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(TangentMapProductStepAlgo, TangentMapProductStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapProductStepAlgo
+  {
+    template<
+      typename ConfigVectorIn,
+      typename TangentVector,
+      typename MatrixInType,
+      typename MatrixOutType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<MatrixInType> & mat_in,
+      const Eigen::MatrixBase<MatrixOutType> & mat_out,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMapProduct(
+        jmodel.jointConfigSelector(q.derived()), jmodel.jointRows(mat_in.derived()),
+        jmodel.jointQRows(PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out)), op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(TangentMapProductStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct CoTangentMapProductStepAlgo;
+
+  template<
+    typename LieGroup_t,
+    typename ConfigVectorIn,
+    typename MatrixInType,
+    typename MatrixOutType>
+  struct CoTangentMapProductStep
+  : public fusion::JointUnaryVisitorBase<
+      CoTangentMapProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
+  {
+    typedef boost::fusion::vector<
+      const ConfigVectorIn &,
+      const MatrixInType &,
+      MatrixOutType &,
+      const AssignmentOperatorType &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(CoTangentMapProductStepAlgo, CoTangentMapProductStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct CoTangentMapProductStepAlgo
+  {
+    template<
+      typename ConfigVectorIn,
+      typename TangentVector,
+      typename MatrixInType,
+      typename MatrixOutType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<MatrixInType> & mat_in,
+      const Eigen::MatrixBase<MatrixOutType> & mat_out,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.coTangentMapProduct(
+        jmodel.jointConfigSelector(q.derived()), jmodel.jointQRows(mat_in.derived()),
+        jmodel.jointRows(PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out)), op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(CoTangentMapProductStepAlgo);
+
+  template<typename Visitor, typename JointModel>
   struct dIntegrateTransportStepAlgo;
 
   template<
