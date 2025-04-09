@@ -950,10 +950,10 @@ namespace pinocchio
       Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op)
     {
-      typedef typename TangentMap_t::Scalar Scalar;
+      typedef typename MatrixOut_t::Scalar Scalar;
       enum
       {
-        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(TangentMap_t)::Options
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixOut_t)::Options
       };
 
       ConstQuaternionMap_t quat(q.derived().template tail<4>().data());
@@ -986,10 +986,10 @@ namespace pinocchio
       Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op)
     {
-      typedef typename TangentMap_t::Scalar Scalar;
+      typedef typename MatrixOut_t::Scalar Scalar;
       enum
       {
-        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(TangentMap_t)::Options
+        Options = PINOCCHIO_EIGEN_PLAIN_TYPE(MatrixOut_t)::Options
       };
 
       ConstQuaternionMap_t quat(q.derived().template tail<4>().data());

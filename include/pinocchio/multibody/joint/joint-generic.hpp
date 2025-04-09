@@ -406,7 +406,8 @@ namespace pinocchio
     typename LieGroupMap::template operation<JointModelTpl>::type lie_group_impl() const
     {
       // TODO: Visiting
-      visiting::
+      typedef typename LieGroupMap::template operation<JointModelTpl>::type lgo;
+      return lgo();
     }
 
     template<typename VectorLike, typename Matrix6Like>

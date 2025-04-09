@@ -287,11 +287,11 @@ namespace pinocchio
   void LieGroupBase<Derived>::tangentMap(
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<TangentMap_t> & TM,
-    const AssignmentOperatorType op = SETTO) const
+    const AssignmentOperatorType op) const
   {
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(TangentMap_t, TangentMapMatrix_t);
-    derived().tangentMap_impl(q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMap_t, TM));
+    derived().tangentMap_impl(q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMap_t, TM), op);
   }
 
   template<class Derived>
@@ -300,14 +300,14 @@ namespace pinocchio
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     const Eigen::MatrixBase<MatrixOut_t> & Mout,
-    const AssignmentOperatorType op = SETTO) const
+    const AssignmentOperatorType op) const
   {
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.rows(), nv());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Mout.rows(), nq());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.cols(), Mout.cols());
     derived().tangentMapProduct_impl(
-      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout));
+      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout), op);
   }
 
   template<class Derived>
@@ -316,14 +316,14 @@ namespace pinocchio
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     const Eigen::MatrixBase<MatrixOut_t> & Mout,
-    const AssignmentOperatorType op = SETTO) const
+    const AssignmentOperatorType op) const
   {
     EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.rows(), nq());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Mout.rows(), nv());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.cols(), Mout.cols());
     derived().coTangentMapProduct_impl(
-      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout));
+      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout), op);
   }
 
   /**

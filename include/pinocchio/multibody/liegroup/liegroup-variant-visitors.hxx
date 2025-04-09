@@ -822,7 +822,7 @@ namespace pinocchio
       const Eigen::MatrixBase<TangentMap_t> & TM,
       const AssignmentOperatorType op)
     {
-      lg.tangentMap(q, TM op);
+      lg.tangentMap(q, TM, op);
     }
   };
 
@@ -870,7 +870,7 @@ namespace pinocchio
     const Eigen::MatrixBase<MatrixIn_t> & Min, const Eigen::MatrixBase<MatrixOut_t> & Mout,        \
     const AssignmentOperatorType op)                                                               \
   {                                                                                                \
-    typedef LieGroup##Name##Visitor<Config_t, Tangent_t, MatrixIn_t, MatrixOut_t> Operation;       \
+    typedef LieGroup##Name##Visitor<Config_t, MatrixIn_t, MatrixOut_t> Operation;                  \
     Operation::run(lg, typename Operation::ArgsType(q, Min, Mout, op));                            \
   }
 

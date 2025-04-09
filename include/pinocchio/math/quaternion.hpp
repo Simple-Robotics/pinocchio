@@ -312,9 +312,10 @@ namespace pinocchio
     ///
     template<typename QuaternionLike, typename Matrix43Like>
     inline void tangentMap(
-      const Eigen::QuaternionBase<QuaternionLike> & quat, const Eigen::MatrixBase<Matrix3Like> & TM)
+      const Eigen::QuaternionBase<QuaternionLike> & quat,
+      const Eigen::MatrixBase<Matrix43Like> & TM)
     {
-      Matrix43Like & TMm PINOCCHIO_EIGEN_CONST_CAST(Matrix43Like, TM);
+      Matrix43Like & TMm(PINOCCHIO_EIGEN_CONST_CAST(Matrix43Like, TM));
       typedef typename QuaternionLike::Scalar Scalar;
 
       TMm(0, 0) = Scalar(.5) * quat.w();
