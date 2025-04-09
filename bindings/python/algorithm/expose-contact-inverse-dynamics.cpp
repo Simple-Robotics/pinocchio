@@ -27,11 +27,12 @@ namespace pinocchio
       ProximalSettingsTpl<Scalar> & settings,
       bool solve_ncp)
     {
-      VectorXs lambda_sol;
+      const Eigen::Index problem_size = getTotalConstraintActiveSize(contact_models);
+      VectorXs lambda_sol(problem_size);
       if (lambda_guess)
         lambda_sol = lambda_guess.get();
       else
-        lambda_sol = VectorXs::Zero(R.size());
+        lambda_sol.setZero();
 
       const bool has_converged = computeInverseDynamicsConstraintForces(
         contact_models, c_ref, lambda_sol, settings, solve_ncp);
