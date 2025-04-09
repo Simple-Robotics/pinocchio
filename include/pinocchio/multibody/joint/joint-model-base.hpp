@@ -629,6 +629,100 @@ namespace pinocchio
         Mat.derived(), idx_vExtended(), idx_vExtended(), nvExtended(), nvExtended());
     }
 
+    /* Acces to dedicated Q releated rows or columns.*/
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::ConstType
+    jointQCols(const Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQCols_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::ConstType
+    jointQCols_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), idx_q(), nq());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::Type
+    jointQCols(Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQCols_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::Type
+    jointQCols_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), idx_q(), nq());
+    }
+
+    /* Acces to dedicated rows in a matrix.*/
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
+    jointQRows(const Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQRows_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
+    jointQRows_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), idx_q(), nq());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::Type
+    jointQRows(Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQRows_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::Type
+    jointQRows_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), idx_q(), nq());
+    }
+
+    /// \brief Returns a block of dimension nq()xnv() located at position idx_q(),idx_v() in the
+    /// matrix Mat
+    // Const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
+    jointQVBlock(const Eigen::MatrixBase<D> & Mat) const
+    {
+      return derived().jointQVBlock_impl(Mat.derived());
+    }
+
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
+    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q(), idx_v(), nq(), nv());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
+    jointQVBlock(Eigen::MatrixBase<D> & Mat) const
+    {
+      return derived().jointQVBlock_impl(Mat.derived());
+    }
+
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
+    jointQVBlock_impl(Eigen::MatrixBase<D> & Mat) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q(), idx_v(), nq(), nv());
+    }
+
   protected:
     /// Default constructor: protected.
     ///
