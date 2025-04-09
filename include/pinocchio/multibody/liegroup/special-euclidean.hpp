@@ -389,7 +389,8 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        TM.setZero();
+        TM.template topRightCorner<2, 1>().setZero();
+        TM.template bottomLeftCorner<2, 2>().setZero();
         // Linear
         TM(0, 0) = q[2];
         TM(1, 0) = q[3];
@@ -441,7 +442,6 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        Mout.setZero();
         Mout.template topRows<2>() = R * Min.template topRows<2>();
         Mout.template bottomRows<2>() = R.template rightCols<1>() * Min.template bottomRows<1>();
         break;
@@ -477,7 +477,6 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        Mout.setZero();
         Mout.template topRows<2>() = RT * Min.template topRows<2>();
         Mout.template bottomRows<1>() = RT.template bottomRows<1>() * Min.template bottomRows<2>();
         break;
@@ -926,7 +925,8 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        TM.setZero();
+        TM.template topRightCorner<3, 3>().setZero();
+        TM.template bottomLeftCorner<4, 3>().setZero();
         TM.template topLeftCorner<3, 3>() = quat.matrix();
         TM.template bottomRightCorner<4, 3>() = TMq;
         break;
@@ -963,7 +963,6 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        Mout.setZero();
         Mout.template topRows<3>() = quat.matrix() * Min.template topRows<3>();
         Mout.template bottomRows<4>() = TMq * Min.template bottomRows<3>();
         break;
@@ -1000,7 +999,6 @@ namespace pinocchio
       switch (op)
       {
       case SETTO:
-        Mout.setZero();
         Mout.template topRows<3>() = quat.matrix().transpose() * Min.template topRows<3>();
         Mout.template bottomRows<3>() = TMq.transpose() * Min.template bottomRows<4>();
         break;
