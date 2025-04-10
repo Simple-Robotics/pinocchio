@@ -264,6 +264,8 @@ namespace pinocchio
       if (parent > 0)
       {
         Ia.noalias() -= jdata.UDinv() * jdata.U().transpose();
+        data.oYaba_augmented[parent] += Ia;
+
         fi.toVector().noalias() +=
           Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
         data.oYaba_augmented[parent] += Ia;
