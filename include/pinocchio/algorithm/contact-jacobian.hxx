@@ -216,6 +216,63 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    template<typename T> class Holder,
+    class ConstraintModel,
+    class ConstraintModelAllocator,
+    class ConstraintData,
+    class ConstraintDataAllocator>
+  typename DataTpl<Scalar, Options, JointCollectionTpl>::MatrixXs getConstraintsJacobian(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const std::vector<Holder<const ConstraintModel>, ConstraintModelAllocator> & constraint_models,
+    std::vector<Holder<ConstraintData>, ConstraintDataAllocator> & constraint_datas)
+  {
+    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+    typedef typename Data::MatrixXs ReturnType;
+
+    Eigen::DenseIndex constraint_size = 0;
+    for (const ConstraintModel & cm : constraint_models)
+      constraint_size += cm.size();
+
+    ReturnType res = ReturnType::Zero(constraint_size, model.nv);
+    getConstraintsJacobian(model, data, constraint_models, constraint_datas, res);
+
+    return res;
+  }
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
+    class ConstraintModelAllocator,
+    class ConstraintData,
+    class ConstraintDataAllocator>
+  typename DataTpl<Scalar, Options, JointCollectionTpl>::MatrixXs getConstraintsJacobian(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas)
+  {
+    typedef std::reference_wrapper<const ConstraintModel> WrappedConstraintModelType;
+    typedef std::vector<WrappedConstraintModelType> WrappedConstraintModelVector;
+
+    WrappedConstraintModelVector wrapped_constraint_models(
+      constraint_models.cbegin(), constraint_models.cend());
+
+    typedef std::reference_wrapper<ConstraintData> WrappedConstraintDataType;
+    typedef std::vector<WrappedConstraintDataType> WrappedConstraintDataVector;
+
+    WrappedConstraintDataVector wrapped_constraint_datas(
+      constraint_datas.begin(), constraint_datas.end());
+
+    return getConstraintsJacobian(model, data, wrapped_constraint_models, wrapped_constraint_datas);
+  }
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
     template<typename> class Holder,
     class ConstraintModel,
     class ConstraintModelAllocator,
