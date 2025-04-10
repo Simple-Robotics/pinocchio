@@ -523,16 +523,6 @@ namespace pinocchio
       }
       else
         I12.const_cast_derived().setZero();
-
-      std::cout << "diagonal_constraint_inertia: " << diagonal_constraint_inertia.transpose()
-                << std::endl;
-      std::cout << "I11:\n" << I11 << std::endl;
-      std::cout << "I22:\n" << I22 << std::endl;
-      std::cout << "I12:\n" << I12 << std::endl;
-      std::cout << "A1:\n" << A1 << std::endl;
-      std::cout << "A2:\n" << A2 << std::endl;
-      //      std::cout << "res:\n" << diagonal_constraint_inertia[0] * A1.transpose() * A2 <<
-      //      std::endl;
     }
 
     template<
@@ -569,9 +559,6 @@ namespace pinocchio
 
       if (joint1_id > 0 && joint2_id > 0)
       {
-        //        std::cout << "joint1_id = " << joint1_id << std::endl;
-        //        std::cout << "joint2_id = " << joint2_id << std::endl;
-        //        std::cout << "I12 =\n" << I12 << std::endl;
         if (joint1_id < joint2_id)
         {
           data.joint_cross_coupling.get({joint1_id, joint2_id}) += I12;
