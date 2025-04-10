@@ -27,6 +27,13 @@ namespace pinocchio
         JointModel::Options>
         type;
     };
+
+    // A LieGroupMap fixes the LieGroupCollectionTpl to use
+    // Here it is the default one
+    template<typename Scalar, int Options>
+    struct LieGroupCollectionTpl : LieGroupCollectionDefaultTpl<Scalar, Options>
+    {
+    };
   };
 
   template<typename JointModel>
