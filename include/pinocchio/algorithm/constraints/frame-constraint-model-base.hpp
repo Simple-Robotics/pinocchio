@@ -474,6 +474,115 @@ namespace pinocchio
       return res;
     }
 
+    template<
+      typename Vector6Like,
+      typename Matrix6LikeOut1,
+      typename Matrix6LikeOut2,
+      typename Matrix6LikeOut3,
+      ReferenceFrame rf>
+    void computeCouplingConstraintInertias(
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<Vector6Like> & diagonal_constraint_inertia,
+      const Eigen::MatrixBase<Matrix6LikeOut1> & I11,
+      const Eigen::MatrixBase<Matrix6LikeOut2> & I12,
+      const Eigen::MatrixBase<Matrix6LikeOut3> & I22,
+      const ReferenceFrameTag<rf> reference_frame) const
+    {
+      EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector6Like, Vector6);
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut1, Matrix6);
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut2, Matrix6);
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut3, Matrix6);
+
+      //      assert((check_expression_if_real<Scalar,
+      //      true>(diagonal_constraint_inertia.isZero(Scalar(0)))));
+
+      Matrix6 A1, A2;
+      Matrix6 diagonal_constraint_inertia_time_A;
+      if (joint1_id > 0)
+      {
+        A1 = getA1(cdata, reference_frame);
+        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A1;
+        I11.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I11.const_cast_derived().setZero();
+
+      if (joint2_id > 0)
+      {
+        A2 = getA2(cdata, reference_frame);
+        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A2;
+        I22.const_cast_derived().noalias() = A2.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I22.const_cast_derived().setZero();
+
+      // Compute the cross coupling term
+      if (joint1_id > 0 && joint2_id > 0)
+      {
+        I12.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I12.const_cast_derived().setZero();
+
+      std::cout << "diagonal_constraint_inertia: " << diagonal_constraint_inertia.transpose()
+                << std::endl;
+      std::cout << "I11:\n" << I11 << std::endl;
+      std::cout << "I22:\n" << I22 << std::endl;
+      std::cout << "I12:\n" << I12 << std::endl;
+      std::cout << "A1:\n" << A1 << std::endl;
+      std::cout << "A2:\n" << A2 << std::endl;
+      //      std::cout << "res:\n" << diagonal_constraint_inertia[0] * A1.transpose() * A2 <<
+      //      std::endl;
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename Vector6Like,
+      ReferenceFrame rf>
+    void appendCouplingConstraintInertias(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<Vector6Like> & diagonal_constraint_inertia,
+      const ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(model);
+
+      Matrix6 I11, I12, I22;
+      computeCouplingConstraintInertias(
+        cdata, diagonal_constraint_inertia, I11, I12, I22, reference_frame);
+
+      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
+      {
+        data.oYaba_augmented[joint1_id] += I11;
+        data.oYaba_augmented[joint2_id] += I22;
+      }
+      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
+      {
+        data.oYaba_augmented[joint1_id] += I11; // TODO(jcarpent): should be Yaba_augmented
+        data.oYaba_augmented[joint2_id] += I22; // TODO(jcarpent): should be Yaba_augmented
+      }
+      else
+      {
+        assert(false && "must never happened");
+      }
+
+      if (joint1_id > 0 && joint2_id > 0)
+      {
+        //        std::cout << "joint1_id = " << joint1_id << std::endl;
+        //        std::cout << "joint2_id = " << joint2_id << std::endl;
+        //        std::cout << "I12 =\n" << I12 << std::endl;
+        if (joint1_id < joint2_id)
+        {
+          data.joint_cross_coupling.get({joint1_id, joint2_id}) += I12;
+        }
+        else
+        {
+          data.joint_cross_coupling.get({joint2_id, joint1_id}) += I12.transpose();
+        }
+      }
+    }
+
     //      ///
     //      /// @brief This function computes the spatial inertia associated with the constraint.
     //      /// This function is useful to express the constraint inertia associated with the
@@ -515,7 +624,7 @@ namespace pinocchio
     //    typename Vector3Like,
     //    typename Matrix6Like,
     //    typename Matrix6LikeAllocator>
-    //    void appendConstraintDiagonalInertiaToJointInertias(
+    //    void appendCouplingConstraintInertias(
     //                                                        const ModelTpl<Scalar, Options,
     //                                                        JointCollectionTpl> & model, const
     //                                                        DataTpl<Scalar, Options,
