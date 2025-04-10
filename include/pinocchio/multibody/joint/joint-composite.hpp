@@ -379,6 +379,7 @@ namespace pinocchio
       JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const;
 
     // Declaration: must be define after Lie group and joint visitors
+    // TODO: Visiting
     template<typename LieGroupMap>
     typename LieGroupMap::template operation<JointDerived>::type lie_group_impl() const;
 

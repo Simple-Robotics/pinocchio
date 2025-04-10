@@ -61,11 +61,14 @@ namespace pinocchio
     typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl> type;
   };
 
-  // TODO: the affine transformation should be applied to Lie-Group element
-  template<typename JointModel>
-  struct LieGroupMap::operation<JointModelMimic<JointModel>>
+  template<typename JointModelRef>
+  struct LieGroupMap::operation<JointModelMimicTpl<JointModelRef>>
   {
-    typedef typename LieGroupMap::operation<JointModel>::type type;
+    typedef CartesianProductOperationVariantTpl<
+      typename JointModelRef::Scalar,
+      JointModelRef::Options,
+      LieGroupCollectionDefaultTpl>
+      type;
   };
 
   template<typename Scalar, int Options>

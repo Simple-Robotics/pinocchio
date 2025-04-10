@@ -754,13 +754,6 @@ namespace pinocchio
       data.m_jdata_ref.tangent_map *= m_scaling;
     }
 
-    // TODO: the affine transformation should be applied to Lie-Group element
-    template<typename LieGroupMap>
-    typename LieGroupMap::template operation<JointModelMimic>::type lie_group_impl() const
-    {
-      return m_jmodel_ref.template lie_group_impl<LieGroupMap>();
-    }
-
     static std::string classname()
     {
       return std::string("JointModelMimic");
