@@ -682,7 +682,7 @@ namespace pinocchio
       typename Vector3Like,
       typename Matrix6Like,
       typename Matrix6LikeAllocator>
-    void appendConstraintDiagonalInertiaToJointInertias(
+    void appendCouplingConstraintInertias(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const RigidConstraintDataTpl<Scalar, Options> & cdata,
