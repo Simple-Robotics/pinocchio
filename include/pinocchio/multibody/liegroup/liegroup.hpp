@@ -33,6 +33,13 @@ namespace pinocchio
     template<typename Scalar, int Options>
     struct LieGroupCollectionTpl : LieGroupCollectionDefaultTpl<Scalar, Options>
     {
+      typedef LieGroupCollectionDefaultTpl<Scalar, Options> Base;
+      enum
+      {
+        Options = Base::Options
+      };
+      using Base::LieGroupVariant;
+      using Base::Scalar;
     };
   };
 
@@ -52,6 +59,13 @@ namespace pinocchio
   struct LieGroupMap::operation<JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>>
   {
     typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl> type;
+  };
+
+  // TODO: the affine transformation should be applied to Lie-Group element
+  template<typename JointModel>
+  struct LieGroupMap::operation<JointModelMimic<JointModel>>
+  {
+    typedef typename LieGroupMap::operation<JointModel>::type type;
   };
 
   template<typename Scalar, int Options>

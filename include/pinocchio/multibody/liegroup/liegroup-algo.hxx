@@ -895,6 +895,39 @@ namespace pinocchio
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(IntegrateCoeffWiseJacobianStepAlgo);
 
+  template<typename Visitor, typename JointModel>
+  struct LieGroupInstanceStepAlgo;
+
+  template<typename LieGroup_t, typename Scalar, int Options>
+  struct LieGroupInstanceStep
+  : public fusion::JointUnaryVisitorBase<LieGroupInstanceStep<LieGroup_t, Scalar, Options>>
+  {
+    typedef LieGroup_t LieGroupMap;
+    typedef CartesianProductOperationVariantTpl<
+      Scalar,
+      Options,
+      LieGroup_t::template LieGroupCollectionTpl>
+      LGType;
+
+    typedef boost::fusion::vector<LGType &> ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_1(LieGroupInstanceStepAlgo, LieGroupInstanceStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct LieGroupInstanceStepAlgo
+  {
+    typedef typename Visitor::LGType LGtype;
+    typedef typename Visitor::LieGroupMap LieGroupMap;
+
+    static void run(const JointModelBase<JointModel> & jmodel, LGType & res_lgo)
+    {
+      res_lgo *= jmodel.template lie_group<LieGroupMap>();
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(LieGroupInstanceStepAlgo);
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_multibody_liegroup_liegroup_algo_hxx__
