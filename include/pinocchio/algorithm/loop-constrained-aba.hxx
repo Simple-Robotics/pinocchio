@@ -245,7 +245,7 @@ namespace pinocchio
       const JointIndex parent = model.parents[i];
       auto & Ia = data.oYaba_augmented[i];
 
-      auto Jcols = jmodel.jointCols(data.J);
+      const auto Jcols = jmodel.jointCols(data.J);
 
       Force & fi = data.of[i];
 
@@ -388,11 +388,9 @@ namespace pinocchio
       typedef typename Data::Motion Motion;
       typedef typename Motion::Vector6 Vector6;
       typedef typename Data::Matrix6 Matrix6;
-
-      const auto & neighbours = data.neighbour_links;
-
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
+      const auto & neighbours = data.neighbour_links;
       auto & joint_cross_coupling = data.joint_cross_coupling;
 
       const JointIndex i = jmodel.id();
@@ -401,7 +399,7 @@ namespace pinocchio
       typedef
         typename SizeDepType<JointModel::NV>::template ColsReturn<pinocchio::Data::Matrix6x>::Type
           ColBlock;
-      const ColBlock & Jcols = jmodel.jointCols(data.J);
+      const auto Jcols = jmodel.jointCols(data.J);
 
       Force & fi = data.of[i];
 
@@ -876,7 +874,7 @@ namespace pinocchio
             model.joints[j], data.joints[j], typename ReducedPass2::ArgsType(model, data));
       }
 
-      // forward sweep
+      // reduced forward sweep
       data.oa_gf[0].setZero();
       for (int it = int(elimination_order.size()) - 1; it >= 0; it--)
       {
