@@ -576,39 +576,98 @@ namespace pinocchio
     }
 
     template<
-      template<typename, int> class JointCollectionTpl,
       typename Vector3Like,
-      typename Matrix6Like,
-      typename Matrix6LikeAllocator>
-    void appendConstraintDiagonalInertiaToJointInertias(
-      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      typename Matrix6LikeOut1,
+      typename Matrix6LikeOut2,
+      typename Matrix6LikeOut3,
+      ReferenceFrame rf>
+    void computeCouplingConstraintInertias(
       const ConstraintData & cdata,
       const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia,
-      std::vector<Matrix6Like, Matrix6LikeAllocator> & inertias) const
+      const Eigen::MatrixBase<Matrix6LikeOut1> & I11,
+      const Eigen::MatrixBase<Matrix6LikeOut2> & I12,
+      const Eigen::MatrixBase<Matrix6LikeOut3> & I22,
+      const ReferenceFrameTag<rf> reference_frame) const
     {
       EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Vector3Like, Vector3);
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(cdata);
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(inertias.size(), size_t(model.njoints));
-      assert(
-        ((joint1_id > 0 && joint2_id == 0) || (joint1_id == 0 && joint2_id > 0))
-        && "The behavior is only defined for this context");
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut1, Matrix6);
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut2, Matrix6);
+      EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut3, Matrix6);
 
-      if (this->joint1_id != 0)
+      //      assert((check_expression_if_real<Scalar,
+      //      true>(diagonal_constraint_inertia.isZero(Scalar(0)))));
+
+      Matrix36 A1, A2;
+      Matrix36 diagonal_constraint_inertia_time_A;
+      if (joint1_id > 0)
       {
-        SE3 placement_with_correction = this->joint1_placement;
-        placement_with_correction.translation().noalias() -=
-          placement_with_correction.rotation() * cdata.constraint_position_error;
-        inertias[this->joint1_id] +=
-          computeConstraintSpatialInertia(placement_with_correction, diagonal_constraint_inertia);
+        A1 = getA1(cdata, reference_frame);
+        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A1;
+        I11.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I11.const_cast_derived().setZero();
+
+      if (joint2_id > 0)
+      {
+        A2 = getA2(cdata, reference_frame);
+        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A2;
+        I22.const_cast_derived().noalias() = A2.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I22.const_cast_derived().setZero();
+
+      // Compute the cross coupling term
+      if (joint1_id > 0 && joint2_id > 0)
+      {
+        I12.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
+      }
+      else
+        I12.const_cast_derived().setZero();
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename Vector3Like,
+      ReferenceFrame rf>
+    void appendCouplingConstraintInertias(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia,
+      const ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(model);
+
+      Matrix6 I11, I12, I22;
+      computeCouplingConstraintInertias(
+        cdata, diagonal_constraint_inertia, I11, I12, I22, reference_frame);
+
+      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
+      {
+        data.oYaba_augmented[joint1_id] += I11;
+        data.oYaba_augmented[joint2_id] += I22;
+      }
+      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
+      {
+        data.oYaba_augmented[joint1_id] += I11; // TODO(jcarpent): should be Yaba_augmented
+        data.oYaba_augmented[joint2_id] += I22; // TODO(jcarpent): should be Yaba_augmented
+      }
+      else
+      {
+        assert(false && "must never happened");
       }
 
-      if (this->joint2_id != 0)
+      if (joint1_id > 0 && joint2_id > 0)
       {
-        const SE3 & placement = this->joint2_placement;
-        inertias[this->joint2_id] +=
-          computeConstraintSpatialInertia(placement, diagonal_constraint_inertia);
+        if (joint1_id < joint2_id)
+        {
+          data.joint_cross_coupling.get({joint1_id, joint2_id}) += I12;
+        }
+        else
+        {
+          data.joint_cross_coupling.get({joint2_id, joint1_id}) += I12.transpose();
+        }
       }
     }
 
