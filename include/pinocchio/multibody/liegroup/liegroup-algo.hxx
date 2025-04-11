@@ -162,6 +162,56 @@ namespace pinocchio
     using Algo<Visitor, JointModel>::run;                                                          \
   };
 
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(Algo)                                               \
+  template<typename Visitor, typename JointModelRef>                                               \
+  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<JointModelRef>))             \
+    {                                                                                              \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(Algo)                                               \
+  template<typename Visitor, typename JointModelRef>                                               \
+  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimicTpl<JointModelRef>))             \
+    {                                                                                              \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(Algo)                                               \
+  template<typename Visitor, typename JointModelRef>                                               \
+  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimicTpl<JointModelRef>))             \
+    {                                                                                              \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(Algo)                                               \
+  template<typename Visitor, typename JointModelRef>                                               \
+  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimicTpl<JointModelRef>))             \
+    {                                                                                              \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(Algo)                                               \
+  template<typename Visitor, typename JointModelRef>                                               \
+  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimicTpl<JointModelRef>))             \
+    {                                                                                              \
+    }                                                                                              \
+  }
+
   } // namespace details
 
   template<typename Visitor, typename JointModel>
@@ -203,6 +253,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(IntegrateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(IntegrateStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateStepAlgo;
@@ -249,6 +300,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(dIntegrateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(dIntegrateStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct TangentMapStepAlgo;
@@ -285,6 +337,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(TangentMapStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(TangentMapStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct TangentMapProductStepAlgo;
@@ -333,6 +386,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(TangentMapProductStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(TangentMapProductStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct CoTangentMapProductStepAlgo;
@@ -381,6 +435,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(CoTangentMapProductStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(CoTangentMapProductStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateTransportStepAlgo;
@@ -437,6 +492,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(dIntegrateTransportStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(dIntegrateTransportStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateTransportInPlaceStepAlgo;
@@ -485,6 +541,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(dIntegrateTransportInPlaceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(dIntegrateTransportInPlaceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dDifferenceStepAlgo;
@@ -529,6 +586,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(dDifferenceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(dDifferenceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct InterpolateStepAlgo;
@@ -575,6 +633,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(InterpolateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(InterpolateStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct DifferenceStepAlgo;
@@ -615,6 +674,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(DifferenceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(DifferenceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct SquaredDistanceStepAlgo;
@@ -658,6 +718,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(SquaredDistanceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(SquaredDistanceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct SquaredDistanceSumStepAlgo;
@@ -691,6 +752,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(SquaredDistanceSumStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(SquaredDistanceSumStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct RandomConfigurationStepAlgo;
@@ -732,6 +794,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(RandomConfigurationStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(RandomConfigurationStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct NormalizeStepAlgo;
@@ -760,6 +823,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(NormalizeStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(NormalizeStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IsNormalizedStepAlgo;
@@ -791,6 +855,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(IsNormalizedStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(IsNormalizedStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IsSameConfigurationStepAlgo;
@@ -827,6 +892,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(IsSameConfigurationStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(IsSameConfigurationStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct NeutralStepAlgo;
@@ -857,6 +923,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(NeutralStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(NeutralStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IntegrateCoeffWiseJacobianStepAlgo;
@@ -894,6 +961,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(IntegrateCoeffWiseJacobianStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(IntegrateCoeffWiseJacobianStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct LieGroupInstanceStepAlgo;
@@ -927,6 +995,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(LieGroupInstanceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(LieGroupInstanceStepAlgo);
 
 } // namespace pinocchio
 
