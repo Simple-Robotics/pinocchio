@@ -13,6 +13,7 @@
 #include "pinocchio/multibody/liegroup/liegroup-collection.hpp"
 
 #include "pinocchio/multibody/joint/fwd.hpp"
+// #include "pinocchio/multibody/joint/joint-mimic.hpp"
 
 namespace pinocchio
 {
@@ -30,10 +31,10 @@ namespace pinocchio
 
     // A LieGroupMap fixes the LieGroupCollectionTpl to use
     // Here it is the default one
-    template<typename Scalar, int Options>
-    struct LieGroupCollectionTpl : LieGroupCollectionDefaultTpl<Scalar, Options>
+    template<typename _Scalar, int _Options>
+    struct LieGroupCollectionTpl : LieGroupCollectionDefaultTpl<_Scalar, _Options>
     {
-      typedef LieGroupCollectionDefaultTpl<Scalar, Options> Base;
+      typedef LieGroupCollectionDefaultTpl<_Scalar, _Options> Base;
       enum
       {
         Options = Base::Options
@@ -61,15 +62,15 @@ namespace pinocchio
     typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl> type;
   };
 
-  template<typename JointModelRef>
-  struct LieGroupMap::operation<JointModelMimicTpl<JointModelRef>>
-  {
-    typedef CartesianProductOperationVariantTpl<
-      typename JointModelRef::Scalar,
-      JointModelRef::Options,
-      LieGroupCollectionDefaultTpl>
-      type;
-  };
+  // template<typename JointModelRef>
+  // struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
+  // {
+  //   typedef CartesianProductOperationVariantTpl<
+  //     typename JointModelRef::Scalar,
+  //     JointModelRef::Options,
+  //     LieGroupCollectionDefaultTpl>
+  //     type;
+  // };
 
   template<typename Scalar, int Options>
   struct LieGroupMap::operation<JointModelSphericalTpl<Scalar, Options>>

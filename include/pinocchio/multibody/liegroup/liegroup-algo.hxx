@@ -7,6 +7,7 @@
 
 #include "pinocchio/multibody/visitor.hpp"
 #include "pinocchio/multibody/joint/joint-composite.hpp"
+#include "pinocchio/multibody/joint/joint-mimic.hpp"
 
 namespace pinocchio
 {
@@ -164,51 +165,71 @@ namespace pinocchio
 
 #define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(Algo)                                               \
   template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<JointModelRef>))             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimic<JointModelRef>))                \
     {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(Algo)                                               \
   template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimicTpl<JointModelRef>))             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimic<JointModelRef>))                \
     {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(Algo)                                               \
   template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimicTpl<JointModelRef>))             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimic<JointModelRef>))                \
     {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(Algo)                                               \
   template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimicTpl<JointModelRef>))             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimic<JointModelRef>))                \
     {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(Algo)                                               \
   template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimicTpl<JointModelRef>>                                          \
+  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimicTpl<JointModelRef>))             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimic<JointModelRef>))                \
     {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a4);                                                               \
     }                                                                                              \
   }
 
@@ -970,14 +991,13 @@ namespace pinocchio
   struct LieGroupInstanceStep
   : public fusion::JointUnaryVisitorBase<LieGroupInstanceStep<LieGroup_t, Scalar, Options>>
   {
-    typedef LieGroup_t LieGroupMap;
     typedef CartesianProductOperationVariantTpl<
       Scalar,
       Options,
       LieGroup_t::template LieGroupCollectionTpl>
-      LGType;
+      LgType;
 
-    typedef boost::fusion::vector<LGType &> ArgsType;
+    typedef boost::fusion::vector<LgType &> ArgsType;
 
     PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_1(LieGroupInstanceStepAlgo, LieGroupInstanceStep)
   };
@@ -985,11 +1005,11 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct LieGroupInstanceStepAlgo
   {
-    typedef typename Visitor::LGType LGtype;
-    typedef typename Visitor::LieGroupMap LieGroupMap;
+    typedef typename Visitor::LgType LgType;
 
-    static void run(const JointModelBase<JointModel> & jmodel, LGType & res_lgo)
+    static void run(const JointModelBase<JointModel> & jmodel, LgType & res_lgo)
     {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
       res_lgo *= jmodel.template lie_group<LieGroupMap>();
     }
   };
