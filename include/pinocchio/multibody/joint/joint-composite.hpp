@@ -381,7 +381,12 @@ namespace pinocchio
     // Declaration: must be define after Lie group and joint visitors
     // TODO: Visiting
     template<typename LieGroupMap>
-    typename LieGroupMap::template operation<JointDerived>::type lie_group_impl() const;
+    typename LieGroupMap::template operation<JointDerived>::type lie_group_impl() const
+    {
+      // TODO: Visiting
+      typedef typename LieGroupMap::template operation<JointModelTpl>::type lgo;
+      return lgo();
+    }
 
     int nv_impl() const
     {
