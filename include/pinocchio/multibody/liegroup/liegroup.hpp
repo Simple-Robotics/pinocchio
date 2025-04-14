@@ -19,6 +19,8 @@ namespace pinocchio
 {
   struct LieGroupMap
   {
+
+    // Default LieGroup operation is euclidean
     template<typename JointModel>
     struct operation
     {
@@ -29,49 +31,44 @@ namespace pinocchio
         type;
     };
 
-    // A LieGroupMap fixes the LieGroupCollectionTpl to use
-    // Here it is the default one
-    template<typename _Scalar, int _Options>
-    struct LieGroupCollectionTpl : LieGroupCollectionDefaultTpl<_Scalar, _Options>
+    // LieGroupCollectionDefaultTpl is implicitely chosen by the LieGroupMap
+    // inside the aggregation type
+    template<typename Scalar, int Options>
+    struct product_variant
     {
-      typedef LieGroupCollectionDefaultTpl<_Scalar, _Options> Base;
-      enum
-      {
-        Options = Base::Options
-      };
-      using Base::LieGroupVariant;
-      using Base::Scalar;
-    };
+      typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl>
+        type;
+    }
   };
 
-  template<typename JointModel>
-  struct LieGroup
-  {
-    typedef typename LieGroupMap::operation<JointModel>::type type;
-  };
+  // template<typename JointModel>
+  // struct LieGroup
+  // {
+  //   typedef typename LieGroupMap::operation<JointModel>::type type;
+  // };
 
+  // The type for generic, composite and mimic is directly the variant type
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl> type;
+    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl> type;
+    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
   };
 
+  // TODO: Fix after the rebase on Mimic
   // template<typename JointModelRef>
   // struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
   // {
-  //   typedef CartesianProductOperationVariantTpl<
-  //     typename JointModelRef::Scalar,
-  //     JointModelRef::Options,
-  //     LieGroupCollectionDefaultTpl>
-  //     type;
+  //   typedef typename LieGroupMap::product_variant<typename JointModelRef::Scalar,
+  //   JointModelRef::Options>::type type;
   // };
 
+  // Atomic joint that are not euclidean
   template<typename Scalar, int Options>
   struct LieGroupMap::operation<JointModelSphericalTpl<Scalar, Options>>
   {
