@@ -403,12 +403,7 @@ namespace pinocchio
 
     // Declaration of overload : must be define after Lie group and joint visitors
     template<typename LieGroupMap>
-    typename LieGroupMap::template operation<JointModelTpl>::type lie_group_impl() const
-    {
-      // TODO: Visiting
-      typedef typename LieGroupMap::template operation<JointModelTpl>::type lgo;
-      return lgo();
-    }
+    typename LieGroupMap::template operation<JointModelTpl>::type lie_group_impl() const;
 
     template<typename VectorLike, typename Matrix6Like>
     void calc_aba(
