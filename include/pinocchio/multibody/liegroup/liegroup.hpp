@@ -63,7 +63,6 @@ namespace pinocchio
     typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
   };
 
-  // TODO: Fix after the rebase on Mimic
   template<typename JointModelRef>
   struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
   {

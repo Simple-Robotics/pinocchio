@@ -61,6 +61,28 @@ namespace pinocchio
       }
     };
 
+    template<>
+    struct JointModelLieGroupPythonVisitor<context::JointModel>
+    : public boost::python::def_visitor<JointModelLieGroupPythonVisitor<context::JointModel>>
+    {
+    public:
+      typedef context::JointModel Self;
+      typedef
+        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+          LieGroupOperation;
+
+      template<class PyClass>
+      void visit(PyClass & cl) const
+      {
+        cl.def("lie_group", &lie_group);
+      }
+
+      static LieGroupOperation lie_group(const Self & self)
+      {
+        return self.template lie_group<LieGroupMap>();
+      }
+    };
+
     template<typename JointModelRef>
     struct JointModelLieGroupPythonVisitor<JointModelMimic<JointModelRef>>
     : public boost::python::def_visitor<
