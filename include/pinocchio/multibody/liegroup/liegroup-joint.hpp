@@ -8,6 +8,7 @@
 #include "pinocchio/multibody/visitor.hpp"
 #include "pinocchio/multibody/joint/joint-generic.hpp"
 #include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
+#include "pinocchio/multibody/liegroup/liegroup-generic.hpp"
 
 namespace pinocchio
 {
@@ -16,11 +17,11 @@ namespace pinocchio
   template<typename LieGroup_t>
   typename LieGroup_t::template operation<
     JointModelCompositeTpl<_Scalar, _Options, JointCollectionTpl>>::type
-  JointModelTpl<_Scalar, _Options, JointCollectionTpl>::lie_group_impl() const
+  JointModelCompositeTpl<_Scalar, _Options, JointCollectionTpl>::lie_group_impl() const
   {
-    typedef LieGroupInstanceStep<_Scalar, _Options, LieGroup_t> Algo;
+    typedef LieGroupInstanceStep<LieGroup_t, _Scalar, _Options> Algo;
     typedef typename Algo::LgType LgType;
-    typedef typename Algo::Args Args;
+    typedef typename Algo::ArgsType ArgsType;
 
     LgType res;
     Algo::run(*this, ArgsType(res));
@@ -28,11 +29,11 @@ namespace pinocchio
   }
 
   // Write a Lie group for the generic overload
-  template<typename _Scalar, int _Options, typename LieGroup_t>
+  template<typename LieGroup_t, typename _Scalar, int _Options>
   struct JointModelLieGroupVisitor
-  : boost::static_visitor<typename LieGroup_t::template product_variant<_Scalar, _Options>>
+  : boost::static_visitor<typename LieGroup_t::template product_variant<_Scalar, _Options>::type>
   {
-    typedef typename LieGroup_t::template product_variant<_Scalar, _Options> LgType;
+    typedef typename LieGroup_t::template product_variant<_Scalar, _Options>::type LgType;
 
     // Default behavior, instantiate the atomic type in the agregation type
     template<typename JointModelDerived>
@@ -56,7 +57,7 @@ namespace pinocchio
     }
 
     template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
-    static std::string run(const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel)
+    static LgType run(const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel)
     {
       return boost::apply_visitor(JointModelLieGroupVisitor(), jmodel);
     }
@@ -69,7 +70,7 @@ namespace pinocchio
     JointModelTpl<_Scalar, _Options, JointCollectionTpl>>::type
   JointModelTpl<_Scalar, _Options, JointCollectionTpl>::lie_group_impl() const
   {
-    typedef JointModelLieGroupVisitor<_Scalar, _Options, LieGroup_t> Algo;
+    typedef JointModelLieGroupVisitor<LieGroup_t, _Scalar, _Options> Algo;
     return Algo::run(*this);
   }
 } // namespace pinocchio

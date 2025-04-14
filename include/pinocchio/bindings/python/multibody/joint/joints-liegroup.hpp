@@ -22,8 +22,9 @@ namespace pinocchio
     : public boost::python::def_visitor<JointModelLieGroupPythonVisitor<JointModelDerived>>
     {
     public:
-      typedef typename LieGroupMap::template product_variant<context::Scalar, context::Options>
-        LieGroupOperation;
+      typedef
+        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+          LieGroupOperation;
 
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -44,8 +45,9 @@ namespace pinocchio
     {
     public:
       typedef context::JointModelComposite Self;
-      typedef typename LieGroupMap::template product_variant<context::Scalar, context::Options>
-        LieGroupOperation;
+      typedef
+        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+          LieGroupOperation;
 
       template<class PyClass>
       void visit(PyClass & cl) const
@@ -59,7 +61,28 @@ namespace pinocchio
       }
     };
 
-    // Specialize for Mimic
+    template<typename JointModelRef>
+    struct JointModelLieGroupPythonVisitor<JointModelMimic<JointModelRef>>
+    : public boost::python::def_visitor<
+        JointModelLieGroupPythonVisitor<JointModelMimic<JointModelRef>>>
+    {
+    public:
+      typedef context::JointModelComposite Self;
+      typedef
+        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+          LieGroupOperation;
+
+      template<class PyClass>
+      void visit(PyClass & cl) const
+      {
+        cl.def("lie_group", &lie_group);
+      }
+
+      static LieGroupOperation lie_group(const Self & self)
+      {
+        return self.template lie_group<LieGroupMap>();
+      }
+    };
 
   } // namespace python
 } // namespace pinocchio

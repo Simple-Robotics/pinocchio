@@ -67,18 +67,18 @@ namespace pinocchio
           {
             // update the reference_config with the size of the root joint
             Eigen::VectorXd qroot(root_joint->nq());
-            reference_config.conservativeResize(reference_config.size() + qroot.size());
-            reference_config.tail(qroot.size()) =
-              root_joint.template lie_group<LieGroupMap>().neutral();
+            // reference_config.conservativeResize(reference_config.size() + qroot.size());
+            // reference_config.tail(qroot.size()) =
+            //   root_joint.template lie_group<LieGroupMap>().neutral();
 
-            // typedef Eigen::VectorXd ReturnType;
-            // typename NeutralStep<LieGroupMap, ReturnType>::ArgsType args(qroot.derived());
-            // JointModel root_joint_copy = root_joint.get();
-            // root_joint_copy.setIndexes(0, 0, 0);
-            // NeutralStep<LieGroupMap, ReturnType>::run(root_joint_copy, args);
+            typedef Eigen::VectorXd ReturnType;
+            typename NeutralStep<LieGroupMap, ReturnType>::ArgsType args(qroot.derived());
+            JointModel root_joint_copy = root_joint.get();
+            root_joint_copy.setIndexes(0, 0, 0);
+            NeutralStep<LieGroupMap, ReturnType>::run(root_joint_copy, args);
 
-            // reference_config.conservativeResize(qroot.size() + reference_config.size());
-            // reference_config.tail(qroot.size()) = qroot;
+            reference_config.conservativeResize(qroot.size() + reference_config.size());
+            reference_config.tail(qroot.size()) = qroot;
 
             // convert qroot to mujoco's convention
             qpos0.conservativeResize(qroot.size() + qpos0.size());

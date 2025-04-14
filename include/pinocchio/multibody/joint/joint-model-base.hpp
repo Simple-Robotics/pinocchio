@@ -173,7 +173,7 @@ namespace pinocchio
     template<typename LieGroupMap>
     typename LieGroupMap::template operation<Derived>::type lie_group() const
     {
-      return derived().lie_group_impl();
+      return derived().template lie_group_impl<LieGroupMap>();
     }
 
     // Default implementation, default construction of the type mapped by the LieGroupMap

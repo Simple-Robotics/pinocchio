@@ -13,10 +13,12 @@
 #include "pinocchio/multibody/liegroup/liegroup-collection.hpp"
 
 #include "pinocchio/multibody/joint/fwd.hpp"
-// #include "pinocchio/multibody/joint/joint-mimic.hpp"
 
 namespace pinocchio
 {
+
+  // A LieGroup map map each joint to a LieGroup and give the type to
+  // make cartesian product between those groups
   struct LieGroupMap
   {
 
@@ -31,21 +33,22 @@ namespace pinocchio
         type;
     };
 
-    // LieGroupCollectionDefaultTpl is implicitely chosen by the LieGroupMap
-    // inside the aggregation type
     template<typename Scalar, int Options>
     struct product_variant
     {
       typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl>
         type;
-    }
+      // LieGroupCollectionDefaultTpl is implicitely chosen by the LieGroupMap
+      // inside the aggregation type
+    };
   };
 
-  // template<typename JointModel>
-  // struct LieGroup
-  // {
-  //   typedef typename LieGroupMap::operation<JointModel>::type type;
-  // };
+  // Alias for shorctut in unittest
+  template<typename JointModel>
+  struct LieGroup
+  {
+    typedef typename LieGroupMap::operation<JointModel>::type type;
+  };
 
   // The type for generic, composite and mimic is directly the variant type
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
@@ -61,12 +64,12 @@ namespace pinocchio
   };
 
   // TODO: Fix after the rebase on Mimic
-  // template<typename JointModelRef>
-  // struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
-  // {
-  //   typedef typename LieGroupMap::product_variant<typename JointModelRef::Scalar,
-  //   JointModelRef::Options>::type type;
-  // };
+  template<typename JointModelRef>
+  struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
+  {
+    typedef typename LieGroupMap::
+      product_variant<typename JointModelRef::Scalar, JointModelRef::Options>::type type;
+  };
 
   // Atomic joint that are not euclidean
   template<typename Scalar, int Options>
