@@ -7,6 +7,7 @@
 
 #include "pinocchio/multibody/visitor.hpp"
 #include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
+#include "pinocchio/multibody/liegroup/liegroup-joint.hpp"
 
 /* --- Details -------------------------------------------------------------------- */
 namespace pinocchio
