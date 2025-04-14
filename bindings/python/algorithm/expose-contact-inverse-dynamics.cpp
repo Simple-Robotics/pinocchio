@@ -6,6 +6,8 @@
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
+#include "pinocchio/bindings/python/utils/model-checker.hpp"
+
 #include "pinocchio/algorithm/contact-inverse-dynamics.hpp"
 
 #include <boost/optional.hpp>
@@ -73,7 +75,8 @@ namespace pinocchio
         "\tc_ref: the reference velocity of contact points\n"
         "\tlambda_guess: optional initial guess for contact forces\n"
         "\tsettings: the settings of the proximal algorithm\n"
-        "\tsolve_ncp: whether to solve the NCP (true) or CCP (false)\n");
+        "\tsolve_ncp: whether to solve the NCP (true) or CCP (false)\n",
+        mimic_not_supported_function<>(0));
 
 //      bp::def(
 //        "contactInverseDynamics", contactInverseDynamics_wrapper,
@@ -93,7 +96,8 @@ namespace pinocchio
 //        "\tR: vector representing the diagonal of the compliance matrix\n"
 //        "\tconstraint_correction: vector representing the constraint correction\n"
 //        "\tsettings: the settings of the proximal algorithm\n"
-//        "\tlambda_guess: initial guess for contact forces\n");
+//        "\tlambda_guess: initial guess for contact forces\n",
+//        mimic_not_supported_function<>(0));
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
     }
   } // namespace python

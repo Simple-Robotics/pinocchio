@@ -82,15 +82,15 @@ namespace pinocchio
           {
             std::stringstream ss;
             ss << "Cannot find mesh " << geom.meshName << " for geometry " << geom.geomName;
-              std::string error_msg = ss.str();
-              PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
+            std::string error_msg = ss.str();
+            PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
           }
           MjcfMesh currentMesh = currentGraph.mapOfMeshes.at(geom.meshName);
           if (currentMesh.vertices.size() > 0)
           {
             auto vertices = currentMesh.vertices;
             // Scale vertices
-            for (Eigen::Index i = 0; i < vertices.rows(); ++i)
+            for (Eigen::DenseIndex i = 0; i < vertices.rows(); ++i)
               vertices.row(i) = vertices.row(i).cwiseProduct(currentMesh.scale.transpose());
             auto model = std::make_shared<hpp::fcl::BVHModel<fcl::OBBRSS>>();
             model->beginModel();
@@ -224,8 +224,8 @@ namespace pinocchio
                 std::stringstream ss;
                 ss << "Cannot find material " << geom.materialName << " for geometry "
                    << geom.geomName;
-                  std::string error_msg = ss.str();
-                  PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
+                std::string error_msg = ss.str();
+                PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
               }
               MjcfMaterial mat = currentGraph.mapOfMaterials.at(geom.materialName);
               meshColor = mat.rgba;
@@ -233,13 +233,12 @@ namespace pinocchio
               if (!mat.texture.empty())
               {
                 if (
-                  currentGraph.mapOfTextures.find(mat.texture)
-                  == currentGraph.mapOfTextures.end())
+                  currentGraph.mapOfTextures.find(mat.texture) == currentGraph.mapOfTextures.end())
                 {
                   std::stringstream ss;
-                  ss << "Cannot find texture " << mat.texture << " for material " << geom.materialName << " for geometry "
-                     << geom.geomName;
-                    std::string error_msg = ss.str();
+                  ss << "Cannot find texture " << mat.texture << " for material "
+                     << geom.materialName << " for geometry " << geom.geomName;
+                  std::string error_msg = ss.str();
                   PINOCCHIO_THROW_PRETTY(std::invalid_argument, error_msg);
                 }
                 MjcfTexture text = currentGraph.mapOfTextures.at(mat.texture);

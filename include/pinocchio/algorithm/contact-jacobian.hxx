@@ -7,6 +7,7 @@
 
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
+#include "pinocchio/algorithm/check.hpp"
 
 namespace pinocchio
 {
@@ -163,6 +164,9 @@ namespace pinocchio
     const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.rows(), constraint_size);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(J_.cols(), model.nv);
+
+    assert(model.check(data) && "data is not consistent with model.");
+    assert(model.check(MimicChecker()) && "Function does not support mimic joints");
 
     DynamicMatrixLike & J = J_.const_cast_derived();
     Eigen::DenseIndex row_id = 0;

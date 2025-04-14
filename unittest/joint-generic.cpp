@@ -218,18 +218,18 @@ struct init<pinocchio::JointModelCompositeTpl<Scalar, Options, JointCollection>>
     return jmodel;
   }
 };
-
-template<typename JointModel_>
-struct init<pinocchio::JointModelMimic<JointModel_>>
+template<typename Scalar, int Options, template<typename, int> class JointCollection>
+struct init<pinocchio::JointModelMimicTpl<Scalar, Options, JointCollection>>
 {
-  typedef pinocchio::JointModelMimic<JointModel_> JointModel;
+  typedef pinocchio::JointModelMimicTpl<Scalar, Options, JointCollection> JointModel;
 
   static JointModel run()
   {
-    JointModel_ jmodel_ref = init<JointModel_>::run();
+    typedef pinocchio::JointModelRevoluteTpl<Scalar, Options, 0> JointModelRX;
+    JointModelRX jmodel_ref = init<JointModelRX>::run();
 
     JointModel jmodel(jmodel_ref, 1., 0.);
-    jmodel.setIndexes(0, 0, 0);
+    jmodel.setIndexes(0, 0, 0, 0);
 
     return jmodel;
   }
@@ -294,6 +294,10 @@ struct TestJoint
   void operator()(const pinocchio::JointModelComposite &) const
   {
   }
+
+  void operator()(const pinocchio::JointModelMimic &) const
+  {
+  }
 };
 
 namespace pinocchio
@@ -327,7 +331,8 @@ namespace pinocchio
     {
       Options = _Options,
       NQ = Eigen::Dynamic, // Dynamic because unknown at compile time
-      NV = Eigen::Dynamic
+      NV = Eigen::Dynamic,
+      NVExtended = Eigen::Dynamic
     };
     typedef _Scalar Scalar;
 
@@ -345,6 +350,8 @@ namespace pinocchio
 
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> ConfigVector_t;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> TangentVector_t;
+
+    typedef boost::mpl::false_ is_mimicable_t;
   };
 
   template<typename _Scalar, int _Options, template<typename, int> class JointCollectionTpl>
@@ -471,8 +478,8 @@ struct TestJointOperatorEqual
     test(jdata);
   }
 
-  template<typename JointModel>
-  void operator()(const pinocchio::JointModelMimic<JointModel> &) const
+  template<typename Scalar, int Options, template<typename, int> class JointCollection>
+  void operator()(const pinocchio::JointModelMimicTpl<Scalar, Options, JointCollection> &) const
   {
   }
 

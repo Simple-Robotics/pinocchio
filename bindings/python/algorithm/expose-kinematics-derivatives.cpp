@@ -2,10 +2,11 @@
 // Copyright (c) 2018-2021 CNRS
 // Copyright (c) 2018-2024 INRIA
 //
-
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
 #include "pinocchio/algorithm/kinematics-derivatives.hpp"
 #include "pinocchio/algorithm/center-of-mass-derivatives.hpp"
+
+#include "pinocchio/bindings/python/utils/model-checker.hpp"
 
 #include <boost/python/tuple.hpp>
 
@@ -135,7 +136,8 @@ namespace pinocchio
         "\tdata: data related to the model\n"
         "\tq: the joint configuration vector (size model.nq)\n"
         "\tv: the joint velocity vector (size model.nv)\n"
-        "\ta: the joint acceleration vector (size model.nv)\n");
+        "\ta: the joint acceleration vector (size model.nv)\n",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getJointVelocityDerivatives", getJointVelocityDerivatives_proxy,
@@ -151,7 +153,8 @@ namespace pinocchio
         "\tmodel: model of the kinematic tree\n"
         "\tdata: data related to the model\n"
         "\tjoint_id: index of the joint\n"
-        "\treference_frame: reference frame in which the resulting derivatives are expressed\n");
+        "\treference_frame: reference frame in which the resulting derivatives are expressed\n",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getPointVelocityDerivatives", getPointVelocityDerivatives_proxy,
@@ -167,7 +170,8 @@ namespace pinocchio
         "\tdata: data related to the model\n"
         "\tjoint_id: index of the joint\n"
         "\tplacement: relative placement of the point w.r.t. the joint frame\n"
-        "\treference_frame: reference frame in which the resulting derivatives are expressed\n");
+        "\treference_frame: reference frame in which the resulting derivatives are expressed\n",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getPointClassicAccelerationDerivatives", getPointClassicAccelerationDerivatives_proxy,
@@ -183,7 +187,8 @@ namespace pinocchio
         "\tdata: data related to the model\n"
         "\tjoint_id: index of the joint\n"
         "\tplacement: relative placement of the point w.r.t. the joint frame\n"
-        "\treference_frame: reference frame in which the resulting derivatives are expressed\n");
+        "\treference_frame: reference frame in which the resulting derivatives are expressed\n",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getJointAccelerationDerivatives", getJointAccelerationDerivatives_proxy,
@@ -199,7 +204,8 @@ namespace pinocchio
         "\tmodel: model of the kinematic tree\n"
         "\tdata: data related to the model\n"
         "\tjoint_id: index of the joint\n"
-        "\treference_frame: reference frame in which the resulting derivatives are expressed\n");
+        "\treference_frame: reference frame in which the resulting derivatives are expressed\n",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getCenterOfMassVelocityDerivatives", getCoMVelocityDerivatives_proxy,
@@ -210,7 +216,8 @@ namespace pinocchio
         "before calling this function.\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
-        "\tdata: data related to the model\n");
+        "\tdata: data related to the model\n",
+        mimic_not_supported_function<>(0));
     }
 
   } // namespace python

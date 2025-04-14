@@ -6,6 +6,7 @@
 #define __pinocchio_algorithm_contact_cholesky_hxx__
 
 #include "pinocchio/algorithm/check.hpp"
+#include "pinocchio/multibody/data.hpp"
 
 #include <algorithm>
 
@@ -34,6 +35,8 @@ namespace pinocchio
     static_assert(
       std::is_base_of<ConstraintModelBase<ConstraintModel>, ConstraintModel>::value,
       "ConstraintModel is not a ConstraintModelBase");
+
+    assert(model.check(MimicChecker()) && "Function does not support mimic joints");
 
     nv = model.nv;
 
@@ -184,7 +187,8 @@ namespace pinocchio
       "ConstraintData is not a ConstraintDataBase");
 
     assert(model.check(data) && "data is not consistent with model.");
-    assert(mus.size() == constraintDim() && "mus has not the right dimension.");
+    assert(model.check(MimicChecker()) && "Function does not support mimic joints");
+
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       contact_models.size() == contact_datas.size(),
       "The number of constraints between contact_models and contact_datas vectors is different.");
@@ -681,7 +685,7 @@ namespace pinocchio
   {
 
     template<typename Scalar, int Options, typename VectorLike>
-    EIGEN_DONT_INLINE VectorLike & inverseAlgo(
+    PINOCCHIO_DONT_INLINE VectorLike & inverseAlgo(
       const ContactCholeskyDecompositionTpl<Scalar, Options> & chol,
       const Eigen::DenseIndex col,
       const Eigen::MatrixBase<VectorLike> & vec)

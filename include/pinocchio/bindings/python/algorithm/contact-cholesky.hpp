@@ -15,6 +15,7 @@
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
 #include "pinocchio/bindings/python/utils/comparable.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
+#include "pinocchio/bindings/python/utils/model-checker.hpp"
 
 #include "pinocchio/bindings/python/algorithm/delassus-operator.hpp"
 
@@ -59,13 +60,17 @@ namespace pinocchio
       void visit(PyClass & cl) const
       {
         cl.def(bp::init<>(bp::arg("self"), "Default constructor."))
-          .def(bp::init<const Model &>(bp::args("self", "model"), "Constructor from a model."))
+          .def(bp::init<const Model &>(
+            bp::args("self", "model"),
+            "Constructor from a model.")[mimic_not_supported_function<>(1)])
           .def(bp::init<const Model &, const RigidConstraintModelVector &>(
             (bp::arg("self"), bp::arg("model"), bp::arg("contact_models")),
-            "Constructor from a model and a collection of RigidConstraintModels."))
+            "Constructor from a model and a collection of RigidConstraintModels.")
+                 [mimic_not_supported_function<>(1)])
           .def(bp::init<const Model &, const ConstraintModelVector &>(
             (bp::arg("self"), bp::arg("model"), bp::arg("constraint_models")),
-            "Constructor from a model and a collection of ConstraintModels."))
+            "Constructor from a model and a collection of ConstraintModels.")
+                 [mimic_not_supported_function<>(1)])
 
           .add_property(
             "U",
@@ -106,7 +111,8 @@ namespace pinocchio
             "related to the system mass matrix and the Jacobians of the contact patches contained "
             "in\n"
             "the vector of RigidConstraintModel named contact_models. The decomposition is "
-            "regularized with a factor mu.")
+            "regularized with a factor mu.",
+            mimic_not_supported_function<>(1))
 
           .def(
             "compute",
@@ -119,7 +125,8 @@ namespace pinocchio
             "related to the system mass matrix and the Jacobians of the contact patches contained "
             "in\n"
             "the vector of RigidConstraintModel named contact_models. The decomposition is "
-            "regularized with a factor mu.")
+            "regularized with a factor mu.",
+            mimic_not_supported_function<>(1))
 
           .def(
             "compute",

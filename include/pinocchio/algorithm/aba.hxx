@@ -248,6 +248,7 @@ namespace pinocchio
       const Eigen::MatrixBase<TangentVectorType2> & tau)
     {
       assert(model.check(data) && "data is not consistent with model.");
+      assert(model.check(MimicChecker()) && "Function does not support mimic joints");
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         q.size() == model.nq, "The joint configuration vector is not of right size");
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -312,6 +313,8 @@ namespace pinocchio
 
     {
       assert(model.check(data) && "data is not consistent with model.");
+      assert(model.check(MimicChecker()) && "Function does not support mimic joints");
+
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         q.size() == model.nq, "The joint configuration vector is not of right size");
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -490,6 +493,8 @@ namespace pinocchio
       const Eigen::MatrixBase<TangentVectorType2> & tau)
     {
       assert(model.check(data) && "data is not consistent with model.");
+      assert(model.check(MimicChecker()) && "Function does not support mimic joints");
+
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         q.size(), model.nq, "The joint configuration vector is not of right size");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
@@ -556,6 +561,8 @@ namespace pinocchio
 
     {
       assert(model.check(data) && "data is not consistent with model.");
+      assert(model.check(MimicChecker()) && "Function does not support mimic joints");
+
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         q.size(), model.nq, "The joint configuration vector is not of right size");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
@@ -837,6 +844,8 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorType> & q)
     {
       assert(model.check(data) && "data is not consistent with model.");
+      assert(model.check(MimicChecker()) && "Function does not support mimic joints");
+
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         q.size(), model.nq, "The joint configuration vector is not of right size");
 
@@ -874,6 +883,7 @@ namespace pinocchio
     DataTpl<Scalar, Options, JointCollectionTpl> & data)
   {
     assert(model.check(data) && "data is not consistent with model.");
+    assert(model.check(MimicChecker()) && "Function does not support mimic joints");
 
     typedef typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex JointIndex;
     data.Minv.template triangularView<Eigen::Upper>().setZero();

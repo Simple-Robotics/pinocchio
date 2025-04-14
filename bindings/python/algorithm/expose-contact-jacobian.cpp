@@ -6,6 +6,7 @@
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
+#include "pinocchio/bindings/python/utils/model-checker.hpp"
 
 namespace bp = boost::python;
 
@@ -47,24 +48,28 @@ namespace pinocchio
         "getConstraintJacobian",
         getConstraintJacobian_proxy<context::RigidConstraintModel, context::RigidConstraintData>,
         bp::args("model", "data", "constraint_model", "constraint_data"),
-        "Computes the kinematic Jacobian associatied with a given constraint model.");
+        "Computes the kinematic Jacobian associatied with a given constraint model.",
+        mimic_not_supported_function<>(0));
       bp::def(
         "getConstraintsJacobian",
         getConstraintsJacobian_proxy<
           context::RigidConstraintModelVector, context::RigidConstraintDataVector>,
         bp::args("model", "data", "constraint_models", "constraint_datas"),
-        "Computes the kinematic Jacobian associatied with a given set of constraint models.");
+        "Computes the kinematic Jacobian associatied with a given set of constraint models.",
+        mimic_not_supported_function<>(0));
 
       bp::def(
         "getConstraintJacobian",
         getConstraintJacobian_proxy<context::ConstraintModel, context::ConstraintData>,
         bp::args("model", "data", "constraint_model", "constraint_data"),
-        "Computes the kinematic Jacobian associatied with a given constraint model.");
+        "Computes the kinematic Jacobian associatied with a given constraint model.",
+        mimic_not_supported_function<>(0));
       bp::def(
         "getConstraintsJacobian",
         getConstraintsJacobian_proxy<context::ConstraintModelVector, context::ConstraintDataVector>,
         bp::args("model", "data", "constraint_models", "constraint_datas"),
-        "Computes the kinematic Jacobian associatied with a given set of constraint models.");
+        "Computes the kinematic Jacobian associatied with a given set of constraint models.",
+        mimic_not_supported_function<>(0));
     }
   } // namespace python
 } // namespace pinocchio

@@ -4,6 +4,8 @@
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
+#include "pinocchio/bindings/python/utils/model-checker.hpp"
+
 #include "pinocchio/algorithm/impulse-dynamics.hpp"
 
 namespace bp = boost::python;
@@ -46,8 +48,9 @@ namespace pinocchio
         "Contact information.\n"
         "When using impulseDynamics for the first time, you should call first "
         "initConstraintDynamics to initialize the internal memory used in the algorithm.\n"
-        "This function returns the after-impulse velocity of the system. The impulses acting on "
-        "the contacts are stored in the list data.contact_forces.");
+        "This function returns the after-impulse velocity of the system. The impulses acting "
+        "on the contacts are stored in the list data.contact_forces.",
+        mimic_not_supported_function<>(0));
 #endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_IMPULSE_DYNAMICS
     }
   } // namespace python

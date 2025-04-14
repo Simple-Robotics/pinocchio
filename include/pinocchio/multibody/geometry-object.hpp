@@ -134,10 +134,10 @@ namespace pinocchio
   template<>
   struct traits<GeometryObject>
   {
-    typedef context::Scalar Scalar;
+    typedef double Scalar;
     enum
     {
-      Options = context::Options
+      Options = 0
     };
   };
 
