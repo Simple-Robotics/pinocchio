@@ -900,14 +900,18 @@ namespace pinocchio
     int nv = output_model.nv;
 
     // Resize limits
-    output_model.effortLimit.resize(nv);
-    output_model.velocityLimit.resize(nv);
+    output_model.lowerEffortLimit.resize(nv);
+    output_model.upperEffortLimit.resize(nv);
+    output_model.lowerVelocityLimit.resize(nv);
+    output_model.upperVelocityLimit.resize(nv);
     output_model.lowerPositionLimit.resize(nq);
     output_model.upperPositionLimit.resize(nq);
+    output_model.positionLimitMargin.resize(nq);
     output_model.armature.resize(nv);
     output_model.rotorInertia.resize(nv);
     output_model.rotorGearRatio.resize(nv);
-    output_model.friction.resize(nv);
+    output_model.lowerDryFrictionLimit.resize(nv);
+    output_model.upperDryFrictionLimit.resize(nv);
     output_model.damping.resize(nv);
 
     // Move indexes and limits
@@ -915,15 +919,22 @@ namespace pinocchio
     {
       const JointModel & jmodel_input = input_model.joints[joint_id];
       const JointModel & jmodel_output = output_model.joints[joint_id];
-      jmodel_output.jointVelocitySelector(output_model.effortLimit) =
-        jmodel_input.jointVelocitySelector(input_model.effortLimit);
-      jmodel_output.jointVelocitySelector(output_model.velocityLimit) =
-        jmodel_input.jointVelocitySelector(input_model.velocityLimit);
+
+      jmodel_output.jointVelocitySelector(output_model.lowerEffortLimit) =
+        jmodel_input.jointVelocitySelector(input_model.lowerEffortLimit);
+      jmodel_output.jointVelocitySelector(output_model.upperEffortLimit) =
+        jmodel_input.jointVelocitySelector(input_model.upperEffortLimit);
+      jmodel_output.jointVelocitySelector(output_model.lowerVelocityLimit) =
+        jmodel_input.jointVelocitySelector(input_model.lowerVelocityLimit);
+      jmodel_output.jointVelocitySelector(output_model.upperVelocityLimit) =
+        jmodel_input.jointVelocitySelector(input_model.upperVelocityLimit);
 
       jmodel_output.jointConfigSelector(output_model.lowerPositionLimit) =
         jmodel_input.jointConfigSelector(input_model.lowerPositionLimit);
       jmodel_output.jointConfigSelector(output_model.upperPositionLimit) =
         jmodel_input.jointConfigSelector(input_model.upperPositionLimit);
+      jmodel_output.jointConfigSelector(output_model.positionLimitMargin) =
+        jmodel_input.jointConfigSelector(input_model.positionLimitMargin);
 
       jmodel_output.jointVelocitySelector(output_model.armature) =
         jmodel_input.jointVelocitySelector(input_model.armature);
@@ -931,8 +942,10 @@ namespace pinocchio
         jmodel_input.jointVelocitySelector(input_model.rotorInertia);
       jmodel_output.jointVelocitySelector(output_model.rotorGearRatio) =
         jmodel_input.jointVelocitySelector(input_model.rotorGearRatio);
-      jmodel_output.jointVelocitySelector(output_model.friction) =
-        jmodel_input.jointVelocitySelector(input_model.friction);
+      jmodel_output.jointVelocitySelector(output_model.lowerDryFrictionLimit) =
+        jmodel_input.jointVelocitySelector(input_model.lowerDryFrictionLimit);
+      jmodel_output.jointVelocitySelector(output_model.upperDryFrictionLimit) =
+        jmodel_input.jointVelocitySelector(input_model.upperDryFrictionLimit);
       jmodel_output.jointVelocitySelector(output_model.damping) =
         jmodel_input.jointVelocitySelector(input_model.damping);
     }
@@ -966,15 +979,21 @@ namespace pinocchio
       idx_v += jmodel_output.nv();
       if (joint_id != index_mimicking)
       {
-        jmodel_output.jointVelocitySelector(output_model.effortLimit) =
-          jmodel_input.jointVelocitySelector(input_model.effortLimit);
-        jmodel_output.jointVelocitySelector(output_model.velocityLimit) =
-          jmodel_input.jointVelocitySelector(input_model.velocityLimit);
+        jmodel_output.jointVelocitySelector(output_model.lowerEffortLimit) =
+          jmodel_input.jointVelocitySelector(input_model.lowerEffortLimit);
+        jmodel_output.jointVelocitySelector(output_model.upperEffortLimit) =
+          jmodel_input.jointVelocitySelector(input_model.upperEffortLimit);
+        jmodel_output.jointVelocitySelector(output_model.lowerVelocityLimit) =
+          jmodel_input.jointVelocitySelector(input_model.lowerVelocityLimit);
+        jmodel_output.jointVelocitySelector(output_model.upperVelocityLimit) =
+          jmodel_input.jointVelocitySelector(input_model.upperVelocityLimit);
 
         jmodel_output.jointConfigSelector(output_model.lowerPositionLimit) =
           jmodel_input.jointConfigSelector(input_model.lowerPositionLimit);
         jmodel_output.jointConfigSelector(output_model.upperPositionLimit) =
           jmodel_input.jointConfigSelector(input_model.upperPositionLimit);
+        jmodel_output.jointConfigSelector(output_model.positionLimitMargin) =
+          jmodel_input.jointConfigSelector(input_model.positionLimitMargin);
 
         jmodel_output.jointVelocitySelector(output_model.armature) =
           jmodel_input.jointVelocitySelector(input_model.armature);
@@ -982,8 +1001,10 @@ namespace pinocchio
           jmodel_input.jointVelocitySelector(input_model.rotorInertia);
         jmodel_output.jointVelocitySelector(output_model.rotorGearRatio) =
           jmodel_input.jointVelocitySelector(input_model.rotorGearRatio);
-        jmodel_output.jointVelocitySelector(output_model.friction) =
-          jmodel_input.jointVelocitySelector(input_model.friction);
+        jmodel_output.jointVelocitySelector(output_model.lowerDryFrictionLimit) =
+          jmodel_input.jointVelocitySelector(input_model.lowerDryFrictionLimit);
+        jmodel_output.jointVelocitySelector(output_model.upperDryFrictionLimit) =
+          jmodel_input.jointVelocitySelector(input_model.upperDryFrictionLimit);
         jmodel_output.jointVelocitySelector(output_model.damping) =
           jmodel_input.jointVelocitySelector(input_model.damping);
       }
