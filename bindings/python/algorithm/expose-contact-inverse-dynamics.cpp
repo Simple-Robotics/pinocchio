@@ -1,8 +1,6 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
-
-#define BOOST_PYTHON_MAX_ARITY 24
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
