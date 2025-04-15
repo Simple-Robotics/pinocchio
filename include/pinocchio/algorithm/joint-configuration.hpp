@@ -571,7 +571,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op = SETTO);
+    const AssignmentOperatorType op = SETTO);
 
   template<
     typename Scalar,
@@ -585,7 +585,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op = SETTO);
+    const AssignmentOperatorType op = SETTO)
   {
     tangentMapProduct<
       LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, MatrixInType,
@@ -619,7 +619,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op = SETTO);
+    const AssignmentOperatorType op = SETTO);
 
   template<
     typename Scalar,
@@ -633,7 +633,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op = SETTO);
+    const AssignmentOperatorType op = SETTO)
   {
     coTangentMapProduct<
       LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, MatrixInType,

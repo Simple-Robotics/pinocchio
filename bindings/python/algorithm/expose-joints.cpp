@@ -86,6 +86,35 @@ namespace pinocchio
       return J;
     }
 
+    context::MatrixXs tangentMap_proxy(const context::Model & model, const context::VectorXs & q)
+    {
+      context::MatrixXs TM(context::MatrixXs::Zero(model.nq, model.nv));
+
+      tangentMap(model, q, TM, SETTO);
+
+      return TM;
+    }
+
+    context::MatrixXs tangentMapProduct_proxy(
+      const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
+    {
+      context::MatrixXs mat_out(context::MatrixXs::Zero(model.nq, mat_in.cols()));
+
+      tangentMapProduct(model, q, mat_in, mat_out, SETTO);
+
+      return mat_out;
+    }
+
+    context::MatrixXs coTangentMapProduct_proxy(
+      const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
+    {
+      context::MatrixXs mat_out(context::MatrixXs::Zero(model.nv, mat_in.cols()));
+
+      coTangentMapProduct(model, q, mat_in, mat_out, SETTO);
+
+      return mat_out;
+    }
+
     void exposeJointsAlgo()
     {
       typedef context::Scalar Scalar;
@@ -202,6 +231,30 @@ namespace pinocchio
         "\tq2: the terminal joint configuration vector (size model.nq)\n"
         "\targument_position: either pinocchio.ArgumentPosition.ARG0 or "
         "pinocchio.ArgumentPosition.ARG1, depending on the desired Jacobian value.\n");
+
+      bp::def(
+        "tangentMap", &tangentMap_proxy, bp::args("model", "q"),
+        "Computes the tangent map in configuration q that map of a small variation express in the "
+        "Lie algebra as a small variation in the parametric space.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n");
+
+      bp::def(
+        "tangentMapProduct", &tangentMapProduct_proxy, bp::args("model", "q", "mat_in"),
+        "Apply the tangent map to a matrix mat_in.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n"
+        "\tmat_in: a matrix (size model.nq, ncols)");
+
+      bp::def(
+        "coTangentMapProduct", &coTangentMapProduct_proxy, bp::args("model", "q", "mat_in"),
+        "Apply the tangent map to a matrix mat_in.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n"
+        "\tmat_in: a matrix (size model.nv, ncols)");
 
       bp::def(
         "randomConfiguration", &randomConfiguration_proxy, bp::arg("model"),

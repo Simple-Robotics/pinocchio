@@ -255,7 +255,7 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TM,
-    const AssignmentOperatorType)
+    const AssignmentOperatorType op)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model.nq, "The configuration vector is not of the right size");
@@ -289,7 +289,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op)
+    const AssignmentOperatorType op)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model.nq, "The configuration vector is not of the right size");
@@ -325,7 +325,7 @@ namespace pinocchio
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
-    const AssignmentOperatorType & op)
+    const AssignmentOperatorType op)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model.nq, "The configuration vector is not of the right size");
