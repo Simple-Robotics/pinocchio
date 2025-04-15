@@ -38,6 +38,8 @@ namespace pinocchio
       struct MjcfGeom;
       struct MjcfSite;
 
+      using JointType = ::pinocchio::urdf::details::JointType;
+
       class PINOCCHIO_PARSERS_DLLAPI MjcfVisitor : public ::pinocchio::urdf::details::UrdfVisitor
       {
       public:

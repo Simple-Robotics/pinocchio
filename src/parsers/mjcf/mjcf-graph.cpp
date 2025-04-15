@@ -1021,32 +1021,32 @@ namespace pinocchio
         Inertia inert = currentBody.bodyInertia;
         SE3 jointInParent = bodyPose * joint.jointPlacement;
         bodyInJoint = joint.jointPlacement.inverse();
-        MjcfVisitor::JointType jType;
+        JointType jType;
 
         RangeJoint range;
         if (joint.jointType == "free")
         {
           mjcfVisitor << "Free Joint " << '\n';
           range = joint.range.setDimension<7, 6>();
-          jType = MjcfVisitor::FLOATING;
+          jType = JointType::FLOATING;
         }
         else if (joint.jointType == "slide")
         {
           mjcfVisitor << "joint prismatic with axis " << joint.axis << '\n';
           range = joint.range;
-          jType = MjcfVisitor::PRISMATIC;
+          jType = JointType::PRISMATIC;
         }
         else if (joint.jointType == "ball")
         {
           mjcfVisitor << "Sphere Joint " << '\n';
           range = joint.range.setDimension<4, 3>();
-          jType = MjcfVisitor::SPHERICAL;
+          jType = JointType::SPHERICAL;
         }
         else if (joint.jointType == "hinge")
         {
           mjcfVisitor << "joint revolute with axis " << joint.axis << '\n';
           range = joint.range;
-          jType = MjcfVisitor::REVOLUTE;
+          jType = JointType::REVOLUTE;
         }
         else
           PINOCCHIO_THROW_PRETTY(std::invalid_argument, "Unknown joint type");

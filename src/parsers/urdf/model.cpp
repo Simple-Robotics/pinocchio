@@ -115,8 +115,8 @@ namespace pinocchio
             damping = Vector::Constant(6, 0.);
 
             model.addJointAndBody(
-              UrdfVisitor::FLOATING, axis, parentFrameId, jointPlacement, joint->name, Y,
-              link->name, max_effort, max_velocity, min_config, max_config, friction, damping);
+              JointType::FLOATING, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
+              max_effort, max_velocity, min_config, max_config, friction, damping);
             break;
 
           case ::urdf::Joint::REVOLUTE:
@@ -149,15 +149,15 @@ namespace pinocchio
 
               MimicInfo mimic_info(
                 joint->mimic->joint_name, joint->mimic->multiplier, joint->mimic->offset, axis,
-                UrdfVisitor::REVOLUTE);
+                JointType::REVOLUTE);
 
               model.addJointAndBody(
-                UrdfVisitor::MIMIC, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
+                JointType::MIMIC, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
                 max_effort, max_velocity, min_config, max_config, friction, damping, mimic_info);
             }
             else
               model.addJointAndBody(
-                UrdfVisitor::REVOLUTE, axis, parentFrameId, jointPlacement, joint->name, Y,
+                JointType::REVOLUTE, axis, parentFrameId, jointPlacement, joint->name, Y,
                 link->name, max_effort, max_velocity, min_config, max_config, friction, damping);
             break;
 
@@ -187,7 +187,7 @@ namespace pinocchio
             }
 
             model.addJointAndBody(
-              UrdfVisitor::CONTINUOUS, axis, parentFrameId, jointPlacement, joint->name, Y,
+              JointType::CONTINUOUS, axis, parentFrameId, jointPlacement, joint->name, Y,
               link->name, max_effort, max_velocity, min_config, max_config, friction, damping);
             break;
 
@@ -221,15 +221,15 @@ namespace pinocchio
 
               MimicInfo mimic_info(
                 joint->mimic->joint_name, joint->mimic->multiplier, joint->mimic->offset, axis,
-                UrdfVisitor::PRISMATIC);
+                JointType::PRISMATIC);
 
               model.addJointAndBody(
-                UrdfVisitor::MIMIC, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
+                JointType::MIMIC, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
                 max_effort, max_velocity, min_config, max_config, friction, damping, mimic_info);
             }
             else
               model.addJointAndBody(
-                UrdfVisitor::PRISMATIC, axis, parentFrameId, jointPlacement, joint->name, Y,
+                JointType::PRISMATIC, axis, parentFrameId, jointPlacement, joint->name, Y,
                 link->name, max_effort, max_velocity, min_config, max_config, friction, damping);
             break;
 
@@ -247,7 +247,7 @@ namespace pinocchio
             damping = Vector::Constant(3, 0.);
 
             model.addJointAndBody(
-              UrdfVisitor::PLANAR, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
+              JointType::PLANAR, axis, parentFrameId, jointPlacement, joint->name, Y, link->name,
               max_effort, max_velocity, min_config, max_config, friction, damping);
             break;
 

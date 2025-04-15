@@ -28,6 +28,17 @@ namespace pinocchio
     {
       typedef double urdf_scalar_type;
 
+      enum JointType
+      {
+        REVOLUTE,
+        CONTINUOUS,
+        PRISMATIC,
+        FLOATING,
+        PLANAR,
+        SPHERICAL,
+        MIMIC
+      };
+
       struct MimicInfo
       {
         typedef urdf_scalar_type Scalar;
@@ -39,7 +50,6 @@ namespace pinocchio
         Vector3 axis;
 
         // Use the JointType from UrdfVisitorBaseTpl
-        typedef UrdfVisitor::JointType JointType;
         JointType jointType;
 
         MimicInfo() = default;
@@ -62,17 +72,6 @@ namespace pinocchio
       class UrdfVisitor
       {
       public:
-        enum JointType
-        {
-          REVOLUTE,
-          CONTINUOUS,
-          PRISMATIC,
-          FLOATING,
-          PLANAR,
-          SPHERICAL,
-          MIMIC
-        };
-
         typedef UrdfVisitor Self;
 
         typedef urdf_scalar_type Scalar;
@@ -88,8 +87,6 @@ namespace pinocchio
         typedef typename Model::JointCollection JointCollection;
         typedef typename Model::JointModel JointModel;
         typedef typename Model::Frame Frame;
-
-        typedef MimicInfo<Scalar, Options> MimicInfo;
 
         Model & model;
         std::ostream * log;
@@ -189,7 +186,7 @@ namespace pinocchio
           addJointAndBody(
             type, axis, parentFrameId, placement, joint_name, Y, frame_placement, body_name,
             -max_effort, max_effort, -max_velocity, max_velocity, min_config, max_config, -friction,
-            friction, damping);
+            friction, damping, mimic_info);
         }
         void addJointAndBody(
           JointType type,
@@ -238,20 +235,20 @@ namespace pinocchio
           const VectorConstRef & min_dry_friction,
           const VectorConstRef & max_dry_friction,
           const VectorConstRef & damping,
-          const boost::optional<MimicInfo_> & mimic_info = boost::none)
+          const boost::optional<MimicInfo> & mimic_info = boost::none)
         {
           JointIndex joint_id;
           const Frame & frame = model.frames[parentFrameId];
           switch (type)
           {
-          case Self::FLOATING:
+          case JointType::FLOATING:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelFreeFlyer(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Self::REVOLUTE:
+          case JointType::REVOLUTE:
             joint_id = addJoint<
               typename JointCollection::JointModelRX, typename JointCollection::JointModelRY,
               typename JointCollection::JointModelRZ,
@@ -260,7 +257,7 @@ namespace pinocchio
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Self::CONTINUOUS:
+          case CONTINUOUS:
             joint_id = addJoint<
               typename JointCollection::JointModelRUBX, typename JointCollection::JointModelRUBY,
               typename JointCollection::JointModelRUBZ,
@@ -269,7 +266,7 @@ namespace pinocchio
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Self::PRISMATIC:
+          case PRISMATIC:
             joint_id = addJoint<
               typename JointCollection::JointModelPX, typename JointCollection::JointModelPY,
               typename JointCollection::JointModelPZ,
@@ -278,39 +275,41 @@ namespace pinocchio
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Self::PLANAR:
+          case JointType::PLANAR:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelPlanar(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Self::SPHERICAL:
+          case JointType::SPHERICAL:
             joint_id = model.addJoint(
               frame.parentJoint, typename JointCollection::JointModelSpherical(),
               frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
               max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
               max_dry_friction, damping);
             break;
-          case Base::MIMIC:
+          case MIMIC:
             if (mimic_info)
               switch (mimic_info->jointType)
               {
-              case Base::REVOLUTE:
+              case JointType::REVOLUTE:
                 joint_id = addMimicJoint<
                   typename JointCollection::JointModelRX, typename JointCollection::JointModelRY,
                   typename JointCollection::JointModelRZ,
                   typename JointCollection::JointModelRevoluteUnaligned>(
-                  frame, placement, joint_name, max_effort, max_velocity, min_config, max_config,
-                  friction, damping, *mimic_info);
+                  frame, placement, joint_name, min_effort, max_effort, min_velocity, max_velocity,
+                  min_config, max_config, config_limit_margin, min_dry_friction, max_dry_friction,
+                  damping, *mimic_info);
                 break;
-              case Base::PRISMATIC:
+              case JointType::PRISMATIC:
                 joint_id = addMimicJoint<
                   typename JointCollection::JointModelPX, typename JointCollection::JointModelPY,
                   typename JointCollection::JointModelPZ,
                   typename JointCollection::JointModelPrismaticUnaligned>(
-                  frame, placement, joint_name, max_effort, max_velocity, min_config, max_config,
-                  friction, damping, *mimic_info);
+                  frame, placement, joint_name, min_effort, max_effort, min_velocity, max_velocity,
+                  min_config, max_config, config_limit_margin, min_dry_friction, max_dry_friction,
+                  damping, *mimic_info);
                 break;
               default:
                 PINOCCHIO_CHECK_INPUT_ARGUMENT(
@@ -532,11 +531,15 @@ namespace pinocchio
           const Frame & frame,
           const SE3 & placement,
           const std::string & joint_name,
+          const VectorConstRef & min_effort,
           const VectorConstRef & max_effort,
+          const VectorConstRef & min_velocity,
           const VectorConstRef & max_velocity,
           const VectorConstRef & min_config,
           const VectorConstRef & max_config,
-          const VectorConstRef & friction,
+          const VectorConstRef & config_limit_margin,
+          const VectorConstRef & min_dry_friction,
+          const VectorConstRef & max_dry_friction,
           const VectorConstRef & damping,
           const MimicInfo & mimic_info)
         {
@@ -544,7 +547,7 @@ namespace pinocchio
             PINOCCHIO_CHECK_INPUT_ARGUMENT(
               false, "The parent joint of the mimic joint is not in the kinematic tree");
 
-          auto mimicked_joint = model.joints[getJointId(mimic_info.mimicked_name)];
+          const auto & mimicked_joint = model.joints[getJointId(mimic_info.mimicked_name)];
 
           CartesianAxis axisType = extractCartesianAxis(mimic_info.axis);
           switch (axisType)
@@ -554,16 +557,18 @@ namespace pinocchio
               frame.parentJoint,
               typename JointCollection::JointModelMimic(
                 TypeX(), mimicked_joint, mimic_info.multiplier, mimic_info.offset),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
+              max_dry_friction, damping);
             break;
           case AXIS_Y:
             return model.addJoint(
               frame.parentJoint,
               typename JointCollection::JointModelMimic(
                 TypeY(), mimicked_joint, mimic_info.multiplier, mimic_info.offset),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
+              max_dry_friction, damping);
             break;
 
           case AXIS_Z:
@@ -571,8 +576,9 @@ namespace pinocchio
               frame.parentJoint,
               typename JointCollection::JointModelMimic(
                 TypeZ(), mimicked_joint, mimic_info.multiplier, mimic_info.offset),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
+              max_dry_friction, damping);
             break;
 
           case AXIS_UNALIGNED:
@@ -580,8 +586,9 @@ namespace pinocchio
               frame.parentJoint,
               typename JointCollection::JointModelMimic(
                 TypeUnaligned(), mimicked_joint, mimic_info.multiplier, mimic_info.offset),
-              frame.placement * placement, joint_name, max_effort, max_velocity, min_config,
-              max_config, friction, damping);
+              frame.placement * placement, joint_name, min_effort, max_effort, min_velocity,
+              max_velocity, min_config, max_config, config_limit_margin, min_dry_friction,
+              max_dry_friction, damping);
             break;
 
           default:
