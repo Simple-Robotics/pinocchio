@@ -211,8 +211,8 @@ namespace pinocchio
             bp::args("self", "placement", "diagonal_constraint_inertia"),
             "This function computes the spatial inertia associated with the constraint.")
           // The two following methods are not exposed as they rely on allocators.
-          // .def("appendConstraintDiagonalInertiaToJointInertias",
-          //   &appendConstraintDiagonalInertiaToJointInertias,
+          // .def("appendCouplingConstraintInertias",
+          //   &appendCouplingConstraintInertias,
           //   bp::args("self", "model", "data", "constraint_data", "diagonal_constraint_inertia",
           //   "inertias"), "Append the constraint diagonal inertia to the joint inertias."
           // )
