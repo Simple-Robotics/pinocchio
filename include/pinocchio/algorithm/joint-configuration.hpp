@@ -500,6 +500,149 @@ namespace pinocchio
 
   /**
    *
+   * @brief   Computes the tangentMap that map a small variation of the configuration express in the
+   * Lie algebra (a vector of size nv) to a small variation of the configuration in the parametric
+   * space (a vector of size nq).
+   *
+   * @details This map can be interpreted as a vector space Jacobian of the integrate function
+   * regarding the variable v in 0. Chained with a Lie group Jacobian in q it allows to recover a
+   * vector space Jacobian in the parametric space.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[out] TM           Tangent map in q mapping the Lie algebra with the parametric tangent
+   * space.
+   *
+   */
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void tangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+    const AssignmentOperatorType op = SETTO);
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void tangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+    const AssignmentOperatorType op = SETTO)
+  {
+    tangentMap<
+      LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentMapMatrixType>(
+      model, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), op);
+  }
+
+  /**
+   *
+   * @brief   Compose the tangentMap with a matrix, e.g., a Lie group Jacobian in order to recover a
+   * vector space Jacobian or chain Lie Group derivatives with vector space derivative in a forward
+   * manner.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[in]  mat_in       A matrix with range in the Lie algebra (size model.nv, n_cols)
+   * @param[out] mat_out      A matrix with range in the parametric space (size model.nq, n_cols)
+   *
+   */
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void tangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op = SETTO);
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void tangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op = SETTO);
+  {
+    tangentMapProduct<
+      LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, MatrixInType,
+      MatrixOutType>(
+      model, q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
+  }
+
+  /**
+   *
+   * @brief   Compose the tangentMap with a matrix, e.g., a Lie group Jacobian in order to recover a
+   * vector space Jacobian or chain Lie Group derivatives with vector space derivative in reverse
+   * mode.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[in]  mat_in       A matrix with range in the parametric space (size model.nq, n_cols)
+   * @param[out] mat_out      A matrix with range in the Lie algebra (size model.nv, n_cols)
+   *
+   */
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void coTangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op = SETTO);
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void coTangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op = SETTO);
+  {
+    coTangentMapProduct<
+      LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, MatrixInType,
+      MatrixOutType>(
+      model, q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
+  }
+
+  /**
+   *
    * @brief   Transport a matrix from the terminal to the initial tangent space of the integrate
    * operation, with respect to the configuration or the velocity arguments.
    *

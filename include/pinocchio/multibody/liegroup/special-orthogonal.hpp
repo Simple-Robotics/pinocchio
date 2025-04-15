@@ -601,7 +601,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       const AssignmentOperatorType op)
     {
       ConstQuaternionMap_t quat(q.derived().data());
-      TangentMap_t _TM;
+      TangentMapMatrix_t _TM;
       quaternion::tangentMap(quat, _TM);
       switch (op)
       {

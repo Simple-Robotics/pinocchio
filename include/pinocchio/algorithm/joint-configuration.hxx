@@ -250,6 +250,110 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void tangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+    const AssignmentOperatorType)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TM.rows(), model.nq, "The output argument is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TM.cols(), model.nv, "The output argument is not of the right size");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
+    typename Algo::ArgsType args(
+      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void tangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.rows(), model.nv, "The input matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_out.rows(), model.nq, "The output matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.cols(), mat_out.cols(), "The input/output matrix sized do not match");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapProductStep<LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType> Algo;
+    typename Algo::ArgsType args(
+      q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void coTangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType & op)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.rows(), model.nq, "The input matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_out.rows(), model.nv, "The output matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.cols(), mat_out.cols(), "The input/output matrix sized do not match");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef CoTangentMapProductStep<LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType> Algo;
+    typename Algo::ArgsType args(
+      q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
     typename TangentVectorType,
     typename JacobianMatrixType1,
     typename JacobianMatrixType2>

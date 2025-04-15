@@ -341,7 +341,7 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct TangentMapStepAlgo
   {
-    template<typename ConfigVectorIn, typename TangentVector, typename TangentMapMatrixType>
+    template<typename ConfigVectorIn, typename TangentMapMatrixType>
     static void run(
       const JointModelBase<JointModel> & jmodel,
       const Eigen::MatrixBase<ConfigVectorIn> & q,
@@ -385,11 +385,7 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct TangentMapProductStepAlgo
   {
-    template<
-      typename ConfigVectorIn,
-      typename TangentVector,
-      typename MatrixInType,
-      typename MatrixOutType>
+    template<typename ConfigVectorIn, typename MatrixInType, typename MatrixOutType>
     static void run(
       const JointModelBase<JointModel> & jmodel,
       const Eigen::MatrixBase<ConfigVectorIn> & q,
@@ -434,11 +430,7 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct CoTangentMapProductStepAlgo
   {
-    template<
-      typename ConfigVectorIn,
-      typename TangentVector,
-      typename MatrixInType,
-      typename MatrixOutType>
+    template<typename ConfigVectorIn, typename MatrixInType, typename MatrixOutType>
     static void run(
       const JointModelBase<JointModel> & jmodel,
       const Eigen::MatrixBase<ConfigVectorIn> & q,
