@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_data_mimic_idx_vExtended_to_idx_v_fromRow)
     Data data_mimic(model_mimic);
     Data data_full(model_full);
 
-    for (size_t joint_id = 1; joint_id < model_mimic.njoints; joint_id++)
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model_mimic.njoints); joint_id++)
     {
       const int idx_vj = model_mimic.joints[joint_id].idx_v();
       const int idx_vExtended_j = model_mimic.joints[joint_id].idx_vExtended();
@@ -108,20 +108,21 @@ BOOST_AUTO_TEST_CASE(test_data_mimic_mimic_parents_fromRow)
 
     Data data_mimic(model_mimic);
 
-    for (size_t joint_id = 1; joint_id < model_mimic.njoints; joint_id++)
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model_mimic.njoints); joint_id++)
     {
       const int idx_vExtended_j = model_mimic.joints[joint_id].idx_vExtended();
       const int nvExtended_j = model_mimic.joints[joint_id].nvExtended();
 
       // If the parent from row is not the universe, it should be either mimic or non mimic - not
       // both
-      const bool parent_is_universe = (data_mimic.parents_fromRow[idx_vExtended_j] == -1);
+      const bool parent_is_universe =
+        (data_mimic.parents_fromRow[JointIndex(idx_vExtended_j)] == -1);
       const bool parent_is_mimic =
-        (data_mimic.mimic_parents_fromRow[idx_vExtended_j]
-         == data_mimic.parents_fromRow[idx_vExtended_j]);
+        (data_mimic.mimic_parents_fromRow[JointIndex(idx_vExtended_j)]
+         == data_mimic.parents_fromRow[JointIndex(idx_vExtended_j)]);
       const bool parent_is_not_mimic =
-        (data_mimic.non_mimic_parents_fromRow[idx_vExtended_j]
-         == data_mimic.parents_fromRow[idx_vExtended_j]);
+        (data_mimic.non_mimic_parents_fromRow[JointIndex(idx_vExtended_j)]
+         == data_mimic.parents_fromRow[JointIndex(idx_vExtended_j)]);
       BOOST_CHECK(parent_is_universe || (parent_is_mimic != parent_is_not_mimic));
 
       for (int v = 1; v < nvExtended_j; v++)
