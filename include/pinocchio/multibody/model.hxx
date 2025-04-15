@@ -498,7 +498,8 @@ namespace pinocchio
     bool res = other.nq == nq && other.nv == nv && other.nvExtended == nvExtended
                && other.njoints == njoints && other.nbodies == nbodies && other.nframes == nframes
                && other.parents == parents && other.children == children && other.names == names
-               && other.subtrees == subtrees && other.mimicking_joints == mimicking_joints
+               && other.subtrees == subtrees && other.mimic_joint_supports == mimic_joint_supports
+               && other.mimicking_joints == mimicking_joints
                && other.mimicked_joints == mimicked_joints && other.gravity == gravity
                && other.name == name;
 
