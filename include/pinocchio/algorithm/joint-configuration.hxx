@@ -641,10 +641,10 @@ namespace pinocchio
   {
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef typename LieGroupInstanceStep<LieGroup_t, Scalar, Options> Algo;
+    typedef LieGroupInstanceStep<LieGroup_t, Scalar, Options> Algo;
     typedef typename Model::JointIndex JointIndex;
 
-    Algo::ArgsType args(lgo);
+    typename Algo::ArgsType args(lgo);
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
     {
       Algo::run(model.joints[i], args);

@@ -1239,6 +1239,15 @@ namespace pinocchio
       model, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrix, jacobian));
   }
 
+  /**
+   *
+   * @brief         Returns the Lie group associated to the model. It is the cartesian product of
+   * the lie groups of all its joints.
+   *
+   * @param[in]     model          Model of the kinematic tree.
+   * @param[out]    lgo            The cartesian Lie group object.
+   *
+   */
   template<
     typename LieGroup_t,
     typename Scalar,
@@ -1248,12 +1257,21 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     typename LieGroup_t::template product_variant<Scalar, Options>::type & lgo);
 
+  /**
+   *
+   * @brief         Returns the Lie group associated to the model. It is the cartesian product of
+   * the lie groups of all its joints.
+   *
+   * @param[in]     model          Model of the kinematic tree.
+   * @param[out]    lgo            The cartesian Lie group object.
+   *
+   */
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   void lie_group(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     typename LieGroupMap::template product_variant<Scalar, Options>::type & lgo)
   {
-    lie_group<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo)
+    lie_group<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo);
   }
 
   /// \}
