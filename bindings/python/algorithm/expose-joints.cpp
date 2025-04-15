@@ -10,6 +10,9 @@ namespace pinocchio
   namespace python
   {
 
+    typedef typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+      LgType;
+
     static context::VectorXs
     normalize_proxy(const context::Model & model, const context::VectorXs & config)
     {
@@ -113,6 +116,15 @@ namespace pinocchio
       coTangentMapProduct(model, q, mat_in, mat_out, SETTO);
 
       return mat_out;
+    }
+
+    LgType lie_group_proxy(const context::Model & model)
+    {
+      LgType res;
+
+      lie_group(model, res);
+
+      return res;
     }
 
     void exposeJointsAlgo()
@@ -288,6 +300,13 @@ namespace pinocchio
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
         "\tq: a joint configuration vector to normalize (size model.nq)\n");
+
+      bp::def(
+        "lie_group", lie_group_proxy, bp::args("model"),
+        "Returns the Lie group associated to the model. It is the cartesian product of the lie "
+        "groups of all its joints.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n");
 
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
 
