@@ -528,6 +528,23 @@ namespace pinocchio
     const Eigen::MatrixBase<TangentMapMatrixType> & TM,
     const AssignmentOperatorType op = SETTO);
 
+  /**
+   *
+   * @brief   Computes the tangentMap that map a small variation of the configuration express in the
+   * Lie algebra (a vector of size nv) to a small variation of the configuration in the parametric
+   * space (a vector of size nq).
+   *
+   * @details This map can be interpreted as a vector space Jacobian of the integrate function
+   * regarding the variable v in 0. Chained with a Lie group Jacobian in q it allows to recover a
+   * vector space Jacobian in the parametric space.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[out] TM           Tangent map in q mapping the Lie algebra with the parametric tangent
+   * space.
+   *
+   */
   template<
     typename Scalar,
     int Options,
@@ -573,6 +590,19 @@ namespace pinocchio
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
     const AssignmentOperatorType op = SETTO);
 
+  /**
+   *
+   * @brief   Compose the tangentMap with a matrix, e.g., a Lie group Jacobian in order to recover a
+   * vector space Jacobian or chain Lie Group derivatives with vector space derivative in a forward
+   * manner.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[in]  mat_in       A matrix with range in the Lie algebra (size model.nv, n_cols)
+   * @param[out] mat_out      A matrix with range in the parametric space (size model.nq, n_cols)
+   *
+   */
   template<
     typename Scalar,
     int Options,
@@ -621,6 +651,19 @@ namespace pinocchio
     const Eigen::MatrixBase<MatrixOutType> & mat_out,
     const AssignmentOperatorType op = SETTO);
 
+  /**
+   *
+   * @brief   Compose the tangentMap with a matrix, e.g., a Lie group Jacobian in order to recover a
+   * vector space Jacobian or chain Lie Group derivatives with vector space derivative in reverse
+   * mode.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[in]  mat_in       A matrix with range in the parametric space (size model.nq, n_cols)
+   * @param[out] mat_out      A matrix with range in the Lie algebra (size model.nv, n_cols)
+   *
+   */
   template<
     typename Scalar,
     int Options,
