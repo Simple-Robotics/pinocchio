@@ -219,7 +219,9 @@ namespace pinocchio
     supports[joint_id].push_back(joint_id);
 
     mimic_joint_supports.push_back(mimic_joint_supports[parent]);
-    if (auto jmodel_ = boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(&jmodel))
+    if (
+      const auto & jmodel_ =
+        boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(&jmodel))
     {
       mimicking_joints.push_back(jmodel.id());
       mimicked_joints.push_back(jmodel_->jmodel().id());
@@ -460,8 +462,8 @@ namespace pinocchio
     this->nqs = other.nqs;
     this->idx_vs = other.idx_vs;
     this->nvs = other.nvs;
-    this->idx_vExtendeds = idx_vExtendeds;
-    this->nvExtendeds = nvExtendeds;
+    this->idx_vExtendeds = other.idx_vExtendeds;
+    this->nvExtendeds = other.nvExtendeds;
     this->parents = other.parents;
     this->children = other.children;
     this->names = other.names;
@@ -482,9 +484,9 @@ namespace pinocchio
     this->frames = other.frames;
     this->supports = other.supports;
     this->subtrees = other.subtrees;
-    this->mimic_joint_supports = mimic_joint_supports;
-    this->mimicking_joints = mimicking_joints;
-    this->mimicked_joints = mimicked_joints;
+    this->mimic_joint_supports = other.mimic_joint_supports;
+    this->mimicking_joints = other.mimicking_joints;
+    this->mimicked_joints = other.mimicked_joints;
     this->gravity = other.gravity;
     this->name = other.name;
     return *this;
