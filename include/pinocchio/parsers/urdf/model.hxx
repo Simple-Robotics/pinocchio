@@ -707,7 +707,7 @@ namespace pinocchio
       details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTree(filename, visitor, mimic);
+      details::parseRootTree(filename, visitor, boost::none, boost::none, mimic);
 
       model = visitor.model;
       return model;
@@ -767,7 +767,7 @@ namespace pinocchio
       details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTreeFromXML(xmlStream, visitor, mimic);
+      details::parseRootTreeFromXML(xmlStream, visitor, boost::none, boost::none, mimic);
 
       model = visitor.model;
       return model;
@@ -830,7 +830,7 @@ namespace pinocchio
       details::UrdfVisitor visitor(urdf_model);
       if (verbose)
         visitor.log = &std::cout;
-      details::parseRootTree(urdfTree.get(), visitor, mimic);
+      details::parseRootTree(urdfTree.get(), visitor, boost::none, boost::none, mimic);
 
       model = visitor.model;
       return model;
