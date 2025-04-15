@@ -444,6 +444,7 @@ namespace pinocchio
   {
     this->nq = other.nq;
     this->nv = other.nv;
+    this->nvExtended = other.nvExtended;
     this->njoints = other.njoints;
     this->nbodies = other.nbodies;
     this->nframes = other.nframes;
@@ -459,6 +460,8 @@ namespace pinocchio
     this->nqs = other.nqs;
     this->idx_vs = other.idx_vs;
     this->nvs = other.nvs;
+    this->idx_vExtendeds = idx_vExtendeds;
+    this->nvExtendeds = nvExtendeds;
     this->parents = other.parents;
     this->children = other.children;
     this->names = other.names;
@@ -479,6 +482,9 @@ namespace pinocchio
     this->frames = other.frames;
     this->supports = other.supports;
     this->subtrees = other.subtrees;
+    this->mimic_joint_supports = mimic_joint_supports;
+    this->mimicking_joints = mimicking_joints;
+    this->mimicked_joints = mimicked_joints;
     this->gravity = other.gravity;
     this->name = other.name;
     return *this;
