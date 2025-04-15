@@ -89,7 +89,7 @@ namespace pinocchio
         JointModelLieGroupPythonVisitor<JointModelMimic<JointModelRef>>>
     {
     public:
-      typedef context::JointModelComposite Self;
+      typedef JointModelMimic<JointModelRef> Self;
       typedef
         typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
           LieGroupOperation;
