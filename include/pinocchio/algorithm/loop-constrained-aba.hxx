@@ -268,7 +268,6 @@ namespace pinocchio
 
         fi.toVector().noalias() +=
           Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocitySelector(data.u);
-        data.oYaba_augmented[parent] += Ia;
         data.of[parent] += fi;
       }
 
