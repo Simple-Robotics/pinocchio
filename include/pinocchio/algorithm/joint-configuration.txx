@@ -452,6 +452,16 @@ namespace pinocchio
     const Eigen::MatrixBase<context::VectorXs> &,
     const Eigen::MatrixBase<context::MatrixXs> &);
 
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+
 #endif // PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::VectorXs integrate<

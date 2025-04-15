@@ -630,6 +630,27 @@ namespace pinocchio
     }
   }
 
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl>
+  void lie_group(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    typename LieGroup_t::template product_variant<Scalar, Options>::type & lgo)
+  {
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename LieGroupInstanceStep<LieGroup_t, Scalar, Options> Algo;
+    typedef typename Model::JointIndex JointIndex;
+
+    Algo::ArgsType args(lgo);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
   // ----------------- API that allocates memory ---------------------------- //
 
   template<
