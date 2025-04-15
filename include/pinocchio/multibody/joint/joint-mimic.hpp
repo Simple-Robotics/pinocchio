@@ -645,7 +645,7 @@ namespace pinocchio
     void setIndexes_impl(JointIndex id, int /*q*/, int /*v*/, int vExtended)
     {
       PINOCCHIO_THROW_IF(
-        (id > m_jmodel_mimicking.id()), std::invalid_argument,
+        !(id > m_jmodel_mimicking.id()), std::invalid_argument,
         "Mimic joint index is lower than its directing joint. Should never happen");
       Base::i_id = id;
       // Base::i_q = q;
