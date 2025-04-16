@@ -123,44 +123,6 @@ namespace pinocchio
     const bool update_I);
 
   /**
-   * @brief      Visit a JointModelTpl and the corresponding JointDataTpl through
-   * JointCalcTangentMapVisitor to compute the linear mapping between v and dq in config q.
-   *
-   * @tparam JointCollection    Collection of Joint types.
-   * @tparam ConfigVectorType   Type of the joint configuration vector.
-   *
-   * @param[in]  jmodel  The corresponding JointModelVariant to the JointDataVariant we want to
-   * update
-   * @param      jdata   The JointDataVariant we want to update
-   * @param[in]  q       The full model's (in which the joint belongs to) configuration vector
-   */
-  template<
-    typename Scalar,
-    int Options,
-    template<typename S, int O> class JointCollectionTpl,
-    typename ConfigVectorType>
-  inline void calc_tangent_map(
-    const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel,
-    JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata,
-    const Eigen::MatrixBase<ConfigVectorType> & q);
-
-  /**
-   * @brief      Visit a JointModelTpl and the corresponding JointDataTpl through
-   * JointCalcTangentMapVisitor to compute the linear mapping between v and dq in config q.
-   *
-   * @tparam JointCollection    Collection of Joint types.
-   *
-   * @param[in]  jmodel  The corresponding JointModelVariant to the JointDataVariant we want to
-   * update
-   * @param      jdata   The JointDataVariant we want to update
-   */
-  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
-  inline void calc_tangent_map(
-    const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel,
-    JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata,
-    const Blank blank);
-
-  /**
    * @brief      Visit a JointModelTpl through JointNvVisitor to get the dimension of
    *             the joint tangent space
    *
@@ -489,18 +451,6 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>
   stu_inertia(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata);
-
-  /**
-   * @brief      Visit a JointDataTpl through JointTangentMapVisitor to get the mapping
-   * from v in the Lie algebra to dq in TqQ in the parameter space.
-   *
-   * @param[in]  jdata  The joint data to visit.
-   *
-   * @return     The nq x nv matric
-   */
-  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
-  inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options>
-  tangent_map(const JointDataTpl<Scalar, Options, JointCollectionTpl> & jdata);
 
   /**
    * @brief      Visit a JointDataTpl<Scalar,...> to compare it to another JointData

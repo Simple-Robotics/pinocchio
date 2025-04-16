@@ -34,8 +34,7 @@
     NVExtended = traits<Joint>::NVExtended                                                         \
   };                                                                                               \
   typedef TYPENAME traits<Joint>::ConfigVector_t ConfigVector_t;                                   \
-  typedef TYPENAME traits<Joint>::TangentVector_t TangentVector_t;                                 \
-  typedef TYPENAME traits<Joint>::TangentMap_t TangentMap_t
+  typedef TYPENAME traits<Joint>::TangentVector_t TangentVector_t
 
 #ifdef __clang__
 
@@ -140,35 +139,6 @@ namespace pinocchio
     {
       derived().calc_aba(data, armature.derived(), I.const_cast_derived(), update_I);
     }
-
-    void calc_tangent_map(JointDataDerived & data) const
-    {
-      const Blank blank;
-      derived().calc_tangent_map_impl(data, blank);
-    }
-
-    void calc_tangent_map(JointDataDerived & data, const Blank blank) const
-    {
-      derived().calc_tangent_map_impl(data, blank);
-    }
-
-    template<typename ConfigVectorType>
-    void
-    calc_tangent_map(JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
-    {
-      derived().calc_tangent_map_impl(data, qs.derived());
-    }
-
-    // For the moment, we calculate the tangent map as a matrix and store it in JointData
-    // We could also exploit the sparsity by implementing the application of tangent map
-    // to a Lie algebra vector and the cotangent application to a tangent dq in param space
-    // However, the main application is the JointLimitConstraint and due to the
-    // the activation / deactivation of some limit the exploitation of such function
-    // would be difficult
-    // Here is the signature of the function
-    // void tangent_map_fill(const JointDataDerived & data, XXX &mat):
-    // void tangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
-    // void cotangent_map_product(const JointDataDerived & data, const XXX & mat, XXX &res):
 
     template<typename LieGroupMap>
     typename LieGroupMap::template operation<Derived>::type lie_group() const

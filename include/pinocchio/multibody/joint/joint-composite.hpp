@@ -99,7 +99,6 @@ namespace pinocchio
     , Dinv(0, 0)
     , UDinv(6, 0)
     , StU(0, 0)
-    , tangent_map(0, 0)
     {
     }
 
@@ -117,7 +116,6 @@ namespace pinocchio
     , Dinv(D_t::Zero(nv, nv))
     , UDinv(UD_t::Zero(6, nv))
     , StU(D_t::Zero(nv, nv))
-    , tangent_map(TangentMap_t::Zero(nq, nv))
     {
     }
 
@@ -143,8 +141,6 @@ namespace pinocchio
     D_t Dinv;
     UD_t UDinv;
     D_t StU;
-
-    TangentMap_t tangent_map;
 
     static std::string classname()
     {
@@ -371,12 +367,6 @@ namespace pinocchio
       if (update_I)
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
-
-    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const;
-
-    template<typename ConfigVectorType>
-    void calc_tangent_map_impl(
-      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const;
 
     // Declaration of overload : must be define after Lie group and joint visitors
     template<typename LieGroupMap>

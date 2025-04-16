@@ -50,8 +50,6 @@ namespace pinocchio
           .staticmethod("classname")
           .def("calc", &calc0, bp::args("self", "jdata", "q"))
           .def("calc", &calc1, bp::args("self", "jdata", "q", "v"))
-          .def("calc_tangent_map", &calctm0, bp::args("self", "jdata"))
-          .def("calc_tangent_map", &calctm1, bp::args("self", "jdata", "q"))
           .def(
             "createData", &JointModelDerived::createData, bp::arg("self"),
             "Create data associated to the joint model.")
@@ -125,6 +123,7 @@ namespace pinocchio
       {
         self.calc(jdata, q, v);
       }
+
       static void
       setIndexes0(JointModelDerived & self, const int & id, const int & idx_q, const int & idx_v)
       {
@@ -161,7 +160,6 @@ namespace pinocchio
           .add_property("U", &get_U)
           .add_property("Dinv", &get_Dinv)
           .add_property("UDinv", &get_UDinv)
-          .add_property("tangent_map", &get_tangent_map)
           .def("shortname", &JointDataDerived::shortname, bp::arg("self"))
 
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
@@ -208,10 +206,6 @@ namespace pinocchio
       static typename JointDataDerived::UD_t get_UDinv(const JointDataDerived & self)
       {
         return self.UDinv_accessor();
-      }
-      static typename JointDataDerived::TangentMap_t get_tangent_map(const JointDataDerived & self)
-      {
-        return self.tangent_map_accessor();
       }
 
       static void expose()

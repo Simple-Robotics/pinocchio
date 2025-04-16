@@ -476,14 +476,6 @@ namespace pinocchio
     {
       return m_jdata_mimicking.StU();
     }
-    TangentMapTypeConstRef tangent_map_accessor() const
-    {
-      return m_jdata_ref.tangent_map;
-    }
-    TangentMapTypeRef tangent_map_accessor()
-    {
-      return m_jdata_ref.tangent_map;
-    }
 
     friend struct JointModelMimicTpl<_Scalar, _Options, JointCollectionTpl>;
 
@@ -734,24 +726,6 @@ namespace pinocchio
         false
         && "Joint Mimic is not supported for aba yet. Remove it from your model if you want to use "
            "this function");
-    }
-
-    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
-    {
-      m_jmodel_ref.calc_tangent_map_impl(data.m_jdata_ref, blank);
-      data.m_jdata_ref.tangent_map *= m_scaling;
-    }
-
-    template<typename ConfigVectorType>
-    void calc_tangent_map_impl(
-      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
-    {
-      typedef typename ConfigVectorAffineTransform<JointDerived>::Type AffineTransform;
-
-      ConfigVector_t q;
-      AffineTransform::run(qs.head(m_jmodel_ref.nq()), m_scaling, m_offset, q);
-      m_jmodel_ref.calc_tangent_map_impl(data.m_jdata_ref, q);
-      data.m_jdata_ref.tangent_map *= m_scaling;
     }
 
     static std::string classname()

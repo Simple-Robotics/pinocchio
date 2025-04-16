@@ -175,10 +175,6 @@ void test_joint_mimic(const JointModelBase<JointModel> & jmodel)
   BOOST_CHECK(((SE3)jdata.M).isApprox((SE3)jdata_mimic.M()));
   BOOST_CHECK((scaling_factor * jdata.S.matrix()).isApprox(jdata_mimic.S.matrix()));
   BOOST_CHECK(((Motion)jdata.v).isApprox((Motion)jdata_mimic.v()));
-
-  jmodel.calc(jdata, q0);
-  jmodel_mimic.calc(jdata_mimic, q0);
-  BOOST_CHECK(jdata.tangent_map.isApprox(jdata_mimic.tangent_map()));
 }
 
 template<typename MimicConfigurationTransform, bool MimicIdentity>

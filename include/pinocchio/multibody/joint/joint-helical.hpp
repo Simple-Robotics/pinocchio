@@ -799,8 +799,6 @@ namespace pinocchio
     UD_t UDinv;
     D_t StU;
 
-    TangentMap_t tangent_map;
-
     JointDataHelicalTpl()
     : joint_q(ConfigVector_t::Zero())
     , joint_v(TangentVector_t::Zero())
@@ -811,7 +809,6 @@ namespace pinocchio
     , Dinv(D_t::Zero())
     , UDinv(UD_t::Zero())
     , StU(D_t::Zero())
-    , tangent_map(TangentMap_t::Identity())
     {
     }
 
@@ -921,20 +918,6 @@ namespace pinocchio
 
       if (update_I)
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
-    }
-
-    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
-    {
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(blank);
-    }
-
-    template<typename ConfigVectorType>
-    void calc_tangent_map_impl(
-      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & qs) const
-    {
-      PINOCCHIO_UNUSED_VARIABLE(data);
-      PINOCCHIO_UNUSED_VARIABLE(qs);
     }
 
     static std::string classname()

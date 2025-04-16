@@ -157,10 +157,6 @@ namespace pinocchio
     {
       return stu_inertia(*this);
     }
-    TangentMap_t tangent_map() const
-    {
-      return pinocchio::tangent_map(*this);
-    }
 
     JointDataTpl()
     : JointDataVariant()
@@ -219,10 +215,6 @@ namespace pinocchio
     D_t StU_accessor() const
     {
       return StU();
-    }
-    TangentMap_t tangent_map_accessor() const
-    {
-      return tangent_map();
     }
 
     static std::string classname()
@@ -387,18 +379,6 @@ namespace pinocchio
       const Eigen::MatrixBase<TangentVector> & v) const
     {
       calc_first_order(*this, data, q.derived(), v.derived());
-    }
-
-    void calc_tangent_map_impl(JointDataDerived & data, const Blank blank) const
-    {
-      ::pinocchio::calc_tangent_map(*this, data, blank);
-    }
-
-    template<typename ConfigVectorType>
-    void calc_tangent_map_impl(
-      JointDataDerived & data, const Eigen::MatrixBase<ConfigVectorType> & q) const
-    {
-      ::pinocchio::calc_tangent_map(*this, data, q.derived());
     }
 
     // Declaration of overload : must be define after Lie group and joint visitors
