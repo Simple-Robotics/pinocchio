@@ -272,6 +272,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-base.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-collection.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-generic.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-joint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-variant-visitors.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/liegroup/liegroup-variant-visitors.hxx
