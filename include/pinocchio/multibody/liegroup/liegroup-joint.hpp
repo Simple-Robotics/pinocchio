@@ -50,8 +50,8 @@ namespace pinocchio
       return jmodel.template lie_group<LieGroup_t>();
     }
 
-    template<typename JointModelRef>
-    LgType operator()(const JointModelMimic<JointModelRef> & jmodel) const
+    template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+    LgType operator()(const JointModelMimicTpl<Scalar, Options, JointCollectionTpl> & jmodel) const
     {
       return jmodel.template lie_group<LieGroup_t>();
     }

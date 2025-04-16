@@ -63,11 +63,10 @@ namespace pinocchio
     typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
   };
 
-  template<typename JointModelRef>
-  struct LieGroupMap::operation<JointModelMimic<JointModelRef>>
+  template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
+  struct LieGroupMap::operation<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef typename LieGroupMap::
-      product_variant<typename JointModelRef::Scalar, JointModelRef::Options>::type type;
+    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
   };
 
   // Atomic joint that are not euclidean

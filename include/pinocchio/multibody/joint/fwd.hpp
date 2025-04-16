@@ -176,9 +176,6 @@ namespace pinocchio
   struct JointDataTpl;
   typedef JointDataTpl<context::Scalar> JointData;
 
-  template<class _JointModel>
-  struct JointModelMimic;
-
   /**
    * @}
    */

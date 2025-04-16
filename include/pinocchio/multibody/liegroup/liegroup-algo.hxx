@@ -43,58 +43,158 @@ namespace pinocchio
   PINOCCHIO_DETAILS_WRITE_ARGS_4(JM), typename boost::fusion::result_of::at_c<ArgsType, 4>::type a4
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelCompositeTpl<JointCollection>))       \
+    static void run(                                                                               \
+      PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0));                \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelCompositeTpl<JointCollection>))       \
+    static void run(                                                                               \
+      PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1));            \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelCompositeTpl<JointCollection>))       \
+    static void run(                                                                               \
+      PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2));        \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelCompositeTpl<JointCollection>))       \
+    static void run(                                                                               \
+      PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2, a3));    \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelCompositeTpl<JointCollection>))       \
+    static void run(                                                                               \
+      PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(                                                \
         jmodel.derived(), ArgsType(a0, a1, a2, a3, a4));                                           \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void                                                                                    \
+    run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void                                                                                    \
+    run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void                                                                                    \
+    run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void                                                                                    \
+    run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    static void                                                                                    \
+    run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a4);                                                               \
     }                                                                                              \
   }
 
@@ -162,76 +262,6 @@ namespace pinocchio
   {                                                                                                \
     using Algo<Visitor, JointModel>::run;                                                          \
   };
-
-#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(Algo)                                               \
-  template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
-  {                                                                                                \
-    typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimic<JointModelRef>))                \
-    {                                                                                              \
-      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
-      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
-    }                                                                                              \
-  }
-
-#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(Algo)                                               \
-  template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
-  {                                                                                                \
-    typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimic<JointModelRef>))                \
-    {                                                                                              \
-      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
-      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
-    }                                                                                              \
-  }
-
-#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(Algo)                                               \
-  template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
-  {                                                                                                \
-    typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimic<JointModelRef>))                \
-    {                                                                                              \
-      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
-      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
-    }                                                                                              \
-  }
-
-#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(Algo)                                               \
-  template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
-  {                                                                                                \
-    typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimic<JointModelRef>))                \
-    {                                                                                              \
-      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
-      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
-    }                                                                                              \
-  }
-
-#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(Algo)                                               \
-  template<typename Visitor, typename JointModelRef>                                               \
-  struct Algo<Visitor, JointModelMimic<JointModelRef>>                                             \
-  {                                                                                                \
-    typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimic<JointModelRef>))                \
-    {                                                                                              \
-      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
-      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
-      PINOCCHIO_UNUSED_VARIABLE(a4);                                                               \
-    }                                                                                              \
-  }
 
   } // namespace details
 
