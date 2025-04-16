@@ -257,6 +257,7 @@ namespace pinocchio
     {
       return derived().StU_accessor();
     }
+
     std::string shortname() const
     {
       return derived().shortname();

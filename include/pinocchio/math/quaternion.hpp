@@ -334,5 +334,6 @@ namespace pinocchio
       TMm(3, 2) = Scalar(-.5) * quat.z();
     }
   } // namespace quaternion
+
 } // namespace pinocchio
 #endif // #ifndef __pinocchio_math_quaternion_hpp__
