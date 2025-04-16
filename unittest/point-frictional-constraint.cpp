@@ -146,45 +146,161 @@ void check_A1_and_A2(
 
 BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
 {
-  const pinocchio::Model model;
-  const pinocchio::Data data(model);
-  RigidConstraintModel cm(CONTACT_3D, model, 0, SE3::Random(), LOCAL);
-  RigidConstraintData cd(cm);
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  Data data(model), data_ref(model);
+
+  model.lowerPositionLimit.head<3>().fill(-1.);
+  model.upperPositionLimit.head<3>().fill(1.);
+  const VectorXd q = randomConfiguration(model);
+
+  crba(model, data, q, Convention::WORLD);
+
+  const std::string RF_name = "rleg6_joint";
+  const std::string LF_name = "lleg6_joint";
+
+  BilateralPointConstraintModel cm(
+    model, model.getJointId(RF_name), SE3::Random(), model.getJointId(LF_name), SE3::Random());
+  BilateralPointConstraintData cd(cm);
   cm.calc(model, data, cd);
 
-  const pinocchio::SE3 placement = cm.joint1_placement;
+  // Vector LOCAL
+  {
+    const pinocchio::SE3 placement_local = cm.joint1_placement;
+    pinocchio::SE3 placement_local_with_correction = placement_local;
+    placement_local_with_correction.translation() +=
+      placement_local.rotation() * cd.constraint_position_error;
 
+    const Eigen::Vector3d diagonal_inertia(1, 2, 3);
+
+    const pinocchio::SE3::Matrix6 spatial_inertia_join1 =
+      cm.computeConstraintSpatialInertia(placement_local_with_correction, diagonal_inertia);
+    BOOST_CHECK(
+      spatial_inertia_join1.transpose().isApprox(spatial_inertia_join1)); // check symmetric matrix
+
+    const auto A1 = cm.getA1(cd, LocalFrameTag());
+    const Inertia::Matrix6 I11_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+
+    BOOST_CHECK(spatial_inertia_join1.isApprox(I11_ref));
+
+    const auto A2 = cm.getA2(cd, LocalFrameTag());
+    const Inertia::Matrix6 I22_ref = A2.transpose() * diagonal_inertia.asDiagonal() * A2;
+
+    const Inertia::Matrix6 I12_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A2;
+
+    Inertia::Matrix6 I11 = -Inertia::Matrix6::Ones(), I12 = -Inertia::Matrix6::Ones(),
+                     I22 = -Inertia::Matrix6::Ones();
+
+    cm.computeConstraintInertias(cd, diagonal_inertia, I11, I12, I22, LocalFrameTag());
+    BOOST_CHECK(I11.isApprox(I11_ref));
+    BOOST_CHECK(I12.isApprox(I12_ref));
+    BOOST_CHECK(I22.isApprox(I22_ref));
+
+    // Check against scalar signature
+    const double constant_inertia_value = 10;
+    const Eigen::Vector3d diagonal_inertia_scalar =
+      Eigen::Vector3d::Constant(constant_inertia_value);
+    Inertia::Matrix6 I11_scalar = -Inertia::Matrix6::Ones(), I12_scalar = -Inertia::Matrix6::Ones(),
+                     I22_scalar = -Inertia::Matrix6::Ones();
+
+    cm.computeConstraintInertias(cd, diagonal_inertia_scalar, I11, I12, I22, LocalFrameTag());
+    cm.computeConstraintInertias(
+      cd, constant_inertia_value, I11_scalar, I12_scalar, I22_scalar, LocalFrameTag());
+    BOOST_CHECK(I11 == I11_scalar);
+    BOOST_CHECK(I12 == I12_scalar);
+    BOOST_CHECK(I22 == I22_scalar);
+  }
+
+  // Vector WORLD
   {
     const Eigen::Vector3d diagonal_inertia(1, 2, 3);
 
-    const pinocchio::SE3::Matrix6 spatial_inertia =
-      cm.computeConstraintSpatialInertia(placement, diagonal_inertia);
-    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
+    const pinocchio::SE3 placement_world = cd.oMc1;
+    pinocchio::SE3 placement_world_with_correction = placement_world;
+    placement_world_with_correction.translation() +=
+      placement_world.rotation() * cd.constraint_position_error;
 
-    const auto A1 = cm.getA1(cd, LocalFrameTag());
-    const pinocchio::SE3::Matrix6 spatial_inertia_ref =
-      A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+    const pinocchio::SE3::Matrix6 spatial_inertia_join1 =
+      cm.computeConstraintSpatialInertia(placement_world_with_correction, diagonal_inertia);
+    BOOST_CHECK(
+      spatial_inertia_join1.transpose().isApprox(spatial_inertia_join1)); // check symmetric matrix
 
-    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
+    const auto A1 = cm.getA1(cd, WorldFrameTag());
+    const Inertia::Matrix6 I11_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+
+    BOOST_CHECK(spatial_inertia_join1.isApprox(I11_ref));
+
+    const auto A2 = cm.getA2(cd, WorldFrameTag());
+    const Inertia::Matrix6 I22_ref = A2.transpose() * diagonal_inertia.asDiagonal() * A2;
+
+    const Inertia::Matrix6 I12_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A2;
+
+    Inertia::Matrix6 I11 = -Inertia::Matrix6::Ones(), I12 = -Inertia::Matrix6::Ones(),
+                     I22 = -Inertia::Matrix6::Ones();
+
+    cm.computeConstraintInertias(cd, diagonal_inertia, I11, I12, I22, WorldFrameTag());
+    BOOST_CHECK(I11.isApprox(I11_ref));
+    BOOST_CHECK(I12.isApprox(I12_ref));
+    BOOST_CHECK(I22.isApprox(I22_ref));
+
+    // Check against scalar signature
+    const double constant_inertia_value = 10;
+    const Eigen::Vector3d diagonal_inertia_scalar =
+      Eigen::Vector3d::Constant(constant_inertia_value);
+    Inertia::Matrix6 I11_scalar = -Inertia::Matrix6::Ones(), I12_scalar = -Inertia::Matrix6::Ones(),
+                     I22_scalar = -Inertia::Matrix6::Ones();
+
+    cm.computeConstraintInertias(cd, diagonal_inertia_scalar, I11, I12, I22, WorldFrameTag());
+    cm.computeConstraintInertias(
+      cd, constant_inertia_value, I11_scalar, I12_scalar, I22_scalar, WorldFrameTag());
+    BOOST_CHECK(I11 == I11_scalar);
+    BOOST_CHECK(I12 == I12_scalar);
+    BOOST_CHECK(I22 == I22_scalar);
   }
 
-  // Scalar
+  // Check null values
   {
-    const double constant_value = 10;
-    const Eigen::Vector3d diagonal_inertia = Eigen::Vector3d::Constant(constant_value);
+    BilateralPointConstraintModel cm1(model, model.getJointId(RF_name), SE3::Random());
+    BilateralPointConstraintData cd1(cm1);
+    cm1.calc(model, data, cd1);
 
-    const pinocchio::SE3::Matrix6 spatial_inertia =
-      cm.computeConstraintSpatialInertia(placement, diagonal_inertia);
-    BOOST_CHECK(spatial_inertia.transpose().isApprox(spatial_inertia)); // check symmetric matrix
+    Inertia::Matrix6 I11 = -Inertia::Matrix6::Ones(), I12 = -Inertia::Matrix6::Ones(),
+                     I22 = -Inertia::Matrix6::Ones();
 
-    const auto A1 = cm.getA1(cd, LocalFrameTag());
-    const pinocchio::SE3::Matrix6 spatial_inertia_ref =
-      A1.transpose() * diagonal_inertia.asDiagonal() * A1;
+    const double constant_inertia_value = 10;
+    cm1.computeConstraintInertias(cd1, constant_inertia_value, I11, I12, I22, WorldFrameTag());
+    BOOST_CHECK(!I11.isZero(0));
+    BOOST_CHECK(I12.isZero(0));
+    BOOST_CHECK(I22.isZero(0));
 
-    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref));
+    I11.fill(-1);
+    I12.fill(-1);
+    I22.fill(-1);
+    cm1.computeConstraintInertias(cd1, constant_inertia_value, I11, I12, I22, LocalFrameTag());
+    BOOST_CHECK(!I11.isZero(0));
+    BOOST_CHECK(I12.isZero(0));
+    BOOST_CHECK(I22.isZero(0));
 
-    const Inertia spatial_inertia_ref2(constant_value, placement.translation(), Symmetric3::Zero());
-    BOOST_CHECK(spatial_inertia.isApprox(spatial_inertia_ref2.matrix()));
+    BilateralPointConstraintModel cm2(
+      model, 0, SE3::Identity(), model.getJointId(RF_name), SE3::Random());
+    BilateralPointConstraintData cd2(cm2);
+    cm2.calc(model, data, cd2);
+
+    I11.fill(-1);
+    I12.fill(-1);
+    I22.fill(-1);
+    cm2.computeConstraintInertias(cd2, constant_inertia_value, I11, I12, I22, WorldFrameTag());
+    BOOST_CHECK(I11.isZero(0));
+    BOOST_CHECK(I12.isZero(0));
+    BOOST_CHECK(!I22.isZero(0));
+
+    I11.fill(-1);
+    I12.fill(-1);
+    I22.fill(-1);
+    cm2.computeConstraintInertias(cd2, constant_inertia_value, I11, I12, I22, LocalFrameTag());
+    BOOST_CHECK(I11.isZero(0));
+    BOOST_CHECK(I12.isZero(0));
+    BOOST_CHECK(!I22.isZero(0));
   }
 }
 
