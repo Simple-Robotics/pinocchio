@@ -1,9 +1,14 @@
 //
 // Copyright (c) 2017-2018 CNRS
+// Copyright (c) 2025 INRIA
 //
 
 #ifndef __pinocchio_utils_eigen_fix_hpp__
 #define __pinocchio_utils_eigen_fix_hpp__
+
+#if EIGEN_VERSION_AT_LEAST(3, 4, 90)
+  #define EIGEN_EMPTY_STRUCT_CTOR(x)
+#endif
 
 #if EIGEN_VERSION_AT_LEAST(3, 2, 90) && !EIGEN_VERSION_AT_LEAST(3, 3, 0)
 namespace pinocchio
