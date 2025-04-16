@@ -49,8 +49,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(                                                                               \
-      PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0));                \
     }                                                                                              \
@@ -63,8 +63,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(                                                                               \
-      PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1));            \
     }                                                                                              \
@@ -77,8 +77,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(                                                                               \
-      PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2));        \
     }                                                                                              \
@@ -91,8 +91,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(                                                                               \
-      PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2, a3));    \
     }                                                                                              \
@@ -105,8 +105,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(                                                                               \
-      PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelCompositeTpl<_Scalar, _Options, JointCollection>))  \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(                                                \
         jmodel.derived(), ArgsType(a0, a1, a2, a3, a4));                                           \
@@ -120,8 +120,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void                                                                                    \
-    run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimic))                               \
     {                                                                                              \
       PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
       PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
@@ -135,8 +135,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void                                                                                    \
-    run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimic))                               \
     {                                                                                              \
       PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
       PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
@@ -151,8 +151,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void                                                                                    \
-    run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimic))                               \
     {                                                                                              \
       PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
       PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
@@ -168,8 +168,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void                                                                                    \
-    run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimic))                               \
     {                                                                                              \
       PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
       PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
@@ -186,8 +186,8 @@ namespace pinocchio
   struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void                                                                                    \
-    run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimicTpl<_Scalar, _Options, JointCollection>))    \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimic))                               \
     {                                                                                              \
       PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
       PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
