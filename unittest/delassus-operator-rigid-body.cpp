@@ -339,4 +339,113 @@ BOOST_AUTO_TEST_CASE(test_compute)
   //  }
 }
 
+BOOST_AUTO_TEST_CASE(general_test_no_constraints)
+{
+  typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
+    DelassusOperatorRigidBodyReferenceWrapper;
+  typedef DelassusOperatorRigidBodyReferenceWrapper::CustomData CustomData;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintModelVector ConstraintModelVector;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintDataVector ConstraintDataVector;
+
+  Model model;
+  std::reference_wrapper<Model> model_ref = model;
+  buildModels::humanoidRandom(model, true);
+  model.gravity.setZero();
+
+  const Eigen::VectorXd q_neutral = neutral(model);
+  const Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model.nv);
+
+  Data data(model), data_gt(model), data_aba(model);
+  std::reference_wrapper<Data> data_ref = data;
+
+  ConstraintModelVector constraint_models;
+  ConstraintDataVector constraint_datas;
+
+  ConstraintDataVector constraint_datas_gt = constraint_datas;
+
+  std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
+  std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
+
+  const double min_damping_value = 1e-4;
+
+  DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+    model_ref, data_ref, constraint_models_ref, constraint_datas_ref, min_damping_value);
+
+  // Test solveInPlace
+  {
+    const Eigen::DenseIndex col_id = 7;
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, col_id);
+    Eigen::VectorXd res = rhs;
+
+    const double mu_inv = min_damping_value;
+    const double mu = 1. / mu_inv;
+
+    delassus_operator.updateDamping(mu);
+    delassus_operator.updateCompliance(0);
+    delassus_operator.compute(q_neutral);
+
+    delassus_operator.solveInPlace(res);
+
+    Data data_crba(model);
+    Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
+    make_symmetric(M);
+    const Eigen::MatrixXd M_inv = M.inverse();
+    BOOST_CHECK(data.J.isApprox(data_crba.J));
+
+    Data data_aba(model);
+    const auto res_ref =
+      aba(model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), rhs, Convention::WORLD);
+
+    BOOST_CHECK(data.J.isApprox(data_aba.J));
+    for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
+    {
+      BOOST_CHECK(data.liMi[joint_id].isApprox(data_aba.liMi[joint_id]));
+      BOOST_CHECK(data.oMi[joint_id].isApprox(data_aba.oMi[joint_id]));
+      BOOST_CHECK(data.oYaba_augmented[joint_id].isApprox(data_aba.oYaba[joint_id]));
+
+      BOOST_CHECK(data.joints_augmented[joint_id].U().isApprox(data_aba.joints[joint_id].U()));
+      BOOST_CHECK(
+        data.joints_augmented[joint_id].Dinv().isApprox(data_aba.joints[joint_id].Dinv()));
+      BOOST_CHECK(
+        data.joints_augmented[joint_id].UDinv().isApprox(data_aba.joints[joint_id].UDinv()));
+    }
+
+    BOOST_CHECK(res.isApprox(M_inv.col(col_id)));
+    BOOST_CHECK(res.isApprox(res_ref));
+
+    for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, col_id);
+      const auto res_ref =
+        aba(model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), rhs, Convention::WORLD);
+      const auto res_ref2 = (M_inv * rhs).eval();
+      BOOST_CHECK(res_ref.isApprox(res_ref2));
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref));
+      BOOST_CHECK(res.isApprox(res_ref2));
+    }
+
+    // Check elimination_order
+    const auto & elimination_order = data.elimination_order;
+    for (auto it = elimination_order.begin(); it != elimination_order.end(); ++it)
+    {
+      const auto joint_id = *it;
+      const auto & joint_support = model.supports[joint_id];
+      for (const auto support_joint : joint_support)
+      {
+        bool is_after =
+          std::find(it, elimination_order.end(), support_joint) != elimination_order.end();
+        BOOST_CHECK(is_after || support_joint == 0);
+      }
+    }
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
