@@ -576,12 +576,30 @@ namespace pinocchio
     }
 
     template<
+      typename Matrix6LikeOut1,
+      typename Matrix6LikeOut2,
+      typename Matrix6LikeOut3,
+      ReferenceFrame rf>
+    void computeConstraintInertias(
+      const ConstraintData & cdata,
+      const Scalar & constraint_inertia_value,
+      const Eigen::MatrixBase<Matrix6LikeOut1> & I11,
+      const Eigen::MatrixBase<Matrix6LikeOut2> & I12,
+      const Eigen::MatrixBase<Matrix6LikeOut3> & I22,
+      const ReferenceFrameTag<rf> reference_frame) const
+    {
+      computeConstraintInertias(
+        cdata, Vector3::Constant(constraint_inertia_value), I11.const_cast_derived(),
+        I12.const_cast_derived(), I22.const_cast_derived(), reference_frame);
+    }
+
+    template<
       typename Vector3Like,
       typename Matrix6LikeOut1,
       typename Matrix6LikeOut2,
       typename Matrix6LikeOut3,
       ReferenceFrame rf>
-    void computeCouplingConstraintInertias(
+    void computeConstraintInertias(
       const ConstraintData & cdata,
       const Eigen::MatrixBase<Vector3Like> & diagonal_constraint_inertia,
       const Eigen::MatrixBase<Matrix6LikeOut1> & I11,
@@ -640,8 +658,7 @@ namespace pinocchio
       PINOCCHIO_UNUSED_VARIABLE(model);
 
       Matrix6 I11, I12, I22;
-      computeCouplingConstraintInertias(
-        cdata, diagonal_constraint_inertia, I11, I12, I22, reference_frame);
+      computeConstraintInertias(cdata, diagonal_constraint_inertia, I11, I12, I22, reference_frame);
 
       if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
       {
