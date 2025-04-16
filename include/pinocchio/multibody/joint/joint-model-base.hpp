@@ -630,7 +630,6 @@ namespace pinocchio
       return SizeDepType<NQ>::middleCols(A.derived(), idx_q(), nq());
     }
 
-    /* Acces to dedicated rows in a matrix.*/
     // Const access
     template<typename D>
     typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
@@ -661,36 +660,36 @@ namespace pinocchio
       return SizeDepType<NQ>::middleRows(A.derived(), idx_q(), nq());
     }
 
-    /// \brief Returns a block of dimension nq()xnv() located at position idx_q(),idx_v() in the
+    /// \brief Returns a block of dimension nq()xnv() located at position idx_q_a,idx_v_a in the
     /// matrix Mat
     // Const access
     template<typename D>
     typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
-    jointQVBlock(const Eigen::MatrixBase<D> & Mat) const
+    jointQVBlock(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
     {
-      return derived().jointQVBlock_impl(Mat.derived());
+      return derived().jointQVBlock_impl(Mat.derived(), idx_q_a, idx_v_a);
     }
 
     template<typename D>
     typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
-    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat) const
+    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
     {
-      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q(), idx_v(), nq(), nv());
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q_a, idx_v_a, nq(), nv());
     }
 
     // Non-const access
     template<typename D>
     typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
-    jointQVBlock(Eigen::MatrixBase<D> & Mat) const
+    jointQVBlock(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
     {
-      return derived().jointQVBlock_impl(Mat.derived());
+      return derived().jointQVBlock_impl(Mat.derived(), idx_q_a, idx_v_a);
     }
 
     template<typename D>
     typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
-    jointQVBlock_impl(Eigen::MatrixBase<D> & Mat) const
+    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
     {
-      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q(), idx_v(), nq(), nv());
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q_a, idx_v_a, nq(), nv());
     }
 
   protected:
