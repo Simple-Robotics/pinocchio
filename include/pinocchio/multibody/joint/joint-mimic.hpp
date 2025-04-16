@@ -920,7 +920,7 @@ namespace pinocchio
     // Non-const access
     template<typename D>
     typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
-    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    jointQVBlock_impl(Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
     {
       return DoubleSizeDepType<NQ, NV>::block(
         Mat.derived(), idx_q_a, idx_v_a, m_nqExtended, m_nvExtended);
