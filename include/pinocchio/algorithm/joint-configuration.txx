@@ -591,5 +591,8 @@ namespace pinocchio
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::VectorXs
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
+
+  // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
+
 } // namespace pinocchio
 #endif // ifndef __pinocchio_algorithm_joint_configuration_txx__

@@ -820,6 +820,26 @@ namespace pinocchio
     return q;
   }
 
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  void indexvInfo(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    std::vector<int> & nvs,
+    std::vector<int> & idx_vs)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      model.nq, nvs.size(), "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      model.nq, idx_vs.size(), "The configuration vector is not of the right size");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+    typename IndexvInfoStep::ArgsType args(nvs, idx_vs);
+
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      IndexvInfoStep::run(model.joints[i], args);
+    }
+  }
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_joint_configuration_hxx__

@@ -1699,6 +1699,25 @@ namespace pinocchio
     return neutral<LieGroupMap, Scalar, Options, JointCollectionTpl>(model);
   }
 
+  /**
+   *
+   * @brief         Return two vector of size nq where for each, the idx_v and v associated to the
+   * same atomic joint is given.
+   *
+   * @param[in]     model          Model of the kinematic tree.
+   * @param[out]    nvs            For each id give the nv of the associated joint
+   * @param[out]    idx_vs         For each id give the idx_v of the associated joint
+   *
+   * @details       This function is often required for the numerical solvers that are working on
+   * the tangent of the configuration space, instead of the configuration space itself.
+   *
+   */
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  void indexvInfo(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    std::vector<int> & nvs,
+    std::vector<int> & idx_vs);
+
   /// \}
 
 } // namespace pinocchio

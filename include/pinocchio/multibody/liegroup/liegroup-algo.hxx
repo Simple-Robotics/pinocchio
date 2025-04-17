@@ -1080,6 +1080,38 @@ namespace pinocchio
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(LieGroupInstanceStepAlgo);
   PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(LieGroupInstanceStepAlgo);
 
+  template<typename Visitor, typename JointModel>
+  struct IndexvInfoStepAlgo;
+
+  struct IndexvInfoStep : public fusion::JointUnaryVisitorBase<IndexvInfoStep>
+  {
+    typedef boost::blank LieGroup_t;
+    typedef boost::fusion::vector<std::vector<int> &, std::vector<int> &> ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_2(IndexvInfoStepAlgo, IndexvInfoStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct IndexvInfoStepAlgo
+  {
+    static void run(
+      const JointModelBase<JointModel> & jmodel, std::vector<int> & nvs, std::vector<int> & idx_vs)
+    {
+      int idx_v = jmodel.idx_v();
+      int nv = jmodel.nv();
+      size_t idx_q = static_cast<size_t>(jmodel.idx_q());
+
+      for (size_t idx = idx_q; idx < idx_q + static_cast<size_t>(jmodel.nq()); ++idx)
+      {
+        nvs[idx] = nv;
+        idx_vs[idx] = idx_v;
+      }
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(IndexvInfoStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(IndexvInfoStepAlgo);
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_multibody_liegroup_liegroup_algo_hxx__
