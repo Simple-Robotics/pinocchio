@@ -234,6 +234,23 @@ BOOST_AUTO_TEST_CASE(transform)
   TestJointModelTransform()(JointModel());
 }
 
+struct TestJointModelLieGroup : TestJointModel<TestJointModelLieGroup>
+{
+  template<typename JointModel>
+  static void test(const JointModelBase<JointModel> & jmodel)
+  {
+    auto lgo = jmodel.template lie_group<LieGroupMap>();
+    BOOST_CHECK(lgo.nq() == jmodel.nq());
+    BOOST_CHECK(lgo.nv() == jmodel.nv());
+  }
+};
+
+BOOST_AUTO_TEST_CASE(lie_group)
+{
+  typedef JointCollectionDefault::JointModelVariant JointModelVariant;
+  boost::mpl::for_each<JointModelVariant::types>(TestJointModelLieGroup());
+}
+
 struct TestJointModelCast : TestJointModel<TestJointModelCast>
 {
   template<typename JointModel>
