@@ -580,4 +580,13 @@ namespace pinocchio
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::VectorXs
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+      const context::Model &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 } // namespace pinocchio
