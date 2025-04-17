@@ -356,11 +356,16 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct TangentMapStepAlgo;
 
-  template<typename LieGroup_t, typename ConfigVectorIn, typename TangentMapMatrixType>
+  template<
+    typename LieGroup_t,
+    typename IsCompact_t,
+    typename ConfigVectorIn,
+    typename TangentMapMatrixType>
   struct TangentMapStep
   : public fusion::JointUnaryVisitorBase<
-      TangentMapStep<LieGroup_t, ConfigVectorIn, TangentMapMatrixType>>
+      TangentMapStep<LieGroup_t, IsCompact_t, ConfigVectorIn, TangentMapMatrixType>>
   {
+    typedef IsCompact_t IsCompact;
     typedef boost::fusion::
       vector<const ConfigVectorIn &, TangentMapMatrixType &, const AssignmentOperatorType &>
         ArgsType;
@@ -384,13 +389,51 @@ namespace pinocchio
       lgo.tangentMap(
         jmodel.jointConfigSelector(q.derived()),
         jmodel.jointQVBlock(
-          PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), jmodel.idx_q(), jmodel.idx_v()),
-        op);
+          PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), jmodel.idx_q(),
+          Visitor::IsCompact::value ? 0 : jmodel.idx_v()),
+        Visitor::IsCompact::value ? SETTO : op);
     }
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(TangentMapStepAlgo);
   PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(TangentMapStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct CompactSetTangentMapStepAlgo;
+
+  template<typename LieGroup_t, typename ConfigVectorIn, typename CompactSetTangentMapMatrixType>
+  struct CompactSetTangentMapStep
+  : public fusion::JointUnaryVisitorBase<
+      CompactSetTangentMapStep<LieGroup_t, ConfigVectorIn, CompactSetTangentMapMatrixType>>
+  {
+    typedef boost::fusion::vector<const ConfigVectorIn &, CompactSetTangentMapMatrixType &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_2(CompactSetTangentMapStepAlgo, CompactSetTangentMapStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct CompactSetTangentMapStepAlgo
+  {
+    template<typename ConfigVectorIn, typename CompactSetTangentMapMatrixType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<CompactSetTangentMapMatrixType> & TMc)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMap(
+        jmodel.jointConfigSelector(q.derived()),
+        jmodel.jointQVBlock(
+          PINOCCHIO_EIGEN_CONST_CAST(CompactSetTangentMapMatrixType, TMc), jmodel.idx_q(), 0),
+        SETTO);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(CompactSetTangentMapStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(CompactSetTangentMapStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct TangentMapProductStepAlgo;

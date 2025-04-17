@@ -267,9 +267,42 @@ namespace pinocchio
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::JointIndex JointIndex;
 
-    typedef TangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
+    typedef TangentMapStep<LieGroup_t, boost::mpl::false_, ConfigVectorType, TangentMapMatrixType>
+      Algo;
     typename Algo::ArgsType args(
       q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void compactSetTangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TMc.rows(), model.nq, "The output argument is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TMc.cols(), MAX_JOINT_NV, "The output argument is not of the right size");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapStep<LieGroup_t, boost::mpl::true_, ConfigVectorType, TangentMapMatrixType>
+      Algo;
+    typename Algo::ArgsType args(
+      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc), SETTO);
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
     {
       Algo::run(model.joints[i], args);

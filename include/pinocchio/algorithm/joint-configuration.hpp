@@ -564,6 +564,56 @@ namespace pinocchio
 
   /**
    *
+   * @brief   Set the tangentMap in a compact manner in matric of size nq x MAX_JOINT_NV.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[out] TMc          Compact storage of the tangent map
+   * space.
+   *
+   */
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void compactSetTangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TMc);
+
+  /**
+   *
+   * @brief   Set the tangentMap in a compact manner in matric of size nq x MAX_JOINT_NV.
+   *
+   * @param[in]  model   Model of the kinematic tree on which the integration operation is
+   * performed.
+   * @param[in]  q            Initial configuration (size model.nq)
+   * @param[out] TMc          Compact storage of the tangent map
+   * space.
+   *
+   */
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void compactSetTangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
+  {
+    compactSetTangentMap<
+      LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentMapMatrixType>(
+      model, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc));
+  }
+
+  /**
+   *
    * @brief   Compose the tangentMap with a matrix, e.g., a Lie group Jacobian in order to recover a
    * vector space Jacobian or chain Lie Group derivatives with vector space derivative in a forward
    * manner.
