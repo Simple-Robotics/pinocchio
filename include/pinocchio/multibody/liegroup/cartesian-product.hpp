@@ -220,9 +220,9 @@ namespace pinocchio
       const AssignmentOperatorType op) const
     {
       lg1.tangentMapProduct(
-        Q1(q), Min.template topRows<LieGroup1::NV>, Mout.template topRows<LieGroup1::NQ>, op);
+        Q1(q), Min.template topRows<LieGroup1::NV>(), Mout.template topRows<LieGroup1::NQ>(), op);
       lg2.tangentMapProduct(
-        Q2(q), Min.template topRows<LieGroup2::NV>, Mout.template topRows<LieGroup2::NQ>, op);
+        Q2(q), Min.template topRows<LieGroup2::NV>(), Mout.template topRows<LieGroup2::NQ>(), op);
     }
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
@@ -233,9 +233,9 @@ namespace pinocchio
       const AssignmentOperatorType op) const
     {
       lg1.coTangentMapProduct(
-        Q1(q), Min.template topRows<LieGroup1::NQ>, Mout.template topRows<LieGroup1::NV>, op);
+        Q1(q), Min.template topRows<LieGroup1::NQ>(), Mout.template topRows<LieGroup1::NV>(), op);
       lg2.coTangentMapProduct(
-        Q2(q), Min.template topRows<LieGroup2::NQ>, Mout.template topRows<LieGroup2::NV>, op);
+        Q2(q), Min.template topRows<LieGroup2::NQ>(), Mout.template topRows<LieGroup2::NV>(), op);
     }
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
