@@ -464,6 +464,8 @@ namespace pinocchio
     const context::Model &,
     typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
 
+    // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
+
 #endif // PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::VectorXs integrate<
@@ -592,7 +594,14 @@ namespace pinocchio
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI context::VectorXs
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
-  // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+      const context::Model &);
+
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
 } // namespace pinocchio
 #endif // ifndef __pinocchio_algorithm_joint_configuration_txx__

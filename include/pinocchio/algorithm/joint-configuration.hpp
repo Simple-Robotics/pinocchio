@@ -1718,6 +1718,39 @@ namespace pinocchio
     std::vector<int> & nvs,
     std::vector<int> & idx_vs);
 
+  /**
+   *
+   * @brief         Returns the Lie group associated to the model. It is the cartesian product of
+   * the lie groups of all its joints.
+   *
+   * @param[in]     model          Model of the kinematic tree.
+   * @param[out]    lgo            The cartesian Lie group object.
+   *
+   */
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl>
+  typename LieGroup_t::template product_variant<Scalar, Options>::type
+  lie_group(const ModelTpl<Scalar, Options, JointCollectionTpl> & model);
+
+  /**
+   *
+   * @brief         Returns the Lie group associated to the model. It is the cartesian product of
+   * the lie groups of all its joints.
+   *
+   * @param[in]     model          Model of the kinematic tree.
+   * @param[out]    lgo            The cartesian Lie group object.
+   *
+   */
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  typename LieGroupMap::template product_variant<Scalar, Options>::type
+  lie_group(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  {
+    lie_group<LieGroupMap, Scalar, Options, JointCollectionTpl>(model);
+  }
+
   /// \}
 
 } // namespace pinocchio
