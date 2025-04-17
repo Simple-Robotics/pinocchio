@@ -72,7 +72,7 @@ namespace pinocchio
             reference_config.tail(qroot.size()) = qroot;
 
             // convert qroot to mujoco's convention for quaternions
-            int qpos0_size = (int)qpos0.size();
+            int qpos0_size = static_cast<int>(qpos0.size());
             qpos0.conservativeResize(qpos0_size + qroot.size());
             qpos0.tail(qroot.size()) = qroot;
             if (root_joint->shortname() == "JointModelFreeFlyer")
