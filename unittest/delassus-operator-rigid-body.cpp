@@ -132,10 +132,6 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
   const auto joint1_id = cm_RF_LF_LOCAL.joint1_id;
   const auto joint2_id = cm_RF_LF_LOCAL.joint2_id;
 
-  std::cout << "Constraint1: " << std::endl;
-  std::cout << "\t joint1_id: " << cm_RF_LF_LOCAL.joint1_id << std::endl;
-  std::cout << "\t joint2_id: " << cm_RF_LF_LOCAL.joint2_id << std::endl;
-
   constraint_models.push_back(cm_RF_LF_LOCAL);
   constraint_datas.push_back(cm_RF_LF_LOCAL.createData());
   const ConstraintModel cm_LF_LOCAL(model, model.getJointId(LF), SE3::Random());
@@ -210,23 +206,6 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
       delassus_operator.solveInPlace(res);
       BOOST_CHECK(res.isApprox(res_ref, 1e-10));
     }
-
-    //    for(JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
-    //    {
-    //      std::cout << "oYaba_aug[" << joint_id << "]:\n" << data.oYaba_augmented[joint_id] <<
-    //      std::endl;
-    //    }
-    //
-    //    std::cout << "elimination ordering: ";
-    //    for(const auto val: data.elimination_order)
-    //      std::cout << val << ", ";
-    //    std::cout << std::endl;
-    //    std::cout << "---------" << std::endl;
-
-    //    for(const auto & val: data.joint_cross_coupling)
-    //    {
-    //      std::cout << "val:\n" << val << std::endl;
-    //    }
   }
 
   // Compare with lcaba
@@ -536,34 +515,11 @@ BOOST_AUTO_TEST_CASE(general_test_frictional_point_constraint_model)
     const auto Jc =
       getConstraintsJacobian(model, data_crba, constraint_models, constraint_datas_crba);
 
-    //      Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Jc_local.cols());
-    //      Jc = cm_RF_LOCAL.joint1_placement.toActionMatrix().leftCols<3>() * Jc_local;
-
-    //      std::cout << "M:\n" << M << std::endl;
-    //      std::cout << "Jc:\n" << Jc << std::endl;
-
     const Eigen::MatrixXd M_augmented = M + mu * Jc.transpose() * Jc;
     const Eigen::MatrixXd M_augmented_inv = M_augmented.inverse();
     const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
 
     BOOST_CHECK(res.isApprox(col_ref, 1e-10));
-    //      std::cout << "M_augmented:\n" << M_augmented << std::endl;
-    //      std::cout << "M_augmented_inv:\n" << M_augmented_inv << std::endl;
-    std::cout << std::endl << "---------------" << std::endl;
-    std::cout << "col    : " << res.transpose() << std::endl;
-    std::cout << "col_ref: " << col_ref.transpose() << std::endl;
-    std::cout << "error  : " << (res - col_ref).norm() << std::endl;
-
-    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
-    {
-      std::cout << "oYaba_aug[" << joint_id << "]:\n"
-                << data.oYaba_augmented[joint_id] << std::endl;
-    }
-
-    for (const auto & val : data.joint_cross_coupling)
-    {
-      std::cout << "val:\n" << val << std::endl;
-    }
 
     for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
     {
