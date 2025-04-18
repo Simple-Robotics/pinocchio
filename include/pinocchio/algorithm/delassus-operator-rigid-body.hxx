@@ -498,8 +498,8 @@ namespace pinocchio
     Holder>::solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat_) const
   {
     MatrixLike & mat = mat_.const_cast_derived();
-    //    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-    //      mat.rows(), size(), "The input matrix does not match the size of the Delassus.");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat.rows(), size(), "The input matrix does not match the size of the Delassus.");
 
     PINOCCHIO_THROW_IF(
       m_dirty, std::logic_error,
@@ -513,21 +513,55 @@ namespace pinocchio
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
     const auto & elimination_order = data_ref.elimination_order;
 
+    mat.array() *= m_sum_compliance_damping_inverse.array();
+
     //    for(auto & of_augmented: m_custom_data.of_augmented)
     //      of_augmented.setZero();
-
-    //    mat.array() *= m_sum_compliance_damping_inverse.array();
+    //
     //
     //    // Make a pass over the whole set of constraints to add the contributions of constraint
     //    forces mapConstraintForcesToJointForces(
     //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
     //      m_custom_data.of_augmented);
 
-    const auto & augmented_mass_matrix_operator = this->getAugmentedMassMatrixOperator();
-    augmented_mass_matrix_operator.solveInPlace(mat);
+    typedef Eigen::Map<VectorXs> MapVectorXs;
+    MapVectorXs u = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, model_ref.nv, 1));
 
-    //    typedef Eigen::Map<VectorXs> MapVectorXs;
-    //    MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
+    {
+      u.setZero();
+      Eigen::Index row_id = 0;
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const ConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const ConstraintData & cdata = constraint_datas_ref[ee_id];
+        const auto csize = cmodel.size();
+        const auto mat_rows = mat.middleRows(row_id, csize);
+
+        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, mat_rows, u, AddTo());
+
+        row_id += csize;
+      }
+    }
+
+    const auto & augmented_mass_matrix_operator = this->getAugmentedMassMatrixOperator();
+    augmented_mass_matrix_operator.solveInPlace(u);
+
+    typedef Eigen::Map<VectorXs> MapVectorXs;
+    MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
+    {
+      Eigen::Index row_id = 0;
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const ConstraintModel & cmodel = constraint_models_ref[ee_id];
+        const ConstraintData & cdata = constraint_datas_ref[ee_id];
+        const auto csize = cmodel.size();
+
+        cmodel.jacobianMatrixProduct(
+          model_ref, data_ref, cdata, u, tmp_vec.middleRows(row_id, csize));
+
+        row_id += csize;
+      }
+    }
 
     // Make a pass over the whole set of constraints to project back the joint accelerations onto
     // the constraints
@@ -535,7 +569,8 @@ namespace pinocchio
     //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref,
     //      this->m_custom_data.oa_augmented, tmp_vec);
     //
-    //    mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * tmp_vec;
+
+    mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * tmp_vec;
   }
 
   template<
