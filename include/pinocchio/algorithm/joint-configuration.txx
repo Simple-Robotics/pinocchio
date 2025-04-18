@@ -394,6 +394,18 @@ namespace pinocchio
   normalize<context::Scalar, context::Options, JointCollectionDefaultTpl, context::VectorXs>(
     const context::Model &, const Eigen::MatrixBase<context::VectorXs> &);
 
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+
+  // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
+
 #ifndef PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI bool isNormalized<
@@ -453,18 +465,6 @@ namespace pinocchio
     const context::Model &,
     const Eigen::MatrixBase<context::VectorXs> &,
     const Eigen::MatrixBase<context::MatrixXs> &);
-
-  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
-  lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
-    const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
-
-  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
-  lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(
-    const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
-
-    // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
 
 #endif // PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
