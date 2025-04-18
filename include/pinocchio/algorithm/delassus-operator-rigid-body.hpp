@@ -284,7 +284,8 @@ namespace pinocchio
       }
 
       template<typename MatrixLike>
-      void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const;
+      void solveInPlace(
+        const Eigen::MatrixBase<MatrixLike> & mat, bool reset_joint_force_vector = true) const;
 
     protected:
       const DelassusOperatorRigidBodySystemsTpl & m_self;

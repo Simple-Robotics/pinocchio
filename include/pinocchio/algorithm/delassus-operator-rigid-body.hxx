@@ -12,6 +12,8 @@
 #include "pinocchio/algorithm/aba.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 
+#include "pinocchio/algorithm/delassus-operator-rigid-body-visitors.hxx"
+
 namespace pinocchio
 {
 
@@ -481,47 +483,6 @@ namespace pinocchio
     res.array() += m_sum_compliance_damping.array() * rhs.array();
   }
 
-  //  template<typename DelassusOperator>
-  //  struct DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass
-  //  : public fusion::JointUnaryVisitorBase<
-  //  DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<DelassusOperator> >
-  //  {
-  //    typedef typename DelassusOperator::Model Model;
-  //      //    typedef typename DelassusOperator::Data Data;
-  //    typedef typename DelassusOperator::CustomData Data;
-  //
-  //    typedef boost::fusion::vector<const Model &,
-  //      //    Data &,
-  //    Data &
-  //    > ArgsType;
-  //
-  //    template<typename JointModel>
-  //    static void algo(const pinocchio::JointModelBase<JointModel> & jmodel,
-  //                     pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
-  //                     const Model & model,
-  //                     //                     Data & data
-  //                     Data & data)
-  //    {
-  //      typedef typename Model::JointIndex JointIndex;
-  //      typedef typename Data::Force Force;
-  //
-  //      const JointIndex i = jmodel.id();
-  //      const JointIndex parent = model.parents[i];
-  //
-  //      jmodel.jointVelocitySelector(data.u) = jdata.S().transpose()*data.f[i]; // The sign is
-  //      switched compare to ABA
-  //
-  //      if (parent > 0)
-  //      {
-  //        Force & pa = data.f[i];
-  //        pa.toVector().noalias() -= jdata.UDinv() * jmodel.jointVelocitySelector(data.u); // The
-  //        sign is switched compare to ABA as the sign of data.f[i] is switched too data.f[parent]
-  //        += data.liMi[i].act(pa);
-  //      }
-  //    }
-  //
-  //  };
-
   template<
     typename Scalar,
     int Options,
@@ -537,56 +498,102 @@ namespace pinocchio
     Holder>::solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat_) const
   {
     MatrixLike & mat = mat_.const_cast_derived();
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      mat.rows(), size(), "The input matrix does not match the size of the Delassus.");
+    //    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+    //      mat.rows(), size(), "The input matrix does not match the size of the Delassus.");
+
+    PINOCCHIO_THROW_IF(
+      m_dirty, std::logic_error,
+      "The DelassusOperator has dirty quantities. Please call compute() method first.");
+    //    if(m_dirty)
+    //      compute();
 
     const Model & model_ref = model();
     const Data & data_ref = data();
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
+    const auto & elimination_order = data_ref.elimination_order;
 
-    mat.array() *= m_sum_compliance_damping_inverse.array();
+    //    for(auto & of_augmented: m_custom_data.of_augmented)
+    //      of_augmented.setZero();
 
-    // Make a pass over the whole set of constraints to add the contributions of constraint forces
-    mapConstraintForcesToJointForces(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat, m_custom_data.f);
+    //    mat.array() *= m_sum_compliance_damping_inverse.array();
+    //
+    //    // Make a pass over the whole set of constraints to add the contributions of constraint
+    //    forces mapConstraintForcesToJointForces(
+    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
+    //      m_custom_data.of_augmented);
+
+    const auto & augmented_mass_matrix_operator = this->getAugmentedMassMatrixOperator();
+    augmented_mass_matrix_operator.solveInPlace(mat);
+
+    //    typedef Eigen::Map<VectorXs> MapVectorXs;
+    //    MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
+
+    // Make a pass over the whole set of constraints to project back the joint accelerations onto
+    // the constraints
+    //    mapJointMotionsToConstraintMotions(
+    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref,
+    //      this->m_custom_data.oa_augmented, tmp_vec);
+    //
+    //    mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * tmp_vec;
+  }
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
+    template<typename T> class Holder>
+  template<typename MatrixLike>
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::AugmentedMassMatrixOperator::
+    solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat_, bool reset_joint_force_vector) const
+  {
+    MatrixLike & mat = mat_.const_cast_derived();
+    const auto & model_ref = m_self.model();
+    const auto & data_ref = m_self.data();
+    DelassusOperatorRigidBodySystemsTpl::CustomData & custom_data =
+      const_cast<DelassusOperatorRigidBodySystemsTpl &>(m_self).getCustomData();
+    const auto & elimination_order = data_ref.elimination_order;
+
+    if (reset_joint_force_vector)
+    {
+      for (auto & of_augmented : custom_data.of_augmented)
+        of_augmented.setZero();
+    }
 
     // Backward sweep: propagate joint force contributions
     {
-      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
+      custom_data.u = mat;
+      typedef DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<
         DelassusOperatorRigidBodySystemsTpl>
         Pass1;
-      typename Pass1::ArgsType args1(model_ref, this->m_custom_data);
-      for (JointIndex i = JointIndex(model_ref.njoints - 1); i > 0; --i)
+      typename Pass1::ArgsType args1(model_ref, data_ref, custom_data);
+      for (const JointIndex i : elimination_order)
       {
-        Pass1::run(model_ref.joints[i], this->m_custom_data.joints_augmented[i], args1);
+        Pass1::run(model_ref.joints[i], data_ref.joints_augmented[i], args1);
       }
     }
 
     // Forward sweep: compute joint accelerations
     {
-      typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass<
+      typedef DelassusOperatorRigidBodySystemsTplSolveInPlaceForwardPass<
         DelassusOperatorRigidBodySystemsTpl>
         Pass2;
-      for (auto & motion : m_custom_data.a)
-        motion.setZero();
-      typename Pass2::ArgsType args2(model_ref, this->m_custom_data);
-      for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
+      custom_data.oa_augmented[0].setZero();
+      typename Pass2::ArgsType args2(model_ref, data_ref, custom_data);
+      for (int it = int(elimination_order.size()) - 1; it >= 0; it--)
       {
-        Pass2::run(model_ref.joints[i], this->m_custom_data.joints_augmented[i], args2);
+        const JointIndex i = elimination_order[size_t(it)];
+        Pass2::run(model_ref.joints[i], data_ref.joints_augmented[i], args2);
       }
     }
 
-    typedef Eigen::Map<VectorXs> MapVectorXs;
-    MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
-
-    // Make a pass over the whole set of constraints to project back the joint accelerations onto
-    // the constraints
-    mapJointMotionsToConstraintMotions(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, this->m_custom_data.a,
-      this->m_custom_data.tmp_vec);
-
-    mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * this->m_custom_data.tmp_vec;
+    mat = custom_data.ddq;
   }
 
 } // namespace pinocchio
