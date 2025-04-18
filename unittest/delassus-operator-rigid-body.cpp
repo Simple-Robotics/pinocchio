@@ -4,17 +4,23 @@
 
 #include <iostream>
 #include <memory>
+#include <algorithm>
 
+#include "pinocchio/context.hpp"
 #include "pinocchio/algorithm/cholesky.hpp"
-#include "pinocchio/algorithm/contact-info.hpp"
-#include "pinocchio/algorithm/constraints/point-frictional-constraint.hpp"
+#include "pinocchio/algorithm/constraints/constraints.hpp"
 #include "pinocchio/algorithm/contact-dynamics.hpp"
 #include "pinocchio/algorithm/contact-jacobian.hpp"
 #include "pinocchio/algorithm/contact-cholesky.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/context.hpp"
+
 #include "pinocchio/multibody/sample-models.hpp"
 #include "pinocchio/algorithm/delassus-operator-rigid-body.hpp"
+#include "pinocchio/algorithm/aba.hpp"
+#include "pinocchio/algorithm/crba.hpp"
+#include "pinocchio/algorithm/loop-constrained-aba.hpp"
+#include "pinocchio/algorithm/constraints/utils.hpp"
+#include "pinocchio/algorithm/proximal.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -92,7 +98,175 @@ BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
   BOOST_CHECK(&delassus_operator.constraint_datas() == &constraint_datas);
 }
 
-BOOST_AUTO_TEST_CASE(test_compute)
+BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
+{
+  typedef WeldConstraintModelTpl<double> ConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
+    DelassusOperatorRigidBodyReferenceWrapper;
+  typedef DelassusOperatorRigidBodyReferenceWrapper::CustomData CustomData;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintModelVector ConstraintModelVector;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintDataVector ConstraintDataVector;
+
+  Model model;
+  std::reference_wrapper<Model> model_ref = model;
+  buildModels::humanoidRandom(model, true);
+  model.gravity.setZero();
+  const Eigen::VectorXd q_neutral = neutral(model);
+  const Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model.nv);
+
+  const std::string RF = "rleg6_joint";
+  const std::string LF = "lleg6_joint";
+
+  Data data(model), data_gt(model), data_aba(model);
+  std::reference_wrapper<Data> data_ref = data;
+
+  ConstraintModelVector constraint_models;
+  ConstraintDataVector constraint_datas;
+  const ConstraintModel cm_RF_LF_LOCAL(
+    model, model.getJointId(RF), SE3::Random(), model.getJointId(LF), SE3::Random());
+
+  const auto joint1_id = cm_RF_LF_LOCAL.joint1_id;
+  const auto joint2_id = cm_RF_LF_LOCAL.joint2_id;
+
+  std::cout << "Constraint1: " << std::endl;
+  std::cout << "\t joint1_id: " << cm_RF_LF_LOCAL.joint1_id << std::endl;
+  std::cout << "\t joint2_id: " << cm_RF_LF_LOCAL.joint2_id << std::endl;
+
+  constraint_models.push_back(cm_RF_LF_LOCAL);
+  constraint_datas.push_back(cm_RF_LF_LOCAL.createData());
+  const ConstraintModel cm_LF_LOCAL(model, model.getJointId(LF), SE3::Random());
+  constraint_models.push_back(cm_LF_LOCAL);
+  constraint_datas.push_back(cm_LF_LOCAL.createData());
+
+  //  ConstraintDataVector constraint_datas_gt = constraint_datas;
+  //
+  std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
+  std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
+
+  const double min_damping_value = 1e-4;
+
+  // Test solveInPlace
+  {
+    //      const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, 0);
+    Eigen::VectorXd res = rhs;
+
+    const double mu_inv = min_damping_value;
+    const double mu = 1. / mu_inv;
+
+    //    Data data(model);
+    //    std::reference_wrapper<Data> data_ref = data;
+
+    DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, min_damping_value);
+    delassus_operator.updateDamping(mu_inv);
+    delassus_operator.updateCompliance(0);
+    delassus_operator.compute(q_neutral);
+    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+
+    Data data_crba(model);
+    Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
+    make_symmetric(M);
+
+    auto constraint_datas_crba = createData(constraint_models);
+    const auto Jc =
+      getConstraintsJacobian(model, data_crba, constraint_models, constraint_datas_crba);
+
+    const Eigen::MatrixXd M_augmented = M + mu * Jc.transpose() * Jc;
+    const Eigen::MatrixXd M_augmented_inv = M_augmented.inverse();
+    const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
+
+    BOOST_CHECK(res.isApprox(col_ref, 1e-10));
+
+    for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, col_id);
+      const auto res_ref = (M_augmented_inv * rhs).eval();
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+    }
+
+    //    for(JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    //    {
+    //      std::cout << "oYaba_aug[" << joint_id << "]:\n" << data.oYaba_augmented[joint_id] <<
+    //      std::endl;
+    //    }
+    //
+    //    std::cout << "elimination ordering: ";
+    //    for(const auto val: data.elimination_order)
+    //      std::cout << val << ", ";
+    //    std::cout << std::endl;
+    //    std::cout << "---------" << std::endl;
+
+    //    for(const auto & val: data.joint_cross_coupling)
+    //    {
+    //      std::cout << "val:\n" << val << std::endl;
+    //    }
+  }
+
+  // Compare with lcaba
+  //  {
+  //    Data data_lcaba(model);
+  //    RigidConstraintModel rcm(
+  //      CONTACT_6D, model, cm_RF_LOCAL.joint1_id, cm_RF_LOCAL.joint1_placement,
+  //      cm_RF_LOCAL.joint2_id, cm_RF_LOCAL.joint2_placement,
+  //      //                             cm_RF_LOCAL.joint2_id, cm_RF_LOCAL.joint2_placement,
+  //      //                             cm_RF_LOCAL.joint1_id, cm_RF_LOCAL.joint1_placement,
+  //      LOCAL);
+  //
+  //    std::vector<RigidConstraintModel> rcm_vector;
+  //    rcm_vector.push_back(rcm);
+  //    std::vector<RigidConstraintData> rcd_vector;
+  //    rcd_vector.push_back(rcm.createData());
+  //
+  //    const auto & rcd = rcd_vector[0];
+  //
+  //    computeJointMinimalOrdering(model, data_lcaba, rcm_vector);
+  //    ProximalSettings prox_settings(1e-14, min_damping_value, 1);
+  //    lcaba(model, data_lcaba, q_neutral, v, tau, rcm_vector, rcd_vector, prox_settings);
+  //
+  //    BOOST_CHECK(data_lcaba.elimination_order == data.elimination_order);
+  //
+  //
+  //
+  //
+  //    //    for(JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+  //    //    {
+  //    //      BOOST_CHECK(data.oMi[joint_id].isApprox(data_lcaba.oMi[joint_id]));
+  //    //      BOOST_CHECK(data.liMi[joint_id].isApprox(data_lcaba.liMi[joint_id]));
+  //    //      std::cout << "oYaba_aug[" << joint_id << "]:\n" << data.oYaba_augmented[joint_id] <<
+  //    //      std::endl; std::cout << "oYaba_aug_lcaba[" << joint_id << "]:\n" <<
+  //    //      data_lcaba.oYaba_augmented[joint_id] << std::endl;
+  //    //    }
+  //    //    std::cout << "elimination ordering: ";
+  //    //    for(const auto val: data_lcaba.elimination_order)
+  //    //      std::cout << val << ", ";
+  //    std::cout << std::endl;
+  //    std::cout << "---------" << std::endl;
+  //
+  //    std::cout << "---------" << std::endl;
+  //
+  //    std::cout << "oYaba_aug[" << joint1_id << "]:\n"
+  //              << data.oYaba_augmented[joint1_id] << std::endl;
+  //    std::cout << "oYaba_aug_lcaba[" << joint1_id << "]:\n"
+  //              << data_lcaba.oYaba_augmented[joint1_id] << std::endl;
+  //
+  //    std::cout << "---------" << std::endl;
+  //
+  //    std::cout << "oYaba_aug[" << joint2_id << "]:\n"
+  //              << data.oYaba_augmented[joint2_id] << std::endl;
+  //    std::cout << "oYaba_aug_lcaba[" << joint2_id << "]:\n"
+  //              << data_lcaba.oYaba_augmented[joint2_id] << std::endl;
+  //  }
+}
+
+BOOST_AUTO_TEST_CASE(general_test_frictional_point_constraint_model)
 {
   typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
   typedef DelassusOperatorRigidBodySystemsTpl<
@@ -109,28 +283,40 @@ BOOST_AUTO_TEST_CASE(test_compute)
   buildModels::humanoidRandom(model, true);
   model.gravity.setZero();
   const Eigen::VectorXd q_neutral = neutral(model);
+  const Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model.nv);
 
   const std::string RF = "rleg6_joint";
   const std::string LF = "lleg6_joint";
 
   Data data(model), data_gt(model), data_aba(model);
   std::reference_wrapper<Data> data_ref = data;
+  //  const ConstraintModel cm_RF_LOCAL(model, model.getJointId(RF), SE3::Random());
+  //  const ConstraintModel cm_RF_LOCAL(model, 0, SE3::Identity(), model.getJointId(RF),
+  //  SE3::Random());
 
   ConstraintModelVector constraint_models;
   ConstraintDataVector constraint_datas;
-  const ConstraintModel cm_RF_LOCAL(model, model.getJointId(RF), SE3::Random());
-  constraint_models.push_back(cm_RF_LOCAL);
-  constraint_datas.push_back(cm_RF_LOCAL.createData());
+
+  const ConstraintModel cm_LF_RF_LOCAL(
+    model, model.getJointId(LF), SE3::Random(), model.getJointId(RF), SE3::Random());
+  constraint_models.push_back(cm_LF_RF_LOCAL);
+  constraint_datas.push_back(cm_LF_RF_LOCAL.createData());
+
   const ConstraintModel cm_LF_LOCAL(model, model.getJointId(LF), SE3::Random());
   constraint_models.push_back(cm_LF_LOCAL);
   constraint_datas.push_back(cm_LF_LOCAL.createData());
+
+  const ConstraintModel cm_RF_LOCAL(model, model.getJointId(RF), SE3::Random());
+  constraint_models.push_back(cm_RF_LOCAL);
+  constraint_datas.push_back(cm_RF_LOCAL.createData());
 
   ConstraintDataVector constraint_datas_gt = constraint_datas;
 
   std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
   std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
 
-  const double min_damping_value = 1e-8;
+  const double min_damping_value = 1e-4;
 
   DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
     model_ref, data_ref, constraint_models_ref, constraint_datas_ref, min_damping_value);
@@ -290,53 +476,124 @@ BOOST_AUTO_TEST_CASE(test_compute)
     BOOST_CHECK(res_damped.isApprox(res_gt_damped));
   }
 
-  //
-  //  // Test solveInPlace
-  //  {
-  //    const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-  //    Eigen::VectorXd res = rhs;
-  //
-  //    delassus_operator.updateDamping(min_damping_value);
-  //    delassus_operator.compute(q_neutral);
-  //    delassus_operator.solveInPlace(res);
-  //
-  //    const Eigen::VectorXd res_gt = delassus_dense_gt.llt().solve(rhs);
-  //
-  //    BOOST_CHECK(res.isApprox(res_gt));
-  //    std::cout << "res:\n" << res.transpose() << std::endl;
-  //    std::cout << "res_gt:\n" << res_gt.transpose() << std::endl;
-  //
-  //    // Check accuracy
-  //
-  //    const double min_damping_value_sqrt = math::sqrt(min_damping_value);
-  //    const double min_damping_value_sqrt_inv = 1. / min_damping_value_sqrt;
-  //    const Eigen::MatrixXd scaled_matrix =
-  //      Eigen::MatrixXd::Identity(model.nv, model.nv) * min_damping_value_sqrt;
-  //    const Eigen::MatrixXd scaled_matrix_inv =
-  //      Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
-  //      * min_damping_value_sqrt_inv;
-  //    const Eigen::MatrixXd M_gt_scaled = scaled_matrix * M_gt * scaled_matrix;
-  //    std::cout << "M_gt_scaled:\n" << M_gt_scaled << std::endl;
-  //    std::cout << "M_gt:\n" << M_gt << std::endl;
-  //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J =
-  //      M_gt_scaled + constraints_jacobian_gt.transpose() * constraints_jacobian_gt;
-  //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J_inv = M_gt_scaled_plus_Jt_J.inverse();
-  //    const Eigen::MatrixXd damped_delassus_inverse_woodbury =
-  //      1. / min_damping_value
-  //        * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
-  //      - scaled_matrix_inv
-  //          * (constraints_jacobian_gt * M_gt_scaled_plus_Jt_J *
-  //          constraints_jacobian_gt.transpose())
-  //              .eval()
-  //          * scaled_matrix_inv;
-  //
-  //    const Eigen::VectorXd res_gt_woodbury = damped_delassus_inverse_woodbury * rhs;
-  //
-  //    std::cout << "res: " << res.transpose() << std::endl;
-  //    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
-  //    std::cout << "res_gt_woodbury: " << res_gt_woodbury.transpose() << std::endl;
-  //    std::cout << "res - res_gt: " << (res - res_gt).norm() << std::endl;
-  //  }
+  // Test solveInPlace
+  {
+    //      const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, 0);
+    Eigen::VectorXd res = rhs;
+
+    const double mu_inv = min_damping_value;
+    const double mu = 1. / mu_inv;
+
+    Data data(model);
+    std::reference_wrapper<Data> data_ref = data;
+
+    DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, min_damping_value);
+    delassus_operator.updateDamping(mu_inv);
+    delassus_operator.updateCompliance(0);
+    delassus_operator.compute(q_neutral);
+    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+
+    // Check elimination_order
+    const auto & elimination_order = data.elimination_order;
+    for (auto it = elimination_order.begin(); it != elimination_order.end(); ++it)
+    {
+      const auto joint_id = *it;
+      const auto & joint_support = model.supports[joint_id];
+      for (const auto supporting_joint : joint_support)
+      {
+        bool is_after =
+          std::find(it, elimination_order.end(), supporting_joint) != elimination_order.end();
+        BOOST_CHECK(is_after || supporting_joint == 0);
+      }
+    }
+
+    Data data_crba(model);
+    Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
+    make_symmetric(M);
+
+    auto constraint_datas_crba = createData(constraint_models);
+    const auto Jc =
+      getConstraintsJacobian(model, data_crba, constraint_models, constraint_datas_crba);
+
+    //      Eigen::MatrixXd Jc = Eigen::MatrixXd::Zero(6,Jc_local.cols());
+    //      Jc = cm_RF_LOCAL.joint1_placement.toActionMatrix().leftCols<3>() * Jc_local;
+
+    //      std::cout << "M:\n" << M << std::endl;
+    //      std::cout << "Jc:\n" << Jc << std::endl;
+
+    const Eigen::MatrixXd M_augmented = M + mu * Jc.transpose() * Jc;
+    const Eigen::MatrixXd M_augmented_inv = M_augmented.inverse();
+    const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
+
+    BOOST_CHECK(res.isApprox(col_ref, 1e-10));
+    //      std::cout << "M_augmented:\n" << M_augmented << std::endl;
+    //      std::cout << "M_augmented_inv:\n" << M_augmented_inv << std::endl;
+    std::cout << std::endl << "---------------" << std::endl;
+    std::cout << "col    : " << res.transpose() << std::endl;
+    std::cout << "col_ref: " << col_ref.transpose() << std::endl;
+    std::cout << "error  : " << (res - col_ref).norm() << std::endl;
+
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      std::cout << "oYaba_aug[" << joint_id << "]:\n"
+                << data.oYaba_augmented[joint_id] << std::endl;
+    }
+
+    for (const auto & val : data.joint_cross_coupling)
+    {
+      std::cout << "val:\n" << val << std::endl;
+    }
+
+    for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, col_id);
+      const auto res_ref = (M_augmented_inv * rhs).eval();
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+    }
+
+    //
+    //    const Eigen::VectorXd res_gt = delassus_dense_gt.llt().solve(rhs);
+    //
+    //    BOOST_CHECK(res.isApprox(res_gt));
+    //    std::cout << "res:\n" << res.transpose() << std::endl;
+    //    std::cout << "res_gt:\n" << res_gt.transpose() << std::endl;
+    //
+    //    // Check accuracy
+    //
+    //    const double min_damping_value_sqrt = math::sqrt(min_damping_value);
+    //    const double min_damping_value_sqrt_inv = 1. / min_damping_value_sqrt;
+    //    const Eigen::MatrixXd scaled_matrix =
+    //      Eigen::MatrixXd::Identity(model.nv, model.nv) * min_damping_value_sqrt;
+    //    const Eigen::MatrixXd scaled_matrix_inv =
+    //      Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
+    //      * min_damping_value_sqrt_inv;
+    //    const Eigen::MatrixXd M_gt_scaled = scaled_matrix * M_gt * scaled_matrix;
+    //    std::cout << "M_gt_scaled:\n" << M_gt_scaled << std::endl;
+    //    std::cout << "M_gt:\n" << M_gt << std::endl;
+    //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J =
+    //      M_gt_scaled + constraints_jacobian_gt.transpose() * constraints_jacobian_gt;
+    //    const Eigen::MatrixXd M_gt_scaled_plus_Jt_J_inv = M_gt_scaled_plus_Jt_J.inverse();
+    //    const Eigen::MatrixXd damped_delassus_inverse_woodbury =
+    //      1. / min_damping_value
+    //        * Eigen::MatrixXd::Identity(delassus_operator.size(), delassus_operator.size())
+    //      - scaled_matrix_inv
+    //          * (constraints_jacobian_gt * M_gt_scaled_plus_Jt_J *
+    //          constraints_jacobian_gt.transpose())
+    //              .eval()
+    //          * scaled_matrix_inv;
+    //
+    //    const Eigen::VectorXd res_gt_woodbury = damped_delassus_inverse_woodbury * rhs;
+    //
+    //    std::cout << "res: " << res.transpose() << std::endl;
+    //    std::cout << "res_gt: " << res_gt.transpose() << std::endl;
+    //    std::cout << "res_gt_woodbury: " << res_gt_woodbury.transpose() << std::endl;
+    //    std::cout << "res - res_gt: " << (res - res_gt).norm() << std::endl;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(general_test_no_constraints)
@@ -389,7 +646,7 @@ BOOST_AUTO_TEST_CASE(general_test_no_constraints)
     delassus_operator.updateCompliance(0);
     delassus_operator.compute(q_neutral);
 
-    delassus_operator.solveInPlace(res);
+    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
 
     Data data_crba(model);
     Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
@@ -427,7 +684,7 @@ BOOST_AUTO_TEST_CASE(general_test_no_constraints)
       BOOST_CHECK(res_ref.isApprox(res_ref2));
 
       Eigen::VectorXd res = rhs;
-      delassus_operator.solveInPlace(res);
+      delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
       BOOST_CHECK(res.isApprox(res_ref));
       BOOST_CHECK(res.isApprox(res_ref2));
     }
