@@ -152,8 +152,6 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
   // Test solveInPlace
   {
     //      const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, 0);
-    Eigen::VectorXd res = rhs;
 
     const double mu_inv = min_damping_value;
     const double mu = 1. / mu_inv;
@@ -166,7 +164,6 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
     delassus_operator.updateDamping(mu_inv);
     delassus_operator.updateCompliance(0);
     delassus_operator.compute(q_neutral);
-    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
 
     Data data_crba(model);
     Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
@@ -178,8 +175,12 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
 
     const Eigen::MatrixXd M_augmented = M + mu * Jc.transpose() * Jc;
     const Eigen::MatrixXd M_augmented_inv = M_augmented.inverse();
-    const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
 
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, 0);
+    Eigen::VectorXd res = rhs;
+
+    const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
+    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
     BOOST_CHECK(res.isApprox(col_ref, 1e-10));
 
     for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
@@ -189,6 +190,24 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
 
       Eigen::VectorXd res = rhs;
       delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+    }
+
+    // Test Delassus inverse
+    const auto delassus_size = delassus_operator.size();
+    const Eigen::MatrixXd M_inv = M.inverse();
+    const Eigen::MatrixXd delassus_dense =
+      Jc * M_inv * Jc.transpose()
+      + mu_inv * Eigen::MatrixXd::Identity(delassus_size, delassus_size);
+    const Eigen::MatrixXd delassus_dense_inv = delassus_dense.inverse();
+
+    for (Eigen::DenseIndex col_id = 0; col_id < delassus_size; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(delassus_size, col_id);
+      const auto res_ref = (delassus_dense_inv * rhs).eval();
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.solveInPlace(res);
       BOOST_CHECK(res.isApprox(res_ref, 1e-10));
     }
 
@@ -553,6 +572,24 @@ BOOST_AUTO_TEST_CASE(general_test_frictional_point_constraint_model)
 
       Eigen::VectorXd res = rhs;
       delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+    }
+
+    // Test Delassus inverse
+    const auto delassus_size = delassus_operator.size();
+    const Eigen::MatrixXd M_inv = M.inverse();
+    const Eigen::MatrixXd delassus_dense =
+      Jc * M_inv * Jc.transpose()
+      + mu_inv * Eigen::MatrixXd::Identity(delassus_size, delassus_size);
+    const Eigen::MatrixXd delassus_dense_inv = delassus_dense.inverse();
+
+    for (Eigen::DenseIndex col_id = 0; col_id < delassus_size; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(delassus_size, col_id);
+      const auto res_ref = (delassus_dense_inv * rhs).eval();
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.solveInPlace(res);
       BOOST_CHECK(res.isApprox(res_ref, 1e-10));
     }
 
