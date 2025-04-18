@@ -285,6 +285,25 @@ namespace pinocchio
       return m_custom_data;
     }
 
+    struct AugmentedMassMatrixOperator
+    {
+      AugmentedMassMatrixOperator(const DelassusOperatorRigidBodySystemsTpl & delassus_operator)
+      : m_self(delassus_operator)
+      {
+      }
+
+      template<typename MatrixLike>
+      void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const;
+
+    protected:
+      const DelassusOperatorRigidBodySystemsTpl & m_self;
+    };
+
+    AugmentedMassMatrixOperator getAugmentedMassMatrixOperator() const
+    {
+      return AugmentedMassMatrixOperator(*this);
+    }
+
   protected:
     static Eigen::DenseIndex evalConstraintSize(const ConstraintModelVector & constraint_models)
     {
