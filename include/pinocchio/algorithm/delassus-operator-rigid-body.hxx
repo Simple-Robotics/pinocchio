@@ -76,9 +76,6 @@ namespace pinocchio
       typedef typename JointModel::JointDataDerived JointData;
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
-      const auto & neighbours = data.neighbour_links;
-      auto & joint_cross_coupling = data.joint_cross_coupling;
-
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
