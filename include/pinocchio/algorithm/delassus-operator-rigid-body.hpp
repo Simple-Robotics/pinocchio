@@ -118,7 +118,7 @@ namespace pinocchio
     , m_data_ref(data_ref)
     , m_constraint_models_ref(constraint_models_ref)
     , m_constraint_datas_ref(constraint_datas_ref)
-    , m_custom_data(helper::get_ref(model_ref), helper::get_ref(data_ref))
+    , m_custom_data(helper::get_ref(model_ref))
     , m_dirty(true)
     , m_damping(Vector::Zero(m_size))
     , m_compliance(Vector::Zero(m_size))
@@ -245,39 +245,25 @@ namespace pinocchio
 
     struct CustomData
     {
-      typedef typename Data::SE3 SE3;
-      typedef typename Data::Inertia Inertia;
       typedef typename Data::Motion Motion;
-      typedef typename Data::Matrix6 Matrix6;
       typedef typename Data::Force Force;
 
-      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(SE3) SE3Vector;
       typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Motion) MotionVector;
-      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Matrix6) Matrix6Vector;
+      typedef typename PINOCCHIO_ALIGNED_STD_VECTOR(Force) ForceVector;
 
-      CustomData(const Model & model, const Data & data)
-      : liMi(size_t(model.njoints), SE3::Identity())
-      , oMi(size_t(model.njoints), SE3::Identity())
-      , a(size_t(model.njoints), Motion::Zero())
-      , a_augmented(size_t(model.njoints), Motion::Zero())
-      , Yaba(size_t(model.njoints), Inertia::Zero())
-      , Yaba_augmented(size_t(model.njoints), Inertia::Zero())
-      , joints(data.joints)
-      , joints_augmented(data.joints)
+      CustomData(const Model & model)
+      : a(size_t(model.njoints), Motion::Zero())
+      , oa_augmented(size_t(model.njoints), Motion::Zero())
       , u(model.nv)
       , ddq(model.nv)
       , f(size_t(model.njoints))
+      , of_augmented(size_t(model.njoints))
       {
       }
 
-      SE3Vector liMi, oMi;
-      MotionVector a, a_augmented;
-      Matrix6Vector Yaba, Yaba_augmented;
-
-      typename Data::JointDataVector joints;
-      typename Data::JointDataVector joints_augmented;
+      MotionVector a, oa_augmented;
       VectorXs u, ddq;
-      ForceVector f;
+      ForceVector f, of_augmented;
     };
 
     const CustomData & getCustomData() const
