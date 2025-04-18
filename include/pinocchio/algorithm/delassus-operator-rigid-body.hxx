@@ -61,7 +61,7 @@ namespace pinocchio
     Options,
     JointCollectionTpl,
     ConstraintModel,
-    Holder>::compute()
+    Holder>::compute(bool damping_compliance_update_only)
   {
     typedef typename Data::Inertia Inertia;
 
@@ -72,11 +72,13 @@ namespace pinocchio
     ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
     // Compute joint ordering for solveInPlace
-    computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
+    if (!damping_compliance_update_only)
+      computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
 
     for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
-      data_ref.Yaba[i] = model_ref.inertias[i].matrix();
+      if (!damping_compliance_update_only)
+        data_ref.Yaba[i] = model_ref.inertias[i].matrix();
       const Inertia oinertia = data_ref.oMi[i].act(model_ref.inertias[i]);
       data_ref.oYaba_augmented[i] = oinertia.matrix();
     }
@@ -93,19 +95,35 @@ namespace pinocchio
       const auto constraint_diagonal_inertia =
         this->m_sum_compliance_damping_inverse.segment(row_id, constraint_size);
 
-      cmodel.calc(model_ref, data_ref, cdata);
+      if (!damping_compliance_update_only)
+        cmodel.calc(model_ref, data_ref, cdata);
       cmodel.appendCouplingConstraintInertias(
         model_ref, data_ref, cdata, constraint_diagonal_inertia, WorldFrameTag());
 
       row_id += constraint_size;
     }
 
-    typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperatorRigidBodySystemsTpl>
-      Pass2;
-    for (const JointIndex i : data_ref.elimination_order)
+    if (damping_compliance_update_only)
     {
-      typename Pass2::ArgsType args(model_ref, data_ref);
-      Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
+      typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<
+        DelassusOperatorRigidBodySystemsTpl, true>
+        Pass2;
+      for (const JointIndex i : data_ref.elimination_order)
+      {
+        typename Pass2::ArgsType args(model_ref, data_ref);
+        Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
+      }
+    }
+    else
+    {
+      typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<
+        DelassusOperatorRigidBodySystemsTpl, false>
+        Pass2;
+      for (const JointIndex i : data_ref.elimination_order)
+      {
+        typename Pass2::ArgsType args(model_ref, data_ref);
+        Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
+      }
     }
 
     compute_conclude();

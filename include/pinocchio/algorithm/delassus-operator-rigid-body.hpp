@@ -146,7 +146,13 @@ namespace pinocchio
     ///
     /// \brief Update the intermediate computations before calling solveInPlace or operator*
     ///
-    void compute();
+    /// \param[in] damping_compliance_update_only If true, this will only update the quantities
+    /// related to change of damping or compliance values.
+    ///
+    /// \remarks When setting damping_compliance_update_only to true, this enables to lower the
+    /// quantities updated to the minimum, helping to save time overall. Indeed, only the quantities
+    /// involved in the solveInPlace method need to be updated.
+    void compute(bool damping_compliance_update_only = false);
 
     const Model & model() const
     {

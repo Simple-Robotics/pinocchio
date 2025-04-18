@@ -44,7 +44,7 @@ namespace pinocchio
     }
   };
 
-  template<typename DelassusOperator>
+  template<typename DelassusOperator, bool damping_compliance_update_only = false>
   struct DelassusOperatorRigidBodySystemsComputeBackwardPass
   : public fusion::JointUnaryVisitorBase<
       DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperator>>
@@ -73,6 +73,7 @@ namespace pinocchio
       const JointIndex parent = model.parents[i];
 
       // ApplyOnTheRight
+      if (!damping_compliance_update_only)
       {
         auto & Ia = data.Yaba[i];
         jmodel.calc_aba(
