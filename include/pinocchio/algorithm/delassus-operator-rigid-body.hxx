@@ -71,6 +71,8 @@ namespace pinocchio
     {
       typedef typename Model::JointIndex JointIndex;
       typedef typename Data::Inertia Inertia;
+      typedef typename Data::Matrix6 Matrix6;
+      typedef typename Data::Vector6 Vector6;
       typedef typename JointModel::JointDataDerived JointData;
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
@@ -115,6 +117,95 @@ namespace pinocchio
         {
           Ia_augmented.noalias() -= jdata_augmented.UDinv() * jdata_augmented.U().transpose();
           data.oYaba_augmented[parent] += Ia_augmented;
+        }
+
+        // End of the classic ABA backward pass - beginning of cross-coupling handling
+        const auto & neighbours = data.neighbour_links;
+        auto & joint_cross_coupling = data.joint_cross_coupling;
+        const auto & joint_neighbours = neighbours[i];
+
+        if (joint_neighbours.size() == 0)
+          return; // We can return from this point as this joint has no neighbours
+
+        //        return;
+        using Matrix6xNV = typename std::remove_reference<typename JointData::UDTypeRef>::type;
+        typedef Eigen::Map<Matrix6xNV> MapMatrix6xNV;
+        MapMatrix6xNV mat1_tmp = MapMatrix6xNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, 6, jmodel.nv()));
+        MapMatrix6xNV mat2_tmp = MapMatrix6xNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, 6, jmodel.nv()));
+
+        auto & JDinv = mat1_tmp;
+        JDinv.noalias() = Jcols * jdata_augmented.Dinv();
+
+        // oL == data.oL[i]
+        Matrix6 oL = -JDinv * jdata_augmented.U().transpose();
+        oL += Matrix6::Identity();
+
+        for (size_t j = 0; j < joint_neighbours.size(); j++)
+        {
+          const JointIndex vertex_j = joint_neighbours[j];
+          const Matrix6 & crosscoupling_ij =
+            (i > vertex_j)
+              ? joint_cross_coupling.get(JointPair(vertex_j, i))
+              : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose(); // avoid memalloc
+
+          auto & crosscoupling_ix_Jcols = mat1_tmp;
+          crosscoupling_ix_Jcols.noalias() =
+            crosscoupling_ij * Jcols; // Warning: UDinv() is actually edge_ij * J
+
+          auto & crosscoupling_ij_Jcols_Dinv = mat2_tmp;
+          crosscoupling_ij_Jcols_Dinv.noalias() = crosscoupling_ix_Jcols * jdata_augmented.Dinv();
+
+          data.oYaba_augmented[vertex_j].noalias() -=
+            crosscoupling_ij_Jcols_Dinv
+            * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ij * J, U()
+                                                  // is actually edge_ij * J_cols * Dinv
+          //          data.of[vertex_j].toVector().noalias() += crosscoupling_ij * a_tmp;
+
+          const Matrix6 crosscoupling_ij_oL = crosscoupling_ij * oL;
+          if (vertex_j == parent)
+          {
+            data.oYaba_augmented[parent].noalias() +=
+              crosscoupling_ij_oL + crosscoupling_ij_oL.transpose();
+          }
+          else
+          {
+            if (vertex_j < parent)
+            {
+              joint_cross_coupling.get({vertex_j, parent}).noalias() += crosscoupling_ij_oL;
+            }
+            else
+            {
+              joint_cross_coupling.get({parent, vertex_j}).noalias() +=
+                crosscoupling_ij_oL.transpose();
+            }
+          }
+
+          for (size_t k = j + 1; k < joint_neighbours.size(); ++k)
+          {
+            const JointIndex vertex_k = joint_neighbours[k];
+
+            const Matrix6 & edge_ik =
+              (i > vertex_k) ? joint_cross_coupling.get(JointPair(vertex_k, i))
+                             : joint_cross_coupling.get(JointPair(i, vertex_k)).transpose();
+
+            crosscoupling_ix_Jcols.noalias() = edge_ik * Jcols;
+
+            assert(vertex_j != vertex_k && "Must never happen!");
+            if (vertex_j < vertex_k)
+            {
+              joint_cross_coupling.get({vertex_j, vertex_k}).noalias() -=
+                crosscoupling_ij_Jcols_Dinv
+                * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik *
+                                                      // J_col, U() is edge_ij * J_col * Dinv
+            }
+            else // if (vertex_k < vertex_j)
+            {
+              joint_cross_coupling.get({vertex_k, vertex_j}).transpose().noalias() -=
+                crosscoupling_ij_Jcols_Dinv
+                * crosscoupling_ix_Jcols.transpose(); // Warning: UDinv() is actually edge_ik *
+                                                      // J_col, U() is edge_ij * J_col * Dinv
+            }
+          }
         }
       }
     }
@@ -205,7 +296,7 @@ namespace pinocchio
 
     typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperatorRigidBodySystemsTpl>
       Pass2;
-    for (JointIndex i = JointIndex(model_ref.njoints - 1); i > 0; --i)
+    for (const JointIndex i : data_ref.elimination_order)
     {
       typename Pass2::ArgsType args(model_ref, data_ref);
       Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
