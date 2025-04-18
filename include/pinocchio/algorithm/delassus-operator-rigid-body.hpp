@@ -271,6 +271,11 @@ namespace pinocchio
       return m_custom_data;
     }
 
+    CustomData & getCustomData()
+    {
+      return m_custom_data;
+    }
+
     struct AugmentedMassMatrixOperator
     {
       AugmentedMassMatrixOperator(const DelassusOperatorRigidBodySystemsTpl & delassus_operator)
