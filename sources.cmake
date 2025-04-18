@@ -92,6 +92,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-dense.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-rigid-body.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-rigid-body.hxx
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-rigid-body-visitors.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/delassus-operator-sparse.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/energy.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/algorithm/energy.hxx
