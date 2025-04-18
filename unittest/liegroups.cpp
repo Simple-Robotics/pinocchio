@@ -841,8 +841,10 @@ BOOST_AUTO_TEST_CASE(tangentMap)
       SpecialOrthogonalOperationTpl<3, Scalar, Options>>>
     Types;
   for (int i = 0; i < 20; ++i)
+  {
     boost::mpl::for_each<Types>(LieGroup_TangentMap<false>());
-  boost::mpl::for_each<Types>(LieGroup_TangentMap<true>());
+    boost::mpl::for_each<Types>(LieGroup_TangentMap<true>());
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_vector_space)
