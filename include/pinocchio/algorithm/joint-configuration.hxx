@@ -691,9 +691,11 @@ namespace pinocchio
     std::vector<int> & idx_vs)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      model.nq, nvs.size(), "The configuration vector is not of the right size");
+      static_cast<size_t>(model.nq), nvs.size(),
+      "The configuration vector is not of the right size");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      model.nq, idx_vs.size(), "The configuration vector is not of the right size");
+      static_cast<size_t>(model.nq), idx_vs.size(),
+      "The configuration vector is not of the right size");
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::JointIndex JointIndex;
