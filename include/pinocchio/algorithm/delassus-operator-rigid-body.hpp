@@ -195,6 +195,11 @@ namespace pinocchio
       return m_size;
     }
 
+    bool isDirty() const
+    {
+      return m_dirty;
+    }
+
     void update(
       const ConstraintModelVectorHolder & constraint_models_ref,
       const ConstraintDataVectorHolder & constraint_datas_ref)
