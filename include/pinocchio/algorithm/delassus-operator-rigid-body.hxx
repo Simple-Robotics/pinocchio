@@ -77,9 +77,10 @@ namespace pinocchio
 
     for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
+      const auto & joint_inertia = model_ref.inertias[i];
       if (!damping_compliance_update_only)
-        data_ref.Yaba[i] = model_ref.inertias[i].matrix();
-      const Inertia oinertia = data_ref.oMi[i].act(model_ref.inertias[i]);
+        data_ref.Yaba[i] = joint_inertia.matrix();
+      const Inertia oinertia = data_ref.oMi[i].act(joint_inertia);
       data_ref.oYaba_augmented[i] = oinertia.matrix();
     }
 
