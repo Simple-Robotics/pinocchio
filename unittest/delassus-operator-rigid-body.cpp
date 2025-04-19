@@ -143,20 +143,15 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
   std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
   std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
 
-  const double min_damping_value = 1e-4;
+  const double damping_value = 1e-4;
+
+  const double mu_inv = damping_value;
+  const double mu = 1. / mu_inv;
 
   // Test solveInPlace
   {
-    //      const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
-
-    const double mu_inv = min_damping_value;
-    const double mu = 1. / mu_inv;
-
-    //    Data data(model);
-    //    std::reference_wrapper<Data> data_ref = data;
-
     DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, min_damping_value);
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, damping_value);
     delassus_operator.updateDamping(mu_inv);
     delassus_operator.updateCompliance(0);
     delassus_operator.compute(q_neutral);
@@ -205,6 +200,96 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
       Eigen::VectorXd res = rhs;
       delassus_operator.solveInPlace(res);
       BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+    }
+  }
+
+  // Test updateDamping
+  {
+    Data data(model);
+    std::reference_wrapper<Data> data_ref = data;
+
+    auto constraint_datas = createData(constraint_models);
+    std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
+
+    DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, damping_value);
+    delassus_operator.compute(q_neutral);
+
+    Data data2(model);
+    std::reference_wrapper<Data> data2_ref = data2;
+    auto constraint_datas2 = createData(constraint_models);
+    std::reference_wrapper<ConstraintDataVector> constraint_datas2_ref = constraint_datas2;
+
+    const double new_damping_value = 1e-6;
+    const double new_mu = 1. / new_damping_value;
+    DelassusOperatorRigidBodyReferenceWrapper delassus_operator2(
+      model_ref, data2_ref, constraint_models_ref, constraint_datas2_ref, new_damping_value);
+    BOOST_CHECK(delassus_operator2.isDirty());
+    delassus_operator2.compute(q_neutral);
+    BOOST_CHECK(!delassus_operator2.isDirty());
+
+    BOOST_CHECK(!delassus_operator.isDirty());
+    delassus_operator.updateDamping(new_damping_value);
+    BOOST_CHECK(delassus_operator.isDirty());
+    delassus_operator.compute(true);
+    BOOST_CHECK(!delassus_operator.isDirty());
+
+    BOOST_CHECK(delassus_operator.getDamping() == delassus_operator2.getDamping());
+    BOOST_CHECK(delassus_operator.getCompliance() == delassus_operator2.getCompliance());
+
+    BOOST_CHECK(data.J == data2.J);
+    BOOST_CHECK(data.elimination_order == data2.elimination_order);
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      //      std::cout << "joint_id: " << joint_id << std::endl;
+
+      BOOST_CHECK(data.oMi[joint_id] == data2.oMi[joint_id]);
+      BOOST_CHECK(data.liMi[joint_id] == data2.liMi[joint_id]);
+
+      BOOST_CHECK(data.Yaba[joint_id] == data2.Yaba[joint_id]);
+      BOOST_CHECK(data.joints[joint_id].StU() == data2.joints[joint_id].StU());
+      BOOST_CHECK(data.joints[joint_id].Dinv() == data2.joints[joint_id].Dinv());
+      BOOST_CHECK(data.joints[joint_id].UDinv() == data2.joints[joint_id].UDinv());
+
+      BOOST_CHECK(data.oYaba_augmented[joint_id] == data2.oYaba_augmented[joint_id]);
+      BOOST_CHECK(data.joints_augmented[joint_id].StU() == data2.joints_augmented[joint_id].StU());
+      BOOST_CHECK(
+        data.joints_augmented[joint_id].Dinv() == data2.joints_augmented[joint_id].Dinv());
+      BOOST_CHECK(
+        data.joints_augmented[joint_id].UDinv() == data2.joints_augmented[joint_id].UDinv());
+
+      //      std::cout << "-----------" << std::endl;
+    }
+
+    Data data_crba(model);
+    Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
+    make_symmetric(M);
+
+    auto constraint_datas_crba = createData(constraint_models);
+    const auto Jc =
+      getConstraintsJacobian(model, data_crba, constraint_models, constraint_datas_crba);
+
+    const auto delassus_size = delassus_operator.size();
+    const Eigen::MatrixXd M_inv = M.inverse();
+    const Eigen::MatrixXd delassus_dense =
+      Jc * M_inv * Jc.transpose()
+      + new_damping_value * Eigen::MatrixXd::Identity(delassus_size, delassus_size);
+    const Eigen::MatrixXd delassus_dense_inv = delassus_dense.inverse();
+
+    for (Eigen::DenseIndex col_id = 0; col_id < delassus_size; ++col_id)
+    {
+      const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(delassus_size, col_id);
+      const auto res_ref = (delassus_dense_inv * rhs).eval();
+
+      Eigen::VectorXd res = rhs;
+      delassus_operator.solveInPlace(res);
+      BOOST_CHECK(res.isApprox(res_ref, 1e-8));
+
+      Eigen::VectorXd res2 = rhs;
+      delassus_operator2.solveInPlace(res2);
+      BOOST_CHECK(res2.isApprox(res_ref, 1e-8));
+
+      BOOST_CHECK(res.isApprox(res2));
     }
   }
 
