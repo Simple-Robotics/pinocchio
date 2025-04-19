@@ -326,11 +326,11 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       mat.rows(), size(), "The input matrix does not match the size of the Delassus.");
 
-    PINOCCHIO_THROW_IF(
-      m_dirty, std::logic_error,
-      "The DelassusOperator has dirty quantities. Please call compute() method first.");
-    //    if(m_dirty)
-    //      compute();
+    //    PINOCCHIO_THROW_IF(
+    //      m_dirty, std::logic_error,
+    //      "The DelassusOperator has dirty quantities. Please call compute() method first.");
+    if (isDirty())
+      self_const_cast().compute(true);
 
     const Model & model_ref = model();
     const Data & data_ref = data();
