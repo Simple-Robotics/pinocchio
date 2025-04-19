@@ -329,6 +329,11 @@ namespace pinocchio
       m_dirty = true;
     }
 
+    DelassusOperatorRigidBodySystemsTpl & self_const_cast() const
+    {
+      return const_cast<DelassusOperatorRigidBodySystemsTpl &>(*this);
+    }
+
     // Holders
     Eigen::DenseIndex m_size;
     ModelHolder m_model_ref;
