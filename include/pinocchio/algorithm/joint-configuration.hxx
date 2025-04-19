@@ -857,6 +857,16 @@ namespace pinocchio
     return lgo;
   }
 
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  typename LieGroupMap::template product_variant<Scalar, Options>::type
+  lie_group(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  {
+    typedef typename LieGroupMap::template product_variant<Scalar, Options>::type LGO;
+    LGO lgo;
+    lie_group<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo);
+    return lgo;
+  }
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_joint_configuration_hxx__
