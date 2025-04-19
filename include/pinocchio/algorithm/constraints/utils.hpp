@@ -21,7 +21,8 @@ namespace pinocchio
       template type<typename ConstraintModel::ConstraintData>
         ReturnType;
 
-    ReturnType constraint_datas(constraint_models.size());
+    ReturnType constraint_datas;
+    constraint_datas.reserve(constraint_models.size());
 
     for (const auto & cm : constraint_models)
       constraint_datas.push_back(cm.createData());
