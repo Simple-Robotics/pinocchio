@@ -251,6 +251,17 @@ namespace pinocchio
       return m_compliance;
     }
 
+    /// \brief solveInPlace operation returning the results of the inverse of the Delassus operator
+    /// times the input matrix mat
+    ///
+    /// \param[in,out] mat Input/output argument containing the right hand side and the result of
+    /// the operation
+    ///
+    /// \warning The parameter is only marked 'const' to make the C++ compiler accept a temporary
+    /// expression here. This function will const_cast it, so constness isn't honored here.
+    ///
+    /// \remarks Even if the method is marked 'const', it will update the internal decomposition if
+    /// the Delassus operator is dirty after an update of the damping or compliance values.
     template<typename MatrixLike>
     void solveInPlace(const Eigen::MatrixBase<MatrixLike> & mat) const;
 
