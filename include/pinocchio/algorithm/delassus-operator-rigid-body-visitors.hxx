@@ -204,6 +204,81 @@ namespace pinocchio
   };
 
   template<typename DelassusOperator>
+  struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass
+  : public fusion::JointUnaryVisitorBase<
+      DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<DelassusOperator>>
+  {
+    typedef typename DelassusOperator::Model Model;
+    typedef typename DelassusOperator::Data Data;
+    typedef typename DelassusOperator::CustomData CustomData;
+
+    typedef boost::fusion::vector<const Model &, const Data &, CustomData &> ArgsType;
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      const pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const Model & model,
+      const Data & data,
+      CustomData & custom_data)
+    {
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+
+      jmodel.jointVelocitySelector(custom_data.u) -= jdata.S().transpose() * custom_data.f[i];
+
+      if (parent > 0)
+      {
+        auto & pa = custom_data.f[i];
+        pa.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(custom_data.u);
+        custom_data.f[parent] += data.liMi[i].act(pa);
+      }
+    }
+  };
+
+  template<typename DelassusOperator>
+  struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass
+  : public fusion::JointUnaryVisitorBase<
+      DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass<DelassusOperator>>
+  {
+    typedef typename DelassusOperator::Model Model;
+    typedef typename DelassusOperator::Data Data;
+    typedef typename DelassusOperator::CustomData CustomData;
+
+    typedef boost::fusion::vector<const Model &, const Data &, CustomData &> ArgsType;
+
+    template<typename JointModel>
+    static void algo(
+      const pinocchio::JointModelBase<JointModel> & jmodel,
+      const pinocchio::JointDataBase<typename JointModel::JointDataDerived> & jdata,
+      const Model & model,
+      const Data & data,
+      CustomData & custom_data)
+    {
+      typedef typename Model::JointIndex JointIndex;
+
+      const JointIndex i = jmodel.id();
+      const JointIndex parent = model.parents[i];
+
+      //      typename JointData::TangentVector_t ddq_joint;
+      auto ddq_joint = jmodel.jointVelocitySelector(custom_data.ddq);
+      if (parent > 0)
+      {
+        custom_data.a[i] += data.liMi[i].actInv(custom_data.a[parent]);
+        ddq_joint = jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u)
+                    - jdata.UDinv().transpose() * custom_data.a[i].toVector();
+        custom_data.a[i] += jdata.S() * ddq_joint;
+      }
+      else
+      {
+        ddq_joint.noalias() = jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u);
+        custom_data.a[i] = jdata.S() * ddq_joint;
+      }
+    }
+
+  }; // struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass
+
+  template<typename DelassusOperator>
   struct DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass
   : public fusion::JointUnaryVisitorBase<
       DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<DelassusOperator>>
