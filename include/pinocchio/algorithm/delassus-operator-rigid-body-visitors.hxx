@@ -46,8 +46,9 @@ namespace pinocchio
 
   template<typename DelassusOperator, bool damping_compliance_update_only = false>
   struct DelassusOperatorRigidBodySystemsComputeBackwardPass
-  : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodySystemsComputeBackwardPass<DelassusOperator>>
+  : public fusion::JointUnaryVisitorBase<DelassusOperatorRigidBodySystemsComputeBackwardPass<
+      DelassusOperator,
+      damping_compliance_update_only>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::Data Data;
