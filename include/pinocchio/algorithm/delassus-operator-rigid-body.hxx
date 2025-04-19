@@ -64,16 +64,20 @@ namespace pinocchio
     Holder>::compute(bool damping_compliance_update_only)
   {
     typedef typename Data::Inertia Inertia;
+    using Matrix6 = typename Inertia::Matrix6;
 
     const Model & model_ref = model();
     Data & data_ref = data();
-    //    CustomData & custom_data = this->m_custom_data;
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
     // Compute joint ordering for solveInPlace
     if (!damping_compliance_update_only)
       computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
+    else
+    {
+      data_ref.joint_cross_coupling.apply([](Matrix6 & v) { v.setZero(); });
+    }
 
     for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
