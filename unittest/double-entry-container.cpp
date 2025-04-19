@@ -91,6 +91,14 @@ BOOST_AUTO_TEST_CASE(test_all)
   }
   BOOST_CHECK(container == copy);
 
+  // Apply
+  container.apply([](Matrix6 & v) { v.setZero(); });
+  container.apply([](const Matrix6 & v) { BOOST_CHECK(v.isZero(0)); });
+  BOOST_CHECK(container != copy);
+
+  container.apply([](Matrix6 & v) { v.setIdentity(); });
+  BOOST_CHECK(container == copy);
+
   // Remove elt (4,4)
   BOOST_CHECK(!container.remove(3, 4));
   BOOST_CHECK(container == copy);

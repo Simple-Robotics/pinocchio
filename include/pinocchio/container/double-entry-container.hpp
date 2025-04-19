@@ -274,6 +274,16 @@ namespace pinocchio
         m_values.reserve(new_cap);
       }
 
+      void apply(const std::function<void(T &)> & func)
+      {
+        std::for_each(begin(), end(), func);
+      }
+
+      void apply(const std::function<void(const T &)> & func) const
+      {
+        std::for_each(begin(), end(), func);
+      }
+
     protected:
       Array m_keys;
       Vector m_values;
