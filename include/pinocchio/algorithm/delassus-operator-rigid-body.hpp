@@ -128,7 +128,7 @@ namespace pinocchio
       assert(model().check(data()) && "data is not consistent with model.");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         constraint_models().size(), constraint_datas().size(),
-        "The sizes of contact vector models and contact vector data are not the same.");
+        "The sizes of contact vector models and contact vector datas are not the same.");
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         min_damping_value >= Scalar(0) && "The damping value should be positive.");
 
