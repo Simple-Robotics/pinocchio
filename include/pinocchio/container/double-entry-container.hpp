@@ -7,6 +7,7 @@
 
 #include "pinocchio/fwd.hpp"
 #include <vector>
+#include <functional>
 
 namespace pinocchio
 {
