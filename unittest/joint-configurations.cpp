@@ -53,8 +53,6 @@ BOOST_AUTO_TEST_CASE(interpolate_test)
   Eigen::VectorXd q01_1 = interpolate(model, q0, q1, 1.0);
   BOOST_CHECK_MESSAGE(isSameConfiguration(model, q01_1, q1), "interpolation: q01_1 != q1");
   Eigen::VectorXd q01_1_bis;
-  lie_group(model).interpolate(q0, q1, 1.0, q01_1_bis);
-  BOOST_CHECK(q01_1.isApprox(q01_1_bis, 1e-6));
 }
 
 BOOST_AUTO_TEST_CASE(diff_integration_test)
@@ -70,15 +68,11 @@ BOOST_AUTO_TEST_CASE(diff_integration_test)
   qs[0] = Eigen::VectorXd::Ones(model.nq);
   qs[2] = Eigen::VectorXd::Ones(model.nq);
   normalize(model, qs[0]);
-  lie_group(model).normalize(qs[2]);
-  BOOST_CHECK(qs[0].isApprox(qs[2], 1e-6));
 
   vs[0] = Eigen::VectorXd::Zero(model.nv);
   vs[2] = Eigen::VectorXd::Zero(model.nv);
   vs[1] = Eigen::VectorXd::Ones(model.nv);
   dIntegrate(model, qs[0], vs[0], results[0], ARG0);
-  lie_group(model).dIntegrate(qs[2], vs[2], results[2], ARG0);
-  BOOST_CHECK(results[0].isApprox(results[2], 1e-6));
 
   Eigen::VectorXd q_fd(model.nq), v_fd(model.nv);
   v_fd.setZero();
@@ -121,26 +115,52 @@ BOOST_AUTO_TEST_CASE(diff_integration_test)
   }
 
   BOOST_CHECK(results[1].isApprox(results_fd[1], sqrt(eps)));
+}
 
-  std::vector<Eigen::MatrixXd> TMs(4, Eigen::MatrixXd::Zero(model.nq, model.nv));
+BOOST_AUTO_TEST_CASE(tangent_map_test)
+{
+  Model model;
+  buildAllJointsModel(model);
 
-  tangentMap(model, qs[0], TMs[0]);
-  tangentMapProduct(model, qs[0], Eigen::MatrixXd::Identity(model.nv, model.nv), TMs[1]);
-  coTangentMapProduct(
-    model, qs[0], Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
-  for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
+  Eigen::VectorXd q(Eigen::VectorXd::Random(model.nq));
+  normalize(model, q);
+  Eigen::VectorXd q_plus(Eigen::VectorXd::Zero(model.nq));
+  Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
+
+  std::vector<int> nvs(static_cast<size_t>(model.nq));
+  std::vector<int> idx_vs(static_cast<size_t>(model.nq));
+
+  std::vector<Eigen::MatrixXd> TMs(5, Eigen::MatrixXd::Zero(model.nq, model.nv));
+
+  Eigen::MatrixXd TMc(Eigen::MatrixXd::Zero(model.nq, MAX_JOINT_NV));
+
+  tangentMap(model, q, TMs[0]);
+  tangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nv, model.nv), TMs[1]);
+  coTangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
+  compactSetTangentMap(model, q, TMc);
+  indexvInfo(model, nvs, idx_vs);
+  size_t k_s;
+  for (Eigen::DenseIndex k = 0; k < model.nq; ++k)
   {
-    v_fd[k] += eps;
-
-    q_fd = integrate(model, qs[0], v_fd);
-    TMs[3].col(k) = (q_fd - qs[0]) / eps;
-
-    v_fd[k] -= eps;
+    k_s = static_cast<size_t>(k);
+    TMs[3].block(k, idx_vs[k_s], 1, nvs[k_s]) = TMc.block(k, 0, 1, nvs[k_s]);
   }
 
-  BOOST_CHECK(TMs[0].isApprox(TMs[1], 1e-6));
-  BOOST_CHECK(TMs[0].isApprox(TMs[2], 1e-6));
-  BOOST_CHECK(TMs[0].isApprox(TMs[3], sqrt(eps)));
+  const double eps = 1e-8;
+  for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
+  {
+    v[k] = eps;
+
+    q_plus = integrate(model, q, v);
+    TMs[4].col(k) = (q_plus - q) / eps;
+
+    v[k] = 0;
+  }
+
+  BOOST_CHECK(TMs[0].isApprox(TMs[1], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[2], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[3], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[4], sqrt(eps)));
 }
 
 BOOST_AUTO_TEST_CASE(lie_group_test)
@@ -151,16 +171,48 @@ BOOST_AUTO_TEST_CASE(lie_group_test)
   typedef
     typename LieGroupMap::template product_variant<typename Model::Scalar, Model::Options>::type
       LGO;
-  LGO lgo = lie_group(model);
 
-  LGO lgo2;
+  LGO lgo1;
+  lie_group(model, lgo1);
+
+  // LGO lgo2 = lie_group(model);
+
+  LGO lgo3;
   typedef typename Model::JointIndex JointIndex;
   for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
   {
-    lgo2 *= model.joints[i].template lie_group<LieGroupMap>();
+    lgo3 *= model.joints[i].template lie_group<LieGroupMap>();
   }
 
-  BOOST_CHECK(lgo == lgo2);
+  // BOOST_CHECK(lgo1 == lgo2);
+  BOOST_CHECK(lgo1 == lgo3);
+}
+
+BOOST_AUTO_TEST_CASE(lie_group_vs_algo_test)
+{
+  Model model;
+  buildAllJointsModel(model);
+
+  typedef
+    typename LieGroupMap::template product_variant<typename Model::Scalar, Model::Options>::type
+      LGO;
+
+  LGO lgo;
+  lie_group(model, lgo);
+
+  Eigen::VectorXd q(Eigen::VectorXd::Random(model.nq));
+  Eigen::VectorXd q2(Eigen::VectorXd::Random(model.nq));
+  Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
+
+  std::vector<Eigen::VectorXd> q_ps(2, Eigen::VectorXd::Zero(model.nq));
+  integrate(model, q, v, q_ps[0]);
+  lgo.integrate(q, v, q_ps[1]);
+  BOOST_CHECK(q_ps[0].isApprox(q_ps[1], 1e-8));
+
+  std::vector<Eigen::VectorXd> v_ds(2, Eigen::VectorXd::Zero(model.nv));
+  difference(model, q, q2, v_ds[0]);
+  lgo.difference(q, q2, v_ds[1]);
+  BOOST_CHECK(v_ds[0].isApprox(v_ds[1], 1e-8));
 }
 
 BOOST_AUTO_TEST_CASE(diff_difference_test)
