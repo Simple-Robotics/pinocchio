@@ -336,7 +336,6 @@ namespace pinocchio
     const Data & data_ref = data();
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
-    const auto & elimination_order = data_ref.elimination_order;
 
     mat.array() *= m_sum_compliance_damping_inverse.array();
 
