@@ -14,18 +14,16 @@ namespace pinocchio
     const JointIndexVector & active_joints)
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef typename Model::JointModel JointModel;
     active_dofs.reserve(size_t(model.nv));
     for (const JointIndex joint_id : active_joints)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         joint_id < model.joints.size(),
         "joint_id is larger than the total number of joints contained in the model.");
-      const JointModel & jmodel = model.joints[joint_id];
       const auto & jsupport = model.supports[joint_id];
 
-      const int nv = jmodel.nv();
-      const int idx_v = jmodel.idx_v();
+      const auto nv = model.nvs[joint_id];
+      const auto idx_v = model.idx_vs[joint_id];
 
       for (int k = 0; k < nv; ++k)
       {
@@ -38,10 +36,9 @@ namespace pinocchio
       for (size_t j = 1; j < jsupport.size() - 1; ++j)
       {
         const JointIndex jsupport_id = jsupport[j];
-        const JointModel & jsupport = model.joints[jsupport_id];
 
-        const int jsupport_nv = jsupport.nv();
-        const int jsupport_idx_v = jsupport.idx_v();
+        const int jsupport_nv = model.nvs[jsupport_id];
+        const int jsupport_idx_v = model.idx_vs[jsupport_id];
 
         for (int k = 0; k < jsupport_nv; ++k)
         {
