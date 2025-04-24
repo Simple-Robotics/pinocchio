@@ -98,6 +98,16 @@ namespace pinocchio
       return TM;
     }
 
+    context::MatrixXs
+    compactTangentMap_proxy(const context::Model & model, const context::VectorXs & q)
+    {
+      context::MatrixXs TMc(context::MatrixXs::Zero(model.nq, MAX_JOINT_NV));
+
+      compactTangentMap(model, q, TMc);
+
+      return TMc;
+    }
+
     context::MatrixXs tangentMapProduct_proxy(
       const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
     {
@@ -125,6 +135,16 @@ namespace pinocchio
       lieGroup(model, res);
 
       return res;
+    }
+
+    bp::tuple indexvInfo_proxy(const context::Model & model)
+    {
+      std::vector<int> nvs(model.nq, 0);
+      std::vector<int> idx_vs(model.nq, 0);
+
+      indexvInfo(model, nvs, idx_vs);
+
+      return bp::make_tuple(nvs, idx_vs);
     }
 
     void exposeJointsAlgo()
@@ -253,6 +273,15 @@ namespace pinocchio
         "\tq: the joint configuration vector (size model.nq)\n");
 
       bp::def(
+        "tangentMap", &compactTangentMap_proxy, bp::args("model", "q"),
+        "Computes the tangent map in configuration q that map of a small variation express in the "
+        "Lie algebra as a small variation in the parametric space. Store the result in a compact "
+        "manner that can be exploited using indexvInfo.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n");
+
+      bp::def(
         "tangentMapProduct", &tangentMapProduct_proxy, bp::args("model", "q", "mat_in"),
         "Apply the tangent map to a matrix mat_in.\n\n"
         "Parameters:\n"
@@ -306,6 +335,13 @@ namespace pinocchio
         "lieGroup", lieGroup_proxy, bp::args("model"),
         "Returns the Lie group associated to the model. It is the cartesian product of the lie "
         "groups of all its joints.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n");
+
+      bp::def(
+        "indexvInfo", indexvInfo_proxy, bp::args("model"),
+        "Returns two vectors of size model.nq that gives for each q_i, the associated idx_v and nv "
+        "of the joint for which q_i is a configuration component.\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n");
 
