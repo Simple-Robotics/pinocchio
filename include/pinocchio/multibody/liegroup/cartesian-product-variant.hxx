@@ -23,6 +23,7 @@ namespace pinocchio
     m_nv += lg_nv;
 
     if (liegroups.size() > 1)
+      // Was not empty before the append
       m_name += " x ";
     m_name += ::pinocchio::name(lg);
 
@@ -546,7 +547,8 @@ namespace pinocchio
 
     if (other.liegroups.size() > 0)
     {
-      if (liegroups.size())
+      if (liegroups.size() > other.liegroups.size())
+        // Was not empty before concat
         m_name += " x ";
       m_name += other.m_name;
     }

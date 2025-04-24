@@ -55,6 +55,18 @@ class TestJointsAlgo(TestCase):
 
         self.assertFalse(pin.isSameConfiguration(model, q_rand1, q_rand2, 1e-8))
 
+        lgo1 = pin.lieGroup(model)
+        self.assertTrue(model.nq == lgo1.nq)
+        self.assertTrue(model.nv == lgo1.nv)
+
+        lgo2 = pin.LieGroup()
+        for j in model.joints[1:]:
+            lgo2 *= j.lieGroup()
+
+        self.assertTrue(lgo1.name == lgo2.name)
+        self.assertTrue(lgo1 == lgo2)
+        self.assertApprox(lgo1.neutral, pin.neutral(model))
+
     def test_derivatives(self):
         model = self.model
 
