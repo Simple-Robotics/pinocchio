@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(lie_group_test)
   LGO lgo1;
   lieGroup(model, lgo1);
 
-  // LGO lgo2 = lieGroup(model);
+  LGO lgo2 = lieGroup(model);
 
   LGO lgo3;
   typedef typename Model::JointIndex JointIndex;
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(lie_group_test)
     lgo3 *= model.joints[i].template lieGroup<LieGroupMap>();
   }
 
-  // BOOST_CHECK(lgo1 == lgo2);
+  BOOST_CHECK(lgo1 == lgo2);
   BOOST_CHECK(lgo1 == lgo3);
 }
 
