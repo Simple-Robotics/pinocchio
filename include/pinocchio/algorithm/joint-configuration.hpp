@@ -1746,7 +1746,10 @@ namespace pinocchio
    */
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   typename LieGroupMap::template product_variant<Scalar, Options>::type
-  lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model);
+  lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  {
+    return lieGroup<LieGroupMap, Scalar, Options, JointCollectionTpl>(model);
+  }
 
   /// \}
 
