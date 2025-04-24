@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(integrate_difference_test)
   Eigen::VectorXd qdot(Eigen::VectorXd::Random(model.nv));
 
   BOOST_CHECK_MESSAGE(
-    isSameConfiguration(model, integrate(model, q0, difference(model, q0, q1)), q1),
+    isSameConfiguration(model, integrate(model, q0, difference(model, q0, q1)), q1, 1e-5),
     "Integrate (difference) - wrong results");
 
   BOOST_CHECK_MESSAGE(

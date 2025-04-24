@@ -90,6 +90,7 @@ class TestJointsAlgo(TestCase):
         self.assertApprox(J1, res_1)
 
         TM = pin.tangentMap(model, q)
+
         TMv1 = TM.reshape(model.nq, model.nv) @ v.reshape(model.nv, 1)
         TMv2 = pin.tangentMapProduct(model, q, v.reshape(model.nv, 1))
         self.assertApprox(TMv1, TMv2)
@@ -100,7 +101,7 @@ class TestJointsAlgo(TestCase):
 
         nvs, idx_vs = pin.indexvInfo(model)
         TMc = pin.compactTangentMap(model, q)
-        TM_recons = np.zeros(model.nq, model.nv)
+        TM_recons = np.zeros((model.nq, model.nv))
         for i in range(model.nq):
             TM_recons[i, idx_vs[i] : (idx_vs[i] + nvs[i])] = TMc[i, : nvs[i]]
         self.assertApprox(TM, TM_recons)

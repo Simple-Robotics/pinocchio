@@ -273,7 +273,7 @@ namespace pinocchio
         "\tq: the joint configuration vector (size model.nq)\n");
 
       bp::def(
-        "tangentMap", &compactTangentMap_proxy, bp::args("model", "q"),
+        "compactTangentMap", &compactTangentMap_proxy, bp::args("model", "q"),
         "Computes the tangent map in configuration q that map of a small variation express in the "
         "Lie algebra as a small variation in the parametric space. Store the result in a compact "
         "manner that can be exploited using indexvInfo.\n\n"
