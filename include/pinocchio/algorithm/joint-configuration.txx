@@ -399,12 +399,12 @@ namespace pinocchio
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
 
   // indexvInfo is not explicitelly instantiated as it is only use in JointLimit
 
@@ -597,12 +597,12 @@ namespace pinocchio
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
     lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
       const context::Model &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
     lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
 } // namespace pinocchio

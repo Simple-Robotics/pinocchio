@@ -47,7 +47,7 @@ void test_joint_methods(
   BOOST_CHECK(jma == jmodel);
   BOOST_CHECK(jma.hasSameIndexes(jmodel));
 
-  typedef typename LieGroupMap::template product_variant<
+  typedef typename LieGroupMap::template operationProduct<
     typename JointModel::Scalar, JointModel::Options>::type PV;
   BOOST_CHECK(PV(jmodel.template lieGroup<LieGroupMap>()) == jma.template lieGroup<LieGroupMap>());
 

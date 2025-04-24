@@ -1305,7 +1305,7 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl>
   void lieGroup(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    typename LieGroup_t::template product_variant<Scalar, Options>::type & lgo);
+    typename LieGroup_t::template operationProduct<Scalar, Options>::type & lgo);
 
   /**
    *
@@ -1319,7 +1319,7 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   void lieGroup(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    typename LieGroupMap::template product_variant<Scalar, Options>::type & lgo)
+    typename LieGroupMap::template operationProduct<Scalar, Options>::type & lgo)
   {
     lieGroup<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo);
   }
@@ -1732,7 +1732,7 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl>
-  typename LieGroup_t::template product_variant<Scalar, Options>::type
+  typename LieGroup_t::template operationProduct<Scalar, Options>::type
   lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model);
 
   /**
@@ -1745,7 +1745,7 @@ namespace pinocchio
    *
    */
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
-  typename LieGroupMap::template product_variant<Scalar, Options>::type
+  typename LieGroupMap::template operationProduct<Scalar, Options>::type
   lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
   {
     return lieGroup<LieGroupMap, Scalar, Options, JointCollectionTpl>(model);

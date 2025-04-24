@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(lie_group_test)
   buildAllJointsModel(model);
 
   typedef
-    typename LieGroupMap::template product_variant<typename Model::Scalar, Model::Options>::type
+    typename LieGroupMap::template operationProduct<typename Model::Scalar, Model::Options>::type
       LGO;
 
   LGO lgo1;
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(lie_group_vs_algo_test)
   buildAllJointsModel(model);
 
   typedef
-    typename LieGroupMap::template product_variant<typename Model::Scalar, Model::Options>::type
+    typename LieGroupMap::template operationProduct<typename Model::Scalar, Model::Options>::type
       LGO;
 
   LGO lgo;

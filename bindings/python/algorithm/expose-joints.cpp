@@ -10,7 +10,7 @@ namespace pinocchio
   namespace python
   {
 
-    typedef typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    typedef typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
       LgType;
 
     static context::VectorXs

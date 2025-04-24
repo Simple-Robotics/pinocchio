@@ -34,7 +34,7 @@ namespace pinocchio
     };
 
     template<typename Scalar, int Options>
-    struct product_variant
+    struct operationProduct
     {
       typedef CartesianProductOperationVariantTpl<Scalar, Options, LieGroupCollectionDefaultTpl>
         type;
@@ -54,19 +54,19 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
+    typedef typename LieGroupMap::operationProduct<Scalar, Options>::type type;
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelCompositeTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
+    typedef typename LieGroupMap::operationProduct<Scalar, Options>::type type;
   };
 
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   struct LieGroupMap::operation<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>
   {
-    typedef typename LieGroupMap::product_variant<Scalar, Options>::type type;
+    typedef typename LieGroupMap::operationProduct<Scalar, Options>::type type;
   };
 
   // Atomic joint that are not euclidean

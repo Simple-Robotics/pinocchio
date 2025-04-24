@@ -670,7 +670,7 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl>
   void lieGroup(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    typename LieGroup_t::template product_variant<Scalar, Options>::type & lgo)
+    typename LieGroup_t::template operationProduct<Scalar, Options>::type & lgo)
   {
 
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
@@ -848,10 +848,10 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl>
-  typename LieGroup_t::template product_variant<Scalar, Options>::type
+  typename LieGroup_t::template operationProduct<Scalar, Options>::type
   lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
   {
-    typedef typename LieGroup_t::template product_variant<Scalar, Options>::type LGO;
+    typedef typename LieGroup_t::template operationProduct<Scalar, Options>::type LGO;
     LGO lgo;
     lieGroup<LieGroup_t, Scalar, Options, JointCollectionTpl>(model, lgo);
     return lgo;

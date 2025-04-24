@@ -23,7 +23,7 @@ namespace pinocchio
     {
     public:
       typedef
-        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+        typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
           LieGroupOperation;
 
       template<class PyClass>
@@ -46,7 +46,7 @@ namespace pinocchio
     public:
       typedef context::JointModelComposite Self;
       typedef
-        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+        typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
           LieGroupOperation;
 
       template<class PyClass>
@@ -68,7 +68,7 @@ namespace pinocchio
     public:
       typedef context::JointModel Self;
       typedef
-        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+        typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
           LieGroupOperation;
 
       template<class PyClass>
@@ -90,7 +90,7 @@ namespace pinocchio
     public:
       typedef context::JointModelMimic Self;
       typedef
-        typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+        typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
           LieGroupOperation;
 
       template<class PyClass>

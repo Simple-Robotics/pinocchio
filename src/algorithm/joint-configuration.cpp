@@ -392,12 +392,12 @@ namespace pinocchio
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
   lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
 
 #ifndef PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
@@ -582,11 +582,11 @@ namespace pinocchio
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
     lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
       const context::Model &);
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
     lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 } // namespace pinocchio

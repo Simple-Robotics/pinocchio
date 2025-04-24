@@ -1058,7 +1058,7 @@ namespace pinocchio
   struct LieGroupInstanceStep
   : public fusion::JointUnaryVisitorBase<LieGroupInstanceStep<LieGroup_t, Scalar, Options>>
   {
-    typedef typename LieGroup_t::template product_variant<Scalar, Options>::type LgType;
+    typedef typename LieGroup_t::template operationProduct<Scalar, Options>::type LgType;
 
     typedef boost::fusion::vector<LgType &> ArgsType;
 

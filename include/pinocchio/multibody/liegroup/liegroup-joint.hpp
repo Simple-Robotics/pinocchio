@@ -31,9 +31,9 @@ namespace pinocchio
   // Write a Lie group for the generic overload
   template<typename LieGroup_t, typename _Scalar, int _Options>
   struct JointModelLieGroupVisitor
-  : boost::static_visitor<typename LieGroup_t::template product_variant<_Scalar, _Options>::type>
+  : boost::static_visitor<typename LieGroup_t::template operationProduct<_Scalar, _Options>::type>
   {
-    typedef typename LieGroup_t::template product_variant<_Scalar, _Options>::type LgType;
+    typedef typename LieGroup_t::template operationProduct<_Scalar, _Options>::type LgType;
 
     // Default behavior, instantiate the atomic type in the agregation type
     template<typename JointModelDerived>
