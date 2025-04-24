@@ -580,7 +580,7 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentMapMatrixType>
-  void compactSetTangentMap(
+  void compactTangentMap(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TMc);
@@ -602,12 +602,12 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     typename ConfigVectorType,
     typename TangentMapMatrixType>
-  void compactSetTangentMap(
+  void compactTangentMap(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
   {
-    compactSetTangentMap<
+    compactTangentMap<
       LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentMapMatrixType>(
       model, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc));
   }

@@ -211,7 +211,7 @@ namespace pinocchio
     const Eigen::MatrixBase<context::MatrixXs> &,
     const AssignmentOperatorType);
 
-  // compactSetTangentMap is not explicitelly instantiated as it is only use in JointLimit
+  // compactTangentMap is not explicitelly instantiated as it is only use in JointLimit
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMapProduct<
     LieGroupMap,
