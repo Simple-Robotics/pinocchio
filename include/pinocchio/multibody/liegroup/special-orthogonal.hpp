@@ -268,7 +268,7 @@ namespace pinocchio
         break;
       }
     }
-    // We use default tangentMapProduct_impl and coTangentMapProduct_impl
+    // We use default tangentMapProduct_impl and tangentMapTransposeProduct_impl
     // because TM is a dense matrix for SO(2)
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
@@ -619,7 +619,7 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
         break;
       }
     }
-    // We use default tangentMapProduct_impl and coTangentMapProduct_impl
+    // We use default tangentMapProduct_impl and tangentMapTransposeProduct_impl
     // because TM is a dense matrix for SO(3)
 
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>

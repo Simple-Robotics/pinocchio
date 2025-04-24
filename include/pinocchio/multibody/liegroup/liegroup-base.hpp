@@ -577,7 +577,7 @@ namespace pinocchio
 
     // Mout op TM^T * Min, it is the jacobian transpose vector product
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void coTangentMapProduct(
+    void tangentMapTransposeProduct(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       const Eigen::MatrixBase<MatrixOut_t> & Mout,
@@ -693,7 +693,7 @@ namespace pinocchio
       const AssignmentOperatorType op) const;
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void coTangentMapProduct_impl(
+    void tangentMapTransposeProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,

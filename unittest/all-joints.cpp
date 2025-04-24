@@ -239,7 +239,7 @@ struct TestJointModelLieGroup : TestJointModel<TestJointModelLieGroup>
   template<typename JointModel>
   static void test(const JointModelBase<JointModel> & jmodel)
   {
-    auto lgo = jmodel.template lie_group<LieGroupMap>();
+    auto lgo = jmodel.template lieGroup<LieGroupMap>();
     BOOST_CHECK(lgo.nq() == jmodel.nq());
     BOOST_CHECK(lgo.nv() == jmodel.nv());
   }

@@ -353,7 +353,7 @@ namespace pinocchio
     typename ConfigVectorType,
     typename MatrixInType,
     typename MatrixOutType>
-  void coTangentMapProduct(
+  void tangentMapTransposeProduct(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<MatrixInType> & mat_in,
@@ -668,7 +668,7 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl>
-  void lie_group(
+  void lieGroup(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     typename LieGroup_t::template product_variant<Scalar, Options>::type & lgo)
   {
@@ -849,21 +849,21 @@ namespace pinocchio
     int Options,
     template<typename, int> class JointCollectionTpl>
   typename LieGroup_t::template product_variant<Scalar, Options>::type
-  lie_group(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
   {
     typedef typename LieGroup_t::template product_variant<Scalar, Options>::type LGO;
     LGO lgo;
-    lie_group<LieGroup_t, Scalar, Options, JointCollectionTpl>(model, lgo);
+    lieGroup<LieGroup_t, Scalar, Options, JointCollectionTpl>(model, lgo);
     return lgo;
   }
 
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   typename LieGroupMap::template product_variant<Scalar, Options>::type
-  lie_group(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
   {
     typedef typename LieGroupMap::template product_variant<Scalar, Options>::type LGO;
     LGO lgo;
-    lie_group<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo);
+    lieGroup<LieGroupMap, Scalar, Options, JointCollectionTpl>(model, lgo);
     return lgo;
   }
 

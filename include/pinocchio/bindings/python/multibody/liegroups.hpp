@@ -204,11 +204,11 @@ namespace pinocchio
         return Mout;
       }
 
-      static JacobianMatrix_t coTangentMapProduct(
+      static JacobianMatrix_t tangentMapTransposeProduct(
         const LieGroupType & lg, const ConfigVector_t & q, const JacobianMatrix_t & Min)
       {
         JacobianMatrix_t Mout(lg.nv(), Min.cols());
-        lg.coTangentMapProduct(q, Min, Mout, SETTO);
+        lg.tangentMapTransposeProduct(q, Min, Mout, SETTO);
         return Mout;
       }
     };
@@ -241,7 +241,7 @@ namespace pinocchio
           .def("dDifference", LieGroupWrapper::dDifference3)
           .def("tangentMap", LieGroupWrapper::tangentMap)
           .def("tangentMapProduct", LieGroupWrapper::tangentMapProduct)
-          .def("coTangentMapProduct", LieGroupWrapper::coTangentMapProduct)
+          .def("tangentMapTransposeProduct", LieGroupWrapper::tangentMapTransposeProduct)
 
           .def("interpolate", LieGroupWrapper::interpolate)
 

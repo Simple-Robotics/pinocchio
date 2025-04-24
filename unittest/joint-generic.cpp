@@ -49,8 +49,7 @@ void test_joint_methods(
 
   typedef typename LieGroupMap::template product_variant<
     typename JointModel::Scalar, JointModel::Options>::type PV;
-  BOOST_CHECK(
-    PV(jmodel.template lie_group<LieGroupMap>()) == jma.template lie_group<LieGroupMap>());
+  BOOST_CHECK(PV(jmodel.template lieGroup<LieGroupMap>()) == jma.template lieGroup<LieGroupMap>());
 
   pinocchio::JointData jda(jdata.derived());
   BOOST_CHECK(jda == jdata);

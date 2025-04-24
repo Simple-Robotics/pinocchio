@@ -29,12 +29,12 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def("lie_group", &lie_group);
+        cl.def("lieGroup", &lieGroup);
       }
 
-      static LieGroupOperation lie_group(const JointModelDerived & self)
+      static LieGroupOperation lieGroup(const JointModelDerived & self)
       {
-        return LieGroupOperation(self.template lie_group<LieGroupMap>());
+        return LieGroupOperation(self.template lieGroup<LieGroupMap>());
       }
     };
 
@@ -52,12 +52,12 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def("lie_group", &lie_group);
+        cl.def("lieGroup", &lieGroup);
       }
 
-      static LieGroupOperation lie_group(const Self & self)
+      static LieGroupOperation lieGroup(const Self & self)
       {
-        return self.template lie_group<LieGroupMap>();
+        return self.template lieGroup<LieGroupMap>();
       }
     };
 
@@ -74,12 +74,12 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def("lie_group", &lie_group);
+        cl.def("lieGroup", &lieGroup);
       }
 
-      static LieGroupOperation lie_group(const Self & self)
+      static LieGroupOperation lieGroup(const Self & self)
       {
-        return self.template lie_group<LieGroupMap>();
+        return self.template lieGroup<LieGroupMap>();
       }
     };
 
@@ -96,12 +96,12 @@ namespace pinocchio
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def("lie_group", &lie_group);
+        cl.def("lieGroup", &lieGroup);
       }
 
-      static LieGroupOperation lie_group(const Self & self)
+      static LieGroupOperation lieGroup(const Self & self)
       {
-        return self.template lie_group<LieGroupMap>();
+        return self.template lieGroup<LieGroupMap>();
       }
     };
 

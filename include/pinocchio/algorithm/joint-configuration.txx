@@ -240,7 +240,8 @@ namespace pinocchio
     const Eigen::MatrixBase<context::MatrixXs> &,
     const AssignmentOperatorType);
 
-  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void coTangentMapProduct<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  tangentMapTransposeProduct<
     LieGroupMap,
     context::Scalar,
     context::Options,
@@ -254,7 +255,8 @@ namespace pinocchio
     const Eigen::MatrixBase<context::MatrixXs> &,
     const AssignmentOperatorType);
 
-  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void coTangentMapProduct<
+  extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  tangentMapTransposeProduct<
     context::Scalar,
     context::Options,
     JointCollectionDefaultTpl,
@@ -395,12 +397,12 @@ namespace pinocchio
     const context::Model &, const Eigen::MatrixBase<context::VectorXs> &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
-  lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+  lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
-  lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+  lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(
     const context::Model &,
     typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type &);
 
@@ -596,12 +598,12 @@ namespace pinocchio
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
-    lie_group<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
       const context::Model &);
 
   extern template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
     typename LieGroupMap::template product_variant<context::Scalar, context::Options>::type
-    lie_group<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
+    lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 
 } // namespace pinocchio
 #endif // ifndef __pinocchio_algorithm_joint_configuration_txx__

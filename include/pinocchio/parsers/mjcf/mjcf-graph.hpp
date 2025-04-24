@@ -65,7 +65,7 @@ namespace pinocchio
 
           if (root_joint.has_value())
           {
-            Eigen::VectorXd qroot(root_joint->template lie_group<LieGroupMap>().neutral());
+            Eigen::VectorXd qroot(root_joint->template lieGroup<LieGroupMap>().neutral());
 
             // update the reference_config with the size of the root joint
             reference_config.conservativeResize(reference_config.size() + qroot.size());

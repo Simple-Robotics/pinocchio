@@ -276,7 +276,7 @@ namespace pinocchio
   template<typename _Scalar, int _Options, template<typename, int> class LieGroupCollectionTpl>
   template<class Config_t, class MatrixIn_t, class MatrixOut_t>
   void CartesianProductOperationVariantTpl<_Scalar, _Options, LieGroupCollectionTpl>::
-    coTangentMapProduct_impl(
+    tangentMapTransposeProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,
@@ -287,7 +287,7 @@ namespace pinocchio
     {
       const Index & nq = lg_nqs[k];
       const Index & nv = lg_nvs[k];
-      ::pinocchio::coTangentMapProduct(
+      ::pinocchio::tangentMapTransposeProduct(
         liegroups[k], q.segment(id_q, nq), Min.middleRows(id_q, nq), Mout.middleRows(id_v, nv), op);
       id_q += nq;
       id_v += nv;

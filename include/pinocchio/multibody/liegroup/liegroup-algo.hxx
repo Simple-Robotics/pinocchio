@@ -516,7 +516,7 @@ namespace pinocchio
       typedef typename Visitor::LieGroupMap LieGroupMap;
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
-      lgo.coTangentMapProduct(
+      lgo.tangentMapTransposeProduct(
         jmodel.jointConfigSelector(q.derived()), jmodel.jointQRows(mat_in.derived()),
         jmodel.jointRows(PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out)), op);
     }
@@ -1073,7 +1073,7 @@ namespace pinocchio
     static void run(const JointModelBase<JointModel> & jmodel, LgType & res_lgo)
     {
       typedef typename Visitor::LieGroupMap LieGroupMap;
-      res_lgo *= jmodel.template lie_group<LieGroupMap>();
+      res_lgo *= jmodel.template lieGroup<LieGroupMap>();
     }
   };
 

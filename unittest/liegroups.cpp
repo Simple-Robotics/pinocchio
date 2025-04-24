@@ -653,7 +653,7 @@ struct LieGroup_TangentMap
 
       TangentVector_t manual_co_prod = TM_q_p_v.transpose() * dq_ps;
       TangentVector_t co_prod;
-      lg.coTangentMapProduct(q_p_v, dq_ps, co_prod);
+      lg.tangentMapTransposeProduct(q_p_v, dq_ps, co_prod);
       EIGEN_VECTOR_IS_APPROX(co_prod, manual_co_prod, 1e-6);
 
       dq_ps[i] = Scalar(0.);

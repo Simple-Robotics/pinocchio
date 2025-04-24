@@ -227,15 +227,15 @@ namespace pinocchio
     }
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void coTangentMapProduct_impl(
+    void tangentMapTransposeProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op) const
     {
-      lg1.coTangentMapProduct(
+      lg1.tangentMapTransposeProduct(
         Q1(q), Min.template topRows<LieGroup1::NQ>(), Mout.template topRows<LieGroup1::NV>(), op);
-      lg2.coTangentMapProduct(
+      lg2.tangentMapTransposeProduct(
         Q2(q), Min.template bottomRows<LieGroup2::NQ>(), Mout.template bottomRows<LieGroup2::NV>(),
         op);
     }

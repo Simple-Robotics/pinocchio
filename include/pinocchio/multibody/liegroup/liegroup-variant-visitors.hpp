@@ -223,7 +223,7 @@ namespace pinocchio
     const AssignmentOperatorType op);
 
   template<typename LieGroupCollection, class Config_t, class MatrixIn_t, class MatrixOut_t>
-  void coTangentMapProduct(
+  void tangentMapTransposeProduct(
     const LieGroupGenericTpl<LieGroupCollection> & lg,
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,

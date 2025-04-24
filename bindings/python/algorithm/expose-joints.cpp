@@ -108,21 +108,21 @@ namespace pinocchio
       return mat_out;
     }
 
-    context::MatrixXs coTangentMapProduct_proxy(
+    context::MatrixXs tangentMapTransposeProduct_proxy(
       const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
     {
       context::MatrixXs mat_out(context::MatrixXs::Zero(model.nv, mat_in.cols()));
 
-      coTangentMapProduct(model, q, mat_in, mat_out, SETTO);
+      tangentMapTransposeProduct(model, q, mat_in, mat_out, SETTO);
 
       return mat_out;
     }
 
-    LgType lie_group_proxy(const context::Model & model)
+    LgType lieGroup_proxy(const context::Model & model)
     {
       LgType res;
 
-      lie_group(model, res);
+      lieGroup(model, res);
 
       return res;
     }
@@ -261,7 +261,8 @@ namespace pinocchio
         "\tmat_in: a matrix (size model.nq, ncols)");
 
       bp::def(
-        "coTangentMapProduct", &coTangentMapProduct_proxy, bp::args("model", "q", "mat_in"),
+        "tangentMapTransposeProduct", &tangentMapTransposeProduct_proxy,
+        bp::args("model", "q", "mat_in"),
         "Apply the tangent map to a matrix mat_in.\n\n"
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
@@ -302,7 +303,7 @@ namespace pinocchio
         "\tq: a joint configuration vector to normalize (size model.nq)\n");
 
       bp::def(
-        "lie_group", lie_group_proxy, bp::args("model"),
+        "lieGroup", lieGroup_proxy, bp::args("model"),
         "Returns the Lie group associated to the model. It is the cartesian product of the lie "
         "groups of all its joints.\n\n"
         "Parameters:\n"

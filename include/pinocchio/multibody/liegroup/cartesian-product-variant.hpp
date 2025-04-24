@@ -272,7 +272,7 @@ namespace pinocchio
       const AssignmentOperatorType op) const;
 
     template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-    void coTangentMapProduct_impl(
+    void tangentMapTransposeProduct_impl(
       const Eigen::MatrixBase<Config_t> & q,
       const Eigen::MatrixBase<MatrixIn_t> & Min,
       Eigen::MatrixBase<MatrixOut_t> & Mout,

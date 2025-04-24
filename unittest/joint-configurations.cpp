@@ -136,7 +136,8 @@ BOOST_AUTO_TEST_CASE(tangent_map_test)
 
   tangentMap(model, q, TMs[0]);
   tangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nv, model.nv), TMs[1]);
-  coTangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
+  tangentMapTransposeProduct(
+    model, q, Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
   compactSetTangentMap(model, q, TMc);
   indexvInfo(model, nvs, idx_vs);
   size_t k_s;
@@ -173,15 +174,15 @@ BOOST_AUTO_TEST_CASE(lie_group_test)
       LGO;
 
   LGO lgo1;
-  lie_group(model, lgo1);
+  lieGroup(model, lgo1);
 
-  // LGO lgo2 = lie_group(model);
+  // LGO lgo2 = lieGroup(model);
 
   LGO lgo3;
   typedef typename Model::JointIndex JointIndex;
   for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
   {
-    lgo3 *= model.joints[i].template lie_group<LieGroupMap>();
+    lgo3 *= model.joints[i].template lieGroup<LieGroupMap>();
   }
 
   // BOOST_CHECK(lgo1 == lgo2);
@@ -198,7 +199,7 @@ BOOST_AUTO_TEST_CASE(lie_group_vs_algo_test)
       LGO;
 
   LGO lgo;
-  lie_group(model, lgo);
+  lieGroup(model, lgo);
 
   Eigen::VectorXd q(Eigen::VectorXd::Random(model.nq));
   Eigen::VectorXd q2(Eigen::VectorXd::Random(model.nq));

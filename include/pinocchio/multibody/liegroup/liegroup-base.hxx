@@ -312,7 +312,7 @@ namespace pinocchio
 
   template<class Derived>
   template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-  void LieGroupBase<Derived>::coTangentMapProduct(
+  void LieGroupBase<Derived>::tangentMapTransposeProduct(
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     const Eigen::MatrixBase<MatrixOut_t> & Mout,
@@ -322,7 +322,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.rows(), nq());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Mout.rows(), nv());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.cols(), Mout.cols());
-    derived().coTangentMapProduct_impl(
+    derived().tangentMapTransposeProduct_impl(
       q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout), op);
   }
 
@@ -699,7 +699,7 @@ namespace pinocchio
 
   template<class Derived>
   template<class Config_t, class MatrixIn_t, class MatrixOut_t>
-  void LieGroupBase<Derived>::coTangentMapProduct_impl(
+  void LieGroupBase<Derived>::tangentMapTransposeProduct_impl(
     const Eigen::MatrixBase<Config_t> & q,
     const Eigen::MatrixBase<MatrixIn_t> & Min,
     Eigen::MatrixBase<MatrixOut_t> & Mout,

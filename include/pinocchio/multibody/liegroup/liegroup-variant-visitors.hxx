@@ -875,7 +875,7 @@ namespace pinocchio
   }
 
   PINOCCHIO_LG_TM_PROD_VISITOR(TangentMapProduct, tangentMapProduct)
-  PINOCCHIO_LG_TM_PROD_VISITOR(CoTangentMapProduct, coTangentMapProduct)
+  PINOCCHIO_LG_TM_PROD_VISITOR(CoTangentMapProduct, tangentMapTransposeProduct)
 #undef PINOCCHIO_LG_TM_PROD_VISITOR
 
 } // namespace pinocchio

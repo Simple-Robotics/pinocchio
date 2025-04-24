@@ -17,7 +17,7 @@ namespace pinocchio
   template<typename LieGroup_t>
   typename LieGroup_t::template operation<
     JointModelCompositeTpl<_Scalar, _Options, JointCollectionTpl>>::type
-  JointModelCompositeTpl<_Scalar, _Options, JointCollectionTpl>::lie_group_impl() const
+  JointModelCompositeTpl<_Scalar, _Options, JointCollectionTpl>::lieGroup_impl() const
   {
     typedef LieGroupInstanceStep<LieGroup_t, _Scalar, _Options> Algo;
     typedef typename Algo::LgType LgType;
@@ -39,7 +39,7 @@ namespace pinocchio
     template<typename JointModelDerived>
     LgType operator()(const JointModelBase<JointModelDerived> & jmodel) const
     {
-      return LgType(jmodel.template lie_group<LieGroup_t>());
+      return LgType(jmodel.template lieGroup<LieGroup_t>());
     }
 
     // Composite and Mimic are already agregated lie group type
@@ -47,13 +47,13 @@ namespace pinocchio
     LgType
     operator()(const JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> & jmodel) const
     {
-      return jmodel.template lie_group<LieGroup_t>();
+      return jmodel.template lieGroup<LieGroup_t>();
     }
 
     template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
     LgType operator()(const JointModelMimicTpl<Scalar, Options, JointCollectionTpl> & jmodel) const
     {
-      return jmodel.template lie_group<LieGroup_t>();
+      return jmodel.template lieGroup<LieGroup_t>();
     }
 
     template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
@@ -68,7 +68,7 @@ namespace pinocchio
   template<typename LieGroup_t>
   typename LieGroup_t::template operation<
     JointModelTpl<_Scalar, _Options, JointCollectionTpl>>::type
-  JointModelTpl<_Scalar, _Options, JointCollectionTpl>::lie_group_impl() const
+  JointModelTpl<_Scalar, _Options, JointCollectionTpl>::lieGroup_impl() const
   {
     typedef JointModelLieGroupVisitor<LieGroup_t, _Scalar, _Options> Algo;
     return Algo::run(*this);

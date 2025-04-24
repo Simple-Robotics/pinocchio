@@ -383,7 +383,7 @@ namespace pinocchio
 
     // Declaration of overload : must be define after Lie group and joint visitors
     template<typename LieGroupMap>
-    typename LieGroupMap::template operation<JointModelTpl>::type lie_group_impl() const;
+    typename LieGroupMap::template operation<JointModelTpl>::type lieGroup_impl() const;
 
     template<typename VectorLike, typename Matrix6Like>
     void calc_aba(
