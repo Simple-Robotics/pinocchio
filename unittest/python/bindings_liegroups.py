@@ -104,6 +104,28 @@ class TestLiegroupBindings(TestCase):
                 Jout1_ref = Jint.dot(J0)
                 self.assertApprox(Jout1, Jout1_ref)
 
+    def test_tangentMap_methods(self):
+        for lg in [
+            pin.liegroups.R3(),
+            pin.liegroups.SO3(),
+            pin.liegroups.SO2(),
+            pin.liegroups.SE3(),
+            pin.liegroups.SE2(),
+            pin.liegroups.R3() * pin.liegroups.SO3(),
+        ]:
+            q = lg.random()
+            vs = np.random.rand(lg.nv, 100)
+            dqs = np.random.rand(lg.nq, 100)
+
+            TM = lg.tangentMap(q).reshape(lg.nq, lg.nv)
+            TMvs_1 = TM @ vs
+            TMvs_2 = lg.tangentMapProduct(q, vs)
+            self.assertApprox(TMvs_1, TMvs_2)
+
+            TMTdqs_1 = TM.T @ dqs
+            TMTdqs_2 = lg.tangentMapTransposeProduct(q, dqs)
+            self.assertApprox(TMTdqs_1, TMTdqs_2)
+
     def test_dIntegrateTransport_inverse(self):
         for lg in [
             pin.liegroups.R3(),

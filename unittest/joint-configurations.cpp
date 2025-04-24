@@ -201,8 +201,10 @@ BOOST_AUTO_TEST_CASE(lie_group_vs_algo_test)
   LGO lgo;
   lieGroup(model, lgo);
 
-  Eigen::VectorXd q(Eigen::VectorXd::Random(model.nq));
-  Eigen::VectorXd q2(Eigen::VectorXd::Random(model.nq));
+  Eigen::VectorXd q(randomConfiguration(
+    model, -1 * Eigen::VectorXd::Ones(model.nq), Eigen::VectorXd::Ones(model.nq)));
+  Eigen::VectorXd q2(randomConfiguration(
+    model, -1 * Eigen::VectorXd::Ones(model.nq), Eigen::VectorXd::Ones(model.nq)));
   Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
 
   std::vector<Eigen::VectorXd> q_ps(2, Eigen::VectorXd::Zero(model.nq));
