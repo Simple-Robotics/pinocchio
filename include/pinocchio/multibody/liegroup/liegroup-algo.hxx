@@ -481,16 +481,16 @@ namespace pinocchio
   PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(TangentMapProductStepAlgo);
 
   template<typename Visitor, typename JointModel>
-  struct CoTangentMapProductStepAlgo;
+  struct TangentMapTransposeProductStepAlgo;
 
   template<
     typename LieGroup_t,
     typename ConfigVectorIn,
     typename MatrixInType,
     typename MatrixOutType>
-  struct CoTangentMapProductStep
+  struct TangentMapTransposeProductStep
   : public fusion::JointUnaryVisitorBase<
-      CoTangentMapProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
+      TangentMapTransposeProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
   {
     typedef boost::fusion::vector<
       const ConfigVectorIn &,
@@ -499,11 +499,12 @@ namespace pinocchio
       const AssignmentOperatorType &>
       ArgsType;
 
-    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(CoTangentMapProductStepAlgo, CoTangentMapProductStep)
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(
+      TangentMapTransposeProductStepAlgo, TangentMapTransposeProductStep)
   };
 
   template<typename Visitor, typename JointModel>
-  struct CoTangentMapProductStepAlgo
+  struct TangentMapTransposeProductStepAlgo
   {
     template<typename ConfigVectorIn, typename MatrixInType, typename MatrixOutType>
     static void run(
@@ -522,8 +523,8 @@ namespace pinocchio
     }
   };
 
-  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(CoTangentMapProductStepAlgo);
-  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(CoTangentMapProductStepAlgo);
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(TangentMapTransposeProductStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(TangentMapTransposeProductStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateTransportStepAlgo;

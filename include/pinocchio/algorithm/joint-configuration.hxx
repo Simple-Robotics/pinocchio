@@ -372,7 +372,9 @@ namespace pinocchio
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::JointIndex JointIndex;
 
-    typedef CoTangentMapProductStep<LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType> Algo;
+    typedef TangentMapTransposeProductStep<
+      LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType>
+      Algo;
     typename Algo::ArgsType args(
       q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
