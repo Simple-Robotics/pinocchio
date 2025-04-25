@@ -267,8 +267,7 @@ namespace pinocchio
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef typename Model::JointIndex JointIndex;
 
-    typedef TangentMapStep<LieGroup_t, boost::mpl::false_, ConfigVectorType, TangentMapMatrixType>
-      Algo;
+    typedef TangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
     typename Algo::ArgsType args(
       q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), op);
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)

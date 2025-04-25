@@ -356,16 +356,11 @@ namespace pinocchio
   template<typename Visitor, typename JointModel>
   struct TangentMapStepAlgo;
 
-  template<
-    typename LieGroup_t,
-    typename IsCompact_t,
-    typename ConfigVectorIn,
-    typename TangentMapMatrixType>
+  template<typename LieGroup_t, typename ConfigVectorIn, typename TangentMapMatrixType>
   struct TangentMapStep
   : public fusion::JointUnaryVisitorBase<
-      TangentMapStep<LieGroup_t, IsCompact_t, ConfigVectorIn, TangentMapMatrixType>>
+      TangentMapStep<LieGroup_t, ConfigVectorIn, TangentMapMatrixType>>
   {
-    typedef IsCompact_t IsCompact;
     typedef boost::fusion::
       vector<const ConfigVectorIn &, TangentMapMatrixType &, const AssignmentOperatorType &>
         ArgsType;
@@ -389,9 +384,8 @@ namespace pinocchio
       lgo.tangentMap(
         jmodel.jointConfigSelector(q.derived()),
         jmodel.jointQVBlock(
-          PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), jmodel.idx_q(),
-          Visitor::IsCompact::value ? 0 : jmodel.idx_v()),
-        Visitor::IsCompact::value ? SETTO : op);
+          PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), jmodel.idx_q(), jmodel.idx_v()),
+        op);
     }
   };
 
@@ -406,7 +400,7 @@ namespace pinocchio
   : public fusion::JointUnaryVisitorBase<
       CompactSetTangentMapStep<LieGroup_t, ConfigVectorIn, CompactSetTangentMapMatrixType>>
   {
-    typedef boost::fusion::vector<const ConfigVectorIn &, CompactSetTangentMapMatrixType &>
+    typedef boost::fusion::vector<const ConfigVectorIn &, CompactSetTangentMapMatrixType &, int &>
       ArgsType;
 
     PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_2(CompactSetTangentMapStepAlgo, CompactSetTangentMapStep)
@@ -419,7 +413,8 @@ namespace pinocchio
     static void run(
       const JointModelBase<JointModel> & jmodel,
       const Eigen::MatrixBase<ConfigVectorIn> & q,
-      const Eigen::MatrixBase<CompactSetTangentMapMatrixType> & TMc)
+      const Eigen::MatrixBase<CompactSetTangentMapMatrixType> & TMc,
+      int & idx)
     {
       typedef typename Visitor::LieGroupMap LieGroupMap;
 
@@ -427,13 +422,14 @@ namespace pinocchio
       lgo.tangentMap(
         jmodel.jointConfigSelector(q.derived()),
         jmodel.jointQVBlock(
-          PINOCCHIO_EIGEN_CONST_CAST(CompactSetTangentMapMatrixType, TMc), jmodel.idx_q(), 0),
+          PINOCCHIO_EIGEN_CONST_CAST(CompactSetTangentMapMatrixType, TMc), idx, 0),
         SETTO);
+      idx += jmodel.nq();
     }
   };
 
-  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(CompactSetTangentMapStepAlgo);
-  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(CompactSetTangentMapStepAlgo);
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(CompactSetTangentMapStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(CompactSetTangentMapStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct TangentMapProductStepAlgo;
@@ -1100,12 +1096,11 @@ namespace pinocchio
     {
       int idx_v = jmodel.idx_v();
       int nv = jmodel.nv();
-      size_t idx_q = static_cast<size_t>(jmodel.idx_q());
 
-      for (size_t idx = idx_q; idx < idx_q + static_cast<size_t>(jmodel.nq()); ++idx)
+      for (size_t i = 0; i < static_cast<size_t>(jmodel.nq()); ++i)
       {
-        nvs[idx] = nv;
-        idx_vs[idx] = idx_v;
+        nvs.push_back(nv);
+        idx_vs.push_back(idx_v);
       }
     }
   };
