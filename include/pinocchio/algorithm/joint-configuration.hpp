@@ -568,8 +568,9 @@ namespace pinocchio
    *
    * @param[in]  model   Model of the kinematic tree on which the integration operation is
    * performed.
-   * @param[in]  q            Initial configuration (size model.nq)
-   * @param[out] TMc          Compact storage of the tangent map
+   * @param[in]  joint_selection  Joint to condider to compute the tangentMap
+   * @param[in]  q                Initial configuration (size model.nq)
+   * @param[out] TMc              Compact storage of the tangent map
    * space.
    *
    */
@@ -582,6 +583,8 @@ namespace pinocchio
     typename TangentMapMatrixType>
   void compactTangentMap(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TMc);
 
@@ -1329,9 +1332,10 @@ namespace pinocchio
    * @brief         Return two vector of size nq where for each, the idx_v and v associated to the
    * same atomic joint is given.
    *
-   * @param[in]     model          Model of the kinematic tree.
-   * @param[out]    nvs            For each id give the nv of the associated joint
-   * @param[out]    idx_vs         For each id give the idx_v of the associated joint
+   * @param[in]     model            Model of the kinematic tree.
+   * @param[in]     joint_selection  Joint to condider to compute the tangentMap
+   * @param[out]    nvs              For each id give the nv of the associated joint
+   * @param[out]    idx_vs           For each id give the idx_v of the associated joint
    *
    * @details       This function is often required for the numerical solvers that are working on
    * the tangent of the configuration space, instead of the configuration space itself.
@@ -1340,6 +1344,8 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   void indexvInfo(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
     std::vector<int> & nvs,
     std::vector<int> & idx_vs);
 

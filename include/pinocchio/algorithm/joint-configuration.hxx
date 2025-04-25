@@ -286,27 +286,27 @@ namespace pinocchio
     typename TangentMapMatrixType>
   void compactTangentMap(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model.nq, "The configuration vector is not of the right size");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      TMc.rows(), model.nq, "The output argument is not of the right size");
+    // Assume TMc.rows() == SUM_(j in joint_selection) j.nq() --> assert at the end
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       TMc.cols(), MAX_JOINT_NV, "The output argument is not of the right size");
 
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef typename Model::JointIndex JointIndex;
+    typedef CompactSetTangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
 
-    typedef TangentMapStep<LieGroup_t, boost::mpl::true_, ConfigVectorType, TangentMapMatrixType>
-      Algo;
+    int idx = 0;
     typename Algo::ArgsType args(
-      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc), SETTO);
-    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc), idx);
+    for (size_t i = 0; i < joint_selection.size(); ++i)
     {
-      Algo::run(model.joints[i], args);
+      Algo::run(model.joints[joint_selection[i]], args);
     }
+    assert(idx == TMc.rows());
   }
 
   template<
@@ -689,23 +689,16 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   void indexvInfo(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
     std::vector<int> & nvs,
     std::vector<int> & idx_vs)
   {
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      static_cast<size_t>(model.nq), nvs.size(),
-      "The configuration vector is not of the right size");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      static_cast<size_t>(model.nq), idx_vs.size(),
-      "The configuration vector is not of the right size");
-
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
-    typedef typename Model::JointIndex JointIndex;
     typename IndexvInfoStep::ArgsType args(nvs, idx_vs);
 
-    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    for (size_t i = 0; i < joint_selection.size(); ++i)
     {
-      IndexvInfoStep::run(model.joints[i], args);
+      Algo::run(model.joints[joint_selection[i]], args);
     }
   }
 
