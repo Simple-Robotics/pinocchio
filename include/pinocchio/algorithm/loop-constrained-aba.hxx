@@ -30,6 +30,7 @@ namespace pinocchio
     auto & neighbours = data.neighbour_links;
     for (auto & neighbour_elt : neighbours)
       neighbour_elt.clear();
+    data.joint_cross_coupling.clear();
 
     // Get links supporting constraints
     std::fill(data.constraints_supported_dim.begin(), data.constraints_supported_dim.end(), 0);
@@ -67,8 +68,8 @@ namespace pinocchio
 
     // Second step: order the joints according to the minimum degree heuristic
     auto & elimination_order = data.elimination_order;
-
     elimination_order.clear(); // clearing in case inited once more
+
     std::vector<size_t> num_children(size_t(model.njoints), 0);
     std::list<JointIndex> leaf_vertices;
 
