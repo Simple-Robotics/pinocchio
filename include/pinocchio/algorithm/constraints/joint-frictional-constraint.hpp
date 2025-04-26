@@ -136,6 +136,7 @@ namespace pinocchio
     FrictionalJointConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & active_joints)
+    : active_joints(active_joints)
     {
       init(model, active_joints);
     }
@@ -149,6 +150,7 @@ namespace pinocchio
       Base::cast(res);
       BaseCommonParameters::template cast<NewScalar>(res);
 
+      res.active_joints = active_joints;
       res.active_dofs = active_dofs;
       res.row_sparsity_pattern = row_sparsity_pattern;
       res.row_active_indexes = row_active_indexes;
