@@ -11,7 +11,7 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/binary-constraint-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
@@ -59,7 +59,7 @@ namespace pinocchio
   ///
   template<typename Derived>
   struct PointConstraintModelBase
-  : ConstraintModelBase<Derived>
+  : BinaryConstraintModelBase<Derived>
   , ConstraintModelCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -70,7 +70,7 @@ namespace pinocchio
       Options = traits<Derived>::Options
     };
 
-    typedef ConstraintModelBase<Derived> Base;
+    typedef BinaryConstraintModelBase<Derived> Base;
     typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
 
     template<typename OtherDerived>
@@ -88,6 +88,8 @@ namespace pinocchio
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
     using Base::derived;
+    using Base::joint1_id;
+    using Base::joint2_id;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 
@@ -117,12 +119,6 @@ namespace pinocchio
     {
       return static_cast<const BaseCommonParameters &>(*this);
     }
-
-    /// \brief Index of the first joint in the model tree
-    JointIndex joint1_id;
-
-    /// \brief Index of the second joint in the model tree
-    JointIndex joint2_id;
 
     /// \brief Position of attached point with respect to the frame of joint1.
     SE3 joint1_placement;
@@ -202,9 +198,7 @@ namespace pinocchio
       const SE3 & joint1_placement,
       const JointIndex joint2_id,
       const SE3 & joint2_placement)
-    : Base(model)
-    , joint1_id(joint1_id)
-    , joint2_id(joint2_id)
+    : Base(model, joint1_id, joint2_id)
     , joint1_placement(joint1_placement)
     , joint2_placement(joint2_placement)
     , desired_constraint_offset(Vector3::Zero())
@@ -231,9 +225,7 @@ namespace pinocchio
       const ModelTpl<Scalar, OtherOptions, JointCollectionTpl> & model,
       const JointIndex joint1_id,
       const SE3 & joint1_placement)
-    : Base(model)
-    , joint1_id(joint1_id)
-    , joint2_id(0)
+    : Base(model, joint1_id, 0)
     , joint1_placement(joint1_placement)
     , joint2_placement(SE3::Identity())
     , desired_constraint_offset(Vector3::Zero())
@@ -258,9 +250,7 @@ namespace pinocchio
       const ModelTpl<Scalar, OtherOptions, JointCollectionTpl> & model,
       const JointIndex joint1_id,
       const JointIndex joint2_id)
-    : Base(model)
-    , joint1_id(joint1_id)
-    , joint2_id(joint2_id)
+    : Base(model, joint1_id, joint2_id)
     , joint1_placement(SE3::Identity())
     , joint2_placement(SE3::Identity())
     , desired_constraint_offset(Vector3::Zero())
@@ -285,9 +275,7 @@ namespace pinocchio
     template<int OtherOptions, template<typename, int> class JointCollectionTpl>
     PointConstraintModelBase(
       const ModelTpl<Scalar, OtherOptions, JointCollectionTpl> & model, const JointIndex joint1_id)
-    : Base(model)
-    , joint1_id(joint1_id)
-    , joint2_id(0) // set to be the Universe
+    : Base(model, joint1_id, 0)
     , joint1_placement(SE3::Identity())
     , joint2_placement(SE3::Identity())
     , desired_constraint_offset(Vector3::Zero())
