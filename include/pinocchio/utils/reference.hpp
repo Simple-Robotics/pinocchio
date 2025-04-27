@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_utils_reference_hpp__
@@ -56,6 +56,18 @@ namespace pinocchio
     const T * get_pointer(const std::shared_ptr<const T> & ptr)
     {
       return ptr.get();
+    }
+
+    template<typename T>
+    std::reference_wrapper<T> make_ref(T & value)
+    {
+      return std::reference_wrapper<T>(value);
+    }
+
+    template<typename T>
+    std::reference_wrapper<const T> make_ref(const T & value)
+    {
+      return std::reference_wrapper<const T>(value);
     }
 
   } // namespace helper
