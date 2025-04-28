@@ -107,8 +107,9 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
 
   // Check sparsity pattern
   {
-    const EigenIndexVector & active_dofs_lower = constraint.getActiveLowerBoundConstraintsTangent();
-    const EigenIndexVector & active_dofs_upper = constraint.getActiveUpperBoundConstraintsTangent();
+    // const EigenIndexVector & active_dofs_lower =
+    // constraint.getActiveLowerBoundConstraintsTangent(); const EigenIndexVector &
+    // active_dofs_upper = constraint.getActiveUpperBoundConstraintsTangent();
     EigenIndexVector active_dofs(active_dofs_lower);
     active_dofs.insert(active_dofs.end(), active_dofs_upper.begin(), active_dofs_upper.end());
 
@@ -139,8 +140,9 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
 
   // Check projection on force sets
   {
-    const EigenIndexVector & active_dofs_lower = constraint.getActiveLowerBoundConstraintsTangent();
-    const EigenIndexVector & active_dofs_upper = constraint.getActiveUpperBoundConstraintsTangent();
+    // const EigenIndexVector & active_dofs_lower =
+    // constraint.getActiveLowerBoundConstraintsTangent(); const EigenIndexVector &
+    // active_dofs_upper = constraint.getActiveUpperBoundConstraintsTangent();
 
     const Eigen::DenseIndex nb_lower_active_dofs = Eigen::DenseIndex(active_dofs_lower.size());
     const Eigen::DenseIndex nb_upper_active_dofs = Eigen::DenseIndex(active_dofs_upper.size());
