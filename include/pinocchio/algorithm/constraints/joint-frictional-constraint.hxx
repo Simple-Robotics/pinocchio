@@ -13,7 +13,6 @@ namespace pinocchio
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const JointIndexVector & active_joints)
   {
-    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     active_dofs.reserve(size_t(model.nv));
     for (const JointIndex joint_id : active_joints)
     {
