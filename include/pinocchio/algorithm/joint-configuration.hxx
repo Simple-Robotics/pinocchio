@@ -697,7 +697,7 @@ namespace pinocchio
 
     for (size_t i = 0; i < joint_selection.size(); ++i)
     {
-      Algo::run(model.joints[joint_selection[i]], args);
+      IndexvInfoStep::run(model.joints[joint_selection[i]], args);
     }
   }
 

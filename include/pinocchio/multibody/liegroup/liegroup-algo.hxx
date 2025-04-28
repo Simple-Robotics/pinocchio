@@ -403,7 +403,7 @@ namespace pinocchio
     typedef boost::fusion::vector<const ConfigVectorIn &, CompactSetTangentMapMatrixType &, int &>
       ArgsType;
 
-    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_2(CompactSetTangentMapStepAlgo, CompactSetTangentMapStep)
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_3(CompactSetTangentMapStepAlgo, CompactSetTangentMapStep)
   };
 
   template<typename Visitor, typename JointModel>

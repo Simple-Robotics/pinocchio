@@ -221,7 +221,7 @@ namespace pinocchio
 
     int size() const
     {
-      return int(activable_idx_row.size());
+      return int(activable_idx_rows.size());
     }
 
     int activeSize() const
@@ -371,11 +371,6 @@ namespace pinocchio
     const EigenIndexVector getActivableIdxQs() const
     {
       return activable_idx_qs;
-    }
-
-    const VectorOfSize & getActiveSetIndexes() const
-    {
-      return active_set_indexes;
     }
 
     const EigenIndexVector getActivableIdxQsReduce() const
@@ -649,7 +644,7 @@ namespace pinocchio
         return true;
       return (
         this->constraint_residual == other.constraint_residual
-        && this->compact_tangent_map == other.compact_tangent_map)
+        && this->compact_tangent_map == other.compact_tangent_map);
     }
 
     bool operator!=(const JointLimitConstraintDataTpl & other) const

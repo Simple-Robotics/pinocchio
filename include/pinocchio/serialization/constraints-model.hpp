@@ -107,15 +107,7 @@ namespace boost
       : public ::pinocchio::JointLimitConstraintModelTpl<Scalar, Options>
       {
         typedef ::pinocchio::JointLimitConstraintModelTpl<Scalar, Options> Base;
-        using Base::activable_configuration_components;
-        using Base::activable_configuration_limits;
-        using Base::activable_lower_bound_constraints;
-        using Base::activable_lower_bound_constraints_tangent;
-        using Base::activable_upper_bound_constraints;
-        using Base::activable_upper_bound_constraints_tangent;
         using Base::m_set;
-        using Base::row_activable_indexes;
-        using Base::row_activable_sparsity_pattern;
       };
     } // namespace internal
 
@@ -134,19 +126,6 @@ namespace boost
 
       typedef internal::JointLimitConstraintModelAccessor<Scalar, Options> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
-      ar & make_nvp(
-        "activable_configuration_components", cmodel_.activable_configuration_components);
-      ar & make_nvp("activable_lower_bound_constraints", cmodel_.activable_lower_bound_constraints);
-      ar & make_nvp(
-        "activable_lower_bound_constraints_tangent",
-        cmodel_.activable_lower_bound_constraints_tangent);
-      ar & make_nvp("activable_upper_bound_constraints", cmodel_.activable_upper_bound_constraints);
-      ar & make_nvp(
-        "activable_upper_bound_constraints_tangent",
-        cmodel_.activable_upper_bound_constraints_tangent);
-      ar & make_nvp("activable_configuration_limits", cmodel_.activable_configuration_limits);
-      ar & make_nvp("row_activable_sparsity_pattern", cmodel_.row_activable_sparsity_pattern);
-      ar & make_nvp("row_activable_indexes", cmodel_.row_activable_indexes);
       ar & make_nvp("m_set", cmodel_.m_set);
     }
 

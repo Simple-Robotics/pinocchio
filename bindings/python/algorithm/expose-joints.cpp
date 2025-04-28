@@ -102,8 +102,14 @@ namespace pinocchio
     compactTangentMap_proxy(const context::Model & model, const context::VectorXs & q)
     {
       context::MatrixXs TMc(context::MatrixXs::Zero(model.nq, MAX_JOINT_NV));
+      typedef typename context::Model::JointIndex JointIndex;
+      std::vector<JointIndex> joint_selection;
+      for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+      {
+        joint_selection.push_back(i);
+      }
 
-      compactTangentMap(model, q, TMc);
+      compactTangentMap(model, joint_selection, q, TMc);
 
       return TMc;
     }
@@ -142,7 +148,14 @@ namespace pinocchio
       std::vector<int> nvs(model.nq, 0);
       std::vector<int> idx_vs(model.nq, 0);
 
-      indexvInfo(model, nvs, idx_vs);
+      typedef typename context::Model::JointIndex JointIndex;
+      std::vector<JointIndex> joint_selection;
+      for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+      {
+        joint_selection.push_back(i);
+      }
+
+      indexvInfo(model, joint_selection, nvs, idx_vs);
 
       return bp::make_tuple(nvs, idx_vs);
     }

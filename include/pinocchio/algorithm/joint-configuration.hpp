@@ -607,12 +607,14 @@ namespace pinocchio
     typename TangentMapMatrixType>
   void compactTangentMap(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
     const Eigen::MatrixBase<ConfigVectorType> & q,
     const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
   {
     compactTangentMap<
       LieGroupMap, Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentMapMatrixType>(
-      model, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc));
+      model, joint_selection, q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc));
   }
 
   /**
