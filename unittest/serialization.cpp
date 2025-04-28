@@ -27,6 +27,7 @@
 #include "pinocchio/serialization/constraints-data.hpp"
 
 #include "pinocchio/serialization/eigen-storage.hpp"
+#include "pinocchio/serialization/double-entry-container.hpp"
 
 #include "pinocchio/multibody/sample-models.hpp"
 
@@ -1190,6 +1191,20 @@ BOOST_AUTO_TEST_CASE(eigen_storage)
   storage.resize(10, 5);
 
   generic_test(storage, TEST_SERIALIZATION_FOLDER "/Container", "eigen_storage");
+}
+
+BOOST_AUTO_TEST_CASE(double_entry_container)
+{
+  typedef pinocchio::Inertia::Matrix6 Matrix6;
+  typedef pinocchio::container::DoubleEntryContainer<Matrix6> DoubleEntryContainer;
+
+  DoubleEntryContainer container(10, 20);
+  for (Eigen::DenseIndex k = 0; k < 10; ++k)
+  {
+    container[{k, k}] = Matrix6::Random();
+  }
+
+  generic_test(container, TEST_SERIALIZATION_FOLDER "/Container", "double_entry_container");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
