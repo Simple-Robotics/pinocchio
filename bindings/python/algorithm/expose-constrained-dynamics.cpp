@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #include "pinocchio/bindings/python/algorithm/algorithms.hpp"
@@ -24,8 +24,6 @@ namespace pinocchio
       RigidConstraintModelVector;
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(context::RigidConstraintData)
       RigidConstraintDataVector;
-
-#ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
 
     template<typename ConstraintModel, typename ConstraintData>
     static const context::VectorXs constraintDynamics_proxy(
@@ -98,8 +96,6 @@ namespace pinocchio
         mimic_not_supported_function<>(0));
     }
 
-#endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
-
     void exposeConstraintDynamics()
     {
       using namespace Eigen;
@@ -122,13 +118,10 @@ namespace pinocchio
 
       StdVectorPythonVisitor<RigidConstraintDataVector>::expose("StdVec_RigidConstraintData");
 
-#ifndef PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
       ContactCholeskyDecompositionPythonVisitor<context::ContactCholeskyDecomposition>::expose();
 
       exposeConstraintDynamicsFor<RigidConstraintModel>();
       // exposeConstraintDynamicsFor<WeldConstraintModel>();
-
-#endif // PINOCCHIO_PYTHON_SKIP_ALGORITHM_CONSTRAINED_DYNAMICS
     }
   } // namespace python
 } // namespace pinocchio

@@ -44,7 +44,6 @@ or via pip (currently only available on Linux):
 ## Table of contents
 
   - [Table of contents](#table-of-contents)
-  - [Introducing Pinocchio 3](#introducing-pinocchio-3)
   - [Pinocchio main features](#pinocchio-main-features)
   - [Documentation](#documentation)
   - [Examples](#examples)
@@ -61,9 +60,6 @@ or via pip (currently only available on Linux):
   - [Credits](#credits)
   - [Open-source projects relying on Pinocchio](#open-source-projects-relying-on-pinocchio)
   - [Acknowledgments](#acknowledgments)
-
-  - New SDF and MJCF parsers
-  - and much more.
 
 ## Pinocchio main features
 
