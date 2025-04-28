@@ -50,7 +50,7 @@ namespace boost
     void serialize(
       Archive & ar,
       ::pinocchio::BinaryConstraintModelBase<Derived> & cmodel,
-      const unsigned int version)
+      const unsigned int /*version*/)
     {
       typedef ::pinocchio::BinaryConstraintModelBase<Derived> Self;
       typedef typename Self::Base Base;
