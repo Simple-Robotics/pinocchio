@@ -228,12 +228,17 @@ namespace pinocchio
     lower_active_size = 0;
 
     // Fill the constraint residual for all activable constraints and detect the active ones.
+    // The convention is lower | upper, and negative | positive constraint so:
+    // q_l <= q + TMv <= q_up
+    // -TMv + (q_l - q) <= 0
+    // -TMv + (q_u - q) >= 0
+
     // Lower
     for (std::size_t i = 0; i < lowerSize(); i++)
     {
       const auto idx_q = activable_idx_qs[i];
       activable_constraint_residual[i] =
-        -(data.q_in[idx_q] - bound_position_limit[static_cast<Eigen::DenseIndex>(i)]);
+        bound_position_limit[static_cast<Eigen::DenseIndex>(i)] - data.q_in[idx_q];
       if (
         activable_constraint_residual[i]
         >= -bound_position_margin[static_cast<Eigen::DenseIndex>(i)])
@@ -251,7 +256,7 @@ namespace pinocchio
     {
       const auto q_idx = activable_idx_qs[i];
       activable_constraint_residual[i] =
-        -(data.q_in[idx_q] - bound_position_limit[static_cast<Eigen::DenseIndex>(i)]);
+        bound_position_limit[static_cast<Eigen::DenseIndex>(i)] - data.q_in[idx_q];
       if (
         activable_constraint_residual[i]
         <= bound_position_margin[static_cast<Eigen::DenseIndex>(i)])
@@ -289,7 +294,7 @@ namespace pinocchio
     PINOCCHIO_UNUSED_VARIABLE(model);
     PINOCCHIO_UNUSED_VARIABLE(data);
 
-    std::size_t active_size = static_cast<std::size_t>(this->activeSize());
+    const std::size_t active_size = static_cast<std::size_t>(this->activeSize());
     auto & activable_constraint_residual = cdata.activable_constraint_residual;
     auto & constraint_residual = cdata.constraint_residual;
 
