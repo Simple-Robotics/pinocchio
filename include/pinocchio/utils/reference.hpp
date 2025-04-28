@@ -70,6 +70,24 @@ namespace pinocchio
       return std::reference_wrapper<const T>(value);
     }
 
+    template<typename T>
+    struct remove_ref
+    {
+      typedef typename std::remove_const<T>::type type;
+    };
+
+    template<typename T>
+    struct remove_ref<std::reference_wrapper<T>>
+    {
+      typedef typename std::remove_const<T>::type type;
+    };
+
+    template<typename T>
+    struct remove_ref<std::shared_ptr<T>>
+    {
+      typedef typename std::remove_const<T>::type type;
+    };
+
   } // namespace helper
 } // namespace pinocchio
 
