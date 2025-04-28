@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2023 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #include "pinocchio/multibody/data.hpp"
@@ -68,6 +68,17 @@ struct call_equality_op<pinocchio::Tensor<Scalar, NumIndices, Options, IndexType
   }
 };
 #endif
+
+template<typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+struct call_equality_op<Eigen::Array<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>
+{
+  typedef Eigen::Array<Scalar, Rows, Cols, Options, MaxRows, MaxCols> T;
+
+  static bool run(const T & a1, const T & a2)
+  {
+    return a1.matrix() == a2.matrix();
+  }
+};
 
 template<typename T>
 struct empty_contructor_algo
@@ -238,6 +249,9 @@ BOOST_AUTO_TEST_CASE(test_eigen_serialization)
 
   Eigen::array<Eigen::DenseIndex, array_size> array = {1, 2, 3};
   generic_test(array, TEST_SERIALIZATION_FOLDER "/eigen_array", "array");
+
+  Eigen::ArrayXXd Array = Eigen::ArrayXXd::Random(num_rows, num_cols);
+  generic_test(Array, TEST_SERIALIZATION_FOLDER "/eigen_array", "array");
 
   const Eigen::DenseIndex tensor_size = 3;
   const Eigen::DenseIndex x_dim = 10, y_dim = 20, z_dim = 30;

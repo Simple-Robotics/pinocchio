@@ -184,6 +184,24 @@ namespace boost
       internal::Eigen::serialize_eigen_plain_object(ar, m, version);
     }
 
+    template<
+      class Archive,
+      typename Scalar,
+      int Rows,
+      int Cols,
+      int Options,
+      int MaxRows,
+      int MaxCols>
+    void serialize(
+      Archive & ar,
+      ::Eigen::Array<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & m,
+      const unsigned int version)
+    {
+      typedef ::Eigen::Array<Scalar, Rows, Cols, Options, MaxRows, MaxCols> Self;
+      typedef typename Self::Base Base;
+      serialize(ar, static_cast<Base &>(m), version);
+    }
+
 #if !defined(PINOCCHIO_WITH_EIGEN_TENSOR_MODULE)                                                   \
   && ((__cplusplus <= 199711L && EIGEN_COMP_MSVC < 1900) || defined(__CUDACC__) || defined(EIGEN_AVOID_STL_ARRAY))
     template<class Archive, typename _IndexType, std::size_t _NumIndices>
