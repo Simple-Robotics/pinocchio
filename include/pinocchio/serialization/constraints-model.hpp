@@ -133,6 +133,7 @@ namespace boost
       {
         typedef ::pinocchio::FrictionalJointConstraintModelTpl<Scalar, Options> Base;
         using Base::active_dofs;
+        using Base::active_joints;
         using Base::m_set;
         using Base::row_active_indexes;
         using Base::row_sparsity_pattern;
@@ -154,6 +155,7 @@ namespace boost
 
       typedef internal::FrictionalJointConstraintModelAccessor<Scalar, Options> Accessor;
       auto & cmodel_ = reinterpret_cast<Accessor &>(cmodel);
+      ar & make_nvp("active_joints", cmodel_.active_joints);
       ar & make_nvp("active_dofs", cmodel_.active_dofs);
       ar & make_nvp("row_sparsity_pattern", cmodel_.row_sparsity_pattern);
       ar & make_nvp("row_active_indexes", cmodel_.row_active_indexes);
