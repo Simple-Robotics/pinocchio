@@ -199,11 +199,11 @@ namespace pinocchio
       res.bound_position_margin = bound_position_margin.template cast<NewScalar>();
       res.active_set_indexes = active_set_indexes;
       res.activable_idx_rows = activable_idx_rows;
-      res.activable_idx_q_reduces = activable_idx_q_reduces;
+      res.activable_idx_qs_reduce = activable_idx_qs_reduce;
       res.activable_nvs = activable_nvs;
       res.activable_idx_vs = activable_idx_vs;
       res.active_idx_rows = active_idx_rows;
-      res.active_idx_q_reduces = active_idx_q_reduces;
+      res.active_idx_qs_reduce = active_idx_qs_reduce;
       res.active_nvs = active_nvs;
       res.active_idx_vs = active_idx_vs;
       res.m_set = m_set.template cast<NewScalar>();
@@ -374,11 +374,11 @@ namespace pinocchio
 
     const EigenIndexVector getActivableIdxQReduces() const
     {
-      return activable_idx_q_reduces;
+      return activable_idx_qs_reduce;
     }
     const EigenIndexVector getActiveIdxQReduces() const
     {
-      return active_idx_q_reduces;
+      return active_idx_qs_reduce;
     }
     const EigenIndexVector getActivableNvs() const
     {
@@ -421,10 +421,10 @@ namespace pinocchio
              && bound_position_margin == other.bound_position_margin
              && active_set_indexes == other.active_set_indexes
              && activable_idx_rows == other.activable_idx_rows
-             && activable_idx_q_reduces == other.activable_idx_q_reduces
+             && activable_idx_qs_reduce == other.activable_idx_qs_reduce
              && activable_nvs == other.activable_nvs && activable_idx_vs == other.activable_idx_vs
              && active_idx_rows == other.active_idx_rows
-             && active_idx_q_reduces == other.active_idx_q_reduces && active_nvs == other.active_nvs
+             && active_idx_qs_reduce == other.active_idx_qs_reduce && active_nvs == other.active_nvs
              && active_idx_vs == other.active_idx_vs && m_set == other.m_set
              && active_compliance_storage == other.active_compliance_storage;
     }
@@ -449,11 +449,11 @@ namespace pinocchio
         bound_position_margin = other.bound_position_margin;
         active_set_indexes = other.active_set_indexes;
         activable_idx_rows = other.activable_idx_rows;
-        activable_idx_q_reduces = other.activable_idx_q_reduces;
+        activable_idx_qs_reduce = other.activable_idx_qs_reduce;
         activable_nvs = other.activable_nvs;
         activable_idx_vs = other.activable_idx_vs;
         active_idx_rows = other.active_idx_rows;
-        active_idx_q_reduces = other.active_idx_q_reduces;
+        active_idx_qs_reduce = other.active_idx_qs_reduce;
         active_nvs = other.active_nvs;
         active_idx_vs = other.active_idx_vs;
         m_set = other.m_set;
@@ -575,7 +575,7 @@ namespace pinocchio
     /// @brief give for each active/activable constraint the row_id of sparsity pattern
     VectorOfSize activable_idx_rows, active_idx_rows;
     /// @brief give for each active/activable constraint  of sparsity pattern
-    EigenIndexVector activable_idx_q_reduces, active_idx_q_reduces;
+    EigenIndexVector activable_idx_qs_reduce, active_idx_qs_reduce;
     /// @brief For each dof, the associated nv and idx_v to exploit tangent map sparsity
     EigenIndexVector activable_nvs, active_nvs;
     EigenIndexVector activable_idx_vs, active_idx_vs;
