@@ -138,8 +138,15 @@ BOOST_AUTO_TEST_CASE(tangent_map_test)
   tangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nv, model.nv), TMs[1]);
   tangentMapTransposeProduct(
     model, q, Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
-  compactTangentMap(model, q, TMc);
-  indexvInfo(model, nvs, idx_vs);
+
+  typedef typename Model::JointIndex JointIndex;
+  std::vector<JointIndex> joint_selection;
+  for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+  {
+    joint_selection.push_back(i);
+  }
+  compactTangentMap(model, joint_selection, q, TMc);
+  indexvInfo(model, joint_selection, nvs, idx_vs);
   size_t k_s;
   for (Eigen::DenseIndex k = 0; k < model.nq; ++k)
   {
