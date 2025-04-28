@@ -46,6 +46,20 @@ namespace boost
       ar & make_nvp("name", cmodel.name);
     }
 
+    template<typename Archive, typename Derived>
+    void serialize(
+      Archive & ar,
+      ::pinocchio::BinaryConstraintModelBase<Derived> & cmodel,
+      const unsigned int version)
+    {
+      typedef ::pinocchio::BinaryConstraintModelBase<Derived> Self;
+      typedef typename Self::Base Base;
+      ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+
+      ar & make_nvp("joint1_id", cmodel.joint1_id);
+      ar & make_nvp("joint2_id", cmodel.joint2_id);
+    }
+
     namespace internal
     {
       template<typename Derived>
@@ -175,8 +189,6 @@ namespace boost
       ar & make_nvp(
         "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
-      ar & make_nvp("joint1_id", cmodel.joint1_id);
-      ar & make_nvp("joint2_id", cmodel.joint2_id);
       ar & make_nvp("joint1_placement", cmodel.joint1_placement);
       ar & make_nvp("joint2_placement", cmodel.joint2_placement);
       ar & make_nvp("desired_constraint_offset", cmodel.desired_constraint_offset);
@@ -260,8 +272,6 @@ namespace boost
         "base_common_parameters", boost::serialization::base_object<BaseCommonParameters>(cmodel));
 
       // TODO: point/frame constraint models data structure are identical, factor them
-      ar & make_nvp("joint1_id", cmodel.joint1_id);
-      ar & make_nvp("joint2_id", cmodel.joint2_id);
       ar & make_nvp("joint1_placement", cmodel.joint1_placement);
       ar & make_nvp("joint2_placement", cmodel.joint2_placement);
       ar & make_nvp("desired_constraint_offset", cmodel.desired_constraint_offset);
