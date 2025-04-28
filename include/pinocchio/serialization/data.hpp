@@ -7,6 +7,7 @@
 
 #include <boost/serialization/variant.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/set.hpp>
 
 #include "pinocchio/serialization/aligned-vector.hpp"
 #include "pinocchio/serialization/spatial.hpp"
@@ -147,6 +148,18 @@ namespace boost
       PINOCCHIO_MAKE_DATA_NVP(ar, data, d2tau_dadq);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, kinematic_hessians);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, primal_dual_contact_solution);
+
+      // Related to constraints handling
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, extended_motion_propagator);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, extended_motion_propagator2);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, spatial_inv_inertia);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, accumulation_descendant);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, accumulation_ancestor);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_supported_dim);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_supported);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_on_joint);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, neighbour_links);
+      //      PINOCCHIO_MAKE_DATA_NVP(ar, data, joint_cross_coupling);
     }
 
   } // namespace serialization
