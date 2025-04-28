@@ -400,7 +400,17 @@ namespace pinocchio
       && data1.bodyRegressor == data2.bodyRegressor
       && data1.jointTorqueRegressor == data2.jointTorqueRegressor
       //    && data1.contact_chol == data2.contact_chol
-      && data1.primal_dual_contact_solution == data2.primal_dual_contact_solution;
+      && data1.primal_dual_contact_solution == data2.primal_dual_contact_solution
+      && data1.extended_motion_propagator == data2.extended_motion_propagator
+      && data1.extended_motion_propagator2 == data2.extended_motion_propagator2
+      && data1.spatial_inv_inertia == data2.spatial_inv_inertia
+      && data1.accumulation_descendant == data2.accumulation_descendant
+      && data1.accumulation_ancestor == data2.accumulation_ancestor
+      && data1.constraints_supported_dim == data2.constraints_supported_dim
+      && data1.constraints_supported == data2.constraints_supported
+      && data1.constraints_on_joint == data2.constraints_on_joint
+      && data1.neighbour_links == data2.neighbour_links
+      && data1.joint_cross_coupling == data2.joint_cross_coupling;
 
     // operator== for Eigen::Tensor provides an Expression which might be not evaluated as a boolean
     value &= Tensor<bool, 0>((data1.kinematic_hessians == data2.kinematic_hessians).all())(0)
