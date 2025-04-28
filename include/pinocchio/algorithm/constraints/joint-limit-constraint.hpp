@@ -197,6 +197,7 @@ namespace pinocchio
       res.row_indexes = row_indexes;
       res.bound_position_limit = bound_position_limit.template cast<NewScalar>();
       res.bound_position_margin = bound_position_margin.template cast<NewScalar>();
+      res.activable_idx_qs = activable_idx_qs;
       res.active_set_indexes = active_set_indexes;
       res.activable_idx_rows = activable_idx_rows;
       res.activable_idx_qs_reduce = activable_idx_qs_reduce;
@@ -367,16 +368,21 @@ namespace pinocchio
       return bound_position_margin;
     }
 
+    const EigenIndexVector getActivableIdxQs() const
+    {
+      return activable_idx_qs;
+    }
+
     const VectorOfSize & getActiveSetIndexes() const
     {
       return active_set_indexes;
     }
 
-    const EigenIndexVector getActivableIdxQReduces() const
+    const EigenIndexVector getActivableIdxQsReduce() const
     {
       return activable_idx_qs_reduce;
     }
-    const EigenIndexVector getActiveIdxQReduces() const
+    const EigenIndexVector getActiveIdxQsReduce() const
     {
       return active_idx_qs_reduce;
     }
@@ -419,6 +425,7 @@ namespace pinocchio
              && row_indexes == other.row_indexes
              && bound_position_limit == other.bound_position_limit
              && bound_position_margin == other.bound_position_margin
+             && activable_idx_qs == other.activable_idx_qs
              && active_set_indexes == other.active_set_indexes
              && activable_idx_rows == other.activable_idx_rows
              && activable_idx_qs_reduce == other.activable_idx_qs_reduce
@@ -447,6 +454,7 @@ namespace pinocchio
         row_indexes = other.row_indexes;
         bound_position_limit = other.bound_position_limit;
         bound_position_margin = other.bound_position_margin;
+        activable_idx_qs = other.activable_idx_qs;
         active_set_indexes = other.active_set_indexes;
         activable_idx_rows = other.activable_idx_rows;
         activable_idx_qs_reduce = other.activable_idx_qs_reduce;
@@ -566,6 +574,9 @@ namespace pinocchio
     VectorXs bound_position_limit;
     /// @brief Margin value of lower and upper bound in the constraint (size size()=lsize+usize)
     VectorXs bound_position_margin;
+
+    /// @brief give for each activable constraint the qs in the configuration vector
+    EigenIndexVector activable_idx_qs;
 
     /// \brief Vector containing the indexes of the constraints in the active set.
     /// the size of the vector is activeSize()
