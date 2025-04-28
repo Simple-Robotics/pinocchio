@@ -137,7 +137,7 @@ namespace pinocchio
 
     typedef std::vector<BooleanVector> VectorOfBooleanVector;
     typedef std::vector<EigenIndexVector> VectofOfEigenIndexVector;
-    typedef std::vecor<size_t> VectorOfSize;
+    typedef std::vector<size_t> VectorOfSize;
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;

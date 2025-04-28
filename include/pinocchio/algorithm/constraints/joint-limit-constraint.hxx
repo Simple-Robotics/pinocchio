@@ -54,7 +54,8 @@ namespace pinocchio
     EigenIndexVector & activable_idx_qs_reduce_lower = activable_idx_qs_reduce;
     EigenIndexVector activable_idx_qs_reduce_upper;
 
-    EigenIndexVector activable_idx_qs_lower, activable_idx_qs_upper;
+    EigenIndexVector & activable_idx_qs_lower = activable_idx_qs;
+    EigenIndexVector activable_idx_qs_upper;
 
     // Prepare the structure to compute sparsity pattern
     EigenIndexVector extended_support;
@@ -136,33 +137,35 @@ namespace pinocchio
     int lower_activable_size = static_cast<int>(activable_idx_rows_upper.size());
     int activable_size = lower_activable_size + lower_activable_size;
 
+    // Fill bound limit and margin for lower and upper constraint
+    bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
+    bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
+    Eigen::DenseIndex bound_row_id = 0;
+    for (const auto activable_idx_q : activable_idx_qs_lower)
+    {
+      bound_position_limit[bound_row_id] = lb[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
+      bound_row_id++;
+    }
+    for (const auto activable_idx_q : activable_idx_qs_upper)
+    {
+      bound_position_limit[bound_row_id] = ub[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
+      bound_row_id++;
+    }
+    assert(bound_row_id == static_cast<Eigen::DenseIndex>(activable_size));
+
     // Recompose one vectors for all constraint with convention lower | upper
     activable_idx_rows.insert(
       activable_idx_rows.end(), activable_idx_rows_upper.begin(), activable_idx_rows_upper.end());
     activable_idx_qs_reduce.insert(
       activable_idx_qs_reduce.end(), activable_idx_qs_reduce_upper.begin(),
       activable_idx_qs_reduce_upper.end());
+    activable_idx_qs.insert(
+      activable_idx_qs.end(), activable_idx_qs_upper.begin(), activable_idx_qs_upper.end());
     assert(size() == activable_size);
-
-    // Fill bound limit and margin for lower and upper constraint
-    bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
-    bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
-    int row_id = 0;
-    for (const auto activable_idx_q : activable_idx_qs_lower)
-    {
-      bound_position_limit[row_id] = lb[activable_idx_q];
-      assert(model.positionLimitMargin[activable_idx_q] >= 0);
-      bound_position_margin[row_id] = model.positionLimitMargin[activable_idx_q];
-      row_id++;
-    }
-    for (const auto activable_idx_q : activable_idx_qs_upper)
-    {
-      bound_position_limit[row_id] = ub[activable_idx_q];
-      assert(model.positionLimitMargin[activable_idx_q] >= 0);
-      bound_position_margin[row_id] = model.positionLimitMargin[activable_idx_q];
-      row_id++;
-    }
-    assert(row_id == size());
 
     // Fill activable_nvs and activable_idx_vs
     activable_nvs.reserve(size());
@@ -215,68 +218,65 @@ namespace pinocchio
     // Compute notably the constraint constraint_residual
     // This allows to compute which limits are active in the current configuration (data.q_in) which
     // corresponds to the current active set.
-    // TODO(jcarpent): change model.lowerPositionLimit[q_index] and
-    // model.upperPositionLimit[q_index] for internal limit values stored in the constraint model.
     auto & activable_constraint_residual = cdata.activable_constraint_residual;
-    active_lower_bound_constraints.clear();
-    active_upper_bound_constraints.clear();
-    active_lower_bound_constraints_tangent.clear();
-    active_upper_bound_constraints_tangent.clear();
-    active_set_indexes.clear();
 
-    std::size_t row_index = 0;
+    active_set_indexes.clear();
+    active_idx_rows.clear();
+    active_idx_qs_reduce.clear();
+    active_nvs.clear();
+    active_idx_vs.clear();
+    lower_active_size = 0;
 
     // Fill the constraint residual for all activable constraints and detect the active ones.
-    for (std::size_t i = 0; i < activable_lower_bound_constraints.size(); i++)
+    // Lower
+    for (std::size_t i = 0; i < lowerSize(); i++)
     {
-      const auto q_index = activable_lower_bound_constraints[i];
-      activable_constraint_residual[int(row_index)] =
-        -(data.q_in[q_index] - model.lowerPositionLimit[q_index]);
-      assert(model.positionLimitMargin[q_index] >= 0);
-      if (activable_constraint_residual[int(row_index)] >= -model.positionLimitMargin[q_index])
+      const auto idx_q = activable_idx_qs[i];
+      activable_constraint_residual[i] =
+        -(data.q_in[idx_q] - bound_position_limit[static_cast<Eigen::DenseIndex>(i)]);
+      if (
+        activable_constraint_residual[i]
+        >= -bound_position_margin[static_cast<Eigen::DenseIndex>(i)])
       {
-        const auto v_index = activable_lower_bound_constraints_tangent[i];
-        active_lower_bound_constraints.push_back(q_index);
-        active_lower_bound_constraints_tangent.push_back(v_index);
-        active_set_indexes.push_back(row_index);
+        active_set_indexes.push_back(i);
+        active_idx_rows.push_back(activable_idx_rows[i]);
+        active_idx_qs_reduce.push_back(activable_idx_qs_reduce[i]);
+        active_nvs.push_back(activable_nvs[i]);
+        active_idx_vs.push_back(activable_idx_vs[i]);
+        lower_active_size += 1;
       }
-      row_index++;
     }
-
-    for (std::size_t i = 0; i < activable_upper_bound_constraints.size(); i++)
+    // Upper
+    for (std::size_t i = lowerSize(); i < size(); i++)
     {
-      const auto q_index = activable_upper_bound_constraints[i];
-      activable_constraint_residual[int(row_index)] =
-        -(data.q_in[q_index] - model.upperPositionLimit[q_index]);
-      assert(model.positionLimitMargin[q_index] >= 0);
-      if (activable_constraint_residual[int(row_index)] <= model.positionLimitMargin[q_index])
+      const auto q_idx = activable_idx_qs[i];
+      activable_constraint_residual[i] =
+        -(data.q_in[idx_q] - bound_position_limit[static_cast<Eigen::DenseIndex>(i)]);
+      if (
+        activable_constraint_residual[i]
+        <= bound_position_margin[static_cast<Eigen::DenseIndex>(i)])
       {
-        const auto v_index = activable_upper_bound_constraints_tangent[i];
-        active_upper_bound_constraints.push_back(q_index);
-        active_upper_bound_constraints_tangent.push_back(v_index);
-        active_set_indexes.push_back(row_index);
+        active_set_indexes.push_back(i);
+        active_idx_rows.push_back(activable_idx_rows[i]);
+        active_idx_qs_reduce.push_back(activable_idx_qs_reduce[i]);
+        active_nvs.push_back(activable_nvs[i]);
+        active_idx_vs.push_back(activable_idx_vs[i]);
       }
-      row_index++;
     }
-
-    assert(row_index == (std::size_t)this->size());
 
     // Resize the constraint residual/compliance storage to the active set size.
-    std::size_t active_size = active_set_indexes.size();
-    cdata.constraint_residual_storage.resize(int(active_size));
+    const int active_size = activeSize() cdata.constraint_residual_storage.resize(active_size);
 
     // Update the active compliance
-    active_compliance_storage.resize(int(active_size));
-    for (std::size_t active_row_index = 0; active_row_index < active_size; active_row_index++)
+    active_compliance_storage.resize(active_size);
+    for (int active_row_index = 0; active_row_index < active_size; active_row_index++)
     {
-      active_compliance[int(active_row_index)] =
-        m_compliance[int(active_set_indexes[active_row_index])];
+      active_compliance[active_row_index] = m_compliance[static_cast<int>(
+        active_set_indexes[static_cast<std::size_t>(active_row_index)])];
     }
 
     // Resize the constraint set so it corresponds to the active set.
-    m_set.resize(
-      Eigen::DenseIndex(active_lower_bound_constraints.size()),
-      Eigen::DenseIndex(active_upper_bound_constraints.size()));
+    m_set.resize(Eigen::DenseIndex(lowerActiveSize()), Eigen::DenseIndex(upperActiveSize()));
   }
 
   template<typename Scalar, int Options>
@@ -289,7 +289,7 @@ namespace pinocchio
     PINOCCHIO_UNUSED_VARIABLE(model);
     PINOCCHIO_UNUSED_VARIABLE(data);
 
-    std::size_t active_size = std::size_t(activeSize());
+    std::size_t active_size = static_cast<std::size_t>(this->activeSize());
     auto & activable_constraint_residual = cdata.activable_constraint_residual;
     auto & constraint_residual = cdata.constraint_residual;
 
@@ -304,6 +304,9 @@ namespace pinocchio
       constraint_residual[int(active_row_index)] =
         activable_constraint_residual[int(active_set_indexes[active_row_index])];
     }
+
+    // Fill the compact tangent map
+    pinocchio::compactTangentMap(model, activable_joints, data.q_in, cdata.compact_tangent_map);
   }
 
   template<typename Scalar, int Options>
