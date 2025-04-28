@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2017-2020 CNRS INRIA
+// Copyright (c) 2017-2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 //
 
 #ifndef __pinocchio_serialization_eigen_matrix_hpp__
@@ -128,48 +129,32 @@ namespace boost
 {
   namespace serialization
   {
-
-    template<
-      class Archive,
-      typename Scalar,
-      int Rows,
-      int Cols,
-      int Options,
-      int MaxRows,
-      int MaxCols>
-    void save(
-      Archive & ar,
-      const Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & m,
-      const unsigned int /*version*/)
+    namespace internal
     {
-      Eigen::DenseIndex rows(m.rows()), cols(m.cols());
-      if (Rows == Eigen::Dynamic)
-        ar & BOOST_SERIALIZATION_NVP(rows);
-      if (Cols == Eigen::Dynamic)
-        ar & BOOST_SERIALIZATION_NVP(cols);
-      ar & make_nvp("data", make_array(m.data(), (size_t)m.size()));
-    }
+      namespace Eigen
+      {
+        template<class Archive, typename EigenPlainObjectBase>
+        void serialize_eigen_plain_object(
+          Archive & ar, EigenPlainObjectBase & m, const unsigned int /*version*/)
+        {
 
-    template<
-      class Archive,
-      typename Scalar,
-      int Rows,
-      int Cols,
-      int Options,
-      int MaxRows,
-      int MaxCols>
-    void load(
-      Archive & ar,
-      Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & m,
-      const unsigned int /*version*/)
+          ::Eigen::DenseIndex rows(m.rows()), cols(m.cols());
+          if (EigenPlainObjectBase::RowsAtCompileTime == ::Eigen::Dynamic)
+            ar & BOOST_SERIALIZATION_NVP(rows);
+          if (EigenPlainObjectBase::ColsAtCompileTime == ::Eigen::Dynamic)
+            ar & BOOST_SERIALIZATION_NVP(cols);
+
+          if (Archive::is_loading::value)
+            m.resize(rows, cols);
+          ar & make_nvp("data", make_array(m.data(), (size_t)m.size()));
+        }
+      } // namespace Eigen
+    } // namespace internal
+
+    template<class Archive, typename Derived>
+    void serialize(Archive & ar, ::Eigen::PlainObjectBase<Derived> & m, const unsigned int version)
     {
-      Eigen::DenseIndex rows = Rows, cols = Cols;
-      if (Rows == Eigen::Dynamic)
-        ar >> BOOST_SERIALIZATION_NVP(rows);
-      if (Cols == Eigen::Dynamic)
-        ar >> BOOST_SERIALIZATION_NVP(cols);
-      m.resize(rows, cols);
-      ar >> make_nvp("data", make_array(m.data(), (size_t)m.size()));
+      internal::Eigen::serialize_eigen_plain_object(ar, m, version);
     }
 
     template<
@@ -182,49 +167,21 @@ namespace boost
       int MaxCols>
     void serialize(
       Archive & ar,
-      Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & m,
+      ::Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & m,
       const unsigned int version)
     {
-      split_free(ar, m, version);
-    }
-
-    template<class Archive, typename PlainObjectBase, int MapOptions, typename StrideType>
-    void save(
-      Archive & ar,
-      const Eigen::Map<PlainObjectBase, MapOptions, StrideType> & m,
-      const unsigned int /*version*/)
-    {
-      Eigen::DenseIndex rows(m.rows()), cols(m.cols());
-      if (PlainObjectBase::RowsAtCompileTime == Eigen::Dynamic)
-        ar & BOOST_SERIALIZATION_NVP(rows);
-      if (PlainObjectBase::ColsAtCompileTime == Eigen::Dynamic)
-        ar & BOOST_SERIALIZATION_NVP(cols);
-      ar & make_nvp("data", make_array(m.data(), (size_t)m.size()));
-    }
-
-    template<class Archive, typename PlainObjectBase, int MapOptions, typename StrideType>
-    void load(
-      Archive & ar,
-      Eigen::Map<PlainObjectBase, MapOptions, StrideType> & m,
-      const unsigned int /*version*/)
-    {
-      Eigen::DenseIndex rows = PlainObjectBase::RowsAtCompileTime,
-                        cols = PlainObjectBase::ColsAtCompileTime;
-      if (PlainObjectBase::RowsAtCompileTime == Eigen::Dynamic)
-        ar >> BOOST_SERIALIZATION_NVP(rows);
-      if (PlainObjectBase::ColsAtCompileTime == Eigen::Dynamic)
-        ar >> BOOST_SERIALIZATION_NVP(cols);
-      m.resize(rows, cols);
-      ar >> make_nvp("data", make_array(m.data(), (size_t)m.size()));
+      typedef ::Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> Self;
+      typedef typename Self::Base Base;
+      serialize(ar, static_cast<Base &>(m), version);
     }
 
     template<class Archive, typename PlainObjectBase, int MapOptions, typename StrideType>
     void serialize(
       Archive & ar,
-      Eigen::Map<PlainObjectBase, MapOptions, StrideType> & m,
+      ::Eigen::Map<PlainObjectBase, MapOptions, StrideType> & m,
       const unsigned int version)
     {
-      split_free(ar, m, version);
+      internal::Eigen::serialize_eigen_plain_object(ar, m, version);
     }
 
 #if !defined(PINOCCHIO_WITH_EIGEN_TENSOR_MODULE)                                                   \
