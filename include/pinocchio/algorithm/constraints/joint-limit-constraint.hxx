@@ -319,7 +319,7 @@ namespace pinocchio
   void JointLimitConstraintModelTpl<Scalar, Options>::jacobian(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & /*data*/,
-    ConstraintData & /*cdata*/,
+    ConstraintData & cdata,
     const Eigen::MatrixBase<JacobianMatrix> & _jacobian_matrix) const
   {
     JacobianMatrix & jacobian_matrix = _jacobian_matrix.const_cast_derived();
@@ -332,18 +332,12 @@ namespace pinocchio
       "The input/output Jacobian matrix does not have the right number of cols.");
 
     jacobian_matrix.setZero();
+    const CompactTangentMap_t & TMc = cdata.TMc;
     Eigen::DenseIndex row_id = 0;
-    for (size_t constraint_id = 0; constraint_id < active_lower_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
+    for (size_t constraint_id = 0; constraint_id < activeSize(); ++constraint_id, ++row_id)
     {
-      const auto col_id = active_lower_bound_constraints_tangent[constraint_id];
-      jacobian_matrix(row_id, col_id) = -Scalar(1);
-    }
-    for (size_t constraint_id = 0; constraint_id < active_upper_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
-    {
-      const auto col_id = active_upper_bound_constraints_tangent[constraint_id];
-      jacobian_matrix(row_id, col_id) = -Scalar(1);
+      jacobian_matrix.block(row_id, active_idx_vs[constraint_id], 1, active_nvs[constraint_id]) =
+        -TMc.block(active_idx_qs_reduce[constraint_id], 0, 1, active_nvs[constraint_id]);
     }
   }
 
@@ -367,32 +361,23 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.cols(), res.cols());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), this->activeSize());
     PINOCCHIO_UNUSED_VARIABLE(data);
-    PINOCCHIO_UNUSED_VARIABLE(cdata);
     PINOCCHIO_UNUSED_VARIABLE(aot);
 
     if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
       res.setZero();
 
+    const CompactTangentMap_t & TMc = cdata.TMc;
     Eigen::DenseIndex row_id = 0;
-    for (size_t constraint_id = 0; constraint_id < active_lower_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
+    for (size_t constraint_id = 0; constraint_id < activeSize(); ++constraint_id, ++row_id)
     {
-      const auto col_id = active_lower_bound_constraints_tangent[constraint_id];
-
       if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
-        res.row(row_id) -= -mat.row(col_id);
+        res.row(row_id) -=
+          -TMc.block(active_idx_qs_reduce[constraint_id], 0, 1, active_nvs[constraint_id])
+          * mat.middleRows(active_idx_vs[constraint_id], active_nvs[constraint_id]);
       else
-        res.row(row_id) += -mat.row(col_id);
-    }
-    for (size_t constraint_id = 0; constraint_id < active_upper_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
-    {
-      const auto col_id = active_upper_bound_constraints_tangent[constraint_id];
-
-      if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
-        res.row(row_id) -= -mat.row(col_id);
-      else
-        res.row(row_id) += -mat.row(col_id);
+        res.row(row_id) +=
+          -TMc.block(active_idx_qs_reduce[constraint_id], 0, 1, active_nvs[constraint_id])
+          * mat.middleRows(active_idx_vs[constraint_id], active_nvs[constraint_id]);
     }
   }
 
@@ -416,32 +401,25 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), mat.cols());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), model.nv);
     PINOCCHIO_UNUSED_VARIABLE(data);
-    PINOCCHIO_UNUSED_VARIABLE(cdata);
     PINOCCHIO_UNUSED_VARIABLE(aot);
 
     if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
       res.setZero();
 
+    const CompactTangentMap_t & TMc = cdata.TMc;
     Eigen::DenseIndex row_id = 0;
-    for (size_t constraint_id = 0; constraint_id < active_lower_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
+    for (size_t constraint_id = 0; constraint_id < activeSize(); ++constraint_id, ++row_id)
     {
-      const auto col_id = active_lower_bound_constraints_tangent[constraint_id];
-
       if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
-        res.row(col_id) -= -mat.row(row_id);
+        res.middleRows(active_idx_vs[constraint_id], active_nvs[constraint_id]) -=
+          -TMc.block(active_idx_qs_reduce[constraint_id], 0, 1, active_nvs[constraint_id])
+             .transpose()
+          * mat.row(row_id);
       else
-        res.row(col_id) += -mat.row(row_id);
-    }
-    for (size_t constraint_id = 0; constraint_id < active_upper_bound_constraints_tangent.size();
-         ++constraint_id, ++row_id)
-    {
-      const auto col_id = active_upper_bound_constraints_tangent[constraint_id];
-
-      if (std::is_same<AssignmentOperatorTag<op>, RmTo>::value)
-        res.row(col_id) -= -mat.row(row_id);
-      else
-        res.row(col_id) += -mat.row(row_id);
+        res.middleRows(active_idx_vs[constraint_id], active_nvs[constraint_id]) +=
+          -TMc.block(active_idx_qs_reduce[constraint_id], 0, 1, active_nvs[constraint_id])
+             .transpose()
+          * mat.row(row_id);
     }
   }
 
