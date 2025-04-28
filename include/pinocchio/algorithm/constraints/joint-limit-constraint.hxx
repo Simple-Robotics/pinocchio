@@ -10,22 +10,6 @@
 
 namespace pinocchio
 {
-  //  template<typename Scalar, int Options>
-  //  template<template<typename, int> class JointCollectionTpl>
-  //  int JointLimitConstraintModelTpl<Scalar, Options>::check_activable_joints(
-  //    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-  //    const JointIndexVector & activable_joints)
-  //  {
-  //    for (const JointIndex joint_id : activable_joints)
-  //    {
-  //      const JointModel & jmodel = model.joints[joint_id];
-  //
-  //      if (!check_joint_type_within_sequence<ValidJointTypes>(jmodel))
-  //        return int(joint_id);
-  //    }
-  //
-  //    return -1;
-  //  }
 
   template<typename Scalar, int Options>
   template<
@@ -34,7 +18,7 @@ namespace pinocchio
     typename VectorUpperConfiguration>
   void JointLimitConstraintModelTpl<Scalar, Options>::init(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    const JointIndexVector & activable_joints,
+    const JointIndexVector & _activable_joints,
     const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
     const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
   {
@@ -44,145 +28,164 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(lb.size(), model.nq);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(ub.size(), model.nq);
 
-    // Check validity of activable_joints input
-    for (const JointIndex joint_id : activable_joints)
+    // Check validity of _activable_joints input
+    JointIndex prev_joint_id = -1;
+    for (const JointIndex joint_id : _activable_joints)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         joint_id < model.joints.size(),
         "joint_id is larger than the total number of joints contained in the model.");
+      // Ensure it is stricly increasing
+      assert(joint_id > prev_joint_id);
+      prev_joint_id = joint_id;
     }
     //    PINOCCHIO_CHECK_INPUT_ARGUMENT(
-    //      check_activable_joints(model, activable_joints) == -1,
+    //      check__activable_joints(model, _activable_joints) == -1,
     //      "One of the joint is not supported by JointLimitConstraintModelTpl.")
 
-    // Collect all potentially active bounds
-    BooleanVector is_lower_bound_constraint_active = BooleanVector::Constant(model.nq, false),
-                  is_upper_bound_constraint_active = BooleanVector::Constant(model.nq, false);
+    // TODO: Should we reserve some activable quantities ?
 
-    activable_configuration_components.reserve(size_t(model.nq));
-    activable_lower_bound_constraints.reserve(size_t(model.nq));
-    activable_lower_bound_constraints_tangent.reserve(size_t(model.nv));
-    activable_upper_bound_constraints.reserve(size_t(model.nq));
-    activable_upper_bound_constraints_tangent.reserve(size_t(model.nv));
-    for (const JointIndex joint_id : activable_joints)
+    // Loop on all q components of activable jointds to identify activable lower and upper
+    // constraints, and for each track row_id of related activable joint, idx_q in the configuration
+    // and idx_q_reduce in the subpart of q due to activable joints
+    VectorOfSize & activable_idx_rows_lower = activable_idx_rows;
+    VectorOfSize activable_idx_rows_upper;
+
+    EigenIndexVector & activable_idx_qs_reduce_lower = activable_idx_qs_reduce;
+    EigenIndexVector activable_idx_qs_reduce_upper;
+
+    EigenIndexVector activable_idx_qs_lower, activable_idx_qs_upper;
+
+    // Prepare the structure to compute sparsity pattern
+    EigenIndexVector extended_support;
+    extended_support.reserve(size_t(model.nv));
+
+    int idx_row = 0;
+    nq_reduce = 0;
+    for (const JointIndex joint_id : _activable_joints)
     {
       const JointModel & jmodel = model.joints[joint_id];
 
       const int idx_q = jmodel.idx_q();
       const int idx_v = jmodel.idx_v();
       const int nq = jmodel.nq();
-
+      const int nv = jmodel.nv();
       const auto has_configuration_limit = jmodel.hasConfigurationLimit();
-      for (int k = 0; k < nq; ++k)
+
+      bool is_joint_really_active = false;
+      for (int j_qi = 0; j_qi < nq; ++j_qi)
       {
-        const int q_index = idx_q + k;
-        if (!has_configuration_limit[size_t(k)])
+        if (!has_configuration_limit[size_t(j_qi)])
           continue;
 
-        const int v_index = idx_v + k;
+        const int q_index = idx_q + j_qi;
+        const int q_reduce_index = nq_reduce + j_qi;
+
         if (!(lb[q_index] == -std::numeric_limits<Scalar>::max()
               || lb[q_index] == -std::numeric_limits<Scalar>::infinity()))
         {
-          is_lower_bound_constraint_active[q_index] = true;
-          activable_lower_bound_constraints.push_back(q_index);
-          activable_lower_bound_constraints_tangent.push_back(v_index);
+          activable_idx_rows_lower.push_back(idx_row);
+          activable_idx_qs_lower.push_back(q_index);
+          activable_idx_qs_reduce_lower.push_back(q_reduce_index);
+          is_joint_really_active = true;
         }
         if (!(ub[q_index] == +std::numeric_limits<Scalar>::max()
               || ub[q_index] == +std::numeric_limits<Scalar>::infinity()))
         {
-          is_upper_bound_constraint_active[q_index] = true;
-          activable_upper_bound_constraints.push_back(q_index);
-          activable_upper_bound_constraints_tangent.push_back(v_index);
-        }
-
-        if (is_lower_bound_constraint_active[q_index] || is_upper_bound_constraint_active[q_index])
-        {
-          activable_configuration_components.push_back(q_index);
+          activable_idx_rows_upper.push_back(idx_row);
+          activable_idx_qs_upper.push_back(q_index);
+          activable_idx_qs_reduce_upper.push_back(q_reduce_index);
+          is_joint_really_active = true;
         }
       }
-    }
 
-    // Fill lower and upper bounds for active components of the configuration vector.
-    {
-      // TODO: this code should be removed ? activable_configuration_limits is not used anymore
-      VectorXs active_lower_bound_limit =
-                 VectorXs::Zero(Eigen::DenseIndex(activable_configuration_components.size())),
-               active_upper_bound_limit =
-                 VectorXs::Zero(Eigen::DenseIndex(activable_configuration_components.size()));
-      Eigen::Index row_id = 0;
-      for (const auto active_configuration_index : activable_configuration_components)
+      // At least one lower or upper constraint for a component of the joint is active so update the
+      // quantity
+      if (is_joint_really_active)
       {
-        active_lower_bound_limit[row_id] = lb[active_configuration_index];
-        active_upper_bound_limit[row_id] = ub[active_configuration_index];
-        row_id++;
-      }
+        activable_joints.push_back(joint_id);
+        idx_row += 1;
+        nq_reduce += nq;
 
-      activable_configuration_limits = BoxSet(active_lower_bound_limit, active_upper_bound_limit);
-    }
-
-    // Fill constraint sparsity pattern
-    VectofOfEigenIndexVector row_activable_indexes_upper;
-    VectofOfEigenIndexVector & row_activable_indexes_lower = row_activable_indexes;
-
-    EigenIndexVector extended_support;
-    extended_support.reserve(size_t(model.nv));
-    for (const JointIndex joint_id : activable_joints)
-    {
-      const JointModel & jmodel = model.joints[joint_id];
-      const auto & jsupport = model.supports[joint_id];
-
-      const int idx_q = jmodel.idx_q();
-
-      const int nv = jmodel.nv();
-      const int idx_v = jmodel.idx_v();
-
-      extended_support.clear();
-      for (size_t j = 1; j < jsupport.size() - 1; ++j)
-      {
-        const JointIndex jsupport_id = jsupport[j];
-        const JointModel & jsupport = model.joints[jsupport_id];
-
-        const int jsupport_nv = jsupport.nv();
-        const int jsupport_idx_v = jsupport.idx_v();
-
-        for (int k = 0; k < jsupport_nv; ++k)
+        // Compute the sparsity pattern of the joint
+        const auto & jsupport = model.supports[joint_id];
+        extended_support.clear();
+        for (size_t i = 1; i < jsupport.size() - 1; ++i)
         {
-          const int extended_row_id = jsupport_idx_v + k;
+          const JointIndex jsupport_id = jsupport[j];
+          const JointModel & jsupport = model.joints[jsupport_id];
+          const int jsupport_nv = jsupport.nv();
+          const int jsupport_idx_v = jsupport.idx_v();
+          for (int k = 0; k < jsupport_nv; ++k)
+          {
+            const int extended_row_id = jsupport_idx_v + k;
+            extended_support.push_back(extended_row_id);
+          }
+        }
+        for (int k = 0; k < nv; ++k)
+        {
+          const int extended_row_id = idx_v + k;
           extended_support.push_back(extended_row_id);
         }
-      }
-
-      for (int k = 0; k < nv; ++k)
-      {
-        // TODO(jcarpent): potential issue for mapping row_id_v and row_id_q together for joints
-        // with nq != nv.
-        const int row_id_v = idx_v + k;
-        const int row_id_q = idx_q + k;
-
-        extended_support.push_back(row_id_v);
-        if (is_lower_bound_constraint_active[row_id_q])
-          row_activable_indexes_lower.push_back(extended_support);
-        if (is_upper_bound_constraint_active[row_id_q])
-          row_activable_indexes_upper.push_back(extended_support);
+        row_indexes.push_back(extended_support);
       }
     }
 
-    // append row_activable_indexes_upper to row_activable_indexes_lower
-    row_activable_indexes_lower.insert(
-      row_activable_indexes_lower.end(), row_activable_indexes_upper.begin(),
-      row_activable_indexes_upper.end());
+    // Recover sizes of constraints
+    lower_activable_size = static_cast<int>(activable_idx_rows_lower.size());
+    int lower_activable_size = static_cast<int>(activable_idx_rows_upper.size());
+    int activable_size = lower_activable_size + lower_activable_size;
 
-    const size_t total_size =
-      activable_lower_bound_constraints.size() + activable_upper_bound_constraints.size();
-    assert(row_activable_indexes.size() == total_size);
+    // Recompose one vectors for all constraint with convention lower | upper
+    activable_idx_rows.insert(
+      activable_idx_rows.end(), activable_idx_rows_upper.begin(), activable_idx_rows_upper.end());
+    activable_idx_qs_reduce.insert(
+      activable_idx_qs_reduce.end(), activable_idx_qs_reduce_upper.begin(),
+      activable_idx_qs_reduce_upper.end());
+    assert(size() == activable_size);
+
+    // Fill bound limit and margin for lower and upper constraint
+    bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
+    bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
+    int row_id = 0;
+    for (const auto activable_idx_q : activable_idx_qs_lower)
+    {
+      bound_position_limit[row_id] = lb[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[row_id] = model.positionLimitMargin[activable_idx_q];
+      row_id++;
+    }
+    for (const auto activable_idx_q : activable_idx_qs_upper)
+    {
+      bound_position_limit[row_id] = ub[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[row_id] = model.positionLimitMargin[activable_idx_q];
+      row_id++;
+    }
+    assert(row_id == size());
+
+    // Fill activable_nvs and activable_idx_vs
+    activable_nvs.reserve(size());
+    activable_idx_vs.reserve(size());
+
+    std::vector<int> reduce_nvs, reduce_idx_vs;
+    reduce_nvs.reserve(nq_reduce);
+    reduce_idx_vs.reserve(nq_reduce);
+    pinocchio::indexvInfo(model, activable_joints, reduce_nvs, reduce_idx_vs);
+
+    for (const auto activable_idx_q_reduce : activable_idx_qs_reduce)
+    {
+      activable_nvs.push_back(static_cast<Eigen::DenseIndex>(reduce_nvs[activable_idx_q_reduce]));
+      activable_idx_vs.push_back(
+        static_cast<Eigen::DenseIndex>(reduce_idx_vs[activable_idx_q_reduce]));
+    }
 
     // Fill row_activable_sparsity_pattern from row_activable_indexes content
-    row_activable_sparsity_pattern.resize(total_size, BooleanVector::Zero(model.nv));
-    for (size_t row_id = 0; row_id < total_size; ++row_id)
+    row_sparsity_pattern.resize(row_indexes.size(), BooleanVector::Zero(model.nv));
+    for (size_t joint_id = 0; joint_id < row_indexes.size(); ++joint_id)
     {
-      auto & sparsity_pattern = row_activable_sparsity_pattern[row_id];
-      const auto & extended_support = row_activable_indexes[row_id];
-
+      auto & sparsity_pattern = row_sparsity_pattern[joint_id];
+      const auto & extended_support = row_indexes[joint_id];
       for (const auto val : extended_support)
         sparsity_pattern[val] = true;
     }
@@ -190,17 +193,16 @@ namespace pinocchio
     m_compliance = ComplianceVectorType::Zero(size());
     m_baumgarte_parameters = BaumgarteCorrectorParameters();
 
-    // Allocate the maximum size for the dynamic limits
-    active_lower_bound_constraints.reserve(this->getActivableLowerBoundConstraints().size());
-    active_lower_bound_constraints_tangent.reserve(
-      this->getActivableLowerBoundConstraintsTangent().size());
-    active_upper_bound_constraints.reserve(this->getActivableUpperBoundConstraints().size());
-    active_upper_bound_constraints_tangent.reserve(
-      this->getActivableUpperBoundConstraintsTangent().size());
-    active_set_indexes.reserve(
-      active_upper_bound_constraints_tangent.capacity()
-      + active_lower_bound_constraints_tangent.capacity());
+    // Allocate the maximum size for the dynamic quantity
+    lower_active_size = 0;
+    active_set_indexes.reserve(size());
+    active_idx_rows.reserve(size());
+    active_idx_qs_reduce.reserve(size());
+    active_nvs.reserve(size());
+    active_idx_vs.reserve(size());
+    active_compliance_storage.resize(size());
     active_compliance_storage.resize(0);
+    assert(activeSize() == lowerActiveSize() == upperActiveSize() == 0);
   }
 
   template<typename Scalar, int Options>
