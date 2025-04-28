@@ -360,6 +360,7 @@ namespace pinocchio
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & active_joints);
 
+    JointIndexVector active_joints;
     EigenIndexVector active_dofs;
     VectorOfBooleanVector row_sparsity_pattern;
     VectofOfEigenIndexVector row_active_indexes;
