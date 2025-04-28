@@ -14,6 +14,7 @@
 #include "pinocchio/serialization/eigen.hpp"
 #include "pinocchio/serialization/joints.hpp"
 #include "pinocchio/serialization/frame.hpp"
+#include "pinocchio/serialization/double-entry-container.hpp"
 
 #define PINOCCHIO_MAKE_DATA_NVP(ar, data, field_name) ar & make_nvp(#field_name, data.field_name)
 
@@ -159,7 +160,7 @@ namespace boost
       PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_supported);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_on_joint);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, neighbour_links);
-      //      PINOCCHIO_MAKE_DATA_NVP(ar, data, joint_cross_coupling);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, joint_cross_coupling);
     }
 
   } // namespace serialization
