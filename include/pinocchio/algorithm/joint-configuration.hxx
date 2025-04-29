@@ -693,6 +693,9 @@ namespace pinocchio
     std::vector<int> & nvs,
     std::vector<int> & idx_vs)
   {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(nvs.size(), 0, "The nvs vector must empty");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(idx_vs.size(), 0, "The nvs vector must empty");
+
     typename IndexvInfoStep::ArgsType args(nvs, idx_vs);
 
     for (size_t i = 0; i < joint_selection.size(); ++i)

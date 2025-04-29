@@ -62,7 +62,7 @@ namespace pinocchio
     EigenIndexVector extended_support;
     extended_support.reserve(size_t(model.nv));
 
-    int idx_row = 0;
+    size_t idx_row = 0;
     nq_reduce = 0;
     for (const JointIndex joint_id : _activable_joints)
     {
@@ -94,7 +94,7 @@ namespace pinocchio
         if (!(ub[q_index] == +std::numeric_limits<Scalar>::max()
               || ub[q_index] == +std::numeric_limits<Scalar>::infinity()))
         {
-          activable_idx_rows_upper.push_back(static_cast<std::size_t>(idx_row));
+          activable_idx_rows_upper.push_back(idx_row);
           activable_idx_qs_upper.push_back(q_index);
           activable_idx_qs_reduce_upper.push_back(q_reduce_index);
           is_joint_really_active = true;

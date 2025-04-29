@@ -127,9 +127,6 @@ BOOST_AUTO_TEST_CASE(tangent_map_test)
   Eigen::VectorXd q_plus(Eigen::VectorXd::Zero(model.nq));
   Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
 
-  std::vector<int> nvs(static_cast<size_t>(model.nq));
-  std::vector<int> idx_vs(static_cast<size_t>(model.nq));
-
   std::vector<Eigen::MatrixXd> TMs(5, Eigen::MatrixXd::Zero(model.nq, model.nv));
 
   Eigen::MatrixXd TMc(Eigen::MatrixXd::Zero(model.nq, MAX_JOINT_NV));
@@ -146,6 +143,11 @@ BOOST_AUTO_TEST_CASE(tangent_map_test)
     joint_selection.push_back(i);
   }
   compactTangentMap(model, joint_selection, q, TMc);
+  std::vector<int> nvs;
+  nvs.reserve(static_cast<size_t>(model.nq));
+  std::vector<int> idx_vs;
+  idx_vs.reserve(static_cast<size_t>(model.nq));
+
   indexvInfo(model, joint_selection, nvs, idx_vs);
   size_t k_s;
   for (Eigen::DenseIndex k = 0; k < model.nq; ++k)
