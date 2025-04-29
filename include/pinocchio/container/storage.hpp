@@ -109,9 +109,9 @@ namespace pinocchio
     {
     }
 
-    /// \brief Copy constructor
+    /// \brief Copy constructor (only consider the active part of storage)
     EigenStorageTpl(const EigenStorageTpl & other)
-    : m_storage(other.m_storage)
+    : m_storage(other.m_storage.head(other.m_map.size()))
     , m_map(m_storage.data(), other.m_map.rows(), other.m_map.cols())
     {
     }
@@ -121,7 +121,7 @@ namespace pinocchio
 
     EigenStorageTpl & operator=(const EigenStorageTpl & other)
     {
-      m_storage = other.m_storage;
+      m_storage = other.m_storage.head(other.m_map.size());
       new (&m_map) MapType(m_storage.data(), other.m_map.rows(), other.m_map.cols());
 
       return *this;
@@ -132,8 +132,7 @@ namespace pinocchio
     typename CastType<NewScalar, EigenStorageTpl>::type cast() const
     {
       typedef typename CastType<NewScalar, EigenStorageTpl>::type ReturnType;
-      ReturnType res;
-      res.resize(rows(), cols());
+      ReturnType res = ReturnType(rows(), cols());
       res.m_storage.head(size()) = m_storage.head(size()).template cast<NewScalar>();
       return res;
     }
@@ -249,7 +248,8 @@ namespace pinocchio
     template<typename OtherMatrixLike>
     bool operator==(const EigenStorageTpl<OtherMatrixLike> & other) const
     {
-      return m_storage == other.m_storage && rows() == other.rows() && cols() == other.cols();
+      return rows() == other.rows() && cols() == other.cols()
+             && m_storage.head(size()) == other.m_storage.head(size());
     }
 
   protected:
