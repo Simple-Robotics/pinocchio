@@ -211,8 +211,9 @@ namespace pinocchio
     active_idx_qs_reduce.reserve(r_size);
     active_nvs.reserve(r_size);
     active_idx_vs.reserve(r_size);
-    active_compliance_storage.resize(size());
-    active_compliance_storage.resize(0);
+    // active_compliance_storage.resize(size()) would allocate double size...
+    // active_compliance_storage.resize(0);  and we resize again
+    active_compliance_storage.reserve(size());
     assert(activeSize() == lowerActiveSize() == upperActiveSize() == 0);
   }
 
