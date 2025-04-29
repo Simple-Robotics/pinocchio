@@ -61,8 +61,6 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
   Data data(model);
   const auto & parents_fromRow = data.parents_fromRow;
 
-  //  std::cout << "model:\n" << model << std::endl;
-
   const std::string ee_name = "wrist2_joint";
   const JointIndex ee_id = model.getJointId(ee_name);
 
@@ -98,7 +96,7 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
 
   // we set the margin to infinity so all limits are taken into account in what follows.
   model.positionLimitMargin =
-    Eigen::VectorXd::Constant(constraint.size(), std::numeric_limits<double>::max());
+    Eigen::VectorXd::Constant(model.nq, std::numeric_limits<double>::max());
   constraint = JointLimitConstraintModel(model, activable_joint_ids);
   JointLimitConstraintData constraint_data(constraint);
   const Eigen::VectorXd q0 = randomConfiguration(model);
@@ -192,12 +190,12 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian)
   const Model::IndexVector & ee_support = model.supports[ee_id];
   const Model::IndexVector activable_joint_ids(ee_support.begin() + 1, ee_support.end());
 
-  JointLimitConstraintModel constraint_model(model, activable_joint_ids);
-  JointLimitConstraintData constraint_data(constraint_model);
-
   // we set the margin to infinity so all limits are taken into account in what follows.
   model.positionLimitMargin =
-    Eigen::VectorXd::Constant(constraint_model.size(), std::numeric_limits<double>::max());
+    Eigen::VectorXd::Constant(model.nq, std::numeric_limits<double>::max());
+
+  JointLimitConstraintModel constraint_model(model, activable_joint_ids);
+  JointLimitConstraintData constraint_data(constraint_model);
 
   // Check against finite differences on the drift of the constraint
   const double eps_fd = 1e-8;
@@ -207,18 +205,20 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian)
     data.q_in = q0;
     constraint_model.resize(model, data, constraint_data);
     constraint_model.calc(model, data, constraint_data);
+
     Eigen::MatrixXd jacobian_matrix(constraint_model.activeSize(), model.nv);
     constraint_model.jacobian(model, data, constraint_data, jacobian_matrix);
     Data data_fd(model);
     JointLimitConstraintData constraint_data_fd(constraint_model);
     Eigen::MatrixXd jacobian_matrix_fd(constraint_model.activeSize(), model.nv);
-    // TODO compute jacobian only for activable constraints
+
     for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
     {
       Eigen::VectorXd v_eps = Eigen::VectorXd::Zero(model.nv);
       v_eps[k] = eps_fd;
       const Eigen::VectorXd q_plus = integrate(model, q0, v_eps);
       data_fd.q_in = q_plus;
+
       constraint_model.resize(model, data_fd, constraint_data_fd);
       constraint_model.calc(model, data_fd, constraint_data_fd);
 
@@ -260,6 +260,8 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_residual)
   model.upperPositionLimit[1] = std::numeric_limits<double>::max();
   model.upperPositionLimit[2] = std::numeric_limits<double>::max();
 
+  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, 1e-3);
+
   Data data(model);
 
   const Model::IndexVector activable_joint_ids = {joint_id_x, joint_id_y, joint_id_z};
@@ -268,8 +270,6 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_residual)
   JointLimitConstraintModel constraint_model(model, activable_joint_ids);
   BOOST_CHECK(constraint_model.size() == model.nq);
   JointLimitConstraintData constraint_data(constraint_model);
-
-  model.positionLimitMargin = Eigen::VectorXd::Constant(constraint_model.size(), 1e-3);
 
   for (int i = 0; i < 1e4; ++i)
   {
@@ -330,6 +330,8 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_jacobian)
   model.upperPositionLimit[1] = std::numeric_limits<double>::max();
   model.upperPositionLimit[2] = std::numeric_limits<double>::max();
 
+  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, 1e-3);
+
   Data data(model);
 
   const Model::IndexVector activable_joint_ids = {joint_id_x, joint_id_y, joint_id_z};
@@ -337,8 +339,6 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_jacobian)
 
   JointLimitConstraintModel constraint_model(model, activable_joint_ids);
   JointLimitConstraintData constraint_data(constraint_model);
-
-  model.positionLimitMargin = Eigen::VectorXd::Constant(constraint_model.size(), 1e-3);
 
   // Check against finite differences on the drift of the constraint
   const double eps_fd = 1e-8;

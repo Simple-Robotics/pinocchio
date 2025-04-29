@@ -29,17 +29,14 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(ub.size(), model.nq);
 
     // Check validity of _activable_joints input
-    JointIndex prev_joint_id = JointIndex(-1);
-    PINOCCHIO_UNUSED_VARIABLE(prev_joint_id);
     for (const JointIndex joint_id : _activable_joints)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
         joint_id < model.joints.size(),
         "joint_id is larger than the total number of joints contained in the model.");
-      // Ensure it is stricly increasing
-      assert(joint_id > prev_joint_id);
-      prev_joint_id = joint_id;
+      PINOCCHIO_CHECK_INPUT_ARGUMENT(joint_id > 0, "joint_id is not valid.");
     }
+
     //    PINOCCHIO_CHECK_INPUT_ARGUMENT(
     //      check__activable_joints(model, _activable_joints) == -1,
     //      "One of the joint is not supported by JointLimitConstraintModelTpl.")
@@ -177,7 +174,10 @@ namespace pinocchio
     std::vector<int> reduce_nvs, reduce_idx_vs;
     reduce_nvs.reserve(static_cast<std::size_t>(nq_reduce));
     reduce_idx_vs.reserve(static_cast<std::size_t>(nq_reduce));
+
     pinocchio::indexvInfo(model, activable_joints, reduce_nvs, reduce_idx_vs);
+    assert(nq_reduce == static_cast<int>(reduce_nvs.size()));
+    assert(nq_reduce == static_cast<int>(reduce_idx_vs.size()));
 
     for (const auto activable_idx_q_reduce : activable_idx_qs_reduce)
     {
@@ -185,6 +185,8 @@ namespace pinocchio
       activable_nvs.push_back(static_cast<Eigen::DenseIndex>(reduce_nvs[idx_query]));
       activable_idx_vs.push_back(static_cast<Eigen::DenseIndex>(reduce_idx_vs[idx_query]));
     }
+    assert(r_size == activable_nvs.size());
+    assert(r_size == activable_idx_vs.size());
 
     // Fill row_activable_sparsity_pattern from row_activable_indexes content
     row_sparsity_pattern.resize(row_indexes.size(), BooleanVector::Zero(model.nv));

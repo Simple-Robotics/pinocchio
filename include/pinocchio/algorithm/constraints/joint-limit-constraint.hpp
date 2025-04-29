@@ -159,8 +159,7 @@ namespace pinocchio
     JointLimitConstraintModelTpl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & _activable_joints)
-    : active_compliance_storage(0, 1)
-    , active_compliance(active_compliance_storage.map())
+    : active_compliance(active_compliance_storage.map())
     {
       init(model, _activable_joints, model.lowerPositionLimit, model.upperPositionLimit);
     }
@@ -174,8 +173,7 @@ namespace pinocchio
       const JointIndexVector & _activable_joints,
       const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
-    : active_compliance_storage(0, 1)
-    , active_compliance(active_compliance_storage.map())
+    : active_compliance(active_compliance_storage.map())
     {
       init(model, _activable_joints, lb, ub);
     }
@@ -226,7 +224,7 @@ namespace pinocchio
 
     int activeSize() const
     {
-      return int(m_set.size());
+      return int(active_idx_rows.size());
     }
 
     Base & base()
@@ -631,7 +629,7 @@ namespace pinocchio
 
     explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
     : activable_constraint_residual(constraint_model.size())
-    , constraint_residual_storage(constraint_model.size(), 1)
+    , constraint_residual_storage(constraint_model.size())
     , constraint_residual(constraint_residual_storage.map())
     , compact_tangent_map(CompactTangentMap_t::Zero(constraint_model.getNqReduce(), MAX_JOINT_NV))
     {
