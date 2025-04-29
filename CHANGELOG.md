@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Added Lie group method `tangentMap` which gives, in the form of a `nq x nv` matrix, the linear mapping that transforms a configuration variation expressed in the Lie algebra (size `nv`) into a small variation expressed in the parametric space (size `nq`). Composed with Jacobian of other methods of Pinocchio that use the Lie group structure, it allows obtaining standard Jacobians in order to, for example, insert Pinocchio derivatives into standard Euclidean differentiation pipelines.
+- Added Lie group methods `tangentMapProduct` and `tangentMapTransport` that apply `tangentMap` while exploiting sparsity.
+- Added model methods `tangentMap`, `tangentMapProduct` and `tangentMapTransport` that perform tangent map for the whole configuration space of the model.
+- Now all Lie group related algorithms (e.g. `dIntegrate`...) work seamlessly for models having some mimic joints.
+- Added joint methods `jointQrows`, `jointQcols` (resp. `jointQVblock`) that make selections of size `NQ` (resp. `NQ x NV`).
+- Added joint method `lieGroup` that returns the Lie group instance associated to a joint. This allows performing some operations (e.g. `integrate`...) individually.
+- Added model method `lieGroup` that returns the Lie group instance associated to the model. It is a Cartesian product of multiple Lie groups. It allows combination of the model Lie group with other Lie groups.
+
 ## [3.6.0] - 2025-04-28
 
 ### Fixed
@@ -16,7 +25,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Add explicit template instantiation for constraint algorithms for `casadi`, `CppAD` and `CppADCodeGen` scalar ([#2659](https://github.com/stack-of-tasks/pinocchio/pull/2659))
 - Add `casadi` bindings for `pinocchio.initConstraintDynamics` and `pinocchio.constraintDynamics` ([#2659](https://github.com/stack-of-tasks/pinocchio/pull/2659))
-
 
 ## [3.5.0] - 2025-04-02
 
