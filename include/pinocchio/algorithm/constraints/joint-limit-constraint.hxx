@@ -132,29 +132,9 @@ namespace pinocchio
 
     // Recover sizes of constraints
     lower_activable_size = static_cast<int>(activable_idx_rows_lower.size());
-    int lower_activable_size = static_cast<int>(activable_idx_rows_upper.size());
-    int activable_size = lower_activable_size + lower_activable_size;
+    int upper_activable_size = static_cast<int>(activable_idx_rows_upper.size());
+    int activable_size = lower_activable_size + upper_activable_size;
     PINOCCHIO_UNUSED_VARIABLE(activable_size);
-
-    // Fill bound limit and margin for lower and upper constraint
-    bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
-    bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
-    Eigen::DenseIndex bound_row_id = 0;
-    for (const auto activable_idx_q : activable_idx_qs_lower)
-    {
-      bound_position_limit[bound_row_id] = lb[activable_idx_q];
-      assert(model.positionLimitMargin[activable_idx_q] >= 0);
-      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
-      bound_row_id++;
-    }
-    for (const auto activable_idx_q : activable_idx_qs_upper)
-    {
-      bound_position_limit[bound_row_id] = ub[activable_idx_q];
-      assert(model.positionLimitMargin[activable_idx_q] >= 0);
-      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
-      bound_row_id++;
-    }
-    assert(bound_row_id == static_cast<Eigen::DenseIndex>(activable_size));
 
     // Recompose one vectors for all constraint with convention lower | upper
     activable_idx_rows.insert(
@@ -165,6 +145,29 @@ namespace pinocchio
     activable_idx_qs.insert(
       activable_idx_qs.end(), activable_idx_qs_upper.begin(), activable_idx_qs_upper.end());
     assert(size() == activable_size);
+
+    // Fill bound limit and margin for lower and upper constraint
+    bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
+    bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
+    Eigen::DenseIndex bound_row_id = 0;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(lowerSize()); i++)
+    {
+      const auto activable_idx_q = activable_idx_qs[i];
+      bound_position_limit[bound_row_id] = lb[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
+      bound_row_id++;
+    }
+    for (std::size_t i = static_cast<std::size_t>(lowerSize());
+         i < static_cast<std::size_t>(size()); i++)
+    {
+      const auto activable_idx_q = activable_idx_qs[i];
+      bound_position_limit[bound_row_id] = ub[activable_idx_q];
+      assert(model.positionLimitMargin[activable_idx_q] >= 0);
+      bound_position_margin[bound_row_id] = model.positionLimitMargin[activable_idx_q];
+      bound_row_id++;
+    }
+    assert(bound_row_id == static_cast<Eigen::DenseIndex>(size()));
 
     // Fill activable_nvs and activable_idx_vs
     std::size_t r_size = static_cast<std::size_t>(size());
