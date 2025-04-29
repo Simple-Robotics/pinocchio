@@ -156,21 +156,27 @@ namespace pinocchio
       new (&m_map) MapType(m_storage.data(), new_size);
     }
 
-    /// \brief Resize the current capacity of the internal storage.
+    /// \brief Reserve some place if the capacity is not enough.
     ///
     /// \remarks This is not data conservative
     void reserve(const Index rows, const Index cols)
     {
       const Index new_size = rows * cols;
-      m_storage.resize(new_size);
-      new (&m_map) MapType(m_storage.data(), m_map.rows(), m_map.cols());
+      if (new_size > capacity())
+      {
+        m_storage.resize(new_size);
+        new (&m_map) MapType(m_storage.data(), m_map.rows(), m_map.cols());
+      }
     }
 
     void reserve(const Index new_size)
     {
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(MatrixLike)
-      m_storage.resize(new_size);
-      new (&m_map) MapType(m_storage.data(), m_map.size());
+      if (new_size > capacity())
+      {
+        m_storage.resize(new_size);
+        new (&m_map) MapType(m_storage.data(), m_map.size());
+      }
     }
 
     /// \brief Conservative resize of the current capacity of the internal storage. The data are
