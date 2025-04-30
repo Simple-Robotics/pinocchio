@@ -9,7 +9,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/box-set.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/unary-constraint-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 
@@ -91,7 +91,7 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct FrictionalJointConstraintModelTpl
-  : ConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
+  : UnaryConstraintModelBase<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   , ConstraintModelCommonParameters<FrictionalJointConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
@@ -101,7 +101,7 @@ namespace pinocchio
     };
 
     typedef FrictionalJointConstraintModelTpl Self;
-    typedef ConstraintModelBase<Self> Base;
+    typedef UnaryConstraintModelBase<Self> Base;
     typedef ConstraintModelCommonParameters<Self> BaseCommonParameters;
 
     template<typename NewScalar, int NewOptions>

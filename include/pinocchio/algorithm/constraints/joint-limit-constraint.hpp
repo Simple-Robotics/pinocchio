@@ -11,7 +11,7 @@
 
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint-cone.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/unary-constraint-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
@@ -97,7 +97,7 @@ namespace pinocchio
 
   template<typename _Scalar, int _Options>
   struct JointLimitConstraintModelTpl
-  : ConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
+  : UnaryConstraintModelBase<JointLimitConstraintModelTpl<_Scalar, _Options>>
   , ConstraintModelCommonParameters<JointLimitConstraintModelTpl<_Scalar, _Options>>
   {
     typedef _Scalar Scalar;
