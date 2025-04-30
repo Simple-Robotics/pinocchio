@@ -249,6 +249,12 @@ namespace pinocchio
     // -TMv + (q_l - q) <= 0
     // -TMv + (q_u - q) >= 0
 
+    // We compute all active quanties
+    // active_[idx_rows|idx_qs_reduce|nvs|idx_vs] are store
+    // but they are not necessary as they are recoverable from active_set_indexes
+    // However it imply double referencing in all jacobian methods
+    // And for one call of resize/calc, their can be multiple call to jacobian methods !
+
     // Lower
     for (std::size_t i = 0; i < static_cast<std::size_t>(lowerSize()); i++)
     {
