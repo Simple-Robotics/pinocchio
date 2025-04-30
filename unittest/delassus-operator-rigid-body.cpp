@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(default_constructor_reference_wrapper)
   ConstraintModelVector constraint_models;
   std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
   ConstraintDataVector constraint_datas;
-  std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
+  auto constraint_datas_ref = helper::make_ref(constraint_datas);
 
   DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
     model_ref, data_ref, constraint_models_ref, constraint_datas_ref);
