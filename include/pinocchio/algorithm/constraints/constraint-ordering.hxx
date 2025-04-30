@@ -10,34 +10,39 @@
 namespace pinocchio
 {
 
-  template<
-    typename Scalar,
-    int Options,
-    template<typename, int> class JointCollectionTpl,
-    class ConstraintModel,
-    class ConstraintModelAllocator>
-  inline void computeJointMinimalOrdering(
-    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-    DataTpl<Scalar, Options, JointCollectionTpl> & data,
-    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models)
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  struct MinimalOrderingConstraintStepVisitor
+  : visitors::ConstraintUnaryVisitorBase<
+      MinimalOrderingConstraintStepVisitor<Scalar, Options, JointCollectionTpl>>
   {
-    typedef typename Model::JointIndex JointIndex;
-    typedef std::pair<JointIndex, JointIndex> JointPair;
-    typedef Data::Matrix6 Matrix6;
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
 
-    // First step: for each joint, collect their neighbourds
-    auto & neighbours = data.neighbour_links;
-    for (auto & neighbour_elt : neighbours)
-      neighbour_elt.clear();
-    data.joint_cross_coupling.clear();
+    typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
-    // Get links supporting constraints
-    std::fill(data.constraints_supported_dim.begin(), data.constraints_supported_dim.end(), 0);
-    for (std::size_t i = 0; i < constraint_models.size(); ++i)
+    typedef visitors::ConstraintUnaryVisitorBase<
+      MinimalOrderingConstraintStepVisitor<Scalar, Options, JointCollectionTpl>>
+      Base;
+
+    template<typename ConstraintModel>
+    static void
+    algo(const ConstraintModelBase<ConstraintModel> & cmodel, const Model & model, Data & data)
     {
-      const ConstraintModel & cmodel = constraint_models[i];
+      algo_step(cmodel.derived(), model, data);
+    }
+
+    template<typename ConstraintModel>
+    static void algo_step(
+      const BinaryConstraintModelBase<ConstraintModel> & cmodel, const Model & model, Data & data)
+    {
+      typedef std::pair<JointIndex, JointIndex> JointPair;
+      typedef typename Data::Matrix6 Matrix6;
+
+      PINOCCHIO_UNUSED_VARIABLE(model);
+
       const JointIndex joint1_id = cmodel.joint1_id;
       const JointIndex joint2_id = cmodel.joint2_id;
+      auto & neighbours = data.neighbour_links;
 
       const auto constraint_size = cmodel.size();
       data.constraints_supported_dim[joint1_id] += constraint_size;
@@ -63,6 +68,72 @@ namespace pinocchio
           == joint2_neighbours.end())
           joint2_neighbours.push_back(joint1_id);
       }
+    }
+    template<typename _Scalar, int _Options>
+    static void algo_step(
+      const FrictionalJointConstraintModelTpl<_Scalar, _Options> & cmodel,
+      const Model & model,
+      Data & data)
+    {
+      for (const JointIndex joint_id : cmodel.getActiveJoints())
+      {
+        data.constraints_supported_dim[joint_id] += model.nvs[joint_id];
+      }
+    }
+
+    using Base::run;
+
+    template<typename ConstraintModel>
+    static void run(
+      const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+      const Model & model,
+      Data & data)
+    {
+      algo(cmodel.derived(), model, data);
+    }
+
+    template<
+      typename _Scalar,
+      int _Options,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    static void run(
+      const pinocchio::ConstraintModelTpl<_Scalar, _Options, ConstraintCollectionTpl> & cmodel,
+      const Model & model,
+      Data & data)
+    {
+      ArgsType args(model, data);
+      run(cmodel.derived(), args);
+    }
+  }; // struct MinimalOrderingConstraintStepVisitor
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
+    class ConstraintModelAllocator>
+  inline void computeJointMinimalOrdering(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models)
+  {
+    typedef typename Model::JointIndex JointIndex;
+    typedef std::pair<JointIndex, JointIndex> JointPair;
+    typedef Data::Matrix6 Matrix6;
+
+    // First step: for each joint, collect their neighbourds
+    auto & neighbours = data.neighbour_links;
+    for (auto & neighbour_elt : neighbours)
+      neighbour_elt.clear();
+    data.joint_cross_coupling.clear();
+
+    // Get links supporting constraints
+    std::fill(data.constraints_supported_dim.begin(), data.constraints_supported_dim.end(), 0);
+    typedef MinimalOrderingConstraintStepVisitor<Scalar, Options, JointCollectionTpl> Step;
+    for (std::size_t i = 0; i < constraint_models.size(); ++i)
+    {
+      const ConstraintModel & cmodel = constraint_models[i];
+      Step::run(cmodel, model, data);
     }
 
     // Second step: order the joints according to the minimum degree heuristic
