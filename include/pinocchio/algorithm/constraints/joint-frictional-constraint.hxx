@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hxx__
@@ -170,6 +170,60 @@ namespace pinocchio
         res.row(col_id) -= mat.row(Eigen::DenseIndex(row_id));
       else
         res.row(col_id) += mat.row(Eigen::DenseIndex(row_id));
+    }
+  }
+
+  template<typename Scalar, int Options>
+  template<
+    template<typename, int> class JointCollectionTpl,
+    typename VectorNLike,
+    ReferenceFrame rf>
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::appendCouplingConstraintInertias(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const ConstraintData & cdata,
+    const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
+    const ReferenceFrameTag<rf> reference_frame) const
+  {
+    PINOCCHIO_UNUSED_VARIABLE(cdata);
+    PINOCCHIO_UNUSED_VARIABLE(reference_frame);
+
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      diagonal_constraint_inertia.size(), size(),
+      "The diagonal_constraint_inertia is of wrong size.");
+
+    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+    using Matrix6 = typename Data::Inertia::Matrix6;
+
+    Eigen::DenseIndex row_id = 0;
+    Matrix6 SI;
+    for (const JointIndex joint_id : active_joints)
+    {
+      const auto joint_nv = model.nvs[joint_id];
+      const auto joint_idx_v = model.idx_vs[joint_id];
+      const auto joint_diagonal_constraint_inertia =
+        diagonal_constraint_inertia.segment(row_id, joint_nv);
+
+      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
+      {
+        const auto J_cols = data.J.middleCols(joint_idx_v, joint_nv);
+        SI.leftCols(joint_nv).noalias() = J_cols * joint_diagonal_constraint_inertia.asDiagonal();
+        data.oYaba_augmented[joint_id].noalias() += SI.leftCols(joint_nv) * J_cols.transpose();
+      }
+      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
+      {
+        // TODO(jcarpent): create dedicated visitor for efficiency
+        const auto & jdata = data.joints[joint_id];
+        const auto S_matrix = jdata.S().matrix();
+        SI.leftCols(joint_nv).noalias() = S_matrix * joint_diagonal_constraint_inertia.asDiagonal();
+        data.oYaba_augmented[joint_id].noalias() += SI.leftCols(joint_nv) * S_matrix.transpose();
+      }
+      else
+      {
+        assert(false && "must never happened");
+      }
+
+      row_id += joint_nv;
     }
   }
 
