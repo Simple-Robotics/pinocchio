@@ -161,7 +161,9 @@ namespace pinocchio
       const JointIndexVector & _activable_joints)
     : active_compliance(active_compliance_storage.map())
     {
-      init(model, _activable_joints, model.lowerPositionLimit, model.upperPositionLimit);
+      init(
+        model, _activable_joints, model.lowerPositionLimit, model.upperPositionLimit,
+        model.positionLimitMargin);
     }
 
     template<
@@ -175,7 +177,23 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub)
     : active_compliance(active_compliance_storage.map())
     {
-      init(model, _activable_joints, lb, ub);
+      init(model, _activable_joints, lb, ub, model.positionLimitMargin);
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename VectorLowerConfiguration,
+      typename VectorUpperConfiguration,
+      typename VectorMarginConfiguration>
+    JointLimitConstraintModelTpl(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const JointIndexVector & _activable_joints,
+      const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
+      const Eigen::MatrixBase<VectorUpperConfiguration> & ub,
+      const Eigen::MatrixBase<VectorMarginConfiguration> & marg)
+    : active_compliance(active_compliance_storage.map())
+    {
+      init(model, _activable_joints, lb, ub, marg);
     }
 
     /// \brief Cast operator
@@ -551,12 +569,13 @@ namespace pinocchio
     template<
       template<typename, int> class JointCollectionTpl,
       typename VectorLowerConfiguration,
-      typename VectorUpperConfiguration>
+      typename VectorUpperConfiguration,
+      typename VectorMarginConfiguration>
     void init(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & _activable_joints,
-      const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
-      const Eigen::MatrixBase<VectorUpperConfiguration> & ub);
+      const Eigen::MatrixBase<VectorUpperConfiguration> & ub,
+      const Eigen::MatrixBase<VectorMarginConfiguration> & marg);
 
     /// @brief List of joints that are concerned by the constraint. size nja
     JointIndexVector activable_joints;
