@@ -2,8 +2,8 @@
 // Copyright (c) 2023-2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
-#define __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
+#ifndef __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
+#define __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
@@ -67,4 +67,4 @@ namespace pinocchio
   }; // struct BinaryConstraintModelBase
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
