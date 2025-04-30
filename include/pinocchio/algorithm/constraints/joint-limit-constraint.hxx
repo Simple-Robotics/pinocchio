@@ -5,8 +5,10 @@
 #ifndef __pinocchio_algorithm_constraints_joint_limit_constraint_hxx__
 #define __pinocchio_algorithm_constraints_joint_limit_constraint_hxx__
 
-#include "pinocchio/multibody/joint/joint-basic-visitors.hpp"
 #include <iostream>
+#include <algorithm>
+
+#include "pinocchio/multibody/joint/joint-basic-visitors.hpp"
 
 namespace pinocchio
 {
@@ -169,11 +171,8 @@ namespace pinocchio
     }
     assert(bound_row_id == static_cast<Eigen::DenseIndex>(size()));
 
-    // Fill activable_nvs and activable_idx_vs
-    std::size_t r_size = static_cast<std::size_t>(size());
-    activable_nvs.reserve(r_size);
-    activable_idx_vs.reserve(r_size);
-
+    // Get nvs and idx_vs of all actibale joints to compute nv_max_atom
+    // and activable_nvs, activable_idx_vs
     std::vector<int> reduce_nvs, reduce_idx_vs;
     reduce_nvs.reserve(static_cast<std::size_t>(nq_reduce));
     reduce_idx_vs.reserve(static_cast<std::size_t>(nq_reduce));
@@ -181,7 +180,12 @@ namespace pinocchio
     pinocchio::indexvInfo(model, activable_joints, reduce_nvs, reduce_idx_vs);
     assert(nq_reduce == static_cast<int>(reduce_nvs.size()));
     assert(nq_reduce == static_cast<int>(reduce_idx_vs.size()));
+    nv_max_atom = std::max_element(reduce_nvs.begin(), reduce_nvs.end());
+    assert(nv_max_atom <= MAX_JOINT_NV);
 
+    std::size_t r_size = static_cast<std::size_t>(size());
+    activable_nvs.reserve(r_size);
+    activable_idx_vs.reserve(r_size);
     for (const auto activable_idx_q_reduce : activable_idx_qs_reduce)
     {
       std::size_t idx_query = static_cast<std::size_t>(activable_idx_q_reduce);

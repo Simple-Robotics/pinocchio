@@ -141,7 +141,7 @@ namespace pinocchio
     typedef std::vector<JointIndex> JointIndexVector;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
     typedef VectorXs VectorConstraintSize;
-    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, MAX_JOINT_NV, Eigen::RowMajor>
+    typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
       CompactTangentMap_t;
 
     JointLimitConstraintModelTpl()
@@ -189,6 +189,7 @@ namespace pinocchio
 
       res.activable_joints = activable_joints;
       res.nq_reduce = nq_reduce;
+      res.nv_max_atom = nv_max_atom;
       res.lower_activable_size = lower_activable_size;
       res.lower_active_size = lower_active_size;
       res.row_sparsity_pattern = row_sparsity_pattern;
@@ -340,6 +341,10 @@ namespace pinocchio
     {
       return nq_reduce;
     }
+    int getNvMaxAtom() const
+    {
+      return nv_max_atom;
+    }
     int lowerSize() const
     {
       return lower_activable_size;
@@ -412,6 +417,7 @@ namespace pinocchio
     {
       return base() == other.base() && base_common_parameters() == other.base_common_parameters()
              && activable_joints == other.activable_joints && nq_reduce == other.nq_reduce
+             && nv_max_atom == other.nv_max_atom
              && lower_activable_size == other.lower_activable_size
              && lower_active_size == other.lower_active_size
              && row_sparsity_pattern == other.row_sparsity_pattern
@@ -441,6 +447,7 @@ namespace pinocchio
         base_common_parameters() = other.base_common_parameters();
         activable_joints = other.activable_joints;
         nq_reduce = other.nq_reduce;
+        nv_max_atom = other.nv_max_atom;
         lower_activable_size = other.lower_activable_size;
         lower_active_size = other.lower_active_size;
         row_sparsity_pattern = other.row_sparsity_pattern;
@@ -556,6 +563,9 @@ namespace pinocchio
     /// @brief nq size given the considered joints
     /// nq_reduce = SUM(j in activable_joints) j.nq
     int nq_reduce;
+    /// @brief maximum nv size off all atomic (even if there is some composite) in all
+    /// activable_joints
+    int nv_max_atom;
     /// @brief number of lower bound limite activable and active
     int lower_activable_size, lower_active_size;
 
@@ -631,7 +641,8 @@ namespace pinocchio
     : activable_constraint_residual(constraint_model.size())
     , constraint_residual_storage(constraint_model.size())
     , constraint_residual(constraint_residual_storage.map())
-    , compact_tangent_map(CompactTangentMap_t::Zero(constraint_model.getNqReduce(), MAX_JOINT_NV))
+    , compact_tangent_map(
+        CompactTangentMap_t::Zero(constraint_model.getNqReduce(), constraint_model.getNvMaxAtom()))
     {
       constraint_residual_storage.resize(0);
     }
