@@ -306,6 +306,12 @@ namespace pinocchio
       return this->compliance();
     }
 
+    /// \brief Returns the vector of active joints
+    const JointIndexVector & getActiveJoints() const
+    {
+      return active_joints;
+    }
+
     /// \brief Returns the vector of active rows
     const EigenIndexVector & getActiveDofs() const
     {
