@@ -5,6 +5,8 @@
 #ifndef __pinocchio_algorithm_constraints_constraint_ordering_hxx__
 #define __pinocchio_algorithm_constraints_constraint_ordering_hxx__
 
+#include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
+
 /// @cond DEV
 
 namespace pinocchio
