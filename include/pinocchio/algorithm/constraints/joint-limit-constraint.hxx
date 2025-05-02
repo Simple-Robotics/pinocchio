@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_constraints_joint_limit_constraint_hxx__
@@ -433,6 +433,21 @@ namespace pinocchio
       else
         res.row(col_id) += -mat.row(row_id);
     }
+  }
+
+  template<typename Scalar, int Options>
+  template<
+    template<typename, int> class JointCollectionTpl,
+    typename VectorNLike,
+    ReferenceFrame rf>
+  void JointLimitConstraintModelTpl<Scalar, Options>::appendCouplingConstraintInertias(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const ConstraintData & cdata,
+    const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
+    const ReferenceFrameTag<rf> reference_frame) const
+  {
+    // TODO(jcarpent)
   }
 } // namespace pinocchio
 
