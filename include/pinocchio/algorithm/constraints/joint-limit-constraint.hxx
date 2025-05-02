@@ -447,6 +447,11 @@ namespace pinocchio
     const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
     const ReferenceFrameTag<rf> reference_frame) const
   {
+    PINOCCHIO_UNUSED_VARIABLE(model);
+    PINOCCHIO_UNUSED_VARIABLE(data);
+    PINOCCHIO_UNUSED_VARIABLE(cdata);
+    PINOCCHIO_UNUSED_VARIABLE(diagonal_constraint_inertia);
+    PINOCCHIO_UNUSED_VARIABLE(reference_frame);
     // TODO(jcarpent)
   }
 } // namespace pinocchio
