@@ -280,9 +280,9 @@ namespace pinocchio
   }; // struct DelassusOperatorRigidBodySystemsTplApplyOnTheRightForwardPass
 
   template<typename DelassusOperator>
-  struct DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass
+  struct AugmentedMassMatrixOperatorSolveInPlaceBackwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<DelassusOperator>>
+      AugmentedMassMatrixOperatorSolveInPlaceBackwardPass<DelassusOperator>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::Data Data;
@@ -341,9 +341,9 @@ namespace pinocchio
   };
 
   template<typename DelassusOperator>
-  struct DelassusOperatorRigidBodySystemsTplSolveInPlaceForwardPass
+  struct AugmentedMassMatrixOperatorSolveInPlaceForwardPass
   : public fusion::JointUnaryVisitorBase<
-      DelassusOperatorRigidBodySystemsTplSolveInPlaceForwardPass<DelassusOperator>>
+      AugmentedMassMatrixOperatorSolveInPlaceForwardPass<DelassusOperator>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::Data Data;

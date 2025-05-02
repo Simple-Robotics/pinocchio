@@ -358,7 +358,7 @@ namespace pinocchio
     // Backward sweep: propagate joint force contributions
     {
       custom_data.u = mat;
-      typedef DelassusOperatorRigidBodySystemsTplSolveInPlaceBackwardPass<
+      typedef AugmentedMassMatrixOperatorSolveInPlaceBackwardPass<
         DelassusOperatorRigidBodySystemsTpl>
         Pass1;
       typename Pass1::ArgsType args1(model_ref, data_ref, custom_data);
@@ -370,7 +370,7 @@ namespace pinocchio
 
     // Forward sweep: compute joint accelerations
     {
-      typedef DelassusOperatorRigidBodySystemsTplSolveInPlaceForwardPass<
+      typedef AugmentedMassMatrixOperatorSolveInPlaceForwardPass<
         DelassusOperatorRigidBodySystemsTpl>
         Pass2;
       custom_data.oa_augmented[0].setZero();
