@@ -204,24 +204,8 @@ namespace pinocchio
       const auto joint_diagonal_constraint_inertia =
         diagonal_constraint_inertia.segment(row_id, joint_nv);
 
-      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
-      {
-        const auto J_cols = data.J.middleCols(joint_idx_v, joint_nv);
-        SI.leftCols(joint_nv).noalias() = J_cols * joint_diagonal_constraint_inertia.asDiagonal();
-        data.oYaba_augmented[joint_id].noalias() += SI.leftCols(joint_nv) * J_cols.transpose();
-      }
-      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
-      {
-        // TODO(jcarpent): create dedicated visitor for efficiency
-        const auto & jdata = data.joints[joint_id];
-        const auto S_matrix = jdata.S().matrix();
-        SI.leftCols(joint_nv).noalias() = S_matrix * joint_diagonal_constraint_inertia.asDiagonal();
-        data.oYaba_augmented[joint_id].noalias() += SI.leftCols(joint_nv) * S_matrix.transpose();
-      }
-      else
-      {
-        assert(false && "must never happened");
-      }
+      data.joint_apparent_inertia.segment(joint_idx_v, joint_nv) +=
+        joint_diagonal_constraint_inertia;
 
       row_id += joint_nv;
     }
