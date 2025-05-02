@@ -64,9 +64,7 @@ namespace pinocchio
       Data & data)
     {
       typedef typename Model::JointIndex JointIndex;
-      typedef typename Data::Inertia Inertia;
       typedef typename Data::Matrix6 Matrix6;
-      typedef typename Data::Vector6 Vector6;
       typedef typename JointModel::JointDataDerived JointData;
       typedef std::pair<JointIndex, JointIndex> JointPair;
 
@@ -361,7 +359,6 @@ namespace pinocchio
       CustomData & custom_data)
     {
       typedef typename Model::JointIndex JointIndex;
-      typedef typename Data::Matrix6x Matrix6x;
       typedef typename Data::Matrix6 Matrix6;
 
       const auto J_cols = jmodel.jointCols(data.J);
