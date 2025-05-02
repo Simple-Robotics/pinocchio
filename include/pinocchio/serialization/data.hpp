@@ -161,6 +161,7 @@ namespace boost
       PINOCCHIO_MAKE_DATA_NVP(ar, data, constraints_on_joint);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, neighbour_links);
       PINOCCHIO_MAKE_DATA_NVP(ar, data, joint_cross_coupling);
+      PINOCCHIO_MAKE_DATA_NVP(ar, data, joint_apparent_inertia);
     }
 
   } // namespace serialization

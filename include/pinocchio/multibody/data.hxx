@@ -169,6 +169,7 @@ namespace pinocchio
   , constraints_on_joint((std::size_t)model.njoints)
   , neighbour_links((std::size_t)model.njoints)
   , joint_cross_coupling(model.njoints, model.njoints)
+  , joint_apparent_inertia(VectorXs::Zero(model.nv))
   {
     typedef typename Model::JointIndex JointIndex;
 
@@ -410,7 +411,8 @@ namespace pinocchio
       && data1.constraints_supported == data2.constraints_supported
       && data1.constraints_on_joint == data2.constraints_on_joint
       && data1.neighbour_links == data2.neighbour_links
-      && data1.joint_cross_coupling == data2.joint_cross_coupling;
+      && data1.joint_cross_coupling == data2.joint_cross_coupling
+      && data1.joint_apparent_inertia == data2.joint_apparent_inertia;
 
     // operator== for Eigen::Tensor provides an Expression which might be not evaluated as a boolean
     value &= Tensor<bool, 0>((data1.kinematic_hessians == data2.kinematic_hessians).all())(0)

@@ -625,6 +625,10 @@ namespace pinocchio
     /// \brief Stores the elimination ordering of CL-CABA
     std::vector<JointIndex> elimination_order;
 
+    /// \brief Joint apparent inertia vector (related to model.armarture, joint-wise constraints,
+    /// etc.)
+    VectorXs joint_apparent_inertia;
+
     ///
     /// \brief Default constructor of pinocchio::Data from a pinocchio::Model.
     ///
