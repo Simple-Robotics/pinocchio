@@ -87,6 +87,7 @@ namespace pinocchio
       const Inertia oinertia = data_ref.oMi[i].act(joint_inertia);
       data_ref.oYaba_augmented[i] = oinertia.matrix();
     }
+    data_ref.joint_apparent_inertia = model_ref.armature;
 
     // Append constraint inertia to oYaba_augmented
     Eigen::Index row_id = 0;

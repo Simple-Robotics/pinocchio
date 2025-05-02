@@ -96,7 +96,8 @@ namespace pinocchio
         jdata_augmented.StU().noalias() = Jcols.transpose() * jdata_augmented.U();
 
         // Account for the rotor inertia contribution
-        jdata_augmented.StU().diagonal() += jmodel.jointVelocitySelector(model.armature);
+        jdata_augmented.StU().diagonal() +=
+          jmodel.jointVelocitySelector(data.joint_apparent_inertia);
 
         pinocchio::internal::PerformStYSInversion<Scalar>::run(
           jdata_augmented.StU(), jdata_augmented.Dinv());
