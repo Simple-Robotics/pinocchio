@@ -60,6 +60,17 @@ namespace boost
       ar & make_nvp("joint2_id", cmodel.joint2_id);
     }
 
+    template<typename Archive, typename Derived>
+    void serialize(
+      Archive & ar,
+      ::pinocchio::UnaryConstraintModelBase<Derived> & cmodel,
+      const unsigned int /*version*/)
+    {
+      typedef ::pinocchio::UnaryConstraintModelBase<Derived> Self;
+      typedef typename Self::Base Base;
+      ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
+    }
+
     namespace internal
     {
       template<typename Derived>
