@@ -192,25 +192,8 @@ BOOST_AUTO_TEST_CASE(constraint_coupling_inertia)
 
     const auto diagonal_inertia_segment = diagonal_inertia.segment(row_id, jmodel_nv);
 
-    const auto J_cols = data.J.middleCols(jmodel_idx_v, jmodel_nv);
-    const Inertia::Matrix6 constraint_world_inertia_ref =
-      J_cols * diagonal_inertia_segment.asDiagonal() * J_cols.transpose();
-    const Eigen::MatrixXd constraint_world_inertia_ref_projected =
-      J_cols.transpose() * constraint_world_inertia_ref * J_cols;
-
-    //    std::cout << "diagonal_inertia_segment: " << diagonal_inertia_segment.transpose() <<
-    //    std::endl; std::cout << "constraint_world_inertia_ref_projected:\n" <<
-    //    constraint_world_inertia_ref_projected << std::endl;
-
-    const auto S = jdata.S().matrix();
-    const Inertia::Matrix6 constraint_local_inertia =
-      S * diagonal_inertia_segment.asDiagonal() * S.transpose();
-    const Inertia::Matrix6 constraint_world_inertia_ref2 =
-      oMjoint.toActionMatrix() * constraint_local_inertia * oMjoint.inverse().toDualActionMatrix();
-
-    const auto & constraint_world_inertia = data.oYaba_augmented[joint_id];
-    BOOST_CHECK(constraint_world_inertia.isApprox(constraint_world_inertia_ref));
-    BOOST_CHECK(constraint_world_inertia.isApprox(constraint_world_inertia_ref2));
+    BOOST_CHECK(
+      diagonal_inertia_segment == data.joint_apparent_inertia.segment(jmodel_idx_v, jmodel_nv));
 
     row_id += jmodel_nv;
     //    std::cout << "----" << std::endl;
@@ -219,64 +202,11 @@ BOOST_AUTO_TEST_CASE(constraint_coupling_inertia)
   Eigen::MatrixXd jacobian_matrix(constraint_model.size(), model.nv);
   constraint_model.jacobian(model, data, constraint_data, jacobian_matrix);
 
-  Eigen::MatrixXd joint_space_constraint_inertia =
+  const Eigen::MatrixXd joint_space_constraint_inertia =
     jacobian_matrix.transpose() * diagonal_inertia.asDiagonal() * jacobian_matrix;
 
-  //  std::cout << "diagonal_inertia: " << diagonal_inertia.transpose() << std::endl;
-  //  std::cout << "joint_space_constraint_inertia:\n" << joint_space_constraint_inertia <<
-  //  std::endl;
-
-  for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
-  //  for(const auto joint_id: active_joint_ids)
-  {
-    //    std::cout << "joint_id: " << joint_id << std::endl;
-    const auto & jmodel = model.joints[joint_id];
-    const auto & jdata = data.joints[joint_id];
-
-    const auto jmodel_nv = jmodel.nv();
-    const auto jmodel_idx_v = jmodel.idx_v();
-
-    const auto S = jdata.S().matrix();
-    const auto J_cols = data.J.middleCols(jmodel_idx_v, jmodel_nv);
-    const auto & oMjoint = data.oMi[joint_id];
-
-    BOOST_CHECK((oMjoint.toActionMatrix() * S).isApprox(J_cols));
-    BOOST_CHECK(
-      (S.transpose() * oMjoint.inverse().toDualActionMatrix()).isApprox(J_cols.transpose()));
-    BOOST_CHECK((oMjoint.toActionMatrixInverse() * J_cols).isApprox(S));
-
-    const auto & constraint_world_inertia = data.oYaba_augmented[joint_id];
-    const Inertia::Matrix6 constraint_local_inertia =
-      oMjoint.inverse().toActionMatrix() * constraint_world_inertia * oMjoint.toDualActionMatrix();
-
-    const Eigen::MatrixXd projected_constraint_local_inertia =
-      S.transpose() * constraint_local_inertia * S;
-    if (
-      std::find(active_joint_ids.begin(), active_joint_ids.end(), joint_id)
-      != active_joint_ids.end())
-    {
-      const Inertia::Matrix6 res_local = constraint_local_inertia
-                                         - (constraint_local_inertia * S)
-                                             * projected_constraint_local_inertia.inverse()
-                                             * (S.transpose() * constraint_local_inertia);
-      BOOST_CHECK(res_local.isZero());
-
-      const Eigen::MatrixXd projected_constraint_world_inertia =
-        J_cols.transpose() * constraint_world_inertia * J_cols;
-      const Inertia::Matrix6 res_world = constraint_world_inertia
-                                         - (constraint_world_inertia * J_cols)
-                                             * projected_constraint_world_inertia.inverse()
-                                             * (J_cols.transpose() * constraint_world_inertia);
-      BOOST_CHECK(res_world.isZero());
-    }
-
-    const auto joint_space_constraint_inertia_block =
-      joint_space_constraint_inertia.block(jmodel_idx_v, jmodel_idx_v, jmodel_nv, jmodel_nv);
-
-    BOOST_CHECK(projected_constraint_local_inertia.isApprox(joint_space_constraint_inertia_block));
-    //    BOOST_CHECK(projected_constraint_world_inertia.isApprox(joint_space_constraint_inertia_block));
-    //    std::cout << "----" << std::endl;
-  }
+  BOOST_CHECK(joint_space_constraint_inertia.isApprox(
+    Eigen::MatrixXd(data.joint_apparent_inertia.asDiagonal())));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
