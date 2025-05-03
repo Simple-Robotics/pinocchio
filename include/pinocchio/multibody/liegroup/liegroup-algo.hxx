@@ -417,7 +417,7 @@ namespace pinocchio
       int & idx)
     {
       typedef typename Visitor::LieGroupMap LieGroupMap;
-
+      assert(jmodel.nv() <= TMc.cols());
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.tangentMap(
         jmodel.jointConfigSelector(q.derived()),
