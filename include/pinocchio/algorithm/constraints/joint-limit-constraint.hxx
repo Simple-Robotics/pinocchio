@@ -152,6 +152,8 @@ namespace pinocchio
     assert(size() == activable_size);
 
     // Fill bound limit and margin for lower and upper constraint
+    // Another strategy could be to query the model again but it is not coherent with the existing
+    // constructors.
     bound_position_limit = VectorXs::Zero(Eigen::DenseIndex(size()));
     bound_position_margin = VectorXs::Zero(Eigen::DenseIndex(size()));
     Eigen::DenseIndex bound_row_id = 0;
@@ -183,7 +185,8 @@ namespace pinocchio
     pinocchio::indexvInfo(model, activable_joints, reduce_nvs, reduce_idx_vs);
     assert(nq_reduce == static_cast<int>(reduce_nvs.size()));
     assert(nq_reduce == static_cast<int>(reduce_idx_vs.size()));
-    nv_max_atom = std::max_element(reduce_nvs.begin(), reduce_nvs.end());
+    auto nv_max_atom_iter = std::max_element(reduce_nvs.begin(), reduce_nvs.end());
+    nv_max_atom = nv_max_atom_iter != reduce_nvs.end() ? *nv_max_atom_iter : 1;
     assert(nv_max_atom <= MAX_JOINT_NV);
 
     std::size_t r_size = static_cast<std::size_t>(size());

@@ -450,7 +450,8 @@ namespace pinocchio
              && active_idx_rows == other.active_idx_rows
              && active_idx_qs_reduce == other.active_idx_qs_reduce && active_nvs == other.active_nvs
              && active_idx_vs == other.active_idx_vs && m_set == other.m_set
-             && active_compliance_storage == other.active_compliance_storage;
+             && active_compliance_storage == other.active_compliance_storage
+             && active_compliance == other.active_compliance;
     }
 
     bool operator!=(const JointLimitConstraintModelTpl & other) const
@@ -574,6 +575,7 @@ namespace pinocchio
     void init(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndexVector & _activable_joints,
+      const Eigen::MatrixBase<VectorLowerConfiguration> & lb,
       const Eigen::MatrixBase<VectorUpperConfiguration> & ub,
       const Eigen::MatrixBase<VectorMarginConfiguration> & marg);
 
@@ -657,11 +659,11 @@ namespace pinocchio
     }
 
     explicit JointLimitConstraintDataTpl(const ConstraintModel & constraint_model)
-    : activable_constraint_residual(constraint_model.size())
+    : compact_tangent_map(
+        CompactTangentMap_t::Zero(constraint_model.getNqReduce(), constraint_model.getNvMaxAtom()))
+    , activable_constraint_residual(constraint_model.size())
     , constraint_residual_storage(constraint_model.size())
     , constraint_residual(constraint_residual_storage.map())
-    , compact_tangent_map(
-        CompactTangentMap_t::Zero(constraint_model.getNqReduce(), constraint_model.getNvMaxAtom()))
     {
       constraint_residual_storage.resize(0);
     }
@@ -671,8 +673,9 @@ namespace pinocchio
       if (this == &other)
         return true;
       return (
-        this->constraint_residual == other.constraint_residual
-        && this->compact_tangent_map == other.compact_tangent_map);
+        this->compact_tangent_map == other.compact_tangent_map
+        && this->constraint_residual_storage == other.constraint_residual_storage
+        && this->constraint_residual == other.constraint_residual);
     }
 
     bool operator!=(const JointLimitConstraintDataTpl & other) const
@@ -684,12 +687,16 @@ namespace pinocchio
     {
       if (this != &other)
       {
+        compact_tangent_map = other.compact_tangent_map;
         activable_constraint_residual = other.activable_constraint_residual;
         constraint_residual_storage = other.constraint_residual_storage;
-        compact_tangent_map = other.compact_tangent_map;
+        constraint_residual = constraint_residual_storage.map();
       }
       return *this;
     }
+
+    /// @brief Compact storage of the tangent map
+    CompactTangentMap_t compact_tangent_map;
 
     /// \brief Residual of all the activable constraints
     VectorXs activable_constraint_residual;
@@ -697,9 +704,6 @@ namespace pinocchio
     /// \brief Residual of the active constraints
     EigenStorageVector constraint_residual_storage;
     typename EigenStorageVector::RefMapType constraint_residual;
-
-    /// @brief Compact storage of the tangent map
-    CompactTangentMap_t compact_tangent_map;
 
     static std::string classname()
     {
