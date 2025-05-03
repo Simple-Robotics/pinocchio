@@ -389,32 +389,32 @@ namespace pinocchio
       return bound_position_margin;
     }
 
-    const EigenIndexVector getActivableIdxQs() const
+    const EigenIndexVector & getActivableIdxQs() const
     {
       return activable_idx_qs;
     }
 
-    const EigenIndexVector getActivableIdxQsReduce() const
+    const EigenIndexVector & getActivableIdxQsReduce() const
     {
       return activable_idx_qs_reduce;
     }
-    const EigenIndexVector getActiveIdxQsReduce() const
+    const EigenIndexVector & getActiveIdxQsReduce() const
     {
       return active_idx_qs_reduce;
     }
-    const EigenIndexVector getActivableNvs() const
+    const EigenIndexVector & getActivableNvs() const
     {
       return activable_nvs;
     }
-    const EigenIndexVector getActiveNvs() const
+    const EigenIndexVector & getActiveNvs() const
     {
       return active_nvs;
     }
-    const EigenIndexVector getActivableIdxVs() const
+    const EigenIndexVector & getActivableIdxVs() const
     {
       return activable_idx_vs;
     }
-    const EigenIndexVector getActiveIdxVs() const
+    const EigenIndexVector & getActiveIdxVs() const
     {
       return active_idx_vs;
     }
