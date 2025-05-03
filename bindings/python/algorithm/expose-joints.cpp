@@ -145,8 +145,8 @@ namespace pinocchio
 
     bp::tuple indexvInfo_proxy(const context::Model & model)
     {
-      std::vector<int> nvs(model.nq, 0);
-      std::vector<int> idx_vs(model.nq, 0);
+      std::vector<int> nvs;
+      std::vector<int> idx_vs;
 
       typedef typename context::Model::JointIndex JointIndex;
       std::vector<JointIndex> joint_selection;
