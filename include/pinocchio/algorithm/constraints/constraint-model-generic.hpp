@@ -151,6 +151,15 @@ namespace pinocchio
       ::pinocchio::visitors::calc(*this, model, data, cdata);
     }
 
+    template<template<typename, int> class JointCollectionTpl>
+    void resize_impl(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata)
+    {
+      ::pinocchio::visitors::resize(*this, model, data, cdata);
+    }
+
     template<template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
     void jacobian(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,

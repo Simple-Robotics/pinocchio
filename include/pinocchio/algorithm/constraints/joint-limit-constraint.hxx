@@ -226,7 +226,7 @@ namespace pinocchio
 
   template<typename Scalar, int Options>
   template<template<typename, int> class JointCollectionTpl>
-  void JointLimitConstraintModelTpl<Scalar, Options>::resize(
+  void JointLimitConstraintModelTpl<Scalar, Options>::resize_impl(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & /* model */,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     ConstraintData & cdata)

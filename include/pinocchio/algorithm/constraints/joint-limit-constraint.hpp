@@ -266,7 +266,7 @@ namespace pinocchio
 
     /// \brief Resize the constraint by computing the current active set.
     template<template<typename, int> class JointCollectionTpl>
-    void resize(
+    void resize_impl(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       ConstraintData & cdata);

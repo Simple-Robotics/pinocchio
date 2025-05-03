@@ -71,13 +71,7 @@ namespace pinocchio
                (bp::arg("self"), bp::arg("model"), bp::arg("activable_joints")),
                "Contructor from given joint index vector "
                "implied in the constraint."))
-        .def(
-          "resize",
-          +[](
-             Self & self, const context::Model & model, const context::Data & data,
-             ConstraintData & cdata) -> void { self.resize(model, data, cdata); },
-          bp::args("self", "model", "data", "constraint_data"),
-          "Resize the constraint given active limits.")
+        // TODO: Add here
         .def(
           "getActiveSetIndexes", &Self::getActiveSetIndexes,
           bp::return_value_policy<bp::copy_const_reference>(),
