@@ -293,8 +293,7 @@ namespace pinocchio
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model.nq, "The configuration vector is not of the right size");
     // Assume TMc.rows() == SUM_(j in joint_selection) j.nq() --> assert at the end
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      TMc.cols(), MAX_JOINT_NV, "The output argument is not of the right size");
+    // Assume TMc.cols() >= max_nv --> assert in the Visitor
 
     typedef CompactSetTangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
 
@@ -693,8 +692,8 @@ namespace pinocchio
     std::vector<int> & nvs,
     std::vector<int> & idx_vs)
   {
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(nvs.size(), 0, "The nvs vector must empty");
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(idx_vs.size(), 0, "The nvs vector must empty");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(nvs.size(), 0, "The nvs vector must be empty");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(idx_vs.size(), 0, "The idx_vs vector must empty");
 
     typename IndexvInfoStep::ArgsType args(nvs, idx_vs);
 
