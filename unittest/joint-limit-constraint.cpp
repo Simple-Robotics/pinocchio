@@ -2,6 +2,7 @@
 // Copyright (c) 2024 INRIA
 //
 
+#include "utils/model-generator.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/constraints/joint-limit-constraint.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
@@ -23,8 +24,8 @@ BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(constraint_empty_constructor)
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
+  Model model;
+  buildAllJointsModel(model);
 
   const Data data(model);
 
@@ -35,15 +36,15 @@ BOOST_AUTO_TEST_CASE(constraint_empty_constructor)
 
 BOOST_AUTO_TEST_CASE(constraint_constructor_with_infinite_bounds)
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
+  Model model;
+  buildAllJointsModel(model);
 
   model.lowerPositionLimit.fill(-std::numeric_limits<double>::max());
   model.upperPositionLimit.fill(+std::numeric_limits<double>::max());
 
   const Data data(model);
 
-  const std::string ee_name = "wrist2_joint";
+  const std::string ee_name = "translation_joint";
   const JointIndex ee_id = model.getJointId(ee_name);
 
   const Model::IndexVector & ee_support = model.supports[ee_id];
@@ -55,13 +56,13 @@ BOOST_AUTO_TEST_CASE(constraint_constructor_with_infinite_bounds)
 
 BOOST_AUTO_TEST_CASE(constraint_constructor)
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
+  Model model;
+  buildAllJointsModel(model);
 
   Data data(model);
   const auto & parents_fromRow = data.parents_fromRow;
 
-  const std::string ee_name = "wrist2_joint";
+  const std::string ee_name = "translation_joint";
   const JointIndex ee_id = model.getJointId(ee_name);
 
   const Model::IndexVector & ee_support = model.supports[ee_id];
@@ -82,13 +83,17 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
       const auto & jmodel = model.joints[joint_id];
       const int idx_q = jmodel.idx_q();
       const int nq = jmodel.nq();
+      const auto has_configuration_limit = jmodel.hasConfigurationLimit();
       for (int k = 0; k < nq; ++k)
       {
         const int index_q = idx_q + k;
-        if (model.lowerPositionLimit[index_q] != -std::numeric_limits<double>::max())
-          total_size++;
-        if (model.upperPositionLimit[index_q] != +std::numeric_limits<double>::max())
-          total_size++;
+        if (has_configuration_limit[k])
+        {
+          if (model.lowerPositionLimit[index_q] != -std::numeric_limits<double>::max())
+            total_size++;
+          if (model.upperPositionLimit[index_q] != +std::numeric_limits<double>::max())
+            total_size++;
+        }
       }
     }
     BOOST_CHECK(constraint.size() == total_size);
@@ -103,39 +108,6 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
   data.q_in = q0;
   constraint.resize(model, data, constraint_data);
   constraint.calc(model, data, constraint_data);
-
-  // Check sparsity pattern
-  // {
-  //   // const EigenIndexVector & active_dofs_lower =
-  //   // constraint.getActiveLowerBoundConstraintsTangent(); const EigenIndexVector &
-  //   // active_dofs_upper = constraint.getActiveUpperBoundConstraintsTangent();
-  //   EigenIndexVector active_dofs(active_dofs_lower);
-  //   active_dofs.insert(active_dofs.end(), active_dofs_upper.begin(), active_dofs_upper.end());
-
-  //   for (size_t row_id = 0; row_id < size_t(constraint.activeSize()); ++row_id)
-  //   {
-  //     const Eigen::DenseIndex dof_id = active_dofs[row_id];
-  //     const BooleanVector & row_sparsity_pattern =
-  //       constraint.getRowActiveSparsityPattern(Eigen::DenseIndex(row_id));
-  //     const EigenIndexVector & row_active_indexes =
-  //       constraint.getRowActiveIndexes(Eigen::DenseIndex(row_id));
-
-  //     // Check that the rest of the indexes greater than dof_id are not active.
-  //     BOOST_CHECK((row_sparsity_pattern.tail(model.nv - 1 - dof_id).array() == false).all());
-
-  //     Eigen::DenseIndex id = dof_id;
-  //     while (parents_fromRow[size_t(id)] > -1)
-  //     {
-  //       BOOST_CHECK(row_sparsity_pattern[id] == true);
-  //       id = parents_fromRow[size_t(id)];
-  //     }
-
-  //     for (const Eigen::DenseIndex active_id : row_active_indexes)
-  //     {
-  //       BOOST_CHECK(row_sparsity_pattern[active_id] == true);
-  //     }
-  //   }
-  // }
 
   // Check projection on force sets
   {
@@ -158,12 +130,12 @@ BOOST_AUTO_TEST_CASE(constraint_constructor)
 
 BOOST_AUTO_TEST_CASE(cast)
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
+  Model model;
+  buildAllJointsModel(model);
 
   const Data data(model);
 
-  const std::string ee_name = "wrist2_joint";
+  const std::string ee_name = "translation_joint";
   const JointIndex ee_id = model.getJointId(ee_name);
 
   const Model::IndexVector & ee_support = model.supports[ee_id];
@@ -179,12 +151,12 @@ BOOST_AUTO_TEST_CASE(cast)
 
 BOOST_AUTO_TEST_CASE(constraint_jacobian)
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
+  Model model;
+  buildAllJointsModel(model);
 
   Data data(model);
 
-  const std::string ee_name = "wrist2_joint";
+  const std::string ee_name = "translation_joint";
   const JointIndex ee_id = model.getJointId(ee_name);
 
   const Model::IndexVector & ee_support = model.supports[ee_id];
@@ -235,62 +207,75 @@ BOOST_AUTO_TEST_CASE(constraint_jacobian)
 BOOST_AUTO_TEST_CASE(dynamic_constraint_residual)
 {
   Model model;
-  JointIndex joint_id_x = model.addJoint(0, JointModelPX(), SE3::Identity(), "slider_x");
-  JointIndex joint_id_y = model.addJoint(joint_id_x, JointModelPY(), SE3::Identity(), "slider_y");
-  JointIndex joint_id_z = model.addJoint(joint_id_y, JointModelPZ(), SE3::Identity(), "slider_z");
+  buildAllJointsModel(model);
 
-  const SE3::Vector3 small_box_dims = SE3::Vector3::Ones() * 1e-3;
-  const double small_box_mass = 1e-6;
-  const Inertia small_box_inertia =
-    Inertia::FromBox(small_box_mass, small_box_dims[0], small_box_dims[1], small_box_dims[2]);
-
-  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const double box_mass = 10;
-  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-
-  model.appendBodyToJoint(joint_id_x, small_box_inertia);
-  model.appendBodyToJoint(joint_id_y, small_box_inertia);
-  model.appendBodyToJoint(joint_id_z, box_inertia);
   model.gravity.setZero();
-  model.lowerPositionLimit[0] = 0.;
-  model.lowerPositionLimit[1] = 0.;
-  model.lowerPositionLimit[2] = 0.;
+  model.lowerPositionLimit.fill(0.);
+  const Eigen::VectorXd qmin(Eigen::VectorXd::Zero(model.nq));
+  const Eigen::VectorXd qmax(Eigen::VectorXd::Ones(model.nq));
   // We deactivate the upper limits
-  model.upperPositionLimit[0] = std::numeric_limits<double>::max();
-  model.upperPositionLimit[1] = std::numeric_limits<double>::max();
-  model.upperPositionLimit[2] = std::numeric_limits<double>::max();
-
-  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, 1e-3);
+  model.upperPositionLimit.fill(std::numeric_limits<double>::max());
+  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, .5);
 
   Data data(model);
 
-  const Model::IndexVector activable_joint_ids = {joint_id_x, joint_id_y, joint_id_z};
-  ;
+  int total_size = 0;
+  Model::IndexVector activable_joint_ids;
+  for (Model::JointIndex i = 1; i < (Model::JointIndex)model.njoints; ++i)
+  {
+    activable_joint_ids.push_back(i);
+
+    const auto & jmodel = model.joints[i];
+    const int nq = jmodel.nq();
+    const auto has_configuration_limit = jmodel.hasConfigurationLimit();
+    for (int k = 0; k < nq; ++k)
+    {
+      if (has_configuration_limit[size_t(k)])
+        total_size++;
+    }
+  }
 
   JointLimitConstraintModel constraint_model(model, activable_joint_ids);
-  BOOST_CHECK(constraint_model.size() == model.nq);
+  BOOST_CHECK(constraint_model.size() == total_size);
   JointLimitConstraintData constraint_data(constraint_model);
 
   for (int i = 0; i < 1e4; ++i)
   {
-    const Eigen::VectorXd q0 = Eigen::VectorXd::Random(model.nq);
+    const Eigen::VectorXd q0 = randomConfiguration(model, qmin, qmax);
     std::size_t active_size = 0;
     std::vector<std::size_t> active_indexes;
     Eigen::VectorXd activable_residual(constraint_model.size());
-    for (int j = 0; j < model.nq; j++)
+
+    int set_idx = 0;
+    for (Model::JointIndex i = 1; i < (Model::JointIndex)model.njoints; ++i)
     {
-      activable_residual(j) = -(q0(j) - model.lowerPositionLimit[j]);
-      if (-activable_residual(j) < model.positionLimitMargin[j])
+      const auto & jmodel = model.joints[i];
+      const int idx_q = jmodel.idx_q();
+      const int nq = jmodel.nq();
+
+      const auto has_configuration_limit = jmodel.hasConfigurationLimit();
+      for (int k = 0; k < nq; ++k)
       {
-        active_size++;
-        active_indexes.push_back((std::size_t)j);
+        if (!has_configuration_limit[size_t(k)])
+          continue;
+        const int q_index = idx_q + k;
+        activable_residual(set_idx) = -(q0(q_index) - model.lowerPositionLimit[q_index]);
+        if (-activable_residual(set_idx) < model.positionLimitMargin[q_index])
+        {
+          active_size++;
+          active_indexes.push_back((std::size_t)set_idx);
+        }
+        set_idx++;
       }
     }
+    BOOST_CHECK(constraint_model.size() == set_idx);
+
     Eigen::VectorXd residual(active_size);
     for (std::size_t j = 0; j < active_size; j++)
     {
       residual((Eigen::Index)j) = activable_residual((Eigen::Index)active_indexes[j]);
     }
+
     data.q_in = q0;
     constraint_model.resize(model, data, constraint_data);
     constraint_model.calc(model, data, constraint_data);
@@ -305,69 +290,86 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_residual)
 BOOST_AUTO_TEST_CASE(dynamic_constraint_jacobian)
 {
   Model model;
-  JointIndex joint_id_x = model.addJoint(0, JointModelPX(), SE3::Identity(), "slider_x");
-  JointIndex joint_id_y = model.addJoint(joint_id_x, JointModelPY(), SE3::Identity(), "slider_y");
-  JointIndex joint_id_z = model.addJoint(joint_id_y, JointModelPZ(), SE3::Identity(), "slider_z");
+  buildAllJointsModel(model);
 
-  const SE3::Vector3 small_box_dims = SE3::Vector3::Ones() * 1e-3;
-  const double small_box_mass = 1e-6;
-  const Inertia small_box_inertia =
-    Inertia::FromBox(small_box_mass, small_box_dims[0], small_box_dims[1], small_box_dims[2]);
-
-  const SE3::Vector3 box_dims = SE3::Vector3::Ones();
-  const double box_mass = 10;
-  const Inertia box_inertia = Inertia::FromBox(box_mass, box_dims[0], box_dims[1], box_dims[2]);
-
-  model.appendBodyToJoint(joint_id_x, small_box_inertia);
-  model.appendBodyToJoint(joint_id_y, small_box_inertia);
-  model.appendBodyToJoint(joint_id_z, box_inertia);
   model.gravity.setZero();
-  model.lowerPositionLimit[0] = 0.;
-  model.lowerPositionLimit[1] = 0.;
-  model.lowerPositionLimit[2] = 0.;
+  model.lowerPositionLimit.fill(0.);
+  const Eigen::VectorXd qmin(Eigen::VectorXd::Zero(model.nq));
+  const Eigen::VectorXd qmax(Eigen::VectorXd::Ones(model.nq));
   // We deactivate the upper limits
-  model.upperPositionLimit[0] = std::numeric_limits<double>::max();
-  model.upperPositionLimit[1] = std::numeric_limits<double>::max();
-  model.upperPositionLimit[2] = std::numeric_limits<double>::max();
-
-  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, 1e-3);
+  model.upperPositionLimit.fill(std::numeric_limits<double>::max());
+  model.positionLimitMargin = Eigen::VectorXd::Constant(model.nq, .5);
 
   Data data(model);
 
-  const Model::IndexVector activable_joint_ids = {joint_id_x, joint_id_y, joint_id_z};
-  ;
+  int total_size = 0;
+  Model::IndexVector activable_joint_ids;
+  for (Model::JointIndex i = 1; i < (Model::JointIndex)model.njoints; ++i)
+  {
+    activable_joint_ids.push_back(i);
+
+    const auto & jmodel = model.joints[i];
+    const int nq = jmodel.nq();
+    const auto has_configuration_limit = jmodel.hasConfigurationLimit();
+    for (int k = 0; k < nq; ++k)
+    {
+      if (has_configuration_limit[size_t(k)])
+        total_size++;
+    }
+  }
 
   JointLimitConstraintModel constraint_model(model, activable_joint_ids);
+  BOOST_CHECK(constraint_model.size() == total_size);
   JointLimitConstraintData constraint_data(constraint_model);
 
-  // Check against finite differences on the drift of the constraint
   const double eps_fd = 1e-8;
   for (int i = 0; i < 1e4; ++i)
   {
-    const Eigen::VectorXd q0 = Eigen::VectorXd::Random(model.nq);
+    const Eigen::VectorXd q0 = randomConfiguration(model, qmin, qmax);
     int active_size = 0;
-    std::vector<Eigen::DenseIndex> active_indexes;
-    for (int j = 0; j < model.nq; j++)
+    std::vector<std::size_t> active_indexes;
+    Eigen::VectorXd activable_residual(constraint_model.size());
+
+    int set_idx = 0;
+    for (Model::JointIndex i = 1; i < (Model::JointIndex)model.njoints; ++i)
     {
-      if (q0(j) - model.lowerPositionLimit[j] < model.positionLimitMargin[j])
+      const auto & jmodel = model.joints[i];
+      const int idx_q = jmodel.idx_q();
+      const int nq = jmodel.nq();
+
+      const auto has_configuration_limit = jmodel.hasConfigurationLimit();
+      for (int k = 0; k < nq; ++k)
       {
-        active_size++;
-        active_indexes.push_back(j);
+        if (!has_configuration_limit[size_t(k)])
+          continue;
+        const int q_index = idx_q + k;
+        activable_residual(set_idx) = -(q0(q_index) - model.lowerPositionLimit[q_index]);
+        if (-activable_residual(set_idx) < model.positionLimitMargin[q_index])
+        {
+          active_size++;
+          active_indexes.push_back((std::size_t)set_idx);
+        }
+        set_idx++;
       }
     }
+    BOOST_CHECK(constraint_model.size() == set_idx);
+
     data.q_in = q0;
     constraint_model.resize(model, data, constraint_data);
     constraint_model.calc(model, data, constraint_data);
+
     std::vector<std::size_t> active_set_indexes = constraint_model.getActiveSetIndexes();
     BOOST_CHECK(active_size == constraint_model.activeSize());
     BOOST_CHECK(active_size == constraint_data.constraint_residual.size());
+
     Eigen::MatrixXd jacobian_matrix(constraint_model.activeSize(), model.nv);
     constraint_model.jacobian(model, data, constraint_data, jacobian_matrix);
+
     Data data_fd(model);
     JointLimitConstraintData constraint_data_fd(constraint_model);
     Eigen::MatrixXd jacobian_matrix_fd(constraint_model.activeSize(), model.nv);
-    // For now, we assume model.nq == model.nv
-    assert(model.nq == model.nv);
+
+    bool ok_to_check = true;
     for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
     {
       Eigen::VectorXd v_eps = Eigen::VectorXd::Zero(model.nv);
@@ -379,12 +381,17 @@ BOOST_AUTO_TEST_CASE(dynamic_constraint_jacobian)
       bool same_active_set = active_set_indexes == constraint_model.getActiveSetIndexes();
       // if the active set is identical we can check the jacobian
       if (!same_active_set)
+      {
+        ok_to_check = false;
         continue;
+      }
       jacobian_matrix_fd.col(k) =
         (constraint_data_fd.constraint_residual - constraint_data.constraint_residual) / eps_fd;
+      BOOST_CHECK(jacobian_matrix.col(k).isApprox(jacobian_matrix_fd.col(k), math::sqrt(eps_fd)));
     }
 
-    BOOST_CHECK(jacobian_matrix.isApprox(jacobian_matrix_fd, math::sqrt(eps_fd)));
+    if (ok_to_check)
+      BOOST_CHECK(jacobian_matrix.isApprox(jacobian_matrix_fd, math::sqrt(eps_fd)));
   }
 }
 
