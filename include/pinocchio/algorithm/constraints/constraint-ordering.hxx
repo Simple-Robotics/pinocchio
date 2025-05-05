@@ -35,6 +35,15 @@ namespace pinocchio
 
     template<typename ConstraintModel>
     static void algo_step(
+      const RigidConstraintModelTpl<ConstraintModel> & cmodel, const Model & model, Data & data)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(cmodel);
+      PINOCCHIO_UNUSED_VARIABLE(model);
+      PINOCCHIO_UNUSED_VARIABLE(data);
+    }
+
+    template<typename ConstraintModel>
+    static void algo_step(
       const BinaryConstraintModelBase<ConstraintModel> & cmodel, const Model & model, Data & data)
     {
       typedef std::pair<JointIndex, JointIndex> JointPair;
@@ -71,6 +80,7 @@ namespace pinocchio
           joint2_neighbours.push_back(joint1_id);
       }
     }
+
     template<typename _Scalar, int _Options>
     static void algo_step(
       const FrictionalJointConstraintModelTpl<_Scalar, _Options> & cmodel,
@@ -81,6 +91,17 @@ namespace pinocchio
       {
         data.constraints_supported_dim[joint_id] += model.nvs[joint_id];
       }
+    }
+
+    template<typename _Scalar, int _Options>
+    static void algo_step(
+      const JointLimitConstraintModelTpl<_Scalar, _Options> & cmodel,
+      const Model & model,
+      Data & data)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(cmodel);
+      PINOCCHIO_UNUSED_VARIABLE(model);
+      PINOCCHIO_UNUSED_VARIABLE(data);
     }
 
     using Base::run;
