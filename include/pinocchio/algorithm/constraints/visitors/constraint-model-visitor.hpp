@@ -860,6 +860,67 @@ namespace pinocchio
     }
 
     /**
+     * @brief      AppendCouplingConstraintInertiasVisitor visitor
+     */
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      typename VectorNLike,
+      ReferenceFrame rf>
+    struct AppendCouplingConstraintInertiasVisitor
+    : visitors::ConstraintUnaryVisitorBase<AppendCouplingConstraintInertiasVisitor<
+        Scalar,
+        Options,
+        JointCollectionTpl,
+        VectorNLike,
+        rf>>
+    {
+      typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef boost::fusion::
+        vector<const Model &, Data &, const VectorNLike &, ReferenceFrameTag<rf>>
+          ArgsType;
+
+      template<typename ConstraintModel>
+      static void algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const typename ConstraintModel::ConstraintData & cdata,
+        const Model & model,
+        Data & data,
+        const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
+        const ReferenceFrameTag<rf> reference_frame)
+      {
+        cmodel.appendCouplingConstraintInertias(
+          model, data, cdata.derived(), diagonal_constraint_inertia.derived(), reference_frame);
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
+      typename VectorNLike,
+      ReferenceFrame rf>
+    void appendCouplingConstraintInertias(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+      const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
+      const ReferenceFrameTag<rf> reference_frame)
+    {
+      typedef AppendCouplingConstraintInertiasVisitor<
+        Scalar, Options, JointCollectionTpl, VectorNLike, rf>
+        Algo;
+
+      typename Algo::ArgsType args(
+        model, data, diagonal_constraint_inertia.derived(), reference_frame);
+      Algo::run(cmodel, cdata, args);
+    }
+
+    /**
      * @brief      ConstraintModelComplianceVisitor visitor
      */
     template<typename ReturnType>

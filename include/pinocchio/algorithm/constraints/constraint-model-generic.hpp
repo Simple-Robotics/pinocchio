@@ -268,6 +268,21 @@ namespace pinocchio
         *this, model, data, cdata, input_matrix.derived(), result_matrix.const_cast_derived(), aot);
     }
 
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename VectorNLike,
+      ReferenceFrame rf>
+    void appendCouplingConstraintInertias(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
+      const ReferenceFrameTag<rf> reference_frame) const
+    {
+      ::pinocchio::visitors::appendCouplingConstraintInertias(
+        *this, model, data, cdata, diagonal_constraint_inertia.derived(), reference_frame);
+    }
+
     static std::string classname()
     {
       return "ConstraintModel";
