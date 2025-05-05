@@ -35,6 +35,8 @@ namespace pinocchio
     typedef ForceTpl<Scalar, Options> Force;
     typedef Eigen::Matrix<Scalar, 3, 1, Options> Vector3;
     typedef Eigen::Matrix<Scalar, 6, 6, Options> Matrix6;
+    typedef Eigen::Matrix<Scalar, 3, 6, Options> Matrix36;
+    typedef Eigen::Matrix<Scalar, 3, 6, Eigen::RowMajor> RowMatrix36;
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Matrix6) VectorOfMatrix6;
     typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic, Options> Matrix6x;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Options> MatrixX;
@@ -68,6 +70,10 @@ namespace pinocchio
     Vector3 & contraint_residual = constraint_position_error;
     Vector3 & dcontraint_residual = constraint_velocity_error;
     Vector3 & ddcontraint_residual = constraint_acceleration_error;
+
+    RowMatrix36 A1;
+    RowMatrix36 A2;
+    RowMatrix36 A; // A1 + A2
 
     //    VectorOfMatrix6 extended_motion_propagators_joint1;
     //    VectorOfMatrix6 lambdas_joint1;

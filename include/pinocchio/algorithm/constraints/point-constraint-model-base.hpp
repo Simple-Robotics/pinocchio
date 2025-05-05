@@ -420,6 +420,10 @@ namespace pinocchio
       acceleration_error.noalias() -= af1.angular().cross(position_error);
       acceleration_error.noalias() += vf1.angular().cross(vf1.angular().cross(position_error));
       acceleration_error.noalias() -= 2 * vf1.angular().cross(velocity_error_component1);
+
+      cdata.A1 = this->getA1(cdata, WorldFrameTag());
+      cdata.A2 = this->getA2(cdata, WorldFrameTag());
+      cdata.A = cdata.A1 + cdata.A2;
     }
 
     /// \brief Returns the constraint projector associated with joint 1.
@@ -722,10 +726,10 @@ namespace pinocchio
       //      complexity_strategy_1 = 6 * res.cols() * 36 + constraint_dim * 36 * res.cols(),
       //      complexity_strategy_2 = 36 * constraint_dim * 6 + constraint_dim * 36 * res.cols();
 
-      const Matrix36 A1 = getA1(cdata, WorldFrameTag());
-      const Matrix36 A2 = getA2(cdata, WorldFrameTag());
+      const auto & A1 = cdata.A1;
+      const auto & A2 = cdata.A2;
 
-      const Matrix36 A = A1 + A2;
+      const auto & A = cdata.A;
       for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
@@ -791,10 +795,10 @@ namespace pinocchio
       if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
         res.setZero();
 
-      const Matrix36 A1 = getA1(cdata, WorldFrameTag());
-      const Matrix36 A2 = getA2(cdata, WorldFrameTag());
+      const auto & A1 = cdata.A1;
+      const auto & A2 = cdata.A2;
 
-      const Matrix36 A = A1 + A2;
+      const auto & A = cdata.A;
       for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
