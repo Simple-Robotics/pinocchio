@@ -155,10 +155,14 @@ namespace pinocchio
 
     DenseMatrix matrix(bool enforce_symmetry = false) const
     {
-      DenseMatrix res(this->rows(), this->cols());
-      for (Eigen::DenseIndex i = 0; i < this->cols(); ++i)
+      DenseMatrix res(this->size(), this->size());
+
+      typedef Eigen::Map<VectorXs> MapVectorXs;
+      MapVectorXs x = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, this->size(), 1));
+
+      for (Eigen::DenseIndex i = 0; i < this->size(); ++i)
       {
-        VectorXs x = VectorXs::Unit(this->cols(), i);
+        x = VectorXs::Unit(this->size(), i);
         this->applyOnTheRight(x, res.col(i));
       }
       if (enforce_symmetry)
