@@ -140,9 +140,12 @@ namespace pinocchio
     DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models)
   {
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+
     typedef typename Model::JointIndex JointIndex;
     typedef std::pair<JointIndex, JointIndex> JointPair;
-    typedef Data::Matrix6 Matrix6;
+    typedef typename Data::Matrix6 Matrix6;
 
     // First step: for each joint, collect their neighbourds
     auto & neighbours = data.neighbour_links;
