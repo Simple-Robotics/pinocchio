@@ -10,7 +10,11 @@ namespace pinocchio
   namespace internal
   {
     template<typename C>
-    struct extract_template_template_parameter;
+    struct extract_template_template_parameter
+    {
+      template<typename = void>
+      using type = C;
+    };
 
     template<template<class...> class C, class... Parameters>
     struct extract_template_template_parameter<C<Parameters...>>

@@ -73,19 +73,50 @@ namespace pinocchio
     template<typename T>
     struct remove_ref
     {
-      typedef typename std::remove_const<T>::type type;
+      typedef T type;
     };
 
     template<typename T>
     struct remove_ref<std::reference_wrapper<T>>
     {
-      typedef typename std::remove_const<T>::type type;
+      typedef typename remove_ref<T>::type type;
     };
 
     template<typename T>
     struct remove_ref<std::shared_ptr<T>>
     {
-      typedef typename std::remove_const<T>::type type;
+      typedef typename remove_ref<T>::type type;
+    };
+
+    template<typename T>
+    typename remove_ref<T>::type & get_ref(typename remove_ref<T>::type & ref)
+    {
+      return ref;
+    }
+
+    template<typename T>
+    const typename remove_ref<const T>::type &
+    get_ref(const typename remove_ref<const T>::type & ref)
+    {
+      return ref;
+    }
+
+    template<typename T>
+    struct is_holder_of_type
+    {
+      static constexpr bool value = false;
+    };
+
+    template<typename T>
+    struct is_holder_of_type<std::reference_wrapper<T>>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<typename T>
+    struct is_holder_of_type<std::shared_ptr<T>>
+    {
+      static constexpr bool value = true;
     };
 
   } // namespace helper

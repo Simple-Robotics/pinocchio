@@ -12,6 +12,7 @@
 #include "pinocchio/algorithm/constraints/constraint-collection-default.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-generic.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-generic.hpp"
+#include "pinocchio/utils/template-template-parameter.hpp"
 
 namespace pinocchio
 {
@@ -53,7 +54,14 @@ namespace pinocchio
     typedef typename Model::Data Data;
 
     typedef _ConstraintModel ConstraintModel;
-    typedef typename ConstraintModel::ConstraintData ConstraintData;
+    typedef typename helper::remove_ref<ConstraintModel>::type InnerConstraintModel;
+
+    typedef typename helper::remove_ref<ConstraintModel>::type::ConstraintData InnerConstraintData;
+    typedef typename std::conditional<
+      helper::is_holder_of_type<ConstraintModel>::value,
+      typename internal::extract_template_template_parameter<ConstraintModel>::template type<
+        InnerConstraintData>,
+      InnerConstraintData>::type ConstraintData;
 
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintModel) ConstraintModelVector;
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(ConstraintData) ConstraintDataVector;
@@ -99,10 +107,12 @@ namespace pinocchio
     typedef PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(Force) ForceVector;
 
     typedef typename traits<Self>::ConstraintModel ConstraintModel;
+    typedef typename traits<Self>::InnerConstraintModel InnerConstraintModel;
     typedef typename traits<Self>::ConstraintModelVector ConstraintModelVector;
     typedef Holder<const ConstraintModelVector> ConstraintModelVectorHolder;
 
     typedef typename traits<Self>::ConstraintData ConstraintData;
+    typedef typename traits<Self>::InnerConstraintData InnerConstraintData;
     typedef typename traits<Self>::ConstraintDataVector ConstraintDataVector;
     typedef Holder<ConstraintDataVector> ConstraintDataVectorHolder;
 
@@ -337,8 +347,11 @@ namespace pinocchio
     static Eigen::DenseIndex evalConstraintSize(const ConstraintModelVector & constraint_models)
     {
       Eigen::DenseIndex size = 0;
-      for (const auto & cm : constraint_models)
-        size += cm.size();
+      for (const ConstraintModel & cm : constraint_models)
+      {
+        const InnerConstraintModel & cmodel = helper::get_ref<ConstraintModel>(cm);
+        size += cmodel.size();
+      }
 
       return size;
     }

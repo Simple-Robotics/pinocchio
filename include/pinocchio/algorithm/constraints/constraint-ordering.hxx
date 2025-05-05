@@ -6,6 +6,7 @@
 #define __pinocchio_algorithm_constraints_constraint_ordering_hxx__
 
 #include "pinocchio/algorithm/constraints/visitors/constraint-model-visitor.hpp"
+#include "pinocchio/utils/reference.hpp"
 
 /// @cond DEV
 
@@ -158,7 +159,8 @@ namespace pinocchio
     typedef MinimalOrderingConstraintStepVisitor<Scalar, Options, JointCollectionTpl> Step;
     for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
-      const ConstraintModel & cmodel = constraint_models[i];
+      const typename helper::remove_ref<ConstraintModel>::type & cmodel =
+        helper::get_ref<ConstraintModel>(constraint_models[i]);
       Step::run(cmodel, model, data);
     }
 
