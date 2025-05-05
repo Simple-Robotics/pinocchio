@@ -156,9 +156,9 @@ namespace pinocchio
     DenseMatrix matrix(bool enforce_symmetry = false) const
     {
       DenseMatrix res(this->rows(), this->cols());
-      VectorXs x(this->cols());
       for (Eigen::DenseIndex i = 0; i < this->cols(); ++i)
       {
+        VectorXs x = VectorXs::Unit(this->cols(), i);
         this->applyOnTheRight(x, res.col(i));
       }
       if (enforce_symmetry)
