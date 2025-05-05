@@ -607,17 +607,16 @@ namespace pinocchio
       EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut1, Matrix6);
       EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut2, Matrix6);
       EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Matrix6LikeOut3, Matrix6);
-
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
       //      assert((check_expression_if_real<Scalar,
       //      true>(diagonal_constraint_inertia.isZero(Scalar(0)))));
 
-      const auto & A1 = cdata.A1;
-      const auto & A2 = cdata.A2;
+      const auto & A1 = cdata.A1_world;
+      const auto & A2 = cdata.A2_world;
       Matrix36 diagonal_constraint_inertia_time_A;
 
       if (joint1_id > 0)
       {
-        A1 = getA1(cdata, reference_frame);
         diagonal_constraint_inertia_time_A.noalias() =
           diagonal_constraint_inertia.asDiagonal() * A1;
         I11.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
@@ -627,7 +626,6 @@ namespace pinocchio
 
       if (joint2_id > 0)
       {
-        A2 = getA2(cdata, reference_frame);
         diagonal_constraint_inertia_time_A.noalias() =
           diagonal_constraint_inertia.asDiagonal() * A2;
         I22.const_cast_derived().noalias() = A2.transpose() * diagonal_constraint_inertia_time_A;
@@ -659,21 +657,24 @@ namespace pinocchio
 
       Matrix6 I11, I12, I22;
       computeConstraintInertias(cdata, diagonal_constraint_inertia, I11, I12, I22, reference_frame);
+      assert(
+        (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value
+         || std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
+        && "must never happened");
 
-      if (std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value)
-      {
-        data.oYaba_augmented[joint1_id] += I11;
-        data.oYaba_augmented[joint2_id] += I22;
-      }
-      else if (std::is_same<ReferenceFrameTag<rf>, LocalFrameTag>::value)
-      {
-        data.oYaba_augmented[joint1_id] += I11; // TODO(jcarpent): should be Yaba_augmented
-        data.oYaba_augmented[joint2_id] += I22; // TODO(jcarpent): should be Yaba_augmented
-      }
-      else
-      {
-        assert(false && "must never happened");
-      }
+      Matrix6 & Y1 = std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value
+                       ? data.oYaba_augmented[joint1_id]
+                       : data.oYaba_augmented[joint1_id];
+
+      if (joint1_id)
+        Y1 += I11;
+
+      Matrix6 & Y2 = std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value
+                       ? data.oYaba_augmented[joint2_id]
+                       : data.oYaba_augmented[joint2_id];
+
+      if (joint2_id)
+        Y2 += I22;
 
       if (joint1_id > 0 && joint2_id > 0)
       {
