@@ -143,6 +143,21 @@ namespace pinocchio
     template<typename ConfigVectorType>
     void compute(const Eigen::MatrixBase<ConfigVectorType> & q);
 
+    DenseMatrix matrix(bool enforce_symmetry = false) const
+    {
+      DenseMatrix res(this->rows(), this->cols());
+      VectorXs x(this->cols());
+      for (Eigen::DenseIndex i = 0; i < this->cols(); ++i)
+      {
+        this->applyOnTheRight(x, res.col(i));
+      }
+      if (enforce_symmetry)
+      {
+        res = 0.5 * (res + res.transpose());
+      }
+      return res;
+    }
+
     ///
     /// \brief Update the intermediate computations before calling solveInPlace or operator*
     ///
