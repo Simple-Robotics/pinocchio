@@ -890,11 +890,16 @@ namespace pinocchio
       PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
       PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
       PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
 
       // Todo: optimize code
-      const Matrix36 A1 = getA1(cdata, reference_frame), A2 = getA2(cdata, reference_frame);
-      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
-      joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
+      // Todo: support reference_frame
+      const auto & A1 = cdata.A1;
+      const auto & A2 = cdata.A2;
+      if (joint1_id > 0)
+        joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
+      if (joint2_id > 0)
+        joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
     }
 
     template<
