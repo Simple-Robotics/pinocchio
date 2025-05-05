@@ -71,9 +71,13 @@ namespace pinocchio
     Vector3 & dcontraint_residual = constraint_velocity_error;
     Vector3 & ddcontraint_residual = constraint_acceleration_error;
 
-    RowMatrix36 A1;
-    RowMatrix36 A2;
-    RowMatrix36 A; // A1 + A2
+    Matrix36 A1_world;
+    Matrix36 A2_world;
+    Matrix36 A_world; // A1 + A2
+
+    Matrix36 A1_local;
+    Matrix36 A2_local;
+    Matrix36 A_local; // A1 + A2
 
     //    VectorOfMatrix6 extended_motion_propagators_joint1;
     //    VectorOfMatrix6 lambdas_joint1;

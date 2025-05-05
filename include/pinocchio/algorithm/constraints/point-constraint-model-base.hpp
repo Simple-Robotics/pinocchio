@@ -421,9 +421,13 @@ namespace pinocchio
       acceleration_error.noalias() += vf1.angular().cross(vf1.angular().cross(position_error));
       acceleration_error.noalias() -= 2 * vf1.angular().cross(velocity_error_component1);
 
-      cdata.A1 = this->getA1(cdata, WorldFrameTag());
-      cdata.A2 = this->getA2(cdata, WorldFrameTag());
-      cdata.A = cdata.A1 + cdata.A2;
+      cdata.A1_world = this->getA1(cdata, WorldFrameTag());
+      cdata.A2_world = this->getA2(cdata, WorldFrameTag());
+      cdata.A_world = cdata.A1_world + cdata.A2_world;
+
+      cdata.A1_local = this->getA1(cdata, LocalFrameTag());
+      cdata.A2_local = this->getA2(cdata, LocalFrameTag());
+      cdata.A_local = cdata.A1_local + cdata.A2_local;
     }
 
     /// \brief Returns the constraint projector associated with joint 1.
@@ -730,10 +734,10 @@ namespace pinocchio
       //      complexity_strategy_1 = 6 * res.cols() * 36 + constraint_dim * 36 * res.cols(),
       //      complexity_strategy_2 = 36 * constraint_dim * 6 + constraint_dim * 36 * res.cols();
 
-      const auto & A1 = cdata.A1;
-      const auto & A2 = cdata.A2;
+      const auto & A1 = cdata.A1_world;
+      const auto & A2 = cdata.A2_world;
 
-      const auto & A = cdata.A;
+      const auto & A = cdata.A_world;
       for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
@@ -799,10 +803,10 @@ namespace pinocchio
       if (std::is_same<AssignmentOperatorTag<op>, SetTo>::value)
         res.setZero();
 
-      const auto & A1 = cdata.A1;
-      const auto & A2 = cdata.A2;
+      const auto & A1 = cdata.A1_world;
+      const auto & A2 = cdata.A2_world;
 
-      const auto & A = cdata.A;
+      const auto & A = cdata.A_world;
       for (Eigen::DenseIndex jj = 0; jj < model.nv; ++jj)
       {
         if (!(colwise_joint1_sparsity[jj] || colwise_joint2_sparsity[jj]))
@@ -893,9 +897,10 @@ namespace pinocchio
       PINOCCHIO_UNUSED_VARIABLE(reference_frame);
 
       // Todo: optimize code
-      // Todo: support reference_frame
-      const auto & A1 = cdata.A1;
-      const auto & A2 = cdata.A2;
+      const auto & A1 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A1_world : cdata.A1_local;
+      const auto & A2 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
       if (joint1_id > 0)
         joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
       if (joint2_id > 0)
