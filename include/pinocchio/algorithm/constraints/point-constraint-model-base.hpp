@@ -607,12 +607,15 @@ namespace pinocchio
       //      assert((check_expression_if_real<Scalar,
       //      true>(diagonal_constraint_inertia.isZero(Scalar(0)))));
 
-      Matrix36 A1, A2;
+      const auto & A1 = cdata.A1;
+      const auto & A2 = cdata.A2;
       Matrix36 diagonal_constraint_inertia_time_A;
+
       if (joint1_id > 0)
       {
         A1 = getA1(cdata, reference_frame);
-        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A1;
+        diagonal_constraint_inertia_time_A.noalias() =
+          diagonal_constraint_inertia.asDiagonal() * A1;
         I11.const_cast_derived().noalias() = A1.transpose() * diagonal_constraint_inertia_time_A;
       }
       else
@@ -621,7 +624,8 @@ namespace pinocchio
       if (joint2_id > 0)
       {
         A2 = getA2(cdata, reference_frame);
-        diagonal_constraint_inertia_time_A = diagonal_constraint_inertia.asDiagonal() * A2;
+        diagonal_constraint_inertia_time_A.noalias() =
+          diagonal_constraint_inertia.asDiagonal() * A2;
         I22.const_cast_derived().noalias() = A2.transpose() * diagonal_constraint_inertia_time_A;
       }
       else
