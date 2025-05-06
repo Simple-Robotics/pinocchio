@@ -40,6 +40,7 @@ namespace pinocchio
       typedef context::Data Data;
       typedef typename traits<Self>::ComplianceVectorTypeRef ComplianceVectorTypeRef;
       typedef typename traits<Self>::ComplianceVectorTypeConstRef ComplianceVectorTypeConstRef;
+      typedef typename traits<Self>::JacobianMatrixType JacobianMatrixType;
 
     public:
       template<class PyClass>
@@ -78,7 +79,10 @@ namespace pinocchio
             "Evaluate the constraint values at the current state given by data and store the "
             "results.")
           .def(
-            "jacobian", &Self::jacobian, bp::args("self", "model", "data", "constraint_data"),
+            "jacobian",
+            (JacobianMatrixType(Self::*)(const Model &, const Data &, ConstraintData &)
+               const)&Self::jacobian,
+            bp::args("self", "model", "data", "constraint_data"),
             "Compute the constraint jacobian.")
           .def(
             "jacobianMatrixProduct", &jacobianMatrixProduct,
