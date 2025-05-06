@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(constraint_coupling_inertia)
 
   constraint_model.calc(model, data, constraint_data);
   const Eigen::VectorXd diagonal_inertia =
-    Eigen::VectorXd::Random(constraint_model.size()).cwiseSqrt();
+    Eigen::VectorXd::Random(constraint_model.size()).array().square();
   constraint_model.appendCouplingConstraintInertias(
     model, data, constraint_data, diagonal_inertia, WorldFrameTag());
 
