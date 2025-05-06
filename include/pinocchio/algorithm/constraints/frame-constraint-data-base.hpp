@@ -66,6 +66,14 @@ namespace pinocchio
     /// \brief Constraint acceleration biais
     Vector6 constraint_acceleration_biais_term;
 
+    Matrix6 A1_world;
+    Matrix6 A2_world;
+    Matrix6 A_world; // A1 + A2
+
+    Matrix6 A1_local;
+    Matrix6 A2_local;
+    Matrix6 A_local; // A1 + A2
+
     //    VectorOfMatrix6 extended_motion_propagators_joint1;
     //    VectorOfMatrix6 lambdas_joint1;
     //    VectorOfMatrix6 extended_motion_propagators_joint2;
