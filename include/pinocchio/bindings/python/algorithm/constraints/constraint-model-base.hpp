@@ -78,7 +78,7 @@ namespace pinocchio
             "Evaluate the constraint values at the current state given by data and store the "
             "results.")
           .def(
-            "jacobian", &jacobian, bp::args("self", "model", "data", "constraint_data"),
+            "jacobian", &Self::jacobian, bp::args("self", "model", "data", "constraint_data"),
             "Compute the constraint jacobian.")
           .def(
             "jacobianMatrixProduct", &jacobianMatrixProduct,
@@ -174,14 +174,6 @@ namespace pinocchio
         const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
       {
         self.calc(model, data, constraint_data);
-      }
-
-      static context::MatrixXs jacobian(
-        const Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
-      {
-        context::MatrixXs res = context::MatrixXs::Zero(self.size(), model.nv);
-        self.jacobian(model, data, constraint_data, res);
-        return res;
       }
 
       static context::MatrixXs jacobianMatrixProduct(
