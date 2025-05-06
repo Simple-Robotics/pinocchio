@@ -6,6 +6,8 @@
 #include "pinocchio/math/matrix.hpp"
 #include "pinocchio/math/eigen-helpers.hpp"
 
+#include "pinocchio/utils/std-vector.hpp"
+
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
@@ -58,4 +60,32 @@ BOOST_AUTO_TEST_CASE(test_eigen_helpers)
   setIdentity(M);
   BOOST_CHECK(M.isIdentity(0));
 }
+
+BOOST_AUTO_TEST_CASE(test_eigen_helpers_on_std_vector)
+{
+  using namespace pinocchio;
+  using namespace Eigen;
+  const Eigen::DenseIndex m = 20, n = 100;
+
+  std::vector<Eigen::MatrixXd> vec(10, MatrixXd::Ones(m, n));
+
+  apply_for_each(vec, setZero<Eigen::MatrixXd>);
+  for (const auto & val : vec)
+  {
+    BOOST_CHECK(val.isZero(0));
+  }
+
+  apply_for_each(vec, setOnes<Eigen::MatrixXd>);
+  for (const auto & val : vec)
+  {
+    BOOST_CHECK(val.isOnes(0));
+  }
+
+  apply_for_each(vec, setIdentity<Eigen::MatrixXd>);
+  for (const auto & val : vec)
+  {
+    BOOST_CHECK(val.isIdentity(0));
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
