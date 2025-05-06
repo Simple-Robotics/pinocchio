@@ -97,7 +97,7 @@ namespace pinocchio
       derived().jacobian(model, data, cdata, jacobian_matrix.const_cast_derived());
     }
 
-    template<int Options, template<typename, int> class JointCollectionTpl, typename JacobianMatrix>
+    template<int Options, template<typename, int> class JointCollectionTpl>
     typename traits<Derived>::JacobianMatrixType jacobian(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
