@@ -7,10 +7,11 @@
 
 #include "pinocchio/math/matrix.hpp"
 #include "pinocchio/parsers/config.hpp"
-#include "pinocchio/parsers/sdf.hpp"
+// #include "pinocchio/parsers/sdf.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/algorithm/contact-info.hpp"
+#include "pinocchio/parsers/urdf/model.hxx"
 
 #include <sdf/sdf.hh>
 #include <ignition/math.hh>
@@ -336,6 +337,7 @@ namespace pinocchio
           typedef UrdfVisitor::SE3 SE3;
           typedef UrdfVisitor::Vector Vector;
           typedef UrdfVisitor::Vector3 Vector3;
+          typedef urdf::details::JointType JointType;
           const std::string & jointName = jointElement->template Get<std::string>("name");
 
           urdfVisitor << jointName << " being parsed." << '\n';
@@ -527,14 +529,14 @@ namespace pinocchio
 
             urdfVisitor << "joint REVOLUTE with axis" << axis.transpose() << '\n';
             urdfVisitor.addJointAndBody(
-              UrdfVisitor::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
+              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
               childName, max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else if (jointElement->template Get<std::string>("type") == "gearbox")
           {
             urdfVisitor << "joint GEARBOX with axis" << '\n';
             urdfVisitor.addJointAndBody(
-              UrdfVisitor::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
+              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
               childName, max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else if (jointElement->template Get<std::string>("type") == "prismatic")
@@ -547,7 +549,7 @@ namespace pinocchio
 
             urdfVisitor << "joint prismatic with axis" << '\n';
             urdfVisitor.addJointAndBody(
-              UrdfVisitor::PRISMATIC, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
+              JointType::PRISMATIC, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
               childName, max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else if (jointElement->template Get<std::string>("type") == "fixed")
@@ -568,7 +570,7 @@ namespace pinocchio
 
             urdfVisitor << "joint BALL" << '\n';
             urdfVisitor.addJointAndBody(
-              UrdfVisitor::SPHERICAL, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
+              JointType::SPHERICAL, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
               childName, max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else
