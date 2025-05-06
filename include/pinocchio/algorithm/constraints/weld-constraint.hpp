@@ -38,6 +38,7 @@ namespace pinocchio
     typedef ConstraintData Data;
 
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
+    typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic, Options> JacobianMatrixType;
     typedef Vector6 VectorConstraintSize;
 
     typedef Vector6 ComplianceVectorType;
