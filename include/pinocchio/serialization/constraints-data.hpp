@@ -68,6 +68,13 @@ namespace boost
       ar & make_nvp("constraint_velocity_error", cdata.constraint_velocity_error);
       ar & make_nvp("constraint_acceleration_error", cdata.constraint_acceleration_error);
       ar & make_nvp("constraint_acceleration_biais_term", cdata.constraint_acceleration_biais_term);
+
+      ar & make_nvp("A1_world", cdata.A1_world);
+      ar & make_nvp("A2_world", cdata.A2_world);
+      ar & make_nvp("A_world", cdata.A_world);
+      ar & make_nvp("A1_local", cdata.A1_local);
+      ar & make_nvp("A2_local", cdata.A2_local);
+      ar & make_nvp("A_local", cdata.A_local);
     }
 
     template<typename Archive, typename Scalar, int Options>
@@ -110,6 +117,13 @@ namespace boost
       ar & make_nvp("constraint_velocity_error", cdata.constraint_velocity_error);
       ar & make_nvp("constraint_acceleration_error", cdata.constraint_acceleration_error);
       ar & make_nvp("constraint_acceleration_biais_term", cdata.constraint_acceleration_biais_term);
+
+      ar & make_nvp("A1_world", cdata.A1_world);
+      ar & make_nvp("A2_world", cdata.A2_world);
+      ar & make_nvp("A_world", cdata.A_world);
+      ar & make_nvp("A1_local", cdata.A1_local);
+      ar & make_nvp("A2_local", cdata.A2_local);
+      ar & make_nvp("A_local", cdata.A_local);
     }
 
     template<typename Archive, typename Scalar, int Options>
