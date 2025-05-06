@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024 INRIA
+// Copyright (c) 2024-2025 INRIA
 //
 
 #include "pinocchio/algorithm/aba.hpp"
@@ -179,11 +179,13 @@ BOOST_AUTO_TEST_CASE(constraint3D_basic_operations)
       spatial_inertia_join1.transpose().isApprox(spatial_inertia_join1)); // check symmetric matrix
 
     const auto A1 = cm.getA1(cd, LocalFrameTag());
+    BOOST_CHECK(A1.isApprox(cd.A1_local));
     const Inertia::Matrix6 I11_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A1;
 
     BOOST_CHECK(spatial_inertia_join1.isApprox(I11_ref));
 
     const auto A2 = cm.getA2(cd, LocalFrameTag());
+    BOOST_CHECK(A2.isApprox(cd.A2_local));
     const Inertia::Matrix6 I22_ref = A2.transpose() * diagonal_inertia.asDiagonal() * A2;
 
     const Inertia::Matrix6 I12_ref = A1.transpose() * diagonal_inertia.asDiagonal() * A2;

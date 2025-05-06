@@ -611,8 +611,11 @@ namespace pinocchio
       //      assert((check_expression_if_real<Scalar,
       //      true>(diagonal_constraint_inertia.isZero(Scalar(0)))));
 
-      const auto & A1 = cdata.A1_world;
-      const auto & A2 = cdata.A2_world;
+      const auto & A1 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A1_world : cdata.A1_local;
+      const auto & A2 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
+
       Matrix36 diagonal_constraint_inertia_time_A;
 
       if (joint1_id > 0)
@@ -666,14 +669,14 @@ namespace pinocchio
                        ? data.oYaba_augmented[joint1_id]
                        : data.oYaba_augmented[joint1_id];
 
-      if (joint1_id)
+      if (joint1_id > 0)
         Y1 += I11;
 
       Matrix6 & Y2 = std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value
                        ? data.oYaba_augmented[joint2_id]
                        : data.oYaba_augmented[joint2_id];
 
-      if (joint2_id)
+      if (joint2_id > 0)
         Y2 += I22;
 
       if (joint1_id > 0 && joint2_id > 0)
