@@ -104,6 +104,7 @@ namespace pinocchio
     typedef FrictionalJointConstraintModelTpl Self;
     typedef UnaryConstraintModelBase<Self> Base;
     typedef ConstraintModelCommonParameters<Self> BaseCommonParameters;
+    typedef ConstraintModelBase<FrictionalJointConstraintModelTpl> RootBase;
 
     template<typename NewScalar, int NewOptions>
     friend struct FrictionalJointConstraintModelTpl;
@@ -120,6 +121,7 @@ namespace pinocchio
     typedef FrictionalJointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef BoxSetTpl<Scalar, Options> ConstraintSet;
 
+    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 

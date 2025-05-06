@@ -108,7 +108,9 @@ namespace pinocchio
     };
 
     typedef JointLimitConstraintModelTpl Self;
-    typedef ConstraintModelBase<JointLimitConstraintModelTpl> Base;
+    typedef UnaryConstraintModelBase<Self> Base;
+    typedef ConstraintModelBase<Self> RootBase;
+
     typedef ConstraintModelCommonParameters<JointLimitConstraintModelTpl> BaseCommonParameters;
 
     template<typename NewScalar, int NewOptions>
@@ -129,6 +131,7 @@ namespace pinocchio
     typedef JointLimitConstraintConeTpl<Scalar> ConstraintSet;
     typedef BoxSetTpl<Scalar, Options> BoxSet;
 
+    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 

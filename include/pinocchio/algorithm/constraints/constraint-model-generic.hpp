@@ -93,8 +93,10 @@ namespace pinocchio
       Options = _Options
     };
 
-    typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> Self;
+    typedef ConstraintModelTpl Self;
     typedef ConstraintModelBase<Self> Base;
+    typedef ConstraintModelBase<Self> RootBase;
+
     typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
     typedef ConstraintCollectionTpl<Scalar, Options> ConstraintCollection;
     typedef typename ConstraintCollection::ConstraintDataVariant ConstraintDataVariant;
@@ -113,6 +115,7 @@ namespace pinocchio
       BaumgarteCorrectorVectorParametersConstRef;
     typedef BaumgarteCorrectorParametersTpl<Scalar> BaumgarteCorrectorParameters;
 
+    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
 

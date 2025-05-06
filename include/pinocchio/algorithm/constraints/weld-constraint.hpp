@@ -77,6 +77,7 @@ namespace pinocchio
     };
 
     typedef FrameConstraintModelBase<WeldConstraintModelTpl> Base;
+    typedef ConstraintModelBase<WeldConstraintModelTpl> RootBase;
 
     template<typename NewScalar, int NewOptions>
     friend struct WeldConstraintModelTpl;
@@ -84,6 +85,7 @@ namespace pinocchio
     typedef WeldConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
+    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;

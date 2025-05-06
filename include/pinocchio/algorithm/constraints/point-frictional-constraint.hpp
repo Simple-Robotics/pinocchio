@@ -77,6 +77,7 @@ namespace pinocchio
     };
 
     typedef PointConstraintModelBase<FrictionalPointConstraintModelTpl> Base;
+    typedef ConstraintModelBase<FrictionalPointConstraintModelTpl> RootBase;
 
     template<typename NewScalar, int NewOptions>
     friend struct FrictionalPointConstraintModelTpl;
@@ -84,6 +85,7 @@ namespace pinocchio
     typedef FrictionalPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef CoulombFrictionConeTpl<Scalar> ConstraintSet;
 
+    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
