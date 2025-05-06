@@ -1,9 +1,10 @@
 //
-// Copyright (c) 2019 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/math/matrix.hpp"
+#include "pinocchio/math/eigen-helpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
@@ -42,4 +43,19 @@ BOOST_AUTO_TEST_CASE(test_matrix_scalar_product)
   BOOST_CHECK(res.eval() == M);
 }
 
+BOOST_AUTO_TEST_CASE(test_eigen_helpers)
+{
+  using namespace pinocchio;
+  using namespace Eigen;
+  const Eigen::DenseIndex m = 20, n = 100;
+
+  MatrixXd M(MatrixXd::Ones(m, n));
+
+  setZero(M);
+  BOOST_CHECK(M.isZero(0));
+  setOnes(M);
+  BOOST_CHECK(M.isOnes(0));
+  setIdentity(M);
+  BOOST_CHECK(M.isIdentity(0));
+}
 BOOST_AUTO_TEST_SUITE_END()
