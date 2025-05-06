@@ -32,6 +32,12 @@ namespace pinocchio
     };
 
   } // namespace internal
+
+  template<typename T, typename Allocator, class Func>
+  void apply_for_each(std::vector<T, Allocator> & vector, const Func & func)
+  {
+    std::for_each(vector.begin(), vector.end(), func);
+  }
 } // namespace pinocchio
 
 #endif // __pinocchio_utils_std_vector_hpp__
