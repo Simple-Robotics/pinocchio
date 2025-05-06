@@ -183,7 +183,7 @@ namespace pinocchio
         const ConstraintData & constraint_data,
         const context::MatrixXs & matrix)
       {
-        context::MatrixXs res = context::MatrixXs::Zero(self.size(), matrix.cols());
+        context::MatrixXs res = context::MatrixXs::Zero(self.activeSize(), matrix.cols());
         self.jacobianMatrixProduct(model, data, constraint_data, matrix, res);
         return res;
       }
