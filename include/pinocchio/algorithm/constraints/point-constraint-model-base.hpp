@@ -72,6 +72,7 @@ namespace pinocchio
 
     typedef BinaryConstraintModelBase<Derived> Base;
     typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
+    typedef ConstraintModelBase<Derived> RootBase;
 
     template<typename OtherDerived>
     friend struct PointConstraintModelBase;
@@ -835,6 +836,8 @@ namespace pinocchio
           res.row(jj).noalias() += AxSi.transpose() * mat;
       }
     }
+
+    using RootBase::jacobian;
 
     ///  \brief Evaluate the Jacobian associated to the constraint at the given state stored in data
     /// and cdata.  The results Jacobian is evaluated in the jacobian input/output matrix.

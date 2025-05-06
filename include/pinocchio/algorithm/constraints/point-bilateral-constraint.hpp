@@ -85,7 +85,6 @@ namespace pinocchio
     typedef BilateralPointConstraintDataTpl<Scalar, Options> ConstraintData;
     typedef UnboundedSetTpl<Scalar, Options> ConstraintSet;
 
-    using RootBase::jacobian;
     using typename Base::BooleanVector;
     using typename Base::EigenIndexVector;
     using typename Base::Force;
