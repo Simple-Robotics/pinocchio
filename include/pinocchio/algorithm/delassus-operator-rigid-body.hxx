@@ -23,13 +23,38 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     class ConstraintModel,
     template<typename T> class Holder>
+  void DelassusOperatorRigidBodySystemsTpl<
+    Scalar,
+    Options,
+    JointCollectionTpl,
+    ConstraintModel,
+    Holder>::
+    update(
+      const ConstraintModelVectorHolder & constraint_models_ref,
+      const ConstraintDataVectorHolder & constraint_datas_ref)
+  {
+    m_constraint_models_ref = constraint_models_ref;
+    m_constraint_datas_ref = constraint_datas_ref;
+
+    computeJointMinimalOrdering(model(), data(), helper::get_ref(constraint_models_ref));
+    m_dirty = true;
+  }
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
+    template<typename T> class Holder>
   template<typename ConfigVectorType>
   void DelassusOperatorRigidBodySystemsTpl<
     Scalar,
     Options,
     JointCollectionTpl,
     ConstraintModel,
-    Holder>::compute(const Eigen::MatrixBase<ConfigVectorType> & q)
+    Holder>::
+    compute(
+      const Eigen::MatrixBase<ConfigVectorType> & q, bool apply_on_the_right, bool solve_in_place)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       q.size(), model().nq, "The joint configuration vector is not of right size");
@@ -47,7 +72,7 @@ namespace pinocchio
       Pass1::run(model_ref.joints[i], data_ref.joints[i], args);
     }
 
-    compute();
+    compute(apply_on_the_right, solve_in_place);
   }
 
   template<
@@ -61,7 +86,7 @@ namespace pinocchio
     Options,
     JointCollectionTpl,
     ConstraintModel,
-    Holder>::compute(bool damping_compliance_update_only)
+    Holder>::compute_or_update_decomposition(bool apply_on_the_right, bool solve_in_place)
   {
     typedef typename Data::Inertia Inertia;
     using Matrix6 = typename Inertia::Matrix6;
@@ -71,67 +96,80 @@ namespace pinocchio
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
-    // Compute joint ordering for solveInPlace
-    if (!damping_compliance_update_only)
-      computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
-    else
-    {
-      data_ref.joint_cross_coupling.apply([](Matrix6 & v) { v.setZero(); });
-    }
+    //      computeJointMinimalOrdering(model_ref, data_ref, constraint_models_ref);
 
     for (JointIndex i = 1; i < JointIndex(model_ref.njoints); ++i)
     {
       const auto & joint_inertia = model_ref.inertias[i];
-      if (!damping_compliance_update_only)
+      if (apply_on_the_right)
         data_ref.Yaba[i] = joint_inertia.matrix();
-      const Inertia oinertia = data_ref.oMi[i].act(joint_inertia);
-      data_ref.oYaba_augmented[i] = oinertia.matrix();
-    }
-    data_ref.joint_apparent_inertia = model_ref.armature;
-
-    // Append constraint inertia to oYaba_augmented
-    Eigen::Index row_id = 0;
-    for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-    {
-      const InnerConstraintModel & cmodel =
-        helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-      InnerConstraintData & cdata = helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
-
-      const auto constraint_size = cmodel.size();
-
-      const auto constraint_diagonal_inertia =
-        this->m_sum_compliance_damping_inverse.segment(row_id, constraint_size);
-
-      if (!damping_compliance_update_only)
-        cmodel.calc(model_ref, data_ref, cdata);
-      cmodel.appendCouplingConstraintInertias(
-        model_ref, data_ref, cdata, constraint_diagonal_inertia, WorldFrameTag());
-
-      row_id += constraint_size;
-    }
-
-    if (damping_compliance_update_only)
-    {
-      typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<
-        DelassusOperatorRigidBodySystemsTpl, true>
-        Pass2;
-      for (const JointIndex i : data_ref.elimination_order)
+      if (solve_in_place)
       {
-        typename Pass2::ArgsType args(model_ref, data_ref);
-        Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
+        const Inertia oinertia = data_ref.oMi[i].act(joint_inertia);
+        data_ref.oYaba_augmented[i] = oinertia.matrix();
+      }
+    }
+
+    if (solve_in_place)
+    {
+      data_ref.joint_apparent_inertia = model_ref.armature;
+      data_ref.joint_cross_coupling.apply([](Matrix6 & v) { v.setZero(); });
+
+      // Append constraint inertia to oYaba_augmented
+      Eigen::Index row_id = 0;
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const InnerConstraintModel & cmodel =
+          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+        InnerConstraintData & cdata = helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+
+        const auto constraint_size = cmodel.size();
+
+        const auto constraint_diagonal_inertia =
+          this->m_sum_compliance_damping_inverse.segment(row_id, constraint_size);
+
+        cmodel.appendCouplingConstraintInertias(
+          model_ref, data_ref, cdata, constraint_diagonal_inertia, WorldFrameTag());
+
+        row_id += constraint_size;
+      }
+    }
+
+#define DO_PASS(apply_on_the_right_v, solve_in_place_v)                                            \
+  {                                                                                                \
+    typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<                                   \
+      DelassusOperatorRigidBodySystemsTpl, apply_on_the_right_v, solve_in_place_v>                 \
+      Pass2;                                                                                       \
+    for (const JointIndex i : data_ref.elimination_order)                                          \
+    {                                                                                              \
+      typename Pass2::ArgsType args(model_ref, data_ref);                                          \
+      Pass2::run(model_ref.joints[i], data_ref.joints[i], args);                                   \
+    }                                                                                              \
+  }
+
+    if (apply_on_the_right)
+    {
+      if (solve_in_place)
+      {
+        DO_PASS(true, true);
+      }
+      else
+      {
+        DO_PASS(true, false);
       }
     }
     else
     {
-      typedef DelassusOperatorRigidBodySystemsComputeBackwardPass<
-        DelassusOperatorRigidBodySystemsTpl, false>
-        Pass2;
-      for (const JointIndex i : data_ref.elimination_order)
+      if (solve_in_place)
       {
-        typename Pass2::ArgsType args(model_ref, data_ref);
-        Pass2::run(model_ref.joints[i], data_ref.joints[i], args);
+        DO_PASS(false, true);
+      }
+      else
+      {
+        DO_PASS(false, false);
       }
     }
+#undef DO_PASS
 
     compute_conclude();
   }
@@ -266,7 +304,7 @@ namespace pinocchio
     //      m_dirty, std::logic_error,
     //      "The DelassusOperator has dirty quantities. Please call compute() method first.");
     if (isDirty())
-      self_const_cast().compute(true);
+      self_const_cast().updateDecomposition();
 
     const Model & model_ref = model();
     const Data & data_ref = data();

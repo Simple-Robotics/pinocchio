@@ -143,7 +143,17 @@ namespace pinocchio
         min_damping_value >= Scalar(0) && "The damping value should be positive.");
 
       updateDamping(min_damping_value);
+      update(constraint_models_ref, constraint_datas_ref);
     }
+
+    /// \brief Update the constraint model and data vectors.
+    ///
+    /// \param[in] constraint_models_ref Vector of constraint models
+    /// \param[in] constraint_datas_ref Vector of constraint datas
+    ///
+    void update(
+      const ConstraintModelVectorHolder & constraint_models_ref,
+      const ConstraintDataVectorHolder & constraint_datas_ref);
 
     ///
     /// \brief Update the intermediate computations according to a new configuration vector entry
@@ -151,7 +161,10 @@ namespace pinocchio
     /// \param[in] q Configuration vector
     ///
     template<typename ConfigVectorType>
-    void compute(const Eigen::MatrixBase<ConfigVectorType> & q);
+    void compute(
+      const Eigen::MatrixBase<ConfigVectorType> & q,
+      bool apply_on_the_right = true,
+      bool solve_in_place = true);
 
     DenseMatrix matrix(bool enforce_symmetry = false) const
     {
@@ -172,17 +185,45 @@ namespace pinocchio
       return res;
     }
 
+  protected:
+    void compute_or_update_decomposition(bool apply_on_the_right, bool solve_in_place);
+
+    ///
+    /// \brief Update the internal factorization because the damping or compliance vectors have been
+    /// modified
+    ///
+    void updateDecomposition()
+    {
+      compute_or_update_decomposition(false, true);
+    }
+
+  public:
     ///
     /// \brief Update the intermediate computations before calling solveInPlace or operator*
     ///
-    /// \param[in] damping_compliance_update_only If true, this will only update the quantities
-    /// related to change of damping or compliance values.
+    /// \param[in] apply_on_the_right If true, this will update the quantities related to the
+    /// applyOnTheRight method
+    /// \param[in] solve_in_place If true, this will update the quantities related to the
+    /// solveInPlace method
     ///
-    /// \remarks When setting damping_compliance_update_only to true, this enables to lower the
-    /// quantities updated to the minimum, helping to save time overall. Indeed, only the quantities
-    /// involved in the solveInPlace method need to be updated.
-    void compute(bool damping_compliance_update_only = false);
+    /// \remarks By activating or deactivating apply_on_the_right and solve_in_place, this enables
+    /// to lower the quantities updated to the minimum, helping to save time overall.
+    void compute(bool apply_on_the_right = true, bool solve_in_place = true)
+    {
+      const ConstraintModelVector & constraint_models_ref = constraint_models();
+      ConstraintDataVector & constraint_datas_ref = constraint_datas();
 
+      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+      {
+        const auto & cmodel = helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+        auto & cdata = helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+        cmodel.calc(model(), data(), cdata);
+      }
+
+      compute_or_update_decomposition(apply_on_the_right, solve_in_place);
+    }
+
+  public:
     const Model & model() const
     {
       return helper::get_ref(m_model_ref);
@@ -227,19 +268,6 @@ namespace pinocchio
     bool isDirty() const
     {
       return m_dirty;
-    }
-
-    void update(
-      const ConstraintModelVectorHolder & constraint_models_ref,
-      const ConstraintDataVectorHolder & constraint_datas_ref)
-    {
-      if (
-        helper::get_pointer(m_constraint_models_ref) == helper::get_pointer(constraint_models_ref)
-        && helper::get_pointer(m_constraint_datas_ref) == helper::get_pointer(constraint_datas_ref))
-        return;
-      m_constraint_models_ref = constraint_models_ref;
-      m_constraint_datas_ref = constraint_datas_ref;
-      m_dirty = true;
     }
 
     template<typename MatrixIn, typename MatrixOut>

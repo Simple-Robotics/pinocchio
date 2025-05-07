@@ -44,11 +44,12 @@ namespace pinocchio
     }
   };
 
-  template<typename DelassusOperator, bool damping_compliance_update_only = false>
+  template<typename DelassusOperator, bool apply_on_the_right = true, bool solve_in_place = true>
   struct DelassusOperatorRigidBodySystemsComputeBackwardPass
   : public fusion::JointUnaryVisitorBase<DelassusOperatorRigidBodySystemsComputeBackwardPass<
       DelassusOperator,
-      damping_compliance_update_only>>
+      apply_on_the_right,
+      solve_in_place>>
   {
     typedef typename DelassusOperator::Model Model;
     typedef typename DelassusOperator::Data Data;
@@ -72,7 +73,7 @@ namespace pinocchio
       const JointIndex parent = model.parents[i];
 
       // ApplyOnTheRight
-      if (!damping_compliance_update_only)
+      if (apply_on_the_right)
       {
         auto & Ia = data.Yaba[i];
         jmodel.calc_aba(
@@ -84,6 +85,7 @@ namespace pinocchio
       }
 
       // SolveInPlace
+      if (solve_in_place)
       {
         JointData & _jdata_augmented = boost::get<JointData>(data.joints_augmented[i]);
         JointDataBase<JointData> & jdata_augmented =
@@ -118,7 +120,6 @@ namespace pinocchio
         if (joint_neighbours.size() == 0)
           return; // We can return from this point as this joint has no neighbours
 
-        //        return;
         using Matrix6xNV = typename std::remove_reference<typename JointData::UDTypeRef>::type;
         typedef Eigen::Map<Matrix6xNV> MapMatrix6xNV;
         MapMatrix6xNV mat1_tmp = MapMatrix6xNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, 6, jmodel.nv()));
