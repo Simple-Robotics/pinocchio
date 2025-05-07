@@ -154,7 +154,9 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
       model_ref, data_ref, constraint_models_ref, constraint_datas_ref, damping_value);
     delassus_operator.updateDamping(mu_inv);
     delassus_operator.updateCompliance(0);
+    BOOST_CHECK(delassus_operator.isDirty());
     delassus_operator.compute(q_neutral);
+    BOOST_CHECK(!delassus_operator.isDirty());
 
     const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
     Eigen::VectorXd res(delassus_operator.size());
