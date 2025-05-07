@@ -893,7 +893,7 @@ namespace pinocchio
     void mapConstraintForceToJointForces(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<ForceLike> & constraint_forces,
       std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
       ReferenceFrameTag<rf> reference_frame) const
@@ -922,7 +922,7 @@ namespace pinocchio
     void mapConstraintForceToJointForces(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const ConstraintData & cdata,
       const Eigen::MatrixBase<ForceLike> & constraint_forces,
       std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces) const
     {
@@ -939,7 +939,7 @@ namespace pinocchio
     void mapJointMotionsToConstraintMotion(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const ConstraintData & cdata,
       const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_accelerations,
       const Eigen::MatrixBase<VectorLike> & constraint_motion,
       ReferenceFrameTag<rf> reference_frame) const
@@ -969,7 +969,7 @@ namespace pinocchio
     void mapJointMotionsToConstraintMotion(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const ConstraintData & cdata,
       const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_accelerations,
       const Eigen::MatrixBase<VectorLike> & constraint_motion) const
     {
