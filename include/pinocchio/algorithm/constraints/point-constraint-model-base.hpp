@@ -954,6 +954,7 @@ namespace pinocchio
       const auto & A2 =
         std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
 
+      constraint_motion.const_cast_derived().setZero();
       if (joint1_id > 0)
         constraint_motion.const_cast_derived().noalias() +=
           A1 * joint_accelerations[this->joint1_id].toVector();
