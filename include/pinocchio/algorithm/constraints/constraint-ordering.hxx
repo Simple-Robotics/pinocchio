@@ -182,7 +182,6 @@ namespace pinocchio
     while (leaf_vertices.size() > 0)
     {
       JointIndex joint_id_with_least_neighbors = std::numeric_limits<JointIndex>::max();
-      ;
       size_t least_neighbours = std::numeric_limits<size_t>::max();
 
       for (const auto joint_id : leaf_vertices)
