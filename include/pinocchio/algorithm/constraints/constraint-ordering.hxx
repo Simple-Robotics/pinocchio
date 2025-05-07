@@ -161,8 +161,7 @@ namespace pinocchio
     typedef MinimalOrderingConstraintStepVisitor<Scalar, Options, JointCollectionTpl> Step;
     for (std::size_t i = 0; i < constraint_models.size(); ++i)
     {
-      const typename helper::remove_ref<ConstraintModel>::type & cmodel =
-        helper::get_ref<ConstraintModel>(constraint_models[i]);
+      const auto & cmodel = helper::get_ref<ConstraintModel>(constraint_models[i]);
       Step::run(cmodel, model, data);
     }
 
