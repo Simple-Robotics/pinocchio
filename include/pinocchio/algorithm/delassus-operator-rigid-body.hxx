@@ -200,35 +200,41 @@ namespace pinocchio
     auto & custom_data = this->m_custom_data;
 
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
-    // mapConstraintForcesToJointForces(
-    //   model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f);
+    mapConstraintForcesToJointForces(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f,
+      LocalFrameTag());
     // TODO(jcarpent): extend the code to operator on matrices
 
     //    typedef Eigen::Map<VectorXs> MapVectorXs;
     //    MapVectorXs u = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, model_ref.nv, 1));
+    //    {
+    //      auto & u = custom_data.u;
+    //      u.setZero();
+    //      Eigen::Index row_id = 0;
+    //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+    //      {
+    //        const InnerConstraintModel & cmodel =
+    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+    //        const InnerConstraintData & cdata =
+    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto csize = cmodel.size();
+    //        const auto rhs_rows = rhs.middleRows(row_id, csize);
+    //
+    //        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, rhs_rows, u,
+    //        AddTo());
+    //
+    //        row_id += csize;
+    //      }
+    //    }
+
+    // Backward sweep: propagate joint force contributions
+    //    for (auto & f : m_custom_data.f)
+    //      f.setZero();
+
     {
       auto & u = custom_data.u;
       u.setZero();
-      Eigen::Index row_id = 0;
-      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const InnerConstraintModel & cmodel =
-          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        const InnerConstraintData & cdata =
-          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
-        const auto csize = cmodel.size();
-        const auto rhs_rows = rhs.middleRows(row_id, csize);
 
-        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, rhs_rows, u, AddTo());
-
-        row_id += csize;
-      }
-    }
-
-    // Backward sweep: propagate joint force contributions
-    for (auto & f : m_custom_data.f)
-      f.setZero();
-    {
       typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
         DelassusOperatorRigidBodySystemsTpl>
         Pass1;
@@ -255,28 +261,28 @@ namespace pinocchio
 
     // Make a pass over the whole set of constraints to project back the accelerations onto the
     // joint
-    //    mapJointMotionsToConstraintMotions(
-    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, this->m_custom_data.a,
-    //      res);
+    mapJointMotionsToConstraintMotions(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.a, res,
+      LocalFrameTag());
 
     // TODO(jcarpent): extend the code to operator on matrices
-    {
-      const auto & ddq = custom_data.ddq;
-      Eigen::Index row_id = 0;
-      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const InnerConstraintModel & cmodel =
-          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        const InnerConstraintData & cdata =
-          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
-        const auto csize = cmodel.size();
-
-        cmodel.jacobianMatrixProduct(
-          model_ref, data_ref, cdata, ddq, res.middleRows(row_id, csize));
-
-        row_id += csize;
-      }
-    }
+    //    {
+    //      const auto & ddq = custom_data.ddq;
+    //      Eigen::Index row_id = 0;
+    //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+    //      {
+    //        const InnerConstraintModel & cmodel =
+    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+    //        const InnerConstraintData & cdata =
+    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto csize = cmodel.size();
+    //
+    //        cmodel.jacobianMatrixProduct(
+    //          model_ref, data_ref, cdata, ddq, res.middleRows(row_id, csize));
+    //
+    //        row_id += csize;
+    //      }
+    //    }
 
     // Add damping contribution
     res.array() += m_sum_compliance_damping.array() * rhs.array();
