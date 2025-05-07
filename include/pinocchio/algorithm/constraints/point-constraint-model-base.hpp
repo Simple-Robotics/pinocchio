@@ -908,6 +908,7 @@ namespace pinocchio
         std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A1_world : cdata.A1_local;
       const auto & A2 =
         std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
+
       if (joint1_id > 0)
         joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
       if (joint2_id > 0)
@@ -929,50 +930,52 @@ namespace pinocchio
         model, data, cdata, constraint_forces, joint_forces, LocalFrameTag());
     }
 
-    //      /// \brief Map the joint accelerations to constraint value
-    //    template<
-    //    template<typename, int>
-    //    class JointCollectionTpl,
-    //    typename MotionAllocator,
-    //    typename VectorLike>
-    //    void mapJointMotionsToConstraintMotion(
-    //                                           const ModelTpl<Scalar, Options, JointCollectionTpl>
-    //                                           & model, const DataTpl<Scalar, Options,
-    //                                           JointCollectionTpl> & data, const
-    //                                           BilateralPointConstraintDataTpl<Scalar, Options> &
-    //                                           cdata, const std::vector<MotionTpl<Scalar,
-    //                                           Options>, MotionAllocator> & joint_accelerations,
-    //                                           const Eigen::MatrixBase<VectorLike> &
-    //                                           constraint_value) const
-    //    {
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_accelerations.size(), size_t(model.njoints));
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_value.rows(), size());
-    //      PINOCCHIO_UNUSED_VARIABLE(data);
-    //
-    //        // Todo: optimize code
-    //
-    //      if (this->joint1_id != 0 && this->joint2_id != 0)
-    //      {
-    //        const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A1 * joint_accelerations[this->joint1_id].toVector()
-    //        + A2 * joint_accelerations[this->joint2_id].toVector();
-    //      }
-    //      else if (this->joint1_id != 0)
-    //      {
-    //        const Matrix36 A1 = getA1(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A1 * joint_accelerations[this->joint1_id].toVector();
-    //      }
-    //      else if (this->joint2_id != 0)
-    //      {
-    //        const Matrix36 A2 = getA2(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A2 * joint_accelerations[this->joint2_id].toVector();
-    //      }
-    //      else
-    //        constraint_value.const_cast_derived().setZero();
-    //    }
+    /// \brief Map the joint accelerations to constraint value
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename VectorLike,
+      ReferenceFrame rf>
+    void mapJointMotionsToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_accelerations,
+      const Eigen::MatrixBase<VectorLike> & constraint_motion,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_accelerations.size(), size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motion.rows(), activeSize());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
+
+      const auto & A1 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A1_world : cdata.A1_local;
+      const auto & A2 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
+
+      if (joint1_id > 0)
+        constraint_motion.const_cast_derived().noalias() +=
+          A1 * joint_accelerations[this->joint1_id].toVector();
+      if (joint2_id > 0)
+        constraint_motion.const_cast_derived().noalias() +=
+          A2 * joint_accelerations[this->joint2_id].toVector();
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename VectorLike>
+    void mapJointMotionsToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const BilateralPointConstraintDataTpl<Scalar, Options> & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_accelerations,
+      const Eigen::MatrixBase<VectorLike> & constraint_motion) const
+    {
+      mapJointMotionsToConstraintMotion(
+        model, data, cdata, joint_accelerations, constraint_motion, LocalFrameTag());
+    }
 
     static int size()
     {
