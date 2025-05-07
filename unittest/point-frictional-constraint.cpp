@@ -759,7 +759,7 @@ void check_maps_impl(
     BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
   }
 
-  // Test mapJointMotionsToConstraintMotion
+  // Test mapJointMotionsToConstraintMotion : WorldFrameTag
   {
     const auto constraint_motion_ref = constraint_jacobian * v;
     for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
@@ -771,6 +771,18 @@ void check_maps_impl(
     Eigen::Vector3d constraint_motion = Eigen::Vector3d::Zero();
     cm.mapJointMotionsToConstraintMotion(
       model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
+
+    BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
+  }
+
+  // Test mapJointMotionsToConstraintMotion : LocalFrameTag
+  {
+    const auto constraint_motion_ref = constraint_jacobian * v;
+
+    const auto & joint_motions = data.v;
+    Eigen::Vector3d constraint_motion = Eigen::Vector3d::Zero();
+    cm.mapJointMotionsToConstraintMotion(
+      model, data, cd, joint_motions, constraint_motion, LocalFrameTag());
 
     BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
   }
