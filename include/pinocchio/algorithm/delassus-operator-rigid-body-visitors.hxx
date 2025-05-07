@@ -226,12 +226,14 @@ namespace pinocchio
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
-      jmodel.jointVelocitySelector(custom_data.u) -= jdata.S().transpose() * custom_data.f[i];
+      // Compare to ABA, the sign of f[i] is reversed
+      jmodel.jointVelocitySelector(custom_data.u) += jdata.S().transpose() * custom_data.f[i];
 
       if (parent > 0)
       {
         auto & pa = custom_data.f[i];
-        pa.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(custom_data.u);
+        // Compare to ABA, the sign of f[i] is reversed
+        pa.toVector().noalias() -= jdata.UDinv() * jmodel.jointVelocitySelector(custom_data.u);
         custom_data.f[parent] += data.liMi[i].act(pa);
       }
     }
