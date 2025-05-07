@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
     make_symmetric(Minv_gt);
     BOOST_CHECK(Minv_gt.isApprox(Minv_gt.transpose()));
 
-    auto M_gt = crba(model, data_gt, q_neutral);
+    auto M_gt = crba(model, data_gt, q_neutral, Convention::WORLD);
     make_symmetric(M_gt);
 
     ConstraintDataVector constraint_datas_gt = createData(constraint_models);
@@ -189,13 +189,37 @@ BOOST_AUTO_TEST_CASE(general_test_weld_constraint_model)
     const Eigen::VectorXd Jt_rhs_gt = constraints_jacobian_gt.transpose() * rhs;
     BOOST_CHECK(tau_constraints.isApprox(Jt_rhs_gt));
 
+    std::vector<Force> fext_gt(size_t(model.njoints), Force::Zero());
+    mapConstraintForcesToJointForces(
+      model, data_aba, constraint_models, constraint_datas_gt, rhs, fext_gt, LocalFrameTag());
+    auto fext_gt_copy = fext_gt;
+
     aba(
-      model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), tau_constraints,
+      model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), 0 * tau_constraints, fext_gt,
       Convention::LOCAL);
+
+    Eigen::VectorXd tau_constraints_ref = Eigen::VectorXd::Zero(model.nv);
+    for (JointIndex joint_id = JointIndex(model.njoints) - 1; joint_id >= 1; --joint_id)
+    {
+      const auto parent_id = model.parents[joint_id];
+      const auto & jmodel = model.joints[joint_id];
+      const auto & jdata = data_aba.joints[joint_id];
+      const auto joint_nv = jmodel.nv();
+      const auto joint_idx_v = jmodel.idx_v();
+
+      tau_constraints_ref.segment(joint_idx_v, joint_nv) =
+        jdata.S().matrix().transpose() * fext_gt_copy[joint_id].toVector();
+
+      fext_gt_copy[parent_id] += data_aba.liMi[joint_id].act(fext_gt_copy[joint_id]);
+    }
+    BOOST_CHECK(tau_constraints_ref.isApprox(Jt_rhs_gt));
 
     for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
     {
       BOOST_CHECK(data.joints[joint_id].S().isApprox(data_aba.joints[joint_id].S()));
+      BOOST_CHECK(data.joints[joint_id].U().isApprox(data_aba.joints[joint_id].U()));
+      BOOST_CHECK(data.joints[joint_id].Dinv().isApprox(data_aba.joints[joint_id].Dinv()));
+      BOOST_CHECK(data.joints[joint_id].UDinv().isApprox(data_aba.joints[joint_id].UDinv()));
       BOOST_CHECK(data.liMi[joint_id].isApprox(data_aba.liMi[joint_id]));
       BOOST_CHECK(data.Yaba[joint_id].isApprox(data_aba.Yaba[joint_id]));
     }
