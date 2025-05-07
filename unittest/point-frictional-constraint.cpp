@@ -672,45 +672,68 @@ void check_maps_impl(
   const BilateralPointConstraintModel & cm,
   BilateralPointConstraintData & cd)
 {
-  const Eigen::Vector3d constraint_force = Eigen::Vector3d::Ones();
+  const VectorXd q = randomConfiguration(model);
+  const VectorXd v = VectorXd::Random(model.nv);
+  crba(model, data, q, Convention::WORLD);
+  forwardKinematics(model, data, q, v);
 
   cm.calc(model, data, cd);
   const auto constraint_jacobian = cm.jacobian(model, data, cd);
 
-  const auto joint_torque_ref = constraint_jacobian.transpose() * constraint_force;
-
-  std::vector<Force> joint_forces(size_t(model.njoints), Force::Zero());
-  cm.mapConstraintForceToJointForces(
-    model, data, cd, constraint_force, joint_forces, WorldFrameTag());
-
-  for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+  // Test mapJointMotionsToConstraintMotion
   {
-    if (joint_id == cm.joint1_id || joint_id == cm.joint2_id)
+    std::vector<Force> joint_forces(size_t(model.njoints), Force::Zero());
+    const Eigen::Vector3d constraint_force = Eigen::Vector3d::Ones();
+    const auto joint_torque_ref = constraint_jacobian.transpose() * constraint_force;
+
+    cm.mapConstraintForceToJointForces(
+      model, data, cd, constraint_force, joint_forces, WorldFrameTag());
+
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
     {
-      BOOST_CHECK(!joint_forces[joint_id].isZero(0));
+      if (joint_id == cm.joint1_id || joint_id == cm.joint2_id)
+      {
+        BOOST_CHECK(!joint_forces[joint_id].isZero(0));
+      }
+      else
+      {
+        BOOST_CHECK(joint_forces[joint_id].isZero(0));
+      }
     }
-    else
+
+    // Backward pass over the joint forces
+    Eigen::VectorXd joint_torque = Eigen::VectorXd::Zero(model.nv);
+    for (JointIndex joint_id = JointIndex(model.njoints) - 1; joint_id > 0; --joint_id)
     {
-      BOOST_CHECK(joint_forces[joint_id].isZero(0));
+      const JointModel & jmodel = model.joints[joint_id];
+      const auto joint_nv = jmodel.nv();
+      const auto joint_idx_v = jmodel.idx_v();
+
+      joint_torque.segment(joint_idx_v, joint_nv) =
+        data.J.middleCols(joint_idx_v, joint_nv).transpose() * joint_forces[joint_id].toVector();
+
+      const JointIndex parent_id = model.parents[joint_id];
+      joint_forces[parent_id] += joint_forces[joint_id];
     }
+
+    BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
   }
 
-  // Backward pass over the joint forces
-  Eigen::VectorXd joint_torque = Eigen::VectorXd::Zero(model.nv);
-  for (JointIndex joint_id = JointIndex(model.njoints) - 1; joint_id > 0; --joint_id)
+  // Test mapJointMotionsToConstraintMotion
   {
-    const JointModel & jmodel = model.joints[joint_id];
-    const auto joint_nv = jmodel.nv();
-    const auto joint_idx_v = jmodel.idx_v();
+    const auto constraint_motion_ref = constraint_jacobian * v;
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      data.ov[joint_id] = data.oMi[joint_id].act(data.v[joint_id]);
+    }
 
-    joint_torque.segment(joint_idx_v, joint_nv) =
-      data.J.middleCols(joint_idx_v, joint_nv).transpose() * joint_forces[joint_id].toVector();
+    const auto & joint_accelerations = data.ov;
+    Eigen::Vector3d constraint_motion = Eigen::Vector3d::Zero();
+    cm.mapJointMotionsToConstraintMotion(
+      model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
 
-    const JointIndex parent_id = model.parents[joint_id];
-    joint_forces[parent_id] += joint_forces[joint_id];
+    BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
   }
-
-  BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
 }
 
 BOOST_AUTO_TEST_CASE(check_maps)
@@ -721,9 +744,6 @@ BOOST_AUTO_TEST_CASE(check_maps)
 
   model.lowerPositionLimit.head<3>().fill(-1.);
   model.upperPositionLimit.head<3>().fill(1.);
-  VectorXd q = randomConfiguration(model);
-
-  crba(model, data, q, Convention::WORLD);
 
   const std::string RF = "rleg6_joint";
   const std::string LF = "lleg6_joint";
