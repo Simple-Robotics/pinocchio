@@ -844,79 +844,52 @@ namespace pinocchio
       }
     }
 
-    //      /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
-    //      /// supported by the joints.
-    //    template<
-    //    template<typename, int>
-    //    class JointCollectionTpl,
-    //    typename ForceLike,
-    //    typename ForceAllocator>
-    //    void mapConstraintForceToJointForces(
-    //                                         const ModelTpl<Scalar, Options, JointCollectionTpl> &
-    //                                         model, const DataTpl<Scalar, Options,
-    //                                         JointCollectionTpl> & data, const
-    //                                         BilateralFrameConstraintDataTpl<Scalar, Options> &
-    //                                         cdata, const Eigen::MatrixBase<ForceLike> &
-    //                                         constraint_forces, std::vector<ForceTpl<Scalar,
-    //                                         Options>, ForceAllocator> & joint_forces) const
-    //    {
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
-    //      PINOCCHIO_UNUSED_VARIABLE(data);
-    //
-    //      assert(this->type == CONTACT_3D);
-    //
-    //        // Todo: optimize code
-    //      const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
-    //      joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() *
-    //      constraint_forces; joint_forces[this->joint2_id].toVector().noalias() += A2.transpose()
-    //      * constraint_forces;
-    //    }
+    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
+    /// supported by the joints.
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ForceLike,
+      typename ForceAllocator,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointForces(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), size());
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
 
-    //      /// \brief Map the joint accelerations to constraint value
-    //    template<
-    //    template<typename, int>
-    //    class JointCollectionTpl,
-    //    typename MotionAllocator,
-    //    typename VectorLike>
-    //    void mapJointMotionsToConstraintMotion(
-    //                                           const ModelTpl<Scalar, Options, JointCollectionTpl>
-    //                                           & model, const DataTpl<Scalar, Options,
-    //                                           JointCollectionTpl> & data, const
-    //                                           BilateralFrameConstraintDataTpl<Scalar, Options> &
-    //                                           cdata, const std::vector<MotionTpl<Scalar,
-    //                                           Options>, MotionAllocator> & joint_accelerations,
-    //                                           const Eigen::MatrixBase<VectorLike> &
-    //                                           constraint_value) const
-    //    {
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_accelerations.size(), size_t(model.njoints));
-    //      PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_value.rows(), size());
-    //      PINOCCHIO_UNUSED_VARIABLE(data);
-    //
-    //        // Todo: optimize code
-    //
-    //      if (this->joint1_id != 0 && this->joint2_id != 0)
-    //      {
-    //        const Matrix36 A1 = getA1(cdata, LocalFrameTag()), A2 = getA2(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A1 * joint_accelerations[this->joint1_id].toVector()
-    //        + A2 * joint_accelerations[this->joint2_id].toVector();
-    //      }
-    //      else if (this->joint1_id != 0)
-    //      {
-    //        const Matrix36 A1 = getA1(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A1 * joint_accelerations[this->joint1_id].toVector();
-    //      }
-    //      else if (this->joint2_id != 0)
-    //      {
-    //        const Matrix36 A2 = getA2(cdata, LocalFrameTag());
-    //        constraint_value.const_cast_derived().noalias() =
-    //        A2 * joint_accelerations[this->joint2_id].toVector();
-    //      }
-    //      else
-    //        constraint_value.const_cast_derived().setZero();
-    //    }
+      // Todo: optimize code
+      const auto & A1 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A1_world : cdata.A1_local;
+      const auto & A2 =
+        std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
+
+      if (joint1_id > 0)
+        joint_forces[this->joint1_id].toVector().noalias() += A1.transpose() * constraint_forces;
+      if (joint2_id > 0)
+        joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ForceLike,
+      typename ForceAllocator>
+    void mapConstraintForceToJointForces(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces) const
+    {
+      mapConstraintForceToJointForces(
+        model, data, cdata, constraint_forces, joint_forces, LocalFrameTag());
+    }
 
     static int size()
     {
