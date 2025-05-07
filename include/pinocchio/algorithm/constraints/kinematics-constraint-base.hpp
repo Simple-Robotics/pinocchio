@@ -2,8 +2,8 @@
 // Copyright (c) 2023-2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
-#define __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
+#ifndef __pinocchio_algorithm_constraints_kinematics_constraint_base_hpp__
+#define __pinocchio_algorithm_constraints_kinematics_constraint_base_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
@@ -12,7 +12,7 @@ namespace pinocchio
 {
 
   template<typename Derived>
-  struct BinaryConstraintModelBase : ConstraintModelBase<Derived>
+  struct KinematicsConstraintModelBase : ConstraintModelBase<Derived>
   {
     typedef typename traits<Derived>::Scalar Scalar;
     typedef ConstraintModelBase<Derived> Base;
@@ -31,7 +31,7 @@ namespace pinocchio
     }
 
     template<int Options, template<typename, int> class JointCollectionTpl>
-    BinaryConstraintModelBase(
+    KinematicsConstraintModelBase(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const JointIndex joint1_id,
       const JointIndex joint2_id)
@@ -48,23 +48,23 @@ namespace pinocchio
     JointIndex joint2_id;
 
     template<typename OtherDerived>
-    bool operator==(const BinaryConstraintModelBase<OtherDerived> & other) const
+    bool operator==(const KinematicsConstraintModelBase<OtherDerived> & other) const
     {
       return base() == other.base() && joint1_id == other.joint1_id && joint2_id == other.joint2_id;
     }
 
     template<typename OtherDerived>
-    bool operator!=(const BinaryConstraintModelBase<OtherDerived> & other) const
+    bool operator!=(const KinematicsConstraintModelBase<OtherDerived> & other) const
     {
       return !(*this == other);
     }
 
   protected:
     /// \brief Default constructor
-    BinaryConstraintModelBase()
+    KinematicsConstraintModelBase()
     {
     }
-  }; // struct BinaryConstraintModelBase
+  }; // struct KinematicsConstraintModelBase
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_binary_constraint_base_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_kinematics_constraint_base_hpp__

@@ -11,7 +11,7 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/binary-constraint-base.hpp"
+#include "pinocchio/algorithm/constraints/kinematics-constraint-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-common-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
@@ -59,7 +59,7 @@ namespace pinocchio
   ///
   template<typename Derived>
   struct PointConstraintModelBase
-  : BinaryConstraintModelBase<Derived>
+  : KinematicsConstraintModelBase<Derived>
   , ConstraintModelCommonParameters<Derived>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -70,7 +70,7 @@ namespace pinocchio
       Options = traits<Derived>::Options
     };
 
-    typedef BinaryConstraintModelBase<Derived> Base;
+    typedef KinematicsConstraintModelBase<Derived> Base;
     typedef ConstraintModelCommonParameters<Derived> BaseCommonParameters;
     typedef ConstraintModelBase<Derived> RootBase;
 

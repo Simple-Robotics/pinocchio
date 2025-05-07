@@ -45,7 +45,9 @@ namespace pinocchio
 
     template<typename ConstraintModel>
     static void algo_step(
-      const BinaryConstraintModelBase<ConstraintModel> & cmodel, const Model & model, Data & data)
+      const KinematicsConstraintModelBase<ConstraintModel> & cmodel,
+      const Model & model,
+      Data & data)
     {
       typedef std::pair<JointIndex, JointIndex> JointPair;
       typedef typename Data::Matrix6 Matrix6;
