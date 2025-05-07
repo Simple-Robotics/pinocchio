@@ -612,4 +612,97 @@ BOOST_AUTO_TEST_CASE(cholesky)
   BOOST_CHECK(cholesky.matrix().isApprox(H_ref));
 }
 
+void check_maps_impl(
+  const Model & model, Data & data, const WeldConstraintModel & cm, WeldConstraintData & cd)
+{
+  const VectorXd q = randomConfiguration(model);
+  const VectorXd v = VectorXd::Random(model.nv);
+  crba(model, data, q, Convention::WORLD);
+  forwardKinematics(model, data, q, v);
+
+  cm.calc(model, data, cd);
+  const auto constraint_jacobian = cm.jacobian(model, data, cd);
+
+  // Test mapJointMotionsToConstraintMotion
+  {
+    std::vector<Force> joint_forces(size_t(model.njoints), Force::Zero());
+    const Motion::Vector6 constraint_force = Motion::Vector6::Ones();
+    const auto joint_torque_ref = constraint_jacobian.transpose() * constraint_force;
+
+    cm.mapConstraintForceToJointForces(
+      model, data, cd, constraint_force, joint_forces, WorldFrameTag());
+
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      if (joint_id == cm.joint1_id || joint_id == cm.joint2_id)
+      {
+        BOOST_CHECK(!joint_forces[joint_id].isZero(0));
+      }
+      else
+      {
+        BOOST_CHECK(joint_forces[joint_id].isZero(0));
+      }
+    }
+
+    // Backward pass over the joint forces
+    Eigen::VectorXd joint_torque = Eigen::VectorXd::Zero(model.nv);
+    for (JointIndex joint_id = JointIndex(model.njoints) - 1; joint_id > 0; --joint_id)
+    {
+      const JointModel & jmodel = model.joints[joint_id];
+      const auto joint_nv = jmodel.nv();
+      const auto joint_idx_v = jmodel.idx_v();
+
+      joint_torque.segment(joint_idx_v, joint_nv) =
+        data.J.middleCols(joint_idx_v, joint_nv).transpose() * joint_forces[joint_id].toVector();
+
+      const JointIndex parent_id = model.parents[joint_id];
+      joint_forces[parent_id] += joint_forces[joint_id];
+    }
+
+    BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
+  }
+
+  // Test mapJointMotionsToConstraintMotion
+  // {
+  //   const auto constraint_motion_ref = constraint_jacobian * v;
+  //   for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+  //   {
+  //     data.ov[joint_id] = data.oMi[joint_id].act(data.v[joint_id]);
+  //   }
+
+  //   const auto & joint_accelerations = data.ov;
+  //   Motion::Vector6 constraint_motion = Motion::Vector6::Zero();
+  //   cm.mapJointMotionsToConstraintMotion(
+  //     model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
+
+  //   BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
+  // }
+}
+
+BOOST_AUTO_TEST_CASE(check_maps)
+{
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  Data data(model), data_ref(model);
+
+  model.lowerPositionLimit.head<3>().fill(-1.);
+  model.upperPositionLimit.head<3>().fill(1.);
+
+  const std::string RF = "rleg6_joint";
+  const std::string LF = "lleg6_joint";
+
+  const WeldConstraintModel cm_RF(model, model.getJointId(RF), SE3::Random());
+  auto cd_RF = cm_RF.createData();
+
+  const WeldConstraintModel cm_LF(model, model.getJointId(LF), SE3::Random());
+  auto cd_LF = cm_LF.createData();
+  const WeldConstraintModel clm_RF_LF(
+    model, cm_RF.joint1_id, cm_RF.joint1_placement, cm_LF.joint1_id, cm_LF.joint1_placement);
+  auto cld_RF_LF = clm_RF_LF.createData();
+
+  check_maps_impl(model, data, cm_RF, cd_RF);
+  check_maps_impl(model, data, cm_LF, cd_LF);
+  check_maps_impl(model, data, clm_RF_LF, cld_RF_LF);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
