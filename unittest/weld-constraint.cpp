@@ -623,7 +623,7 @@ void check_maps_impl(
   cm.calc(model, data, cd);
   const auto constraint_jacobian = cm.jacobian(model, data, cd);
 
-  // Test mapJointMotionsToConstraintMotion
+  // Test mapConstraintForceToJointForces : WorldFrameTag
   {
     std::vector<Force> joint_forces(size_t(model.njoints), Force::Zero());
     const Motion::Vector6 constraint_force = Motion::Vector6::Ones();
@@ -662,7 +662,47 @@ void check_maps_impl(
     BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
   }
 
-  // Test mapJointMotionsToConstraintMotion
+  // Test mapConstraintForceToJointForces : LocalFrameTag
+  {
+    std::vector<Force> joint_forces(size_t(model.njoints), Force::Zero());
+    const Motion::Vector6 constraint_force = Motion::Vector6::Ones();
+    const auto joint_torque_ref = constraint_jacobian.transpose() * constraint_force;
+
+    cm.mapConstraintForceToJointForces(
+      model, data, cd, constraint_force, joint_forces, LocalFrameTag());
+
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      if (joint_id == cm.joint1_id || joint_id == cm.joint2_id)
+      {
+        BOOST_CHECK(!joint_forces[joint_id].isZero(0));
+      }
+      else
+      {
+        BOOST_CHECK(joint_forces[joint_id].isZero(0));
+      }
+    }
+
+    // Backward pass over the joint forces
+    Eigen::VectorXd joint_torque = Eigen::VectorXd::Zero(model.nv);
+    for (JointIndex joint_id = JointIndex(model.njoints) - 1; joint_id > 0; --joint_id)
+    {
+      const JointModel & jmodel = model.joints[joint_id];
+      const JointData & jdata = data.joints[joint_id];
+      const auto joint_nv = jmodel.nv();
+      const auto joint_idx_v = jmodel.idx_v();
+
+      joint_torque.segment(joint_idx_v, joint_nv) =
+        jdata.S().matrix().transpose() * joint_forces[joint_id].toVector();
+
+      const JointIndex parent_id = model.parents[joint_id];
+      joint_forces[parent_id] += data.liMi[joint_id].act(joint_forces[joint_id]);
+    }
+
+    BOOST_CHECK(joint_torque.isApprox(joint_torque_ref));
+  }
+
+  // Test mapJointMotionsToConstraintMotion : WorldFrameTag
   {
     const auto constraint_motion_ref = constraint_jacobian * v;
     for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
@@ -674,6 +714,18 @@ void check_maps_impl(
     Motion::Vector6 constraint_motion = Motion::Vector6::Zero();
     cm.mapJointMotionsToConstraintMotion(
       model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
+
+    BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
+  }
+
+  // Test mapJointMotionsToConstraintMotion : LocalFrameTag
+  {
+    const auto constraint_motion_ref = constraint_jacobian * v;
+
+    const auto & joint_motions = data.v;
+    Motion::Vector6 constraint_motion = Motion::Vector6::Zero();
+    cm.mapJointMotionsToConstraintMotion(
+      model, data, cd, joint_motions, constraint_motion, LocalFrameTag());
 
     BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
   }
