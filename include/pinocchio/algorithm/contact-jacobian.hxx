@@ -47,14 +47,16 @@ namespace pinocchio
     class ConstraintData,
     class ConstraintDataAllocator,
     typename ForceMatrix,
-    class ForceAllocator>
+    class ForceAllocator,
+    ReferenceFrame rf>
   void mapConstraintForcesToJointForces(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
-    std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces)
+    std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+    ReferenceFrameTag<rf> reference_frame)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_forces.size(), size_t(model.njoints));
@@ -73,7 +75,8 @@ namespace pinocchio
       const ConstraintData & cdata = constraint_datas[ee_id];
 
       const auto constraint_force = constraint_forces.segment(row_id, constraint_size);
-      cmodel.mapConstraintForceToJointForces(model, data, cdata, constraint_force, joint_forces);
+      cmodel.mapConstraintForceToJointForces(
+        model, data, cdata, constraint_force, joint_forces, reference_frame);
 
       row_id += constraint_size;
     }
@@ -88,14 +91,16 @@ namespace pinocchio
     class ConstraintData,
     class ConstraintDataAllocator,
     class MotionAllocator,
-    typename MotionMatrix>
+    typename MotionMatrix,
+    ReferenceFrame rf>
   void mapJointMotionsToConstraintMotions(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
-    const Eigen::MatrixBase<MotionMatrix> & constraint_motions_)
+    const Eigen::MatrixBase<MotionMatrix> & constraint_motions_,
+    ReferenceFrameTag<rf> reference_frame)
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.size(), size_t(model.njoints));
@@ -113,7 +118,8 @@ namespace pinocchio
 
       auto constraint_motion = constraint_motions.segment(row_id, constraint_size);
       cmodel.mapJointMotionsToConstraintMotion(
-        model, data, cdata, joint_motions, constraint_motion);
+        model, data, cdata, joint_motions, constraint_motion, reference_frame);
+
       row_id += constraint_size;
     }
   }

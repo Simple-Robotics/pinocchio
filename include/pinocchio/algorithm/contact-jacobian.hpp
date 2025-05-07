@@ -56,14 +56,16 @@ namespace pinocchio
     class ConstraintData,
     class ConstraintDataAllocator,
     typename ForceMatrix,
-    class ForceAllocator>
+    class ForceAllocator,
+    ReferenceFrame rf>
   void mapConstraintForcesToJointForces(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const Eigen::MatrixBase<ForceMatrix> & constraint_forces,
-    std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces);
+    std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+    ReferenceFrameTag<rf> reference_frame);
 
   ///
   /// \brief Maps the joint motions expressed in the joint space local frame to the constraint
@@ -87,14 +89,16 @@ namespace pinocchio
     class ConstraintData,
     class ConstraintDataAllocator,
     class MotionAllocator,
-    typename MotionMatrix>
+    typename MotionMatrix,
+    ReferenceFrame rf>
   void mapJointMotionsToConstraintMotions(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
     const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
     const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
-    const Eigen::MatrixBase<MotionMatrix> & constraint_motions);
+    const Eigen::MatrixBase<MotionMatrix> & constraint_motions,
+    ReferenceFrameTag<rf> reference_frame);
 
   ///
   /// \brief Computes the kinematic Jacobian associatied to a given constraint model.
