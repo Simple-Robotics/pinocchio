@@ -104,14 +104,17 @@ namespace pinocchio
     const Eigen::DenseIndex constraint_size = getTotalConstraintActiveSize(constraint_models);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions.rows(), constraint_size);
 
+    Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
       const ConstraintModel & cmodel = constraint_models[ee_id];
       const ConstraintData & cdata = constraint_datas[ee_id];
+      const auto constraint_size = cmodel.activeSize();
 
-      auto constraint_motion = constraint_motions.template segment<3>(Eigen::DenseIndex(ee_id * 3));
+      auto constraint_motion = constraint_motions.segment(row_id, constraint_size);
       cmodel.mapJointMotionsToConstraintMotion(
         model, data, cdata, joint_motions, constraint_motion);
+      row_id += constraint_size;
     }
   }
 
