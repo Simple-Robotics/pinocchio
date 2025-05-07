@@ -663,20 +663,20 @@ void check_maps_impl(
   }
 
   // Test mapJointMotionsToConstraintMotion
-  // {
-  //   const auto constraint_motion_ref = constraint_jacobian * v;
-  //   for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
-  //   {
-  //     data.ov[joint_id] = data.oMi[joint_id].act(data.v[joint_id]);
-  //   }
+  {
+    const auto constraint_motion_ref = constraint_jacobian * v;
+    for (JointIndex joint_id = 1; joint_id < JointIndex(model.njoints); ++joint_id)
+    {
+      data.ov[joint_id] = data.oMi[joint_id].act(data.v[joint_id]);
+    }
 
-  //   const auto & joint_accelerations = data.ov;
-  //   Motion::Vector6 constraint_motion = Motion::Vector6::Zero();
-  //   cm.mapJointMotionsToConstraintMotion(
-  //     model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
+    const auto & joint_accelerations = data.ov;
+    Motion::Vector6 constraint_motion = Motion::Vector6::Zero();
+    cm.mapJointMotionsToConstraintMotion(
+      model, data, cd, joint_accelerations, constraint_motion, WorldFrameTag());
 
-  //   BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
-  // }
+    BOOST_CHECK(constraint_motion.isApprox(constraint_motion_ref));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(check_maps)
