@@ -316,6 +316,7 @@ namespace pinocchio
     const Data & data_ref = data();
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
+    auto & custom_data = this->m_custom_data;
 
     mat.array() *= m_sum_compliance_damping_inverse.array();
 
@@ -323,7 +324,7 @@ namespace pinocchio
 
     mapConstraintForcesToJointForces(
       model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
-      m_custom_data.of_augmented, WorldFrameTag());
+      custom_data.of_augmented, WorldFrameTag());
 
     typedef Eigen::Map<VectorXs> MapVectorXs;
     MapVectorXs u = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, model_ref.nv, 1));
