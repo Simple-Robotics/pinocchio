@@ -397,8 +397,7 @@ namespace pinocchio
     MatrixLike & mat = mat_.const_cast_derived();
     const auto & model_ref = m_self.model();
     const auto & data_ref = m_self.data();
-    DelassusOperatorRigidBodySystemsTpl::CustomData & custom_data =
-      const_cast<DelassusOperatorRigidBodySystemsTpl &>(m_self).getCustomData();
+    auto & custom_data = const_cast<DelassusOperatorRigidBodySystemsTpl &>(m_self).getCustomData();
     const auto & elimination_order = data_ref.elimination_order;
 
     if (reset_joint_force_vector)
