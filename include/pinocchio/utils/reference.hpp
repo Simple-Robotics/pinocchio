@@ -102,19 +102,19 @@ namespace pinocchio
     }
 
     template<typename T>
-    struct is_holder_of_type
+    struct is_type_holder
     {
       static constexpr bool value = false;
     };
 
     template<typename T>
-    struct is_holder_of_type<std::reference_wrapper<T>>
+    struct is_type_holder<std::reference_wrapper<T>>
     {
       static constexpr bool value = true;
     };
 
     template<typename T>
-    struct is_holder_of_type<std::shared_ptr<T>>
+    struct is_type_holder<std::shared_ptr<T>>
     {
       static constexpr bool value = true;
     };
