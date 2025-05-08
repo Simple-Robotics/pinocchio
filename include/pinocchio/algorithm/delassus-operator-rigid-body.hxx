@@ -353,29 +353,28 @@ namespace pinocchio
 
     typedef Eigen::Map<VectorXs> MapVectorXs;
     MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
-    {
-      Eigen::Index row_id = 0;
-      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const InnerConstraintModel & cmodel =
-          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        const InnerConstraintData & cdata =
-          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
-        const auto csize = cmodel.size();
-
-        cmodel.jacobianMatrixProduct(
-          model_ref, data_ref, cdata, u, tmp_vec.middleRows(row_id, csize));
-
-        row_id += csize;
-      }
-    }
+    //    {
+    //      Eigen::Index row_id = 0;
+    //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+    //      {
+    //        const InnerConstraintModel & cmodel =
+    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+    //        const InnerConstraintData & cdata =
+    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto csize = cmodel.size();
+    //
+    //        cmodel.jacobianMatrixProduct(
+    //          model_ref, data_ref, cdata, u, tmp_vec.middleRows(row_id, csize));
+    //
+    //        row_id += csize;
+    //      }
+    //    }
 
     // Make a pass over the whole set of constraints to project back the joint accelerations onto
     // the constraints
-    //    mapJointMotionsToConstraintMotions(
-    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref,
-    //      this->m_custom_data.oa_augmented, tmp_vec);
-    //
+    mapJointMotionsToConstraintMotions(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.oa_augmented,
+      tmp_vec, WorldFrameTag());
 
     mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * tmp_vec;
   }
