@@ -311,6 +311,7 @@ namespace pinocchio
 
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
+      const auto & joint_neighbours = neighbours[i];
 
       const auto Jcols = jmodel.jointCols(data.J);
 
@@ -321,7 +322,7 @@ namespace pinocchio
       const auto res = (jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u))
                          .eval(); // Abuse of notation to reuse existing unused data variable
 
-      if (neighbours[i].size())
+      if (joint_neighbours.size())
       {
         const Vector6 a_tmp = Jcols * res;
 
@@ -379,12 +380,12 @@ namespace pinocchio
         Force coupling_forces = Force::Zero();
         for (const JointIndex vertex_j : joint_neighbours)
         {
-          const Matrix6 & edge_ij =
+          const Matrix6 & crosscoupling_ij =
             (i > vertex_j) ? data.joint_cross_coupling.get(JointPair(vertex_j, i)).transpose()
                            : data.joint_cross_coupling.get(JointPair(i, vertex_j));
 
           coupling_forces.toVector().noalias() +=
-            edge_ij * custom_data.oa_augmented[vertex_j].toVector();
+            crosscoupling_ij * custom_data.oa_augmented[vertex_j].toVector();
         }
 
         jmodel.jointVelocitySelector(custom_data.u).noalias() -=
