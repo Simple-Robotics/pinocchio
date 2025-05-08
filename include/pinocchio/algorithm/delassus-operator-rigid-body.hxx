@@ -319,38 +319,36 @@ namespace pinocchio
 
     mat.array() *= m_sum_compliance_damping_inverse.array();
 
-    //    for(auto & of_augmented: m_custom_data.of_augmented)
-    //      of_augmented.setZero();
-    //
-    //
-    //    // Make a pass over the whole set of constraints to add the contributions of constraint
-    //    forces mapConstraintForcesToJointForces(
-    //      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
-    //      m_custom_data.of_augmented);
+    // Make a pass over the whole set of constraints to add the contributions of constraint
+
+    mapConstraintForcesToJointForces(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
+      m_custom_data.of_augmented, WorldFrameTag());
 
     typedef Eigen::Map<VectorXs> MapVectorXs;
     MapVectorXs u = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, model_ref.nv, 1));
-
-    {
-      u.setZero();
-      Eigen::Index row_id = 0;
-      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
-      {
-        const InnerConstraintModel & cmodel =
-          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        const InnerConstraintData & cdata =
-          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
-        const auto csize = cmodel.size();
-        const auto mat_rows = mat.middleRows(row_id, csize);
-
-        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, mat_rows, u, AddTo());
-
-        row_id += csize;
-      }
-    }
+    u.setZero();
+    //    {
+    //      u.setZero();
+    //      Eigen::Index row_id = 0;
+    //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
+    //      {
+    //        const InnerConstraintModel & cmodel =
+    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
+    //        const InnerConstraintData & cdata =
+    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto csize = cmodel.size();
+    //        const auto mat_rows = mat.middleRows(row_id, csize);
+    //
+    //        cmodel.jacobianTransposeMatrixProduct(model_ref, data_ref, cdata, mat_rows, u,
+    //        AddTo());
+    //
+    //        row_id += csize;
+    //      }
+    //    }
 
     const auto & augmented_mass_matrix_operator = this->getAugmentedMassMatrixOperator();
-    augmented_mass_matrix_operator.solveInPlace(u);
+    augmented_mass_matrix_operator.solveInPlace(u, false);
 
     typedef Eigen::Map<VectorXs> MapVectorXs;
     MapVectorXs tmp_vec = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, size(), 1));
