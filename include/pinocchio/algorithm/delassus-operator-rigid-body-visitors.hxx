@@ -332,8 +332,9 @@ namespace pinocchio
           const Matrix6 & crosscoupling_ij =
             (i > vertex_j) ? joint_cross_coupling.get(JointPair(vertex_j, i))
                            : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose();
-          // Compare to ABA, the sign of ofi is reversed
+
           Force & ofj = custom_data.of_augmented[vertex_j];
+          // Compare to ABA, the sign of ofj is reversed
           ofj.toVector().noalias() -= crosscoupling_ij * a_tmp;
         }
       }
