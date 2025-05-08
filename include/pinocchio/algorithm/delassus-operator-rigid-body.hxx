@@ -119,9 +119,8 @@ namespace pinocchio
       Eigen::Index row_id = 0;
       for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
       {
-        const InnerConstraintModel & cmodel =
-          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        InnerConstraintData & cdata = helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+        const auto & cmodel = helper::get_ref(constraint_models_ref[ee_id]);
+        auto & cdata = helper::get_ref(constraint_datas_ref[ee_id]);
 
         const auto constraint_size = cmodel.size();
 
@@ -213,10 +212,10 @@ namespace pinocchio
     //      Eigen::Index row_id = 0;
     //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
     //      {
-    //        const InnerConstraintModel & cmodel =
-    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-    //        const InnerConstraintData & cdata =
-    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto & cmodel =
+    //          helper::get_ref(constraint_models_ref[ee_id]);
+    //        const auto & cdata =
+    //          helper::get_ref(constraint_datas_ref[ee_id]);
     //        const auto csize = cmodel.size();
     //        const auto rhs_rows = rhs.middleRows(row_id, csize);
     //
@@ -271,10 +270,10 @@ namespace pinocchio
     //      Eigen::Index row_id = 0;
     //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
     //      {
-    //        const InnerConstraintModel & cmodel =
-    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-    //        const InnerConstraintData & cdata =
-    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto & cmodel =
+    //          helper::get_ref(constraint_models_ref[ee_id]);
+    //        const auto & cdata =
+    //          helper::get_ref(constraint_datas_ref[ee_id]);
     //        const auto csize = cmodel.size();
     //
     //        cmodel.jacobianMatrixProduct(
@@ -334,10 +333,10 @@ namespace pinocchio
     //      Eigen::Index row_id = 0;
     //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
     //      {
-    //        const InnerConstraintModel & cmodel =
-    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-    //        const InnerConstraintData & cdata =
-    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto & cmodel =
+    //          helper::get_ref(constraint_models_ref[ee_id]);
+    //        const auto & cdata =
+    //          helper::get_ref(constraint_datas_ref[ee_id]);
     //        const auto csize = cmodel.size();
     //        const auto mat_rows = mat.middleRows(row_id, csize);
     //
@@ -357,10 +356,10 @@ namespace pinocchio
     //      Eigen::Index row_id = 0;
     //      for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
     //      {
-    //        const InnerConstraintModel & cmodel =
-    //          helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-    //        const InnerConstraintData & cdata =
-    //          helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+    //        const auto & cmodel =
+    //          helper::get_ref(constraint_models_ref[ee_id]);
+    //        const auto & cdata =
+    //          helper::get_ref(constraint_datas_ref[ee_id]);
     //        const auto csize = cmodel.size();
     //
     //        cmodel.jacobianMatrixProduct(

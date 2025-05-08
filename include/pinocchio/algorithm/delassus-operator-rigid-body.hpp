@@ -215,8 +215,8 @@ namespace pinocchio
 
       for (size_t ee_id = 0; ee_id < constraint_models_ref.size(); ++ee_id)
       {
-        const auto & cmodel = helper::get_ref<ConstraintModel>(constraint_models_ref[ee_id]);
-        auto & cdata = helper::get_ref<ConstraintData>(constraint_datas_ref[ee_id]);
+        const auto & cmodel = helper::get_ref(constraint_models_ref[ee_id]);
+        auto & cdata = helper::get_ref(constraint_datas_ref[ee_id]);
         cmodel.calc(model(), data(), cdata);
       }
 
@@ -381,7 +381,7 @@ namespace pinocchio
       Eigen::DenseIndex size = 0;
       for (const ConstraintModel & cm : constraint_models)
       {
-        const InnerConstraintModel & cmodel = helper::get_ref<ConstraintModel>(cm);
+        const auto & cmodel = helper::get_ref(cm);
         size += cmodel.size();
       }
 
