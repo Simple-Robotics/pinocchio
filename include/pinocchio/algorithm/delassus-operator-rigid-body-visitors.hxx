@@ -317,7 +317,8 @@ namespace pinocchio
 
       Force & ofi = custom_data.of_augmented[i];
 
-      jmodel.jointVelocitySelector(custom_data.u).noalias() -= Jcols.transpose() * ofi.toVector();
+      // Compare to ABA, the sign of ofi is reversed
+      jmodel.jointVelocitySelector(custom_data.u).noalias() += Jcols.transpose() * ofi.toVector();
 
       const auto res = (jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u))
                          .eval(); // Abuse of notation to reuse existing unused data variable
@@ -331,13 +332,16 @@ namespace pinocchio
           const Matrix6 & crosscoupling_ij =
             (i > vertex_j) ? joint_cross_coupling.get(JointPair(vertex_j, i))
                            : joint_cross_coupling.get(JointPair(i, vertex_j)).transpose();
-          custom_data.of_augmented[vertex_j].toVector().noalias() += crosscoupling_ij * a_tmp;
+          // Compare to ABA, the sign of ofi is reversed
+          Force & ofj = custom_data.of_augmented[vertex_j];
+          ofj.toVector().noalias() -= crosscoupling_ij * a_tmp;
         }
       }
 
       if (parent > 0)
       {
-        ofi.toVector().noalias() += jdata.UDinv() * jmodel.jointVelocitySelector(custom_data.u);
+        // Compare to ABA, the sign of ofi is reversed
+        ofi.toVector().noalias() -= jdata.UDinv() * jmodel.jointVelocitySelector(custom_data.u);
         custom_data.of_augmented[parent] += ofi;
       }
     }
