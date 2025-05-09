@@ -248,9 +248,6 @@ namespace pinocchio
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
-      typedef
-        typename SizeDepType<JointModel::NV>::template ColsReturn<pinocchio::Data::Matrix6x>::Type
-          ColBlock;
       const auto Jcols = jmodel.jointCols(data.J);
 
       Force & fi = data.of[i];
