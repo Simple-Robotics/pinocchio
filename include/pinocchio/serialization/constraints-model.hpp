@@ -63,10 +63,10 @@ namespace boost
     template<typename Archive, typename Derived>
     void serialize(
       Archive & ar,
-      ::pinocchio::UnaryConstraintModelBase<Derived> & cmodel,
+      ::pinocchio::JointWiseConstraintModelBase<Derived> & cmodel,
       const unsigned int /*version*/)
     {
-      typedef ::pinocchio::UnaryConstraintModelBase<Derived> Self;
+      typedef ::pinocchio::JointWiseConstraintModelBase<Derived> Self;
       typedef typename Self::Base Base;
       ar & make_nvp("base", boost::serialization::base_object<Base>(cmodel));
     }

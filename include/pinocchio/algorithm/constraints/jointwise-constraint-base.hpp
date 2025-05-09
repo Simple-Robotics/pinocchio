@@ -2,8 +2,8 @@
 // Copyright (c) 2023-2025 INRIA
 //
 
-#ifndef __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
-#define __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
+#ifndef __pinocchio_algorithm_constraints_jointwise_constraint_base_hpp__
+#define __pinocchio_algorithm_constraints_jointwise_constraint_base_hpp__
 
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
@@ -12,7 +12,7 @@ namespace pinocchio
 {
 
   template<typename Derived>
-  struct UnaryConstraintModelBase : ConstraintModelBase<Derived>
+  struct JointWiseConstraintModelBase : ConstraintModelBase<Derived>
   {
     typedef typename traits<Derived>::Scalar Scalar;
     typedef ConstraintModelBase<Derived> Base;
@@ -31,29 +31,29 @@ namespace pinocchio
     }
 
     template<int Options, template<typename, int> class JointCollectionTpl>
-    UnaryConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+    JointWiseConstraintModelBase(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
     : Base(model)
     {
     }
 
     template<typename OtherDerived>
-    bool operator==(const UnaryConstraintModelBase<OtherDerived> & other) const
+    bool operator==(const JointWiseConstraintModelBase<OtherDerived> & other) const
     {
       return base() == other.base();
     }
 
     template<typename OtherDerived>
-    bool operator!=(const UnaryConstraintModelBase<OtherDerived> & other) const
+    bool operator!=(const JointWiseConstraintModelBase<OtherDerived> & other) const
     {
       return !(*this == other);
     }
 
   protected:
     /// \brief Default constructor
-    UnaryConstraintModelBase()
+    JointWiseConstraintModelBase()
     {
     }
-  }; // struct UnaryConstraintModelBase
+  }; // struct JointWiseConstraintModelBase
 } // namespace pinocchio
 
-#endif // ifndef __pinocchio_algorithm_constraints_unary_constraint_base_hpp__
+#endif // ifndef __pinocchio_algorithm_constraints_jointwise_constraint_base_hpp__
