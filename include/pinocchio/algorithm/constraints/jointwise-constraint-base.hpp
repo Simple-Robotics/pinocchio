@@ -114,7 +114,7 @@ namespace pinocchio
     /// \param[in] model The model of the rigid body system.
     /// \param[in] data The data associated with model.
     /// \param[in] cdata The constraint data associated with the constraint model.
-    /// \param[in] joint_motions Input joint motions associated with the model.
+    /// \param[in] joint_generalized_velocity Input joint motions associated with the model.
     /// \param[out] constraint_motions Output constraint motions.
     ///
     template<
@@ -125,11 +125,40 @@ namespace pinocchio
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
-      const Eigen::MatrixBase<JointMotionsLike> & joint_motions,
+      const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
       const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions) const
     {
       derived().mapJointMotionsToConstraintMotions(
-        model, data, cdata, joint_motions, constraint_motions.const_cast_derived());
+        model, data, cdata, joint_generalized_velocity, constraint_motions.const_cast_derived());
+    }
+
+    ///
+    ///\copydoc Base::mapJointSpaceToConstraintMotion(const ModelTpl<Scalar, Options,
+    /// JointCollectionTpl> &, const DataTpl<Scalar, Options, JointCollectionTpl> , const
+    /// ConstraintData &,
+    /// std::vector<MotionTpl<Scalar, Options>, MotionAllocator> &, const
+    /// Eigen::MatrixBase<JointMotionsLike> &, const Eigen::MatrixBase<VectorLike>
+    /// &,ReferenceFrameTag<rf>)
+    ///
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename JointMotionsLike,
+      typename VectorLike,
+      ReferenceFrame rf>
+    void mapJointSpaceToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+      const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
+      const Eigen::MatrixBase<VectorLike> & constraint_motions,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(joint_motions);
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
+      mapJointMotionsToConstraintMotions(
+        model, data, cdata, joint_generalized_velocity, constraint_motions.const_cast_derived());
     }
 
   protected:

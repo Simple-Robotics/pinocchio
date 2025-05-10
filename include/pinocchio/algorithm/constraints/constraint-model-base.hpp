@@ -201,6 +201,38 @@ namespace pinocchio
         model, data, cdata, constraint_forces, joint_forces, joint_torques, reference_frame);
     }
 
+    ///
+    /// \brief Map the joint space quantities (e.g.,
+    /// joint motions, joint motion vector) to the constraint motions.
+    ///
+    /// \param[in] model The model of the rigid body system.
+    /// \param[in] data The data associated with model.
+    /// \param[in] cdata The constraint data associated with the constraint model.
+    /// \param[in] joint_motions Input joint motions associated with the model.
+    /// \param[in] joint_generalized_velocity Input joint motions associated with the model.
+    /// \param[out] constraint_motions Output constraint motions.
+    /// \param[in] reference_frame Input reference frame in which the joint motions are expressed.
+    ///
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename JointMotionsLike,
+      typename VectorLike,
+      ReferenceFrame rf>
+    void mapJointSpaceToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+      const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
+      const Eigen::MatrixBase<VectorLike> & constraint_motions,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      derived().mapJointSpaceToConstraintMotion(
+        model, data, cdata, joint_motions, joint_generalized_velocity, constraint_motions,
+        reference_frame);
+    }
+
     // Attributes common to all constraints
 
     /// \brief Name of the constraint

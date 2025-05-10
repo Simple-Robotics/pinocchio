@@ -130,7 +130,6 @@ namespace pinocchio
     /// \param[in] data The data associated with model.
     /// \param[in] cdata The constraint data associated with the constraint model.
     /// \param[in] joint_motions Input joint motions associated with each joint of the model.
-    /// the constraint.
     /// \param[out] constraint_motions Output contraint motions.
     /// \param[in] reference_frame Input reference frame in which the joint motion quantities are
     /// expressed.
@@ -151,6 +150,31 @@ namespace pinocchio
       derived().mapJointMotionsToConstraintMotion(
         model, data, cdata, joint_motions, constraint_motions.const_cast_derived(),
         reference_frame);
+    }
+
+    ///
+    /// \brief Map the joint motions expressed in the LOCAL frame to the constraint motions.
+    ///
+    /// \param[in] model The model of the rigid body system.
+    /// \param[in] data The data associated with model.
+    /// \param[in] cdata The constraint data associated with the constraint model.
+    /// \param[in] joint_motions Input joint motions associated with each joint of the model.
+    /// \param[out] constraint_motions Output contraint motions.
+    ///
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename VectorLike>
+    void mapJointMotionsToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+      const Eigen::MatrixBase<VectorLike> & constraint_motions) const
+    {
+      derived().mapJointMotionsToConstraintMotion(
+        model, data, cdata, joint_motions, constraint_motions.const_cast_derived(),
+        LocalFrameTag());
     }
 
     ///
@@ -177,33 +201,36 @@ namespace pinocchio
     {
       PINOCCHIO_UNUSED_VARIABLE(joint_torques);
       mapConstraintForceToJointForces(
-        model, data, cdata, constraint_forces, joint_forces, reference_frame);
+        model, data, cdata, constraint_forces.derived(), joint_forces, reference_frame);
     }
 
     ///
-    /// \brief Map the joint motions to the constraint motions expressed.
-    ///
-    /// \param[in] model The model of the rigid body system.
-    /// \param[in] data The data associated with model.
-    /// \param[in] cdata The constraint data associated with the constraint model.
-    /// \param[in] joint_motions Input joint motions associated with each joint of the model.
-    /// the constraint.
-    /// \param[out] constraint_motions Output contraint motions.
+    ///\copydoc Base::mapJointSpaceToConstraintMotion(const ModelTpl<Scalar, Options,
+    /// JointCollectionTpl> &, const DataTpl<Scalar, Options, JointCollectionTpl> , const
+    /// ConstraintData &,
+    /// std::vector<MotionTpl<Scalar, Options>, MotionAllocator> &, const
+    /// Eigen::MatrixBase<JointMotionsLike> &, const Eigen::MatrixBase<VectorLike>
+    /// &,ReferenceFrameTag<rf>)
     ///
     template<
       template<typename, int> class JointCollectionTpl,
       typename MotionAllocator,
-      typename VectorLike>
-    void mapJointMotionsToConstraintMotion(
+      typename JointMotionsLike,
+      typename VectorLike,
+      ReferenceFrame rf>
+    void mapJointSpaceToConstraintMotion(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
-      const Eigen::MatrixBase<VectorLike> & constraint_motions) const
+      const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
+      const Eigen::MatrixBase<VectorLike> & constraint_motions,
+      ReferenceFrameTag<rf> reference_frame) const
     {
-      derived().mapJointMotionsToConstraintMotion(
+      PINOCCHIO_UNUSED_VARIABLE(joint_generalized_velocity);
+      mapJointMotionsToConstraintMotion(
         model, data, cdata, joint_motions, constraint_motions.const_cast_derived(),
-        LocalFrameTag());
+        reference_frame);
     }
 
   protected:
