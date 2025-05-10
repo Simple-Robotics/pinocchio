@@ -351,7 +351,7 @@ namespace pinocchio
     /// \param[in] cdata The constraint data associated with the constraint model.
     /// \param[in] constraint_forces Input constraint forces (Lagrange multipliers) associated with
     /// the constraint.
-    /// \param[out] joint_torques_ Output joint torques associated with the model.
+    /// \param[out] joint_torques Output joint torques associated with the model.
     ///
     template<
       template<typename, int> class JointCollectionTpl,
@@ -362,7 +362,7 @@ namespace pinocchio
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<ConstraintForcesLike> & constraint_forces,
-      const Eigen::MatrixBase<JointTorquesLike> & joint_torques_) const;
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques) const;
 
     /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the joint torques
     /// associated to each independant constraint. This operation corresponds to the mapping of the
@@ -372,7 +372,7 @@ namespace pinocchio
     /// \param[in] data The data associated with model.
     /// \param[in] cdata The constraint data associated with the constraint model.
     /// \param[in] joint_motions Input joint motions associated with the model.
-    /// \param[out] constraint_motions_ Output constraint motions.
+    /// \param[out] constraint_motions Output constraint motions.
     ///
     template<
       template<typename, int> class JointCollectionTpl,
@@ -383,7 +383,7 @@ namespace pinocchio
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<JointMotionsLike> & joint_motions,
-      const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions_) const;
+      const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions) const;
 
     ///
     ///  \brief Comparison operator
