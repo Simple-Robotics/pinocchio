@@ -167,6 +167,21 @@ namespace pinocchio
         model, data, cdata, mat.derived(), res.const_cast_derived(), aot);
     }
 
+    ///
+    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to joint space (e.g.,
+    /// joint forces, joint torque vector).
+    ///
+    /// \param[in] model The model of the rigid body system.
+    /// \param[in] data The data associated with model.
+    /// \param[in] cdata The constraint data associated with the constraint model.
+    /// \param[in] constraint_forces Input constraint forces (Lagrange multipliers) associated with
+    /// the constraint.
+    /// \param[out] joint_forces Output joint forces associated with each joint of the model.
+    /// \param[out] joint_torques Output joint torques associated with the model.
+    /// \param[in] reference_frame Input reference frame in which the forces are expressed.
+    ///
+    /// \note The results will be added to the joint_forces and joint_torques ouput argument.
+    ///
     template<
       template<typename, int> class JointCollectionTpl,
       typename ConstraintForceLike,
