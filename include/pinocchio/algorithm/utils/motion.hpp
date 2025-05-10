@@ -14,7 +14,8 @@ namespace pinocchio
 
   ///
   /// @copydoc changeReferenceFrame(const SE3Tpl<Scalar,Options> &,const MotionDense<MotionIn>
-  /// &,const ReferenceFrame,const ReferenceFrame) \param[out] m_out Resulting motion quantity.
+  /// &,const ReferenceFrame,const ReferenceFrame)
+  /// \param[out] m_out Resulting motion quantity.
   ///
   template<typename Scalar, int Options, typename MotionIn, typename MotionOut>
   void changeReferenceFrame(
