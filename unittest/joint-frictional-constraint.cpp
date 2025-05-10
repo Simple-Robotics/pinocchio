@@ -209,4 +209,47 @@ BOOST_AUTO_TEST_CASE(constraint_coupling_inertia)
     Eigen::MatrixXd(data.joint_apparent_inertia.asDiagonal())));
 }
 
+BOOST_AUTO_TEST_CASE(check_maps)
+{
+  pinocchio::Model model;
+  pinocchio::buildModels::humanoidRandom(model, true);
+  Data data(model), data_ref(model);
+
+  model.lowerPositionLimit.head<3>().fill(-1.);
+  model.upperPositionLimit.head<3>().fill(1.);
+
+  const std::string RF_name = "rleg6_joint";
+  const JointIndex RF_id = model.getJointId(RF_name);
+
+  const Model::IndexVector & RF_support = model.supports[RF_id];
+  const Model::IndexVector active_joint_ids(RF_support.begin() + 1, RF_support.end());
+
+  FrictionalJointConstraintModel constraint_model(model, active_joint_ids);
+  FrictionalJointConstraintData constraint_data(constraint_model),
+    constraint_data_ref(constraint_model);
+
+  const Eigen::VectorXd q = neutral(model);
+  computeJointJacobians(model, data, q);
+  constraint_model.calc(model, data, constraint_data);
+  computeJointJacobians(model, data_ref, q);
+  constraint_model.calc(model, data_ref, constraint_data_ref);
+
+  const Eigen::VectorXd constraint_forces = Eigen::VectorXd::Random(constraint_model.activeSize());
+  Eigen::VectorXd joint_torques_ref = Eigen::VectorXd::Zero(model.nv);
+
+  const auto constraint_jacobian_ref =
+    constraint_model.jacobian(model, data_ref, constraint_data_ref);
+  joint_torques_ref = constraint_jacobian_ref.transpose() * constraint_forces;
+  Eigen::VectorXd joint_torques_ref2 = Eigen::VectorXd::Zero(model.nv);
+  constraint_model.jacobianTransposeMatrixProduct(
+    model, data_ref, constraint_data_ref, constraint_forces, joint_torques_ref2, SetTo());
+
+  Eigen::VectorXd joint_torques = Eigen::VectorXd::Zero(model.nv);
+  constraint_model.mapConstraintForceToJointTorques(
+    model, data_ref, constraint_data, constraint_forces, joint_torques);
+
+  BOOST_CHECK(joint_torques.isApprox(joint_torques_ref));
+  BOOST_CHECK(joint_torques.isApprox(joint_torques_ref2));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
