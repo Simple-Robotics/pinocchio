@@ -167,6 +167,25 @@ namespace pinocchio
         model, data, cdata, mat.derived(), res.const_cast_derived(), aot);
     }
 
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ConstraintForceLike,
+      typename ForceAllocator,
+      typename JointTorquesLike,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointSpace(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      derived().mapConstraintForceToJointSpace(
+        model, data, cdata, constraint_forces, joint_forces, joint_torques, reference_frame);
+    }
+
     // Attributes common to all constraints
 
     /// \brief Name of the constraint

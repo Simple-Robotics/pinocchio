@@ -81,6 +81,33 @@ namespace pinocchio
         model, data, cdata, constraint_forces, joint_torques.const_cast_derived());
     }
 
+    ///
+    /// \copydoc Base::mapConstraintForceToJointSpace(const ModelTpl<Scalar, Options,
+    /// JointCollectionTpl> &, const DataTpl<Scalar, Options, JointCollectionTpl> , const
+    /// ConstraintData &, const Eigen::MatrixBase<ConstraintForceLike> &,
+    /// std::vector<ForceTpl<Scalar, Options>, ForceAllocator> &, const
+    /// Eigen::MatrixBase<JointTorquesLike> &,ReferenceFrameTag<rf>)
+    ///
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ConstraintForceLike,
+      typename ForceAllocator,
+      typename JointTorquesLike,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointSpace(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      PINOCCHIO_UNUSED_VARIABLE(joint_forces);
+      PINOCCHIO_UNUSED_VARIABLE(reference_frame);
+      mapConstraintForceToJointForces(model, data, cdata, constraint_forces, joint_torques);
+    }
+
     /// \brief Map the joint motions to the constraint motions.
     /// This operation corresponds to the dual mapping wrt mapConstraintForcesToJointTorques.
     ///
