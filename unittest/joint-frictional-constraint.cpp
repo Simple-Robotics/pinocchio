@@ -185,8 +185,6 @@ BOOST_AUTO_TEST_CASE(constraint_coupling_inertia)
     //    std::cout << "joint_id: " << joint_id << std::endl;
 
     const auto & jmodel = model.joints[joint_id];
-    const auto & jdata = data.joints[joint_id];
-    const auto & oMjoint = data.oMi[joint_id];
     const auto jmodel_nv = jmodel.nv();
     const auto jmodel_idx_v = jmodel.idx_v();
 
