@@ -65,6 +65,7 @@ namespace pinocchio
     /// the constraint.
     /// \param[out] joint_torques Output joint torques associated with the model.
     ///
+    /// \note The results will be added to the joint_torques ouput argument.
     template<
       template<typename, int> class JointCollectionTpl,
       typename ConstraintForcesLike,
@@ -80,9 +81,8 @@ namespace pinocchio
         model, data, cdata, constraint_forces, joint_torques.const_cast_derived());
     }
 
-    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the joint torques
-    /// associated to each independant constraint. This operation corresponds to the mapping of the
-    /// constraint multipliers on the joint torque.
+    /// \brief Map the joint motions to the constraint motions.
+    /// This operation corresponds to the dual mapping wrt mapConstraintForcesToJointTorques.
     ///
     /// \param[in] model The model of the rigid body system.
     /// \param[in] data The data associated with model.
