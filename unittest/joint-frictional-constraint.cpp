@@ -234,22 +234,47 @@ BOOST_AUTO_TEST_CASE(check_maps)
   computeJointJacobians(model, data_ref, q);
   constraint_model.calc(model, data_ref, constraint_data_ref);
 
-  const Eigen::VectorXd constraint_forces = Eigen::VectorXd::Random(constraint_model.activeSize());
-  Eigen::VectorXd joint_torques_ref = Eigen::VectorXd::Zero(model.nv);
-
   const auto constraint_jacobian_ref =
     constraint_model.jacobian(model, data_ref, constraint_data_ref);
-  joint_torques_ref = constraint_jacobian_ref.transpose() * constraint_forces;
-  Eigen::VectorXd joint_torques_ref2 = Eigen::VectorXd::Zero(model.nv);
-  constraint_model.jacobianTransposeMatrixProduct(
-    model, data_ref, constraint_data_ref, constraint_forces, joint_torques_ref2, SetTo());
 
-  Eigen::VectorXd joint_torques = Eigen::VectorXd::Zero(model.nv);
-  constraint_model.mapConstraintForceToJointTorques(
-    model, data_ref, constraint_data, constraint_forces, joint_torques);
+  // Test mapConstraintForcesToJointTorques
+  {
+    const Eigen::VectorXd constraint_forces =
+      Eigen::VectorXd::Random(constraint_model.activeSize());
 
-  BOOST_CHECK(joint_torques.isApprox(joint_torques_ref));
-  BOOST_CHECK(joint_torques.isApprox(joint_torques_ref2));
+    Eigen::VectorXd joint_torques_ref = Eigen::VectorXd::Zero(model.nv);
+    joint_torques_ref = constraint_jacobian_ref.transpose() * constraint_forces;
+
+    Eigen::VectorXd joint_torques_ref2 = Eigen::VectorXd::Zero(model.nv);
+    constraint_model.jacobianTransposeMatrixProduct(
+      model, data_ref, constraint_data_ref, constraint_forces, joint_torques_ref2, SetTo());
+
+    Eigen::VectorXd joint_torques = Eigen::VectorXd::Zero(model.nv);
+    constraint_model.mapConstraintForcesToJointTorques(
+      model, data_ref, constraint_data, constraint_forces, joint_torques);
+
+    BOOST_CHECK(joint_torques.isApprox(joint_torques_ref));
+    BOOST_CHECK(joint_torques.isApprox(joint_torques_ref2));
+  }
+
+  // Test mapJointMotionsToConstraintMotions
+  {
+    const Eigen::VectorXd joint_motions = Eigen::VectorXd::Random(model.nv);
+
+    Eigen::VectorXd constraint_motions_ref = Eigen::VectorXd::Zero(constraint_model.activeSize());
+    constraint_motions_ref = constraint_jacobian_ref * joint_motions;
+
+    Eigen::VectorXd constraint_motions_ref2 = Eigen::VectorXd::Zero(constraint_model.activeSize());
+    constraint_model.jacobianMatrixProduct(
+      model, data_ref, constraint_data_ref, joint_motions, constraint_motions_ref2, SetTo());
+
+    Eigen::VectorXd constraint_motions = Eigen::VectorXd::Zero(constraint_model.activeSize());
+    constraint_model.mapJointMotionsToConstraintMotions(
+      model, data_ref, constraint_data, joint_motions, constraint_motions);
+
+    BOOST_CHECK(constraint_motions.isApprox(constraint_motions_ref));
+    BOOST_CHECK(constraint_motions.isApprox(constraint_motions_ref2));
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
