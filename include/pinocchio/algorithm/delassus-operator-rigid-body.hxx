@@ -197,10 +197,11 @@ namespace pinocchio
     const ConstraintModelVector & constraint_models_ref = constraint_models();
     const ConstraintDataVector & constraint_datas_ref = constraint_datas();
     auto & custom_data = this->m_custom_data;
+    auto & u = custom_data.u;
 
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
-    mapConstraintForcesToJointForces(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f,
+    mapConstraintForcesToJointSpace(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f, u,
       LocalFrameTag());
     // TODO(jcarpent): extend the code to operator on matrices
 
@@ -227,12 +228,11 @@ namespace pinocchio
     //    }
 
     // Backward sweep: propagate joint force contributions
-    //    for (auto & f : m_custom_data.f)
-    //      f.setZero();
-
     {
-      auto & u = custom_data.u;
-      u.setZero();
+      //      for (auto & f : m_custom_data.f)
+      //        f.setZero();
+      //      auto & u = custom_data.u;
+      //      u.setZero();
 
       typedef DelassusOperatorRigidBodySystemsTplApplyOnTheRightBackwardPass<
         DelassusOperatorRigidBodySystemsTpl>
