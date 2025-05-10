@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(check_maps)
     constraint_model.jacobianMatrixProduct(
       model, data_ref, constraint_data_ref, joint_motions, constraint_motions_ref2, SetTo());
 
-    Eigen::VectorXd constraint_motions = Eigen::VectorXd::Zero(constraint_model.activeSize());
+    Eigen::VectorXd constraint_motions = -Eigen::VectorXd::Ones(constraint_model.activeSize());
     constraint_model.mapJointMotionsToConstraintMotions(
       model, data_ref, constraint_data, joint_motions, constraint_motions);
 

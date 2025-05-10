@@ -261,7 +261,7 @@ namespace pinocchio
     {
       const auto row_id = active_dofs[dof_id];
 
-      constraint_motions.row(Eigen::DenseIndex(dof_id)) += joint_motions.row(row_id);
+      constraint_motions.row(Eigen::DenseIndex(dof_id)) = joint_motions.row(row_id);
     }
   }
 
