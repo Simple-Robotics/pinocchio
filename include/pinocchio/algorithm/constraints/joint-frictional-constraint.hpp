@@ -361,8 +361,19 @@ namespace pinocchio
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
-      const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
-      const Eigen::MatrixBase<JointTorqueLike> & joint_torques_) const;
+      const Eigen::MatrixBase<ConstraintForcesLike> & constraint_forces,
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques_) const;
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename JointMotionsLike,
+      typename ConstraintMotionsLike>
+    void mapJointMotionsToConstraintMotions(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<JointMotionsLike> & joint_motions,
+      const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions_) const;
 
     ///
     ///  \brief Comparison operator

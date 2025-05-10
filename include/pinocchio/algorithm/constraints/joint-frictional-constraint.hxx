@@ -238,6 +238,33 @@ namespace pinocchio
     }
   }
 
+  template<typename Scalar, int Options>
+  template<
+    template<typename, int> class JointCollectionTpl,
+    typename JointMotionsLike,
+    typename ConstraintMotionsLike>
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapJointMotionsToConstraintMotions(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const ConstraintData & cdata,
+    const Eigen::MatrixBase<JointMotionsLike> & joint_motions,
+    const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions_) const
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions_.rows(), activeSize());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.rows(), model.nv);
+    PINOCCHIO_UNUSED_VARIABLE(data);
+    PINOCCHIO_UNUSED_VARIABLE(cdata);
+
+    auto & constraint_motions = constraint_motions_.const_cast_derived();
+
+    for (size_t dof_id = 0; dof_id < active_dofs.size(); ++dof_id)
+    {
+      const auto row_id = active_dofs[dof_id];
+
+      constraint_motions.row(Eigen::DenseIndex(dof_id)) += joint_motions.row(row_id);
+    }
+  }
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_algorithm_constraints_frictional_joint_constraint_hxx__
