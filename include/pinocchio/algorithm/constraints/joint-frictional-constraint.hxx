@@ -69,8 +69,8 @@ namespace pinocchio
         sparsity_pattern[val] = true;
     }
 
-    m_compliance = ComplianceVectorType::Zero(size());
-    m_set = ConstraintSet(size());
+    m_compliance = ComplianceVectorType::Zero(activeSize());
+    m_set = ConstraintSet(activeSize());
   }
 
   template<typename Scalar, int Options>
@@ -85,7 +85,7 @@ namespace pinocchio
 
     const FrictionalJointConstraintModelTpl & cmodel = *this;
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      jacobian_matrix.rows(), cmodel.size(),
+      jacobian_matrix.rows(), cmodel.activeSize(),
       "The input/output Jacobian matrix does not have the right number of rows.");
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
       jacobian_matrix.cols(), model.nv,
@@ -117,7 +117,7 @@ namespace pinocchio
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), model.nv);
     PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.cols(), res.cols());
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), activeSize());
     PINOCCHIO_UNUSED_VARIABLE(data);
     PINOCCHIO_UNUSED_VARIABLE(cdata);
     PINOCCHIO_UNUSED_VARIABLE(aot);
@@ -152,7 +152,7 @@ namespace pinocchio
   {
     OutputMatrix & res = _res.const_cast_derived();
 
-    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(mat.rows(), activeSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res.cols(), mat.cols());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(res.rows(), model.nv);
     PINOCCHIO_UNUSED_VARIABLE(data);
@@ -189,7 +189,7 @@ namespace pinocchio
     PINOCCHIO_UNUSED_VARIABLE(reference_frame);
 
     PINOCCHIO_CHECK_ARGUMENT_SIZE(
-      diagonal_constraint_inertia.size(), size(),
+      diagonal_constraint_inertia.size(), activeSize(),
       "The diagonal_constraint_inertia is of wrong size.");
 
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
