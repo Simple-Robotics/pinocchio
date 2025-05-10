@@ -364,6 +364,16 @@ namespace pinocchio
       const Eigen::MatrixBase<ConstraintForcesLike> & constraint_forces,
       const Eigen::MatrixBase<JointTorquesLike> & joint_torques_) const;
 
+    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the joint torques
+    /// associated to each independant constraint. This operation corresponds to the mapping of the
+    /// constraint multipliers on the joint torque.
+    ///
+    /// \param[in] model The model of the rigid body system.
+    /// \param[in] data The data associated with model.
+    /// \param[in] cdata The constraint data associated with the constraint model.
+    /// \param[in] joint_motions Input joint motions associated with the model.
+    /// \param[out] constraint_motions_ Output constraint motions.
+    ///
     template<
       template<typename, int> class JointCollectionTpl,
       typename JointMotionsLike,
