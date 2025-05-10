@@ -26,6 +26,7 @@ namespace pinocchio
     using typename Base::EigenIndexVector;
 
     typedef typename traits<Derived>::ConstraintData ConstraintData;
+    typedef typename traits<Derived>::ConstraintSet ConstraintSet;
 
     Base & base()
     {

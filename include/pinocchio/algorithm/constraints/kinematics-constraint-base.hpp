@@ -20,6 +20,8 @@ namespace pinocchio
       Options = traits<Derived>::Options
     };
     typedef ConstraintModelBase<Derived> Base;
+    typedef typename traits<Derived>::ConstraintData ConstraintData;
+    typedef typename traits<Derived>::ConstraintSet ConstraintSet;
 
     using Base::derived;
     using typename Base::BooleanVector;
