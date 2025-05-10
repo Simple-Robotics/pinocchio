@@ -883,8 +883,12 @@ namespace pinocchio
       }
     }
 
-    /// \brief Map the constraint forces (aka constraint Lagrange multipliers) to the forces
-    /// supported by the joints.
+    ///
+    /// \copydoc Base::mapConstraintForceToJointForces(const ModelTpl<Scalar, Options,
+    /// JointCollectionTpl> &, const DataTpl<Scalar, Options, JointCollectionTpl> &, const
+    /// ConstraintData &, const Eigen::MatrixBase<ForceLike> &, std::vector<ForceTpl<Scalar,
+    /// Options>, ForceAllocator> &, ReferenceFrameTag<rf>)
+    ///
     template<
       template<typename, int> class JointCollectionTpl,
       typename ForceLike,
@@ -915,22 +919,12 @@ namespace pinocchio
         joint_forces[this->joint2_id].toVector().noalias() += A2.transpose() * constraint_forces;
     }
 
-    template<
-      template<typename, int> class JointCollectionTpl,
-      typename ForceLike,
-      typename ForceAllocator>
-    void mapConstraintForceToJointForces(
-      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const ConstraintData & cdata,
-      const Eigen::MatrixBase<ForceLike> & constraint_forces,
-      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces) const
-    {
-      mapConstraintForceToJointForces(
-        model, data, cdata, constraint_forces, joint_forces, LocalFrameTag());
-    }
-
-    /// \brief Map the joint accelerations to constraint value
+    ///
+    /// \copydoc Base::mapJointMotionsToConstraintMotion(const ModelTpl<Scalar, Options,
+    /// JointCollectionTpl> &, const DataTpl<Scalar, Options, JointCollectionTpl> &, const
+    /// ConstraintData &, const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> &, const
+    /// Eigen::MatrixBase<VectorLike> &, ReferenceFrameTag<rf>)
+    ///
     template<
       template<typename, int> class JointCollectionTpl,
       typename MotionAllocator,
@@ -961,21 +955,6 @@ namespace pinocchio
       if (joint2_id > 0)
         constraint_motion.const_cast_derived().noalias() +=
           A2 * joint_accelerations[this->joint2_id].toVector();
-    }
-
-    template<
-      template<typename, int> class JointCollectionTpl,
-      typename MotionAllocator,
-      typename VectorLike>
-    void mapJointMotionsToConstraintMotion(
-      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
-      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
-      const ConstraintData & cdata,
-      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_accelerations,
-      const Eigen::MatrixBase<VectorLike> & constraint_motion) const
-    {
-      mapJointMotionsToConstraintMotion(
-        model, data, cdata, joint_accelerations, constraint_motion, LocalFrameTag());
     }
 
     static int size()
