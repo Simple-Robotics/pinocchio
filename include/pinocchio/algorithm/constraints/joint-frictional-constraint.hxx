@@ -214,14 +214,14 @@ namespace pinocchio
   template<typename Scalar, int Options>
   template<
     template<typename, int> class JointCollectionTpl,
-    typename ConstraintForceLike,
-    typename JointTorqueLike>
-  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapConstraintForceToJointTorques(
+    typename ConstraintForcesLike,
+    typename JointTorquesLike>
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapConstraintForcesToJointTorques(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const ConstraintData & cdata,
-    const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
-    const Eigen::MatrixBase<JointTorqueLike> & joint_torques_) const
+    const Eigen::MatrixBase<ConstraintForcesLike> & constraint_forces,
+    const Eigen::MatrixBase<JointTorquesLike> & joint_torques_) const
   {
     PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_forces.rows(), activeSize());
     PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_torques_.rows(), model.nv);

@@ -355,9 +355,9 @@ namespace pinocchio
     ///
     template<
       template<typename, int> class JointCollectionTpl,
-      typename ConstraintForceLike,
-      typename JointTorqueLike>
-    void mapConstraintForceToJointTorques(
+      typename ConstraintForcesLike,
+      typename JointTorquesLike>
+    void mapConstraintForcesToJointTorques(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
