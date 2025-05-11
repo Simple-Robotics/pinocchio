@@ -178,6 +178,53 @@ namespace pinocchio
     typename Scalar,
     int Options,
     template<typename, int> class JointCollectionTpl,
+    class ConstraintModel,
+    class ConstraintModelAllocator,
+    class ConstraintData,
+    class ConstraintDataAllocator,
+    class MotionAllocator,
+    typename GeneralizedVelocityVector,
+    typename MotionConstraintMatrix,
+    ReferenceFrame rf>
+  void mapJointSpaceToConstraintMotions(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+    const std::vector<ConstraintModel, ConstraintModelAllocator> & constraint_models,
+    const std::vector<ConstraintData, ConstraintDataAllocator> & constraint_datas,
+    const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+    const Eigen::MatrixBase<GeneralizedVelocityVector> & generalized_velocity,
+    const Eigen::MatrixBase<MotionConstraintMatrix> & constraint_motions_,
+    ReferenceFrameTag<rf> reference_frame)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_models.size(), constraint_datas.size());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(joint_motions.size(), size_t(model.njoints));
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(generalized_velocity.size(), model.nv);
+
+    auto & constraint_motions = constraint_motions_.const_cast_derived();
+    const Eigen::DenseIndex constraint_active_size =
+      getTotalConstraintActiveSize(constraint_models);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(constraint_motions.rows(), constraint_active_size);
+
+    Eigen::Index row_id = 0;
+    for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
+    {
+      const ConstraintModel & cmodel = constraint_models[ee_id];
+      const ConstraintData & cdata = constraint_datas[ee_id];
+      const auto constraint_size = cmodel.activeSize();
+
+      auto constraint_motion = constraint_motions.segment(row_id, constraint_size);
+      cmodel.mapJointSpaceToConstraintMotion(
+        model, data, cdata, joint_motions, generalized_velocity, constraint_motion,
+        reference_frame);
+
+      row_id += constraint_size;
+    }
+  }
+
+  template<
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
     typename ConstraintModel,
     typename ConstraintData,
     typename JacobianMatrixLike>
