@@ -321,13 +321,13 @@ namespace pinocchio
 
     // Make a pass over the whole set of constraints to add the contributions of constraint
 
-    mapConstraintForcesToJointForces(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
-      custom_data.of_augmented, WorldFrameTag());
-
     typedef Eigen::Map<VectorXs> MapVectorXs;
     MapVectorXs u = MapVectorXs(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, model_ref.nv, 1));
-    u.setZero();
+    // u and custom_data.of_augmented are reset by mapConstraintForcesToJointSpace
+    mapConstraintForcesToJointSpace(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, mat,
+      custom_data.of_augmented, u, WorldFrameTag());
+
     //    {
     //      u.setZero();
     //      Eigen::Index row_id = 0;
