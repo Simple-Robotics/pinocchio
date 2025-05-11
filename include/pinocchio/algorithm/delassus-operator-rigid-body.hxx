@@ -200,6 +200,7 @@ namespace pinocchio
     auto & u = custom_data.u;
 
     // Make a pass over the whole set of constraints to add the contributions of constraint forces
+    // u and custom_data.f are reset by mapConstraintForcesToJointSpace
     mapConstraintForcesToJointSpace(
       model_ref, data_ref, constraint_models_ref, constraint_datas_ref, rhs, m_custom_data.f, u,
       LocalFrameTag());
