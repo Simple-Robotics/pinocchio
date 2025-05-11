@@ -260,9 +260,9 @@ namespace pinocchio
 
     // Make a pass over the whole set of constraints to project back the accelerations onto the
     // joint
-    mapJointMotionsToConstraintMotions(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.a, res,
-      LocalFrameTag());
+    mapJointSpaceToConstraintMotions(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.a,
+      custom_data.ddq, res, LocalFrameTag());
 
     // TODO(jcarpent): extend the code to operator on matrices
     //    {
