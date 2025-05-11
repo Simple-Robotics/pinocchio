@@ -822,7 +822,6 @@ BOOST_AUTO_TEST_CASE(general_test_frictional_point_constraint_model)
   }
 }
 
-/*
 BOOST_AUTO_TEST_CASE(general_test_joint_frictional_constraint)
 {
   typedef FrictionalJointConstraintModelTpl<double> ConstraintModel;
@@ -998,7 +997,6 @@ BOOST_AUTO_TEST_CASE(general_test_joint_frictional_constraint)
     }
   }
 }
- */
 
 BOOST_AUTO_TEST_CASE(general_test_no_constraints)
 {
