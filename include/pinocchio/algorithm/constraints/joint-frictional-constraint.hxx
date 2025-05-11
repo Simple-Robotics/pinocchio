@@ -216,7 +216,7 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     typename ConstraintForcesLike,
     typename JointTorquesLike>
-  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapConstraintForcesToJointTorques(
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapConstraintForceToJointTorques(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const ConstraintData & cdata,
@@ -243,7 +243,7 @@ namespace pinocchio
     template<typename, int> class JointCollectionTpl,
     typename JointMotionsLike,
     typename ConstraintMotionsLike>
-  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapJointMotionsToConstraintMotions(
+  void FrictionalJointConstraintModelTpl<Scalar, Options>::mapJointMotionsToConstraintMotion(
     const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const ConstraintData & cdata,

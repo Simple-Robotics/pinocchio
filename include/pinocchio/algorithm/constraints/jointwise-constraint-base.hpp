@@ -71,14 +71,14 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConstraintForcesLike,
       typename JointTorquesLike>
-    void mapConstraintForcesToJointTorques(
+    void mapConstraintForceToJointTorques(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<ConstraintForcesLike> & constraint_forces,
       const Eigen::MatrixBase<JointTorquesLike> & joint_torques) const
     {
-      derived().mapConstraintForcesToJointTorques(
+      derived().mapConstraintForceToJointTorques(
         model, data, cdata, constraint_forces, joint_torques.const_cast_derived());
     }
 
@@ -106,7 +106,7 @@ namespace pinocchio
     {
       PINOCCHIO_UNUSED_VARIABLE(joint_forces);
       PINOCCHIO_UNUSED_VARIABLE(reference_frame);
-      mapConstraintForceToJointForces(model, data, cdata, constraint_forces, joint_torques);
+      mapConstraintForceToJointTorques(model, data, cdata, constraint_forces, joint_torques);
     }
 
     /// \brief Map the joint motions to the constraint motions.
@@ -122,14 +122,14 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename JointMotionsLike,
       typename ConstraintMotionsLike>
-    void mapJointMotionsToConstraintMotions(
+    void mapJointMotionsToConstraintMotion(
       const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
       const DataTpl<Scalar, Options, JointCollectionTpl> & data,
       const ConstraintData & cdata,
       const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
       const Eigen::MatrixBase<ConstraintMotionsLike> & constraint_motions) const
     {
-      derived().mapJointMotionsToConstraintMotions(
+      derived().mapJointMotionsToConstraintMotion(
         model, data, cdata, joint_generalized_velocity, constraint_motions.const_cast_derived());
     }
 
@@ -158,7 +158,7 @@ namespace pinocchio
     {
       PINOCCHIO_UNUSED_VARIABLE(joint_motions);
       PINOCCHIO_UNUSED_VARIABLE(reference_frame);
-      mapJointMotionsToConstraintMotions(
+      mapJointMotionsToConstraintMotion(
         model, data, cdata, joint_generalized_velocity, constraint_motions.const_cast_derived());
     }
 
