@@ -371,8 +371,8 @@ namespace pinocchio
 
     // Make a pass over the whole set of constraints to project back the joint accelerations onto
     // the constraints
-    mapJointMotionsToConstraintMotions(
-      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.oa_augmented,
+    mapJointSpaceToConstraintMotions(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, custom_data.oa_augmented, u,
       tmp_vec, WorldFrameTag());
 
     mat.noalias() -= m_sum_compliance_damping_inverse.asDiagonal() * tmp_vec;
