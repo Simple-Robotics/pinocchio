@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(check_maps)
       model, data_ref, constraint_data_ref, constraint_forces, joint_torques_ref2, SetTo());
 
     Eigen::VectorXd joint_torques = Eigen::VectorXd::Zero(model.nv);
-    constraint_model.mapConstraintForcesToJointTorques(
+    constraint_model.mapConstraintForceToJointTorques(
       model, data_ref, constraint_data, constraint_forces, joint_torques);
 
     BOOST_CHECK(joint_torques.isApprox(joint_torques_ref));
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(check_maps)
       model, data_ref, constraint_data_ref, joint_motions, constraint_motions_ref2, SetTo());
 
     Eigen::VectorXd constraint_motions = -Eigen::VectorXd::Ones(constraint_model.activeSize());
-    constraint_model.mapJointMotionsToConstraintMotions(
+    constraint_model.mapJointMotionsToConstraintMotion(
       model, data_ref, constraint_data, joint_motions, constraint_motions);
 
     BOOST_CHECK(constraint_motions.isApprox(constraint_motions_ref));
