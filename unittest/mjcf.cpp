@@ -1343,7 +1343,6 @@ BOOST_AUTO_TEST_CASE(build_model_with_root_joint_name)
 BOOST_AUTO_TEST_CASE(compare_to_urdf)
 {
   using namespace pinocchio;
-  typedef typename pinocchio::Model::ConfigVectorMap ConfigVectorMap;
 
   const std::string filename = PINOCCHIO_MODEL_DIR + std::string("/simple_humanoid.xml");
 

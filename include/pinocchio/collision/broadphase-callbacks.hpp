@@ -211,7 +211,7 @@ namespace pinocchio
       const GeometryModel & geometry_model, GeometryData & geometry_data, const int max_num_pairs)
     : CollisionCallBackBase(geometry_model, geometry_data)
     {
-      this->pair_indexes.reserve(max_num_pairs);
+      this->pair_indexes.reserve(size_t(max_num_pairs));
     }
 
     /// @brief This method is called at the beginning of any broad phase call.
