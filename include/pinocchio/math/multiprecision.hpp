@@ -102,7 +102,7 @@ namespace Eigen
     {
       return (std::numeric_limits<Real>::min)();
     }
-    static int digits10_imp(const boost::mpl::true_ &)
+    static int digits10_imp(const std::true_type &)
     {
       return std::numeric_limits<Real>::digits10;
     }
