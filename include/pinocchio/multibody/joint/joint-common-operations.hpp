@@ -8,8 +8,6 @@
 #include "pinocchio/macros.hpp"
 #include "pinocchio/math/matrix.hpp"
 
-#include <boost/type_traits.hpp>
-
 namespace pinocchio
 {
   namespace internal
