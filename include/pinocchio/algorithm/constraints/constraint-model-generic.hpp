@@ -287,6 +287,46 @@ namespace pinocchio
         *this, model, data, cdata, diagonal_constraint_inertia.derived(), reference_frame);
     }
 
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename ConstraintForceLike,
+      typename ForceAllocator,
+      typename JointTorquesLike,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointSpace(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      ::pinocchio::visitors::mapConstraintForceToJointSpace(
+        *this, model, data, cdata, constraint_forces, joint_forces,
+        joint_torques.const_cast_derived(), reference_frame);
+    }
+
+    template<
+      template<typename, int> class JointCollectionTpl,
+      typename MotionAllocator,
+      typename JointMotionsLike,
+      typename VectorLike,
+      ReferenceFrame rf>
+    void mapJointSpaceToConstraintMotion(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+      const Eigen::MatrixBase<JointMotionsLike> & joint_generalized_velocity,
+      const Eigen::MatrixBase<VectorLike> & constraint_motions,
+      ReferenceFrameTag<rf> reference_frame) const
+    {
+      ::pinocchio::visitors::mapJointSpaceToConstraintMotion(
+        *this, model, data, cdata, joint_motions, joint_generalized_velocity,
+        constraint_motions.const_cast_derived(), reference_frame);
+    }
+
     static std::string classname()
     {
       return "ConstraintModel";
