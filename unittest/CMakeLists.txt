@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 CNRS INRIA
+# Copyright (c) 2015-2025 CNRS INRIA
 # Copyright (c) 2015 Wandercraft, 86 rue de Paris 91400 Orsay, France.
 #
 
@@ -145,6 +145,7 @@ add_pinocchio_unit_test(macros HEADER_ONLY)
 add_pinocchio_unit_test(alloca HEADER_ONLY)
 add_pinocchio_unit_test(storage HEADER_ONLY)
 add_pinocchio_unit_test(double-entry-container HEADER_ONLY)
+add_pinocchio_unit_test(reference HEADER_ONLY)
 
 # Math components
 add_pinocchio_unit_test(eigen-basic-op)
