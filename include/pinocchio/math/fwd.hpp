@@ -8,7 +8,7 @@
 #include "pinocchio/fwd.hpp"
 #include <math.h>
 #include <boost/math/constants/constants.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
+#include <type_traits>
 
 namespace pinocchio
 {
@@ -17,7 +17,7 @@ namespace pinocchio
   struct EigenMatrixExpression;
 
   template<typename T>
-  struct is_floating_point : boost::is_floating_point<T>
+  struct is_floating_point : ::std::is_floating_point<T>
   {
   };
 

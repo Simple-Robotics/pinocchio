@@ -5,7 +5,7 @@
 #ifndef __pinocchio_utils_check_hpp__
 #define __pinocchio_utils_check_hpp__
 
-#include <boost/type_traits/is_floating_point.hpp>
+#include <type_traits>
 
 namespace pinocchio
 {
@@ -13,7 +13,7 @@ namespace pinocchio
   template<
     typename Scalar,
     bool default_value = true,
-    bool is_real_valued = boost::is_floating_point<Scalar>::value>
+    bool is_real_valued = ::std::is_floating_point<Scalar>::value>
   struct check_expression_if_real_valued
   {
     static bool run(const void *)
