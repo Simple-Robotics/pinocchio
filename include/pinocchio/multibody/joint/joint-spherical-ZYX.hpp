@@ -481,7 +481,7 @@ namespace pinocchio
         data.S.angularSubspace().transpose() * data.U.template middleRows<3>(Motion::ANGULAR);
       data.StU.diagonal() += armature;
 
-      internal::PerformStYSInversion<Scalar>::run(data.StU, data.Dinv);
+      internal::MatrixInversion<Scalar>::run(data.StU, data.Dinv);
 
       data.UDinv.noalias() = data.U * data.Dinv;
 

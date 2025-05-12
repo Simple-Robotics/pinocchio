@@ -129,7 +129,7 @@ namespace pinocchio
 
         jdata.StU().diagonal() += jmodel.jointVelocitySelector(model.armature);
 
-        ::pinocchio::internal::PerformStYSInversion<Scalar>::run(jdata.StU(), jdata.Dinv());
+        ::pinocchio::internal::MatrixInversion<Scalar>::run(jdata.StU(), jdata.Dinv());
         jdata.UDinv().noalias() = jdata.U() * jdata.Dinv();
 
         MatrixType & Minv_ = PINOCCHIO_EIGEN_CONST_CAST(MatrixType, Minv);

@@ -18,7 +18,7 @@ namespace pinocchio
     /// \brief Operation called in JointModelBase<JointModel>::calc_aba
     ///
     template<typename Scalar, bool is_floating_point = pinocchio::is_floating_point<Scalar>::value>
-    struct PerformStYSInversion
+    struct MatrixInversion
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -31,7 +31,7 @@ namespace pinocchio
     };
 
     template<typename Scalar>
-    struct PerformStYSInversion<Scalar, false>
+    struct MatrixInversion<Scalar, false>
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
