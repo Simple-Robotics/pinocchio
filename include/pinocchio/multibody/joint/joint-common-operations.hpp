@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_multibody_joint_joint_common_operations_hpp__
@@ -7,10 +7,8 @@
 
 #include "pinocchio/macros.hpp"
 #include "pinocchio/math/matrix.hpp"
-#include "pinocchio/math/fwd.hpp"
 
 #include <boost/type_traits.hpp>
-#include <boost/variant.hpp>
 
 namespace pinocchio
 {
