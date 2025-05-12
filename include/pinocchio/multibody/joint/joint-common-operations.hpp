@@ -24,7 +24,7 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void
       run(const Eigen::MatrixBase<M1> & StYS, const Eigen::MatrixBase<M2> & Dinv)
       {
-        M2 & Dinv_ = PINOCCHIO_EIGEN_CONST_CAST(M2, Dinv);
+        auto & Dinv_ = Dinv.const_cast_derived();
         Dinv_.setIdentity();
         StYS.llt().solveInPlace(Dinv_);
       }
@@ -37,8 +37,7 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void
       run(const Eigen::MatrixBase<M1> & StYS, const Eigen::MatrixBase<M2> & Dinv)
       {
-        M2 & Dinv_ = PINOCCHIO_EIGEN_CONST_CAST(M2, Dinv);
-        inverse(StYS, Dinv_);
+        inverse(StYS, Dinv.const_cast_derived());
       }
     };
   } // namespace internal
@@ -57,7 +56,7 @@ namespace pinocchio
       const Eigen::MatrixBase<ConfigVectorOut> & qOut)
     {
       assert(qIn.size() == qOut.size());
-      PINOCCHIO_EIGEN_CONST_CAST(ConfigVectorOut, qOut).noalias() =
+      qOut.const_cast_derived().noalias() =
         scaling * qIn + ConfigVectorOut::Constant(qOut.size(), offset);
     }
   };
@@ -80,7 +79,7 @@ namespace pinocchio
       const typename ConfigVectorIn::Scalar & theta = math::atan2(sa, ca);
       const typename ConfigVectorIn::Scalar & theta_transform = scaling * theta + offset;
 
-      ConfigVectorOut & dest_ = PINOCCHIO_EIGEN_CONST_CAST(ConfigVectorOut, qOut);
+      auto & dest_ = qOut.const_cast_derived();
       SINCOS(theta_transform, &dest_.coeffRef(1), &dest_.coeffRef(0));
     }
   };
