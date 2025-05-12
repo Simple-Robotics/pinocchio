@@ -388,8 +388,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Matrix6Like> & I,
       const bool update_I) const
     {
-      ::pinocchio::calc_aba(
-        *this, data, armature.derived(), PINOCCHIO_EIGEN_CONST_CAST(Matrix6Like, I), update_I);
+      ::pinocchio::calc_aba(*this, data, armature.derived(), I.const_cast_derived(), update_I);
     }
 
     /* Acces to dedicated segment in robot config space.  */

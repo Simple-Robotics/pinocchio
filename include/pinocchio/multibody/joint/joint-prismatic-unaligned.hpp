@@ -680,7 +680,7 @@ namespace pinocchio
       data.UDinv.noalias() = data.U * data.Dinv;
 
       if (update_I)
-        PINOCCHIO_EIGEN_CONST_CAST(Matrix6Like, I).noalias() -= data.UDinv * data.U.transpose();
+        I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
 
     static std::string classname()
