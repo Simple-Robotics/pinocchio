@@ -822,6 +822,180 @@ BOOST_AUTO_TEST_CASE(general_test_frictional_point_constraint_model)
   }
 }
 
+template<
+  template<typename> class Holder,
+  typename Scalar,
+  typename ConstraintModelVector,
+  typename ConstraintDataVector,
+  typename GeneralizedCondigurationVector>
+void test_apply_on_the_right(
+  const Holder<Model> & model_ref,
+  Holder<Data> & data_ref,
+  const Holder<ConstraintModelVector> & constraint_models_ref,
+  const Holder<ConstraintDataVector> & constraint_datas_ref,
+  const Eigen::MatrixBase<GeneralizedCondigurationVector> & q_neutral,
+  const Scalar damping_value)
+{
+  typedef typename ConstraintModelVector::value_type ConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
+    DelassusOperatorRigidBodyReferenceWrapper;
+
+  const Model & model = model_ref;
+  Data & data = data_ref;
+  const ConstraintModelVector & constraint_models = constraint_models_ref;
+
+  Data data_gt(model), data_aba(model);
+  DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+    model_ref, data_ref, constraint_models_ref, constraint_datas_ref, damping_value);
+  delassus_operator.updateDamping(damping_value);
+  delassus_operator.updateCompliance(0);
+  delassus_operator.compute(q_neutral);
+
+  const Eigen::VectorXd rhs = Eigen::VectorXd::Random(delassus_operator.size());
+  Eigen::VectorXd res(delassus_operator.size());
+
+  delassus_operator.applyOnTheRight(rhs, res);
+
+  // Eval J Minv Jt
+  auto Minv_gt = computeMinverse(model, data_gt, q_neutral);
+  make_symmetric(Minv_gt);
+  BOOST_CHECK(Minv_gt.isApprox(Minv_gt.transpose()));
+
+  auto M_gt = crba(model, data_gt, q_neutral);
+  make_symmetric(M_gt);
+
+  ConstraintDataVector constraint_datas_gt = createData(constraint_models);
+  Eigen::MatrixXd constraints_jacobian_gt(delassus_operator.size(), model.nv);
+  constraints_jacobian_gt.setZero();
+  evalConstraints(model, data_gt, constraint_models, constraint_datas_gt);
+  getConstraintsJacobian(
+    model, data_gt, constraint_models, constraint_datas_gt, constraints_jacobian_gt);
+
+  const Eigen::MatrixXd delassus_dense_gt_undamped =
+    constraints_jacobian_gt * Minv_gt * constraints_jacobian_gt.transpose();
+  const Eigen::MatrixXd delassus_dense_gt =
+    delassus_dense_gt_undamped + Eigen::MatrixXd(delassus_operator.getDamping().asDiagonal());
+
+  Eigen::VectorXd tau_constraints = Eigen::VectorXd::Zero(model.nv);
+  evalConstraintJacobianTransposeMatrixProduct(
+    model, data_gt, constraint_models, constraint_datas_gt, rhs, tau_constraints);
+  const Eigen::VectorXd Jt_rhs_gt = constraints_jacobian_gt.transpose() * rhs;
+  BOOST_CHECK(tau_constraints.isApprox(Jt_rhs_gt));
+
+  aba(
+    model, data_aba, q_neutral, Eigen::VectorXd::Zero(model.nv), tau_constraints,
+    Convention::LOCAL);
+
+  for (Model::JointIndex joint_id = 1; joint_id < Model::JointIndex(model.njoints); ++joint_id)
+  {
+    BOOST_CHECK(data.joints[joint_id].S().isApprox(data_aba.joints[joint_id].S()));
+    BOOST_CHECK(data.liMi[joint_id].isApprox(data_aba.liMi[joint_id]));
+    BOOST_CHECK(data.Yaba[joint_id].isApprox(data_aba.Yaba[joint_id]));
+  }
+  BOOST_CHECK(delassus_operator.getCustomData().u.isApprox(data_aba.u));
+
+  const Eigen::VectorXd Minv_Jt_rhs_gt = Minv_gt * Jt_rhs_gt;
+  BOOST_CHECK(delassus_operator.getCustomData().ddq.isApprox(Minv_Jt_rhs_gt));
+
+  const auto res_gt = (delassus_dense_gt * rhs).eval();
+  BOOST_CHECK(res.isApprox(res_gt));
+
+  // Multiple call and operator *
+  {
+    for (int i = 0; i < 100; ++i)
+    {
+      Eigen::VectorXd res(delassus_operator.size());
+      delassus_operator.applyOnTheRight(rhs, res);
+      BOOST_CHECK(res.isApprox(res_gt));
+
+      const Eigen::VectorXd res2 = delassus_operator * rhs;
+      BOOST_CHECK(res2 == res); // Should be exactly the same
+      BOOST_CHECK(res2.isApprox(res_gt));
+    }
+  }
+}
+
+template<
+  template<typename> class Holder,
+  typename Scalar,
+  typename ConstraintModelVector,
+  typename ConstraintDataVector,
+  typename GeneralizedCondigurationVector>
+void test_solve_in_place(
+  const Holder<Model> & model_ref,
+  Holder<Data> & data_ref,
+  const Holder<ConstraintModelVector> & constraint_models_ref,
+  const Holder<ConstraintDataVector> & constraint_datas_ref,
+  const Eigen::MatrixBase<GeneralizedCondigurationVector> & q_neutral,
+  const Scalar damping_value)
+{
+  typedef typename ConstraintModelVector::value_type ConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
+    DelassusOperatorRigidBodyReferenceWrapper;
+
+  const Model & model = model_ref;
+  Data & data = data_ref;
+  const ConstraintModelVector & constraint_models = constraint_models_ref;
+
+  //    Data data(model);
+  //    std::reference_wrapper<Data> data_ref = data;
+  DelassusOperatorRigidBodyReferenceWrapper delassus_operator(
+    model_ref, data_ref, constraint_models_ref, constraint_datas_ref, damping_value);
+  delassus_operator.updateDamping(damping_value);
+  delassus_operator.updateCompliance(0);
+  delassus_operator.compute(q_neutral);
+
+  Data data_crba(model);
+  Eigen::MatrixXd M = crba(model, data_crba, q_neutral, Convention::WORLD);
+  make_symmetric(M);
+
+  auto constraint_datas_crba = createData(constraint_models);
+  const auto Jc =
+    getConstraintsJacobian(model, data_crba, constraint_models, constraint_datas_crba);
+
+  const Scalar mu = Scalar(1) / damping_value;
+  const Eigen::MatrixXd muJcTJc = mu * Jc.transpose() * Jc;
+  const Eigen::MatrixXd M_augmented = M + muJcTJc;
+  const Eigen::MatrixXd M_augmented_inv = M_augmented.inverse();
+
+  const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, 0);
+  Eigen::VectorXd res = rhs;
+
+  const Eigen::VectorXd col_ref = M_augmented_inv * rhs;
+  delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+  BOOST_CHECK(res.isApprox(col_ref, 1e-10));
+
+  for (Eigen::DenseIndex col_id = 0; col_id < model.nv; ++col_id)
+  {
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(model.nv, col_id);
+    const auto res_ref = (M_augmented_inv * rhs).eval();
+
+    Eigen::VectorXd res = rhs;
+    delassus_operator.getAugmentedMassMatrixOperator().solveInPlace(res);
+    BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+  }
+
+  // Test Delassus inverse
+  const auto delassus_size = delassus_operator.size();
+  const Eigen::MatrixXd M_inv = M.inverse();
+  const Eigen::MatrixXd delassus_dense =
+    Jc * M_inv * Jc.transpose()
+    + damping_value * Eigen::MatrixXd::Identity(delassus_size, delassus_size);
+  const Eigen::MatrixXd delassus_dense_inv = delassus_dense.inverse();
+
+  for (Eigen::DenseIndex col_id = 0; col_id < delassus_size; ++col_id)
+  {
+    const Eigen::VectorXd rhs = Eigen::VectorXd::Unit(delassus_size, col_id);
+    const auto res_ref = (delassus_dense_inv * rhs).eval();
+
+    Eigen::VectorXd res = rhs;
+    delassus_operator.solveInPlace(res);
+    BOOST_CHECK(res.isApprox(res_ref, 1e-10));
+  }
+}
+
 BOOST_AUTO_TEST_CASE(general_test_joint_frictional_constraint)
 {
   typedef FrictionalJointConstraintModelTpl<double> ConstraintModel;
