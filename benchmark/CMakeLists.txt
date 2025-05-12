@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 CNRS INRIA
+# Copyright (c) 2015-2018 CNRS
 #
 
 # ----------------------------------------------------
@@ -65,7 +65,7 @@ function(ADD_PINOCCHIO_BENCH name)
     target_link_libraries(${bench_name} PRIVATE ${CMAKE_DL_LIBS})
   endif()
 
-  add_dependencies(bench ${bench_name})
+  add_dependencies(${PROJECT_NAME}-bench ${bench_name})
 endfunction()
 
 # timings
