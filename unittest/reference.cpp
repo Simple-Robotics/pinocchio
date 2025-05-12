@@ -26,18 +26,26 @@ BOOST_AUTO_TEST_CASE(test_get_ref)
     std::shared_ptr<double> v_ptr = std::make_shared<double>(v);
     BOOST_CHECK(v_ptr.get() != &get_ref(v_ref));
     BOOST_CHECK(v_ptr.get() == &get_ref(v_ptr));
+
+    const std::shared_ptr<double> v_const_ptr = std::make_shared<double>(v);
+    BOOST_CHECK(v_const_ptr.get() != &get_ref(v_ref));
+    BOOST_CHECK(v_const_ptr.get() == &get_ref(v_const_ptr));
   }
 
   {
-    const double v_const = 10;
-    BOOST_CHECK(&v_const == &get_ref(v_const));
+    const double const_v = 10;
+    BOOST_CHECK(&const_v == &get_ref(const_v));
 
-    std::reference_wrapper<const double> v_const_ref = v_const;
-    BOOST_CHECK(&v_const == &get_ref(v_const_ref));
+    std::reference_wrapper<const double> const_v_ref = const_v;
+    BOOST_CHECK(&const_v == &get_ref(const_v_ref));
 
-    std::shared_ptr<const double> v_const_ptr = std::make_shared<const double>(v_const);
-    BOOST_CHECK(v_const_ptr.get() != &get_ref(v_const_ref));
-    BOOST_CHECK(v_const_ptr.get() == &get_ref(v_const_ptr));
+    std::shared_ptr<const double> const_v_ptr = std::make_shared<const double>(const_v);
+    BOOST_CHECK(const_v_ptr.get() != &get_ref(const_v_ref));
+    BOOST_CHECK(const_v_ptr.get() == &get_ref(const_v_ptr));
+
+    const std::shared_ptr<const double> const_v_const_ptr = std::make_shared<const double>(const_v);
+    BOOST_CHECK(const_v_const_ptr.get() != &get_ref(const_v_ref));
+    BOOST_CHECK(const_v_const_ptr.get() == &get_ref(const_v_const_ptr));
   }
 }
 
