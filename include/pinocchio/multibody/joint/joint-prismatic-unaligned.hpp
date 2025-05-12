@@ -501,7 +501,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, NQ, 1, Options> ConfigVector_t;
     typedef Eigen::Matrix<Scalar, NV, 1, Options> TangentVector_t;
 
-    typedef boost::mpl::true_ is_mimicable_t;
+    typedef std::true_type is_mimicable_t;
 
     PINOCCHIO_JOINT_DATA_BASE_ACCESSOR_DEFAULT_RETURN_TYPE
   };

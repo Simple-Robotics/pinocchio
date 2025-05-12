@@ -71,7 +71,7 @@ namespace pinocchio
     typedef TangentVector_t TangentVectorTypeConstRef;
     typedef TangentVector_t TangentVectorTypeRef;
 
-    typedef boost::mpl::false_ is_mimicable_t;
+    typedef std::false_type is_mimicable_t;
   };
 
   template<typename _Scalar, int _Options, template<typename S, int O> class JointCollectionTpl>
