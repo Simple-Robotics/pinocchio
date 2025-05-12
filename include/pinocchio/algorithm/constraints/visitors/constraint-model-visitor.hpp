@@ -921,6 +921,166 @@ namespace pinocchio
     }
 
     /**
+     * @brief      mapConstraintForceToJointSpace visitor
+     */
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      typename ConstraintForceLike,
+      class ForceAllocator,
+      typename JointTorquesLike,
+      ReferenceFrame rf>
+    struct MapConstraintForceToJointSpaceVisitor
+    : visitors::ConstraintUnaryVisitorBase<MapConstraintForceToJointSpaceVisitor<
+        Scalar,
+        Options,
+        JointCollectionTpl,
+        ConstraintForceLike,
+        ForceAllocator,
+        JointTorquesLike,
+        rf>>
+    {
+      typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef std::vector<ForceTpl<Scalar, Options>, ForceAllocator> ForceVector;
+      typedef boost::fusion::vector<
+        const Model &,
+        const Data &,
+        const ConstraintForceLike &,
+        ForceVector &,
+        JointTorquesLike &,
+        const ReferenceFrameTag<rf>>
+        ArgsType;
+
+      template<typename ConstraintModel>
+      static void algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const typename ConstraintModel::ConstraintData & cdata,
+        const Model & model,
+        const Data & data,
+        const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
+        std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+        const Eigen::MatrixBase<JointTorquesLike> & joint_torques,
+        const ReferenceFrameTag<rf> reference_frame)
+      {
+        cmodel.mapConstraintForceToJointSpace(
+          model, data, cdata, constraint_forces, joint_forces, joint_torques.const_cast_derived(),
+          reference_frame);
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
+      typename ConstraintForceLike,
+      class ForceAllocator,
+      typename JointTorquesLike,
+      ReferenceFrame rf>
+    void mapConstraintForceToJointSpace(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const Eigen::MatrixBase<ConstraintForceLike> & constraint_forces,
+      std::vector<ForceTpl<Scalar, Options>, ForceAllocator> & joint_forces,
+      const Eigen::MatrixBase<JointTorquesLike> & joint_torques,
+      const ReferenceFrameTag<rf> reference_frame)
+    {
+      typedef MapConstraintForceToJointSpaceVisitor<
+        Scalar, Options, JointCollectionTpl, ConstraintForceLike, ForceAllocator, JointTorquesLike,
+        rf>
+        Algo;
+
+      typename Algo::ArgsType args(
+        model, data, constraint_forces.derived(), joint_forces, joint_torques.const_cast_derived(),
+        reference_frame);
+      Algo::run(cmodel, cdata, args);
+    }
+
+    /**
+     * @brief      mapConstraintForceToJointSpace visitor
+     */
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      class MotionAllocator,
+      typename GeneralizedVelocityLike,
+      typename ConstraintMotionLike,
+      ReferenceFrame rf>
+    struct MapJointSpaceToConstraintMotionVisitor
+    : visitors::ConstraintUnaryVisitorBase<MapJointSpaceToConstraintMotionVisitor<
+        Scalar,
+        Options,
+        JointCollectionTpl,
+        MotionAllocator,
+        GeneralizedVelocityLike,
+        ConstraintMotionLike,
+        rf>>
+    {
+      typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef std::vector<MotionTpl<Scalar, Options>, MotionAllocator> MotionVector;
+      typedef boost::fusion::vector<
+        const Model &,
+        const Data &,
+        const MotionVector &,
+        const GeneralizedVelocityLike &,
+        ConstraintMotionLike &,
+        const ReferenceFrameTag<rf>>
+        ArgsType;
+
+      template<typename ConstraintModel>
+      static void algo(
+        const pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        const typename ConstraintModel::ConstraintData & cdata,
+        const Model & model,
+        const Data & data,
+        const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+        const Eigen::MatrixBase<GeneralizedVelocityLike> & generalized_velocity,
+        const Eigen::MatrixBase<ConstraintMotionLike> & constraint_motions,
+        const ReferenceFrameTag<rf> reference_frame)
+      {
+        cmodel.mapJointSpaceToConstraintMotion(
+          model, data, cdata, joint_motions, generalized_velocity.derived(),
+          constraint_motions.const_cast_derived(), reference_frame);
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename, int> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl,
+      class MotionAllocator,
+      typename GeneralizedVelocityLike,
+      typename ConstraintMotionLike,
+      ReferenceFrame rf>
+    void mapJointSpaceToConstraintMotion(
+      const ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      const ConstraintData & cdata,
+      const std::vector<MotionTpl<Scalar, Options>, MotionAllocator> & joint_motions,
+      const Eigen::MatrixBase<GeneralizedVelocityLike> & generalized_velocity,
+      const Eigen::MatrixBase<ConstraintMotionLike> & constraint_motions,
+      const ReferenceFrameTag<rf> reference_frame)
+    {
+      typedef MapJointSpaceToConstraintMotionVisitor<
+        Scalar, Options, JointCollectionTpl, MotionAllocator, GeneralizedVelocityLike,
+        ConstraintMotionLike, rf>
+        Algo;
+
+      typename Algo::ArgsType args(
+        model, data, joint_motions, generalized_velocity.derived(),
+        constraint_motions.const_cast_derived(), reference_frame);
+      Algo::run(cmodel, cdata, args);
+    }
+
+    /**
      * @brief      ConstraintModelComplianceVisitor visitor
      */
     template<typename ReturnType>
