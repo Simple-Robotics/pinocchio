@@ -1054,6 +1054,61 @@ BOOST_AUTO_TEST_CASE(general_test_joint_frictional_constraint)
   }
 }
 
+BOOST_AUTO_TEST_CASE(general_test_constraint_generic)
+{
+  typedef FrictionalJointConstraintModelTpl<double> FrictionalJointConstraintModel;
+  typedef DelassusOperatorRigidBodySystemsTpl<
+    double, 0, JointCollectionDefaultTpl, ConstraintModel, std::reference_wrapper>
+    DelassusOperatorRigidBodyReferenceWrapper;
+  typedef DelassusOperatorRigidBodyReferenceWrapper::CustomData CustomData;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintModelVector ConstraintModelVector;
+  typedef
+    typename DelassusOperatorRigidBodyReferenceWrapper::ConstraintDataVector ConstraintDataVector;
+
+  Model model;
+  std::reference_wrapper<Model> model_ref = model;
+
+  buildModels::humanoidRandom(model, true);
+
+  const Eigen::VectorXd q_neutral = neutral(model);
+  const Eigen::VectorXd v = Eigen::VectorXd::Random(model.nv);
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model.nv);
+
+  Data data(model), data_gt(model), data_aba(model);
+  std::reference_wrapper<Data> data_ref = data;
+
+  ConstraintModelVector constraint_models;
+  ConstraintDataVector constraint_datas;
+
+  const std::string RF_name = "rleg6_joint";
+  const JointIndex RF_id = model.getJointId(RF_name);
+
+  const Model::IndexVector & RF_support = model.supports[RF_id];
+  const Model::IndexVector active_joint_ids(RF_support.begin() + 1, RF_support.end());
+
+  FrictionalJointConstraintModel constraint_model(model, active_joint_ids);
+
+  constraint_models.push_back(constraint_model);
+  constraint_datas.push_back(constraint_model.createData());
+  std::reference_wrapper<ConstraintModelVector> constraint_models_ref = constraint_models;
+  std::reference_wrapper<ConstraintDataVector> constraint_datas_ref = constraint_datas;
+
+  const double damping_value = 1e-4;
+
+  // Test operator *
+  {
+    test_apply_on_the_right(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, q_neutral, damping_value);
+  } // End: Test operator *
+
+  // Test solveInPlace
+  {
+    test_solve_in_place(
+      model_ref, data_ref, constraint_models_ref, constraint_datas_ref, q_neutral, damping_value);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(general_test_no_constraints)
 {
   typedef FrictionalPointConstraintModelTpl<double> ConstraintModel;
