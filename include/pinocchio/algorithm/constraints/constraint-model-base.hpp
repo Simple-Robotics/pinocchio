@@ -198,7 +198,8 @@ namespace pinocchio
       ReferenceFrameTag<rf> reference_frame) const
     {
       derived().mapConstraintForceToJointSpace(
-        model, data, cdata, constraint_forces, joint_forces, joint_torques, reference_frame);
+        model, data, cdata, constraint_forces, joint_forces, joint_torques.const_cast_derived(),
+        reference_frame);
     }
 
     ///
