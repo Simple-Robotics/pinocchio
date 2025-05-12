@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2015-2025 CNRS
+// Copyright (c) 2015-2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 //
 
 #include "pinocchio/macros.hpp"
