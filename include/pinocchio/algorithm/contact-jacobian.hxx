@@ -8,6 +8,7 @@
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/check.hpp"
+#include "pinocchio/utils/reference.hpp"
 
 namespace pinocchio
 {
@@ -121,9 +122,9 @@ namespace pinocchio
     Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const ConstraintModel & cmodel = constraint_models[ee_id];
+      const auto & cmodel = helper::get_ref(constraint_models[ee_id]);
       const auto constraint_size = cmodel.activeSize();
-      const ConstraintData & cdata = constraint_datas[ee_id];
+      const auto & cdata = helper::get_ref(constraint_datas[ee_id]);
 
       const auto constraint_force = constraint_forces.segment(row_id, constraint_size);
       cmodel.mapConstraintForceToJointSpace(
@@ -163,8 +164,8 @@ namespace pinocchio
     Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const ConstraintModel & cmodel = constraint_models[ee_id];
-      const ConstraintData & cdata = constraint_datas[ee_id];
+      const auto & cmodel = helper::get_ref(constraint_models[ee_id]);
+      const auto & cdata = helper::get_ref(constraint_datas[ee_id]);
       const auto constraint_size = cmodel.activeSize();
 
       auto constraint_motion = constraint_motions.segment(row_id, constraint_size);
@@ -209,8 +210,8 @@ namespace pinocchio
     Eigen::Index row_id = 0;
     for (size_t ee_id = 0; ee_id < constraint_models.size(); ++ee_id)
     {
-      const ConstraintModel & cmodel = constraint_models[ee_id];
-      const ConstraintData & cdata = constraint_datas[ee_id];
+      const auto & cmodel = helper::get_ref(constraint_models[ee_id]);
+      const auto & cdata = helper::get_ref(constraint_datas[ee_id]);
       const auto constraint_size = cmodel.activeSize();
 
       auto constraint_motion = constraint_motions.segment(row_id, constraint_size);
