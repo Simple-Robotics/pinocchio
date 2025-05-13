@@ -28,7 +28,7 @@ function(ADD_PINOCCHIO_BENCH name)
   set(multiValueArgs)
   cmake_parse_arguments(bench "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  set(bench_name "pinocchio-${name}")
+  set(bench_name "pinocchio-benchmark-${name}")
   add_executable(${bench_name} ${name}.cpp)
 
   target_compile_definitions(${bench_name} PRIVATE PINOCCHIO_MODEL_DIR="${PINOCCHIO_MODEL_DIR}")
