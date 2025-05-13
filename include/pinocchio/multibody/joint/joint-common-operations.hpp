@@ -12,11 +12,19 @@ namespace pinocchio
 {
   namespace internal
   {
-    ///
-    /// \brief Operation called in JointModelBase<JointModel>::calc_aba
-    ///
-    template<typename Scalar, bool is_floating_point = pinocchio::is_floating_point<Scalar>::value>
-    struct MatrixInversion
+
+    struct MatrixInversionImplDefault
+    {
+      template<typename M1, typename M2>
+      static EIGEN_STRONG_INLINE void
+      run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
+      {
+        matrix_inverse.const_cast_derived().noalias() = matrix.inverse();
+      }
+    };
+
+    template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
+    struct MatrixInversionImpl
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -28,8 +36,33 @@ namespace pinocchio
       }
     };
 
-    template<typename Scalar>
-    struct MatrixInversion<Scalar, false>
+    template<>
+    struct MatrixInversionImpl<1> : MatrixInversionImplDefault
+    {
+    };
+    template<>
+    struct MatrixInversionImpl<2> : MatrixInversionImplDefault
+    {
+    };
+    template<>
+    struct MatrixInversionImpl<3> : MatrixInversionImplDefault
+    {
+    };
+    template<>
+    struct MatrixInversionImpl<4> : MatrixInversionImplDefault
+    {
+    };
+
+    template<
+      typename InputMatrix,
+      bool is_floating_point = pinocchio::is_floating_point<typename InputMatrix::Scalar>::value>
+    struct MatrixInversion
+    : MatrixInversionImpl<InputMatrix::RowsAtCompileTime, InputMatrix::ColsAtCompileTime>
+    {
+    };
+
+    template<typename InputMatrix>
+    struct MatrixInversion<InputMatrix, false>
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -43,8 +76,7 @@ namespace pinocchio
     EIGEN_STRONG_INLINE void matrix_inversion(
       const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
     {
-      typedef typename M1::Scalar Scalar;
-      MatrixInversion<Scalar>::run(matrix, matrix_inverse.const_cast_derived());
+      MatrixInversion<M1>::run(matrix, matrix_inverse.const_cast_derived());
     }
   } // namespace internal
 
