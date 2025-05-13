@@ -33,6 +33,8 @@ namespace pinocchio
 
 // Include Eigen components
 #include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/Cholesky>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
 
@@ -58,7 +60,6 @@ namespace pinocchio
   #endif
 #endif
 
-#include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
 

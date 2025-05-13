@@ -15,8 +15,6 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/spatial/se3.hpp"
 
-#include <Eigen/Geometry>
-
 #include "pinocchio/spatial/log.hpp"
 
 namespace pinocchio

@@ -5,9 +5,7 @@
 #ifndef __pinocchio_math_triangular_matrix_hpp__
 #define __pinocchio_math_triangular_matrix_hpp__
 
-#include "pinocchio/macros.hpp"
-
-#include <Eigen/Dense>
+#include "pinocchio/math/fwd.hpp"
 
 namespace pinocchio
 {

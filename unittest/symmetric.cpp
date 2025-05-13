@@ -22,7 +22,6 @@
 #include "pinocchio/utils/timer.hpp"
 
 #include <boost/random.hpp>
-#include <Eigen/Geometry>
 
 #include "pinocchio/spatial/symmetric3.hpp"
 

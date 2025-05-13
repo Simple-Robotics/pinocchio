@@ -13,8 +13,6 @@
 #include "pinocchio/math/rotation.hpp"
 #include "pinocchio/spatial/cartesian-axis.hpp"
 
-#include <Eigen/Geometry>
-
 namespace pinocchio
 {
   template<typename _Scalar, int _Options>

@@ -15,8 +15,6 @@
   #include "pinocchio/collision/collision.hpp"
 #endif // PINOCCHIO_WITH_HPP_FCL
 
-#include <Eigen/Core>
-
 namespace pinocchio
 {
   /// @brief Structure containing the return value for the reachable algorithm

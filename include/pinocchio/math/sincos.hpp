@@ -7,6 +7,7 @@
 #define __pinocchio_math_sincos_hpp__
 
 #include <cmath>
+#include "pinocchio/math/fwd.hpp"
 
 namespace pinocchio
 {

@@ -6,6 +6,7 @@
 #define __pinocchio_math_fwd_hpp__
 
 #include "pinocchio/fwd.hpp"
+
 #include <math.h>
 #include <boost/math/constants/constants.hpp>
 #include <type_traits>

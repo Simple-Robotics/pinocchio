@@ -19,9 +19,6 @@
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
 #include <iostream>
-#ifdef NDEBUG
-  #include <Eigen/Cholesky>
-#endif
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>

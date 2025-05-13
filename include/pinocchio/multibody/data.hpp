@@ -23,9 +23,6 @@
 
 #include "pinocchio/serialization/serializable.hpp"
 
-#include <Eigen/Cholesky>
-#include <Eigen/StdVector>
-
 #include <set>
 
 namespace pinocchio

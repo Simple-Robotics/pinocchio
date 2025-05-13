@@ -14,6 +14,8 @@
 
 #include "pinocchio/tracy.hpp"
 
+#include <Eigen/Eigenvalues>
+
 namespace pinocchio
 {
 

@@ -7,7 +7,6 @@
 
 #include "pinocchio/math/fwd.hpp"
 #include "pinocchio/math/eigenvalues-tridiagonal-matrix.hpp"
-#include <Eigen/Dense>
 
 namespace pinocchio
 {

@@ -11,8 +11,6 @@
 #include "pinocchio/algorithm/check.hpp"
 #include "pinocchio/math/matrix.hpp"
 
-#include <Eigen/Cholesky>
-
 namespace pinocchio
 {
 

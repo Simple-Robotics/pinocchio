@@ -17,6 +17,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>
 
+#include <Eigen/Eigenvalues>
+
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(test_SE3)

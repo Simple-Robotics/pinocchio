@@ -11,7 +11,6 @@
 #include "pinocchio/utils/static-if.hpp"
 
 #include <boost/type_traits.hpp>
-#include <Eigen/Dense>
 
 namespace pinocchio
 {

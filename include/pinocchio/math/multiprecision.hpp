@@ -9,7 +9,6 @@
 
 #include <boost/multiprecision/number.hpp>
 #include <boost/random.hpp>
-#include <Eigen/Dense>
 
 namespace pinocchio
 {

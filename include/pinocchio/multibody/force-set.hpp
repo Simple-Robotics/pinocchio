@@ -6,7 +6,6 @@
 #define __pinocchio_spatial_force_set_hpp__
 
 #include "pinocchio/spatial/fwd.hpp"
-#include <Eigen/Geometry>
 
 namespace pinocchio
 {

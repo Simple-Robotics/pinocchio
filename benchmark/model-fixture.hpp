@@ -16,8 +16,6 @@
 
 #include <benchmark/benchmark.h>
 
-#include <Eigen/Core>
-
 #include <iostream>
 
 /// Store custom command line arguments

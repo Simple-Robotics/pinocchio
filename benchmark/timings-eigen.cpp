@@ -3,11 +3,7 @@
 // Copyright (c) 2018-2025 INRIA
 //
 
-#include "pinocchio/macros.hpp"
-
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
-#include <Eigen/StdVector>
+#include "pinocchio/fwd.hpp"
 
 #include <benchmark/benchmark.h>
 

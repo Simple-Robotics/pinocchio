@@ -9,7 +9,6 @@
 #include <eigenpy/eigenpy.hpp>
 #include <eigenpy/memory.hpp>
 
-#include <Eigen/Geometry>
 #include <eigenpy/geometry.hpp>
 #include <eigenpy/quaternion.hpp>
 #include <eigenpy/angle-axis.hpp>

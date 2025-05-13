@@ -12,7 +12,6 @@
 #include <iostream>
 
 #include "pinocchio/tools/timer.hpp"
-#include <Eigen/Core>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/utility/binary.hpp>

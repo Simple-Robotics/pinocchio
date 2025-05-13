@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_kinematics_mimic)
     pinocchio::Data dataFKRed(model_mimic);
     pinocchio::forwardKinematics(model_mimic, dataFKRed, q, v, a);
 
-    for (JointIndex i = 0; i < JointIndex(model_full.njoints); i++)
+    for (pinocchio::JointIndex i = 0; i < pinocchio::JointIndex(model_full.njoints); i++)
     {
       BOOST_CHECK(dataFKRed.oMi[i].isApprox(dataFKFull.oMi[i]));
       BOOST_CHECK(dataFKRed.liMi[i].isApprox(dataFKFull.liMi[i]));
