@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_cube)
     Eigen::VectorXd::Constant(delassus_matrix_plain.rows(), data.M.diagonal().trace());
   mean_inertia /= (double)delassus_matrix_plain.rows();
   mean_inertia = mean_inertia.array().sqrt();
-  typedef DiagonalPreconditioner<Eigen::VectorXd> Preconditionner;
+  typedef DiagonalPreconditionerTpl<Eigen::VectorXd> Preconditionner;
   Preconditionner diag_preconditioner(mean_inertia);
   DelassusOperatorPreconditionedTpl<
     DelassusCholeskyExpressionTpl<ContactCholeskyDecomposition>, Preconditionner>
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(test_delassus_preconditioned)
       preconditioner_diag * matrix * preconditioner_diag;
 
     DelassusOperatorDense delassus(matrix);
-    typedef DiagonalPreconditioner<Eigen::VectorXd> Preconditionner;
+    typedef DiagonalPreconditionerTpl<Eigen::VectorXd> Preconditionner;
     Preconditionner diag_preconditioner(diag_vec);
     DelassusOperatorPreconditionedTpl<DelassusOperatorDense, Preconditionner>
       delassus_preconditioned(delassus, diag_preconditioner);

@@ -22,13 +22,13 @@ namespace pinocchio
   /// We call the new problem working on (x_bar, g_bar, G_bar) the **scaled** problem.
   ///
   template<typename VectorLike>
-  struct DiagonalPreconditioner : PreconditionerBase<DiagonalPreconditioner<VectorLike>>
+  struct DiagonalPreconditionerTpl : PreconditionerBase<DiagonalPreconditionerTpl<VectorLike>>
   {
 
     /// \brief Default constructor takes a vector.
     /// @param diagonal Vector composing the diagonal of the preconditioner
     template<typename InputVector>
-    explicit DiagonalPreconditioner(const Eigen::MatrixBase<InputVector> & diagonal)
+    explicit DiagonalPreconditionerTpl(const Eigen::MatrixBase<InputVector> & diagonal)
     : m_diagonal(diagonal)
     , m_squared_diagonal(diagonal)
     {
@@ -39,7 +39,7 @@ namespace pinocchio
 
     /// @brief Default constructor from a given size.
     /// @param size Size of the preconditioner
-    explicit DiagonalPreconditioner(const Eigen::Index size)
+    explicit DiagonalPreconditionerTpl(const Eigen::Index size)
     : m_diagonal(VectorLike::Ones(size))
     , m_squared_diagonal(VectorLike::Ones(size))
     {
@@ -47,39 +47,39 @@ namespace pinocchio
 
     /// \brief Construct an identity preconditioner
     /// @param size Size of the preconditioner
-    static DiagonalPreconditioner Identity(const Eigen::Index size)
+    static DiagonalPreconditionerTpl Identity(const Eigen::Index size)
     {
-      return DiagonalPreconditioner(size);
+      return DiagonalPreconditionerTpl(size);
     }
 
     /// \brief Move constructor
-    DiagonalPreconditioner(DiagonalPreconditioner && other)
+    DiagonalPreconditionerTpl(DiagonalPreconditionerTpl && other)
     : m_diagonal(std::move(other.m_diagonal))
     , m_squared_diagonal(std::move(other.m_squared_diagonal))
     {
     }
 
     /// \brief Copy constructor
-    DiagonalPreconditioner(const DiagonalPreconditioner & other)
+    DiagonalPreconditionerTpl(const DiagonalPreconditionerTpl & other)
     : m_diagonal(other.m_diagonal)
     , m_squared_diagonal(other.m_squared_diagonal)
     {
     }
 
     /// \brief Copy operator
-    DiagonalPreconditioner & operator=(const DiagonalPreconditioner & other)
+    DiagonalPreconditionerTpl & operator=(const DiagonalPreconditionerTpl & other)
     {
       m_diagonal = other.m_diagonal;
       m_squared_diagonal = other.m_squared_diagonal;
       return *this;
     }
 
-    bool operator==(const DiagonalPreconditioner & other) const
+    bool operator==(const DiagonalPreconditionerTpl & other) const
     {
       return m_diagonal == other.m_diagonal && m_squared_diagonal == other.m_squared_diagonal;
     }
 
-    bool operator!=(const DiagonalPreconditioner & other) const
+    bool operator!=(const DiagonalPreconditionerTpl & other) const
     {
       return !(*this == other);
     }
@@ -163,7 +163,7 @@ namespace pinocchio
     VectorLike m_diagonal;
     VectorLike m_squared_diagonal;
 
-  }; // struct DiagonalPreconditioner
+  }; // struct DiagonalPreconditionerTpl
 
 } // namespace pinocchio
 

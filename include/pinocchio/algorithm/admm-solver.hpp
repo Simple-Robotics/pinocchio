@@ -183,7 +183,7 @@ namespace pinocchio
     typedef const Eigen::Ref<const VectorXs> ConstRefVectorXs;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
     typedef LanczosDecompositionTpl<MatrixXs> LanczosDecomposition;
-    typedef DiagonalPreconditioner<VectorXs> DiagonalPreconditioner;
+    typedef DiagonalPreconditionerTpl<VectorXs> DiagonalPreconditioner;
 
     using Base::problem_size;
 

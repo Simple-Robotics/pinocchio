@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(diagonal_preconditioner)
   Eigen::Index n = 10;
   Eigen::VectorXd precond_vec = Eigen::VectorXd::Random(n);
   precond_vec = precond_vec.array().abs() + 1e-6;
-  DiagonalPreconditioner<Eigen::VectorXd> precond(precond_vec);
+  DiagonalPreconditionerTpl<Eigen::VectorXd> precond(precond_vec);
 
   Eigen::VectorXd x = Eigen::VectorXd::Random(n);
   Eigen::VectorXd x_scaled;

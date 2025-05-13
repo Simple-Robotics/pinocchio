@@ -29,8 +29,9 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   BOOST_CHECK(isSymmetric(preconditioned_matrix));
 
   DelassusOperatorDense delassus(symmetric_mat);
-  DiagonalPreconditioner<Eigen::VectorXd> diag_preconditioner(diag_vec);
-  DelassusOperatorPreconditionedTpl<DelassusOperatorDense, DiagonalPreconditioner<Eigen::VectorXd>>
+  DiagonalPreconditionerTpl<Eigen::VectorXd> diag_preconditioner(diag_vec);
+  DelassusOperatorPreconditionedTpl<
+    DelassusOperatorDense, DiagonalPreconditionerTpl<Eigen::VectorXd>>
     delassus_preconditioned(delassus, diag_preconditioner);
 
   Eigen::VectorXd res(mat_size);
@@ -69,7 +70,8 @@ BOOST_AUTO_TEST_CASE(delassus_dense_preconditioned)
   const double new_compliance = 3e-3;
   delassus.updateDamping(0.);
   delassus.updateCompliance(new_compliance);
-  DelassusOperatorPreconditionedTpl<DelassusOperatorDense, DiagonalPreconditioner<Eigen::VectorXd>>
+  DelassusOperatorPreconditionedTpl<
+    DelassusOperatorDense, DiagonalPreconditionerTpl<Eigen::VectorXd>>
     delassus_preconditioned2(delassus, diag_preconditioner);
   const Eigen::MatrixXd preconditioned_compliant_matrix =
     preconditioner_matrix
