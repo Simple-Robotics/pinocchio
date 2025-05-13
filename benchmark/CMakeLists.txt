@@ -66,7 +66,7 @@ function(ADD_PINOCCHIO_BENCHMARK name)
     target_link_libraries(${bench_name} PRIVATE ${CMAKE_DL_LIBS})
   endif()
 
-  add_dependencies(${PROJECT_NAME}-bench ${bench_name})
+  add_dependencies(${PROJECT_NAME}-benchmarks ${bench_name})
 endfunction()
 
 # timings
