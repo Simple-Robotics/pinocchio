@@ -20,11 +20,11 @@ namespace pinocchio
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
-      run(const Eigen::MatrixBase<M1> & StYS, const Eigen::MatrixBase<M2> & Dinv)
+      run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
       {
-        auto & Dinv_ = Dinv.const_cast_derived();
-        Dinv_.setIdentity();
-        StYS.llt().solveInPlace(Dinv_);
+        auto & matrix_inverse_ = matrix_inverse.const_cast_derived();
+        matrix_inverse_.setIdentity();
+        matrix.llt().solveInPlace(matrix_inverse_);
       }
     };
 
@@ -33,11 +33,19 @@ namespace pinocchio
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
-      run(const Eigen::MatrixBase<M1> & StYS, const Eigen::MatrixBase<M2> & Dinv)
+      run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
       {
-        inverse(StYS, Dinv.const_cast_derived());
+        inverse(matrix, matrix_inverse.const_cast_derived());
       }
     };
+
+    template<typename M1, typename M2>
+    EIGEN_STRONG_INLINE void matrix_inversion(
+      const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
+    {
+      typedef typename M1::Scalar Scalar;
+      MatrixInversion<Scalar>::run(matrix, matrix_inverse.const_cast_derived());
+    }
   } // namespace internal
 
   ///
