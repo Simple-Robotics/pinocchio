@@ -110,11 +110,11 @@ namespace pinocchio
       m_lhs.applyOnTheRight(m_rhs.derived(), result);
     }
 
-    EIGEN_CONSTEXPR Eigen::Index rows() const EIGEN_NOEXCEPT
+    EIGEN_CONSTEXPR Eigen::Index rows() const PINOCCHIO_NOEXCEPT
     {
       return m_lhs.rows();
     }
-    EIGEN_CONSTEXPR Eigen::Index cols() const EIGEN_NOEXCEPT
+    EIGEN_CONSTEXPR Eigen::Index cols() const PINOCCHIO_NOEXCEPT
     {
       return m_rhs.cols();
     }
