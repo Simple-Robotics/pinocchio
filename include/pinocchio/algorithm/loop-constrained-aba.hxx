@@ -108,7 +108,7 @@ namespace pinocchio
       // Account for the rotor inertia contribution
       jdata.StU().diagonal() += jmodel.jointVelocitySelector(model.armature);
 
-      pinocchio::internal::PerformStYSInversion<Scalar>::run(jdata.StU(), jdata.Dinv());
+      ::pinocchio::internal::matrix_inversion(jdata.StU(), jdata.Dinv());
 
       jdata.UDinv().noalias() =
         jdata.U() * jdata.Dinv(); // TODO:check where its used when parent == 0
