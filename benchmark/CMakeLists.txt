@@ -101,6 +101,8 @@ modernize_target_link_libraries(
   TARGETS Eigen3::Eigen
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 
+add_pinocchio_bench(timings-linalg-inverse PARSERS)
+
 # timings-geometry
 #
 if(BUILD_WITH_URDF_SUPPORT AND BUILD_WITH_COLLISION_SUPPORT)
