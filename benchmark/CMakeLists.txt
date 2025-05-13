@@ -6,7 +6,7 @@
 # ----------------------------------------------------
 # --- BENCHMARK --------------------------------------
 # ----------------------------------------------------
-add_custom_target(${PROJECT_NAME}-bench)
+add_custom_target(${PROJECT_NAME}-benchmarks)
 
 add_project_private_dependency(benchmark REQUIRED)
 
