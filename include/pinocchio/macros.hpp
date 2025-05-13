@@ -34,6 +34,7 @@
 
 #define PINOCCHIO_STRING_LITERAL(string) #string
 #define PINOCCHIO_NOEXCEPT noexcept
+#define PINOCCHIO_NO_THROW noexcept(true)
 
 // For more details, visit
 // https://stackoverflow.com/questions/171435/portability-of-warning-preprocessor-directive
