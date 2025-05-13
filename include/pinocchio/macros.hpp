@@ -33,6 +33,7 @@
 #endif
 
 #define PINOCCHIO_STRING_LITERAL(string) #string
+#define PINOCCHIO_NOEXCEPT noexcept
 
 // For more details, visit
 // https://stackoverflow.com/questions/171435/portability-of-warning-preprocessor-directive
