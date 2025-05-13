@@ -639,7 +639,7 @@ namespace pinocchio
       data.StU = data.U.template middleRows<3>(Inertia::LINEAR);
       data.StU.diagonal() += armature;
 
-      internal::MatrixInversion<Scalar>::run(data.StU, data.Dinv);
+      internal::matrix_inversion(data.StU, data.Dinv);
 
       data.UDinv.noalias() = data.U * data.Dinv;
 

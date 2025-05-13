@@ -384,7 +384,7 @@ namespace pinocchio
       data.StU = I;
       data.StU.diagonal() += armature;
 
-      internal::MatrixInversion<Scalar>::run(data.StU, data.Dinv);
+      internal::matrix_inversion(data.StU, data.Dinv);
       data.UDinv.noalias() = I * data.Dinv;
 
       if (update_I)
