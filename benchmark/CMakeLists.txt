@@ -10,7 +10,7 @@ add_custom_target(${PROJECT_NAME}-benchmarks)
 
 add_project_private_dependency(benchmark REQUIRED)
 
-function(ADD_PINOCCHIO_BENCH name)
+function(ADD_PINOCCHIO_BENCHMARK name)
   set(options
       PARSERS
       COLLISION
@@ -71,55 +71,55 @@ endfunction()
 
 # timings
 #
-add_pinocchio_bench(timings PARSERS)
+add_pinocchio_benchmark(timings PARSERS)
 if(BUILD_WITH_CODEGEN_SUPPORT)
-  add_pinocchio_bench(timings-cg PARSERS CPPADCG)
+  add_pinocchio_benchmark(timings-cg PARSERS CPPADCG)
 endif()
 
 if(BUILD_WITH_OPENMP_SUPPORT)
-  add_pinocchio_bench(timings-parallel PARSERS PARALLEL COLLISION_PARALLEL_OPTIONAL)
+  add_pinocchio_benchmark(timings-parallel PARSERS PARALLEL COLLISION_PARALLEL_OPTIONAL)
 endif()
 
 # timings cholesky
 #
-add_pinocchio_bench(timings-cholesky PARSERS)
-add_pinocchio_bench(timings-loop-constrained-aba PARSERS)
+add_pinocchio_benchmark(timings-cholesky PARSERS)
+add_pinocchio_benchmark(timings-loop-constrained-aba PARSERS)
 
 # timings derivatives
 #
-add_pinocchio_bench(timings-derivatives PARSERS)
+add_pinocchio_benchmark(timings-derivatives PARSERS)
 if(BUILD_WITH_AUTODIFF_SUPPORT)
   # timings-cppad-jit
-  add_pinocchio_bench(timings-cppad-jit CPPAD)
+  add_pinocchio_benchmark(timings-cppad-jit CPPAD)
 endif()
 
 # timings-eigen
-add_pinocchio_bench(timings-eigen)
+add_pinocchio_benchmark(timings-eigen)
 modernize_target_link_libraries(
   pinocchio-timings-eigen
   SCOPE PUBLIC
   TARGETS Eigen3::Eigen
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 
-add_pinocchio_bench(timings-linalg-inverse PARSERS)
+add_pinocchio_benchmark(timings-linalg-inverse PARSERS)
 
 # timings-geometry
 #
 if(BUILD_WITH_URDF_SUPPORT AND BUILD_WITH_COLLISION_SUPPORT)
-  add_pinocchio_bench(timings-geometry PARSERS COLLISION)
+  add_pinocchio_benchmark(timings-geometry PARSERS COLLISION)
 endif()
 
 # timings-jacobian
 #
-add_pinocchio_bench(timings-jacobian PARSERS)
+add_pinocchio_benchmark(timings-jacobian PARSERS)
 
 # timings-contact-dynamics
 #
-add_pinocchio_bench(timings-delassus-operations PARSERS)
-add_pinocchio_bench(timings-contact-dynamics PARSERS)
-add_pinocchio_bench(timings-constrained-dynamics-derivatives PARSERS)
+add_pinocchio_benchmark(timings-delassus-operations PARSERS)
+add_pinocchio_benchmark(timings-contact-dynamics PARSERS)
+add_pinocchio_benchmark(timings-constrained-dynamics-derivatives PARSERS)
 
 # timings-impulse-dynamics
 #
-add_pinocchio_bench(timings-impulse-dynamics PARSERS)
-add_pinocchio_bench(timings-impulse-dynamics-derivatives PARSERS)
+add_pinocchio_benchmark(timings-impulse-dynamics PARSERS)
+add_pinocchio_benchmark(timings-impulse-dynamics-derivatives PARSERS)
