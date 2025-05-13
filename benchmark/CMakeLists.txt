@@ -96,7 +96,7 @@ endif()
 # timings-eigen
 add_pinocchio_benchmark(timings-eigen)
 modernize_target_link_libraries(
-  pinocchio-timings-eigen
+  pinocchio-benchmark-timings-eigen
   SCOPE PUBLIC
   TARGETS Eigen3::Eigen
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
