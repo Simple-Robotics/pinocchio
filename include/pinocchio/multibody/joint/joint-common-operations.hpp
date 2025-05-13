@@ -13,7 +13,7 @@ namespace pinocchio
   namespace internal
   {
 
-    struct MatrixInversionImplDefault
+    struct MatrixInversionDefaultImpl
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -23,8 +23,7 @@ namespace pinocchio
       }
     };
 
-    template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
-    struct MatrixInversionImpl
+    struct MatrixInversionDynamicMatrixImpl
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -36,20 +35,25 @@ namespace pinocchio
       }
     };
 
+    template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
+    struct MatrixInversionImpl : MatrixInversionDynamicMatrixImpl
+    {
+    };
+
     template<>
-    struct MatrixInversionImpl<1> : MatrixInversionImplDefault
+    struct MatrixInversionImpl<1> : MatrixInversionDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<2> : MatrixInversionImplDefault
+    struct MatrixInversionImpl<2> : MatrixInversionDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<3> : MatrixInversionImplDefault
+    struct MatrixInversionImpl<3> : MatrixInversionDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<4> : MatrixInversionImplDefault
+    struct MatrixInversionImpl<4> : MatrixInversionDefaultImpl
     {
     };
 
