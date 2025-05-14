@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2016-2024 CNRS INRIA
+// Copyright (c) 2016-2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 //
 
 #ifndef __pinocchio_math_fwd_hpp__
@@ -86,6 +87,12 @@ namespace pinocchio
     PINOCCHIO_OVERLOAD_MATH_BINARY_OPERATOR(min)
     PINOCCHIO_OVERLOAD_MATH_BINARY_OPERATOR(max)
     PINOCCHIO_OVERLOAD_MATH_BINARY_OPERATOR(atan2)
+
+    template<typename T>
+    inline T square(const T & value)
+    {
+      return value * value;
+    }
   } // namespace math
 } // namespace pinocchio
 
