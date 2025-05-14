@@ -101,7 +101,7 @@ namespace pinocchio
         jdata_augmented.StU().diagonal() +=
           jmodel.jointVelocitySelector(data.joint_apparent_inertia);
 
-        ::pinocchio::internal::matrix_inversion(jdata_augmented.StU(), jdata_augmented.Dinv());
+        ::pinocchio::matrix_inversion(jdata_augmented.StU(), jdata_augmented.Dinv());
 
         jdata_augmented.UDinv().noalias() = jdata_augmented.U() * jdata_augmented.Dinv();
 

@@ -653,7 +653,7 @@ namespace pinocchio
       data.StU.template rightCols<1>() = data.U.template bottomRows<1>();
 
       data.StU.diagonal() += armature;
-      internal::matrix_inversion(data.StU, data.Dinv);
+      matrix_inversion(data.StU, data.Dinv);
 
       data.UDinv.noalias() = data.U * data.Dinv;
 

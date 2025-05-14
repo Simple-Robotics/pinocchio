@@ -581,7 +581,7 @@ namespace pinocchio
       data.StU.noalias() =
         data.S.angularSubspace().transpose() * data.U.template middleRows<3>(Motion::ANGULAR);
       data.StU.diagonal() += armature;
-      internal::matrix_inversion(data.StU, data.Dinv);
+      matrix_inversion(data.StU, data.Dinv);
 
       data.UDinv.noalias() = data.U * data.Dinv;
 

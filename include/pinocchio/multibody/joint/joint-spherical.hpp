@@ -582,7 +582,7 @@ namespace pinocchio
       data.StU = data.U.template middleRows<3>(Inertia::ANGULAR);
       data.StU.diagonal() += armature;
 
-      internal::matrix_inversion(data.StU, data.Dinv);
+      matrix_inversion(data.StU, data.Dinv);
       data.UDinv.noalias() = data.U * data.Dinv;
 
       if (update_I)
