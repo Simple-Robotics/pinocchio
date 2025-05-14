@@ -74,13 +74,14 @@ namespace pinocchio
       }
     };
 
-    template<typename M1, typename M2>
-    EIGEN_STRONG_INLINE void matrix_inversion(
-      const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
-    {
-      MatrixInversion<M1>::run(matrix, matrix_inverse.const_cast_derived());
-    }
   } // namespace internal
+
+  template<typename M1, typename M2>
+  EIGEN_STRONG_INLINE void matrix_inversion(
+    const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
+  {
+    internal::MatrixInversion<M1>::run(matrix, matrix_inverse.const_cast_derived());
+  }
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_math_matrix_inverse_hpp__
