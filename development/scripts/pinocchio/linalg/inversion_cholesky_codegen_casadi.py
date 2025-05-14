@@ -75,20 +75,20 @@ b = cs.SX.sym("b", n, 1)
 U = LTL(A)
 
 U_fun = cs.Function("U_fun", [A], [U])
-U_fun.generate(f"U_fun{n!s}_codegen.c")
+U_fun.generate(f"U_fun{n!s}_codegen.c", {"with_header": True})
 
 A_inv_chol = make_symmetric(LTL_solve(U, cs.SX.eye(n)))
 A_inv_chol_fun = cs.Function("A_inv_chol_fun", [A], [A_inv_chol])
-A_inv_chol_fun.generate(f"A_inv_chol_fun{n!s}_codegen.c")
+A_inv_chol_fun.generate(f"A_inv_chol_fun{n!s}_codegen.c", {"with_header": True})
 
 inv_A = make_symmetric(cs.inv(A))
 inv_A_fun = cs.Function("inv_A_fun", [A], [inv_A])
-inv_A_fun.generate(f"inv_A_fun{n!s}_codegen.c")
+inv_A_fun.generate(f"inv_A_fun{n!s}_codegen.c", {"with_header": True})
 
 U_sym = cs.SX.sym("U", n, n)
 x_sol = LTL_solve(U_sym, b)
 x_sol_fun = cs.Function("x_sol_fun", [U_sym, b], [x_sol])
-x_sol_fun.generate(f"x_sol_fun{n!s}_codegen.c")
+x_sol_fun.generate(f"x_sol_fun{n!s}_codegen.c", {"with_header": True})
 
 A_val = np.random.rand(n, n)
 A_val = A_val @ A_val.T
