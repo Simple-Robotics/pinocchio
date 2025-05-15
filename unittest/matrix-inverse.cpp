@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <pinocchio/math/matrix-inverse.hpp>
+#include <Eigen/LU>
 
 #include <boost/variant.hpp> // to avoid C99 warnings
 
@@ -18,19 +19,31 @@ using namespace pinocchio;
 template<int size>
 using MatrixTpl = Eigen::Matrix<double, size, size>;
 
+#ifndef NDEBUG
+const int N = int(1e6);
+#else
+const int N = int(1e3);
+#endif
+
 template<int size>
 void test_generated_inverse_impl()
 {
   typedef MatrixTpl<size> Matrix;
-  Matrix mat = Matrix::Random();
-  mat = mat.transpose() * mat;
-  make_symmetric(mat);
-  BOOST_CHECK(is_symmetric(mat, 0));
+  for (int i = 0; i < N; ++i)
+  {
+    Matrix mat = Matrix::Random();
+    mat = mat.transpose() * mat + 1e-8 * Matrix::Identity();
+    make_symmetric(mat);
+    BOOST_CHECK(is_symmetric(mat, 0));
 
-  Matrix res = Matrix::Zero();
-  matrix_inversion_code_generated(mat, res);
-  BOOST_CHECK((res * mat).isIdentity());
-  BOOST_CHECK(mat.inverse().isApprox(res));
+    if (!(mat.determinant() > 1e-3))
+      continue;
+
+    Matrix res = Matrix::Zero();
+    matrix_inversion_code_generated(mat, res);
+    BOOST_CHECK((res * mat).isIdentity(1e-10));
+    BOOST_CHECK(mat.inverse().isApprox(res, 1e-10));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_inverse)
