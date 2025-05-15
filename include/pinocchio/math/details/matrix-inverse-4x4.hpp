@@ -22,12 +22,12 @@ namespace pinocchio
 
         assert(is_symmetric(matrix));
 
-        Scalar a00, a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11;
-        Scalar a12, a13, a14, a15, a16, a17, a18, a19;
-
         const auto & input_vec = matrix.reshaped();
         auto & matrix_inverse = matrix_inverse_.const_cast_derived();
         auto output_vec = matrix_inverse.reshaped();
+
+        Scalar a00, a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11;
+        Scalar a12, a13, a14, a15, a16, a17, a18, a19;
 
         a00 = input_vec[0];
         a01 = input_vec[4];
