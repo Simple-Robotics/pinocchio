@@ -69,7 +69,7 @@ def get_num_operations(fun):
     return fun.n_instructions() - fun.nnz_in() - fun.nnz_out()
 
 
-n = 4
+n = 7
 A = cs.SX.sym("A", n, n)
 b = cs.SX.sym("b", n, 1)
 U = LTL(A)
