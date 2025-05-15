@@ -35,7 +35,7 @@ namespace pinocchio
         a3 = math::square(a1);
         a0 = (a0 - a3);
         a0 = math::sqrt(a0);
-        a3 = (1. / a0);
+        a3 = (Scalar(1) / a0);
         a3 = (a3 / a0);
         output_vec[0] = a3;
         a3 = (a1 / a2);
@@ -44,7 +44,7 @@ namespace pinocchio
         a0 = (-a3);
         output_vec[1] = a0;
         output_vec[2] = a0;
-        a0 = (1. / a2);
+        a0 = (Scalar(1) / a2);
         a1 = (a1 * a3);
         a0 = (a0 + a1);
         a0 = (a0 / a2);

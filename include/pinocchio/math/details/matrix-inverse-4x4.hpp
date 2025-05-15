@@ -69,7 +69,7 @@ namespace pinocchio
         a10 = (a10 + a11);
         a00 = (a00 - a10);
         a00 = math::sqrt(a00);
-        a10 = (1. / a00);
+        a10 = (Scalar(1) / a00);
         a10 = (a10 / a00);
         output_vec[0] = a10;
         a10 = (a01 / a09);
@@ -102,7 +102,7 @@ namespace pinocchio
         a00 = (-a15);
         output_vec[3] = a00;
         output_vec[4] = a11;
-        a11 = (1. / a09);
+        a11 = (Scalar(1) / a09);
         a10 = (a01 * a10);
         a11 = (a11 + a10);
         a11 = (a11 / a09);
@@ -117,7 +117,7 @@ namespace pinocchio
         output_vec[7] = a01;
         output_vec[8] = a14;
         output_vec[9] = a11;
-        a14 = (1. / a06);
+        a14 = (Scalar(1) / a06);
         a11 = (a07 * a11);
         a12 = (a02 * a12);
         a11 = (a11 - a12);
@@ -134,7 +134,7 @@ namespace pinocchio
         output_vec[12] = a00;
         output_vec[13] = a01;
         output_vec[14] = a06;
-        a06 = (1. / a04);
+        a06 = (Scalar(1) / a04);
         a08 = (a08 * a01);
         a03 = (a03 * a15);
         a08 = (a08 - a03);
