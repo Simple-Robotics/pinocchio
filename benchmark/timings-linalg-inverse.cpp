@@ -30,6 +30,9 @@ using RowMatrix5 = Matrix<5, Eigen::RowMajor>;
 using Matrix6 = Matrix<6>;
 using RowMatrix6 = Matrix<6, Eigen::RowMajor>;
 
+using Matrix7 = Matrix<7>;
+using RowMatrix7 = Matrix<7, Eigen::RowMajor>;
+
 static void CustomArguments(benchmark::internal::Benchmark * b)
 {
   b->MinWarmUpTime(3.);
@@ -62,6 +65,16 @@ struct MatrixInversePinocchio
   run(const Eigen::MatrixBase<M1> & mat, const Eigen::MatrixBase<M2> & mat_inv)
   {
     ::pinocchio::matrix_inversion(mat, mat_inv.const_cast_derived());
+  }
+};
+
+struct MatrixInverseCodeGenerated
+{
+  template<typename M1, typename M2>
+  PINOCCHIO_DONT_INLINE static void
+  run(const Eigen::MatrixBase<M1> & mat, const Eigen::MatrixBase<M2> & mat_inv)
+  {
+    ::pinocchio::matrix_inversion_code_generated(mat, mat_inv.const_cast_derived());
   }
 };
 
@@ -108,10 +121,12 @@ BENCHMARK(scalar_inversion)->Apply(CustomArguments);
   BENCH_MATRIX_INVERSION(Matrix3, MatrixInverseFunctor)                                            \
   BENCH_MATRIX_INVERSION(Matrix4, MatrixInverseFunctor)                                            \
   BENCH_MATRIX_INVERSION(Matrix5, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix6, MatrixInverseFunctor)
+  BENCH_MATRIX_INVERSION(Matrix6, MatrixInverseFunctor)                                            \
+  BENCH_MATRIX_INVERSION(Matrix7, MatrixInverseFunctor)
 
 BENCH_MATRIX_INVERSION_ALL(MatrixInverseEigen)
 BENCH_MATRIX_INVERSION_ALL(MatrixInversePartialPivLU)
 BENCH_MATRIX_INVERSION_ALL(MatrixInversePinocchio)
+BENCH_MATRIX_INVERSION_ALL(MatrixInverseCodeGenerated)
 
 BENCHMARK_MAIN();
