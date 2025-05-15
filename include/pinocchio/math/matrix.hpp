@@ -402,6 +402,24 @@ namespace pinocchio
     }
   }
 
+  ///
+  /// \brief Helper to check whether the input matrix is symmetric.
+  ///
+  /// \param[in] mat Input matrix to check symmetry.
+  /// \param[in] prec Numerical precision of the check (optional).
+  ///
+  template<typename Matrix>
+  bool is_symmetric(
+    const Eigen::MatrixBase<Matrix> & mat,
+    const typename Matrix::Scalar & prec =
+      Eigen::NumTraits<typename Matrix::Scalar>::dummy_precision())
+  {
+    if (mat.rows() != mat.cols())
+      return false;
+
+    return mat.reshaped().isApprox(mat.transpose().reshaped(), prec);
+  }
+
   /// \brief Enforce the symmetry of the input matrix
   template<typename Matrix>
   void enforceSymmetry(const Eigen::MatrixBase<Matrix> & mat_)
