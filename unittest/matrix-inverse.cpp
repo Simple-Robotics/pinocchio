@@ -18,7 +18,8 @@ using namespace pinocchio;
 template<int size>
 using MatrixTpl = Eigen::Matrix<double, size, size>;
 
-BOOST_AUTO_TEST_CASE(test_generated_inverse)
+template<int size>
+void test_generated_inverse_impl()
 {
   typedef MatrixTpl<4> Matrix;
   Matrix mat = Matrix::Random();
@@ -30,6 +31,15 @@ BOOST_AUTO_TEST_CASE(test_generated_inverse)
   matrix_inversion_code_generated(mat, res);
   BOOST_CHECK((res * mat).isIdentity());
   BOOST_CHECK(mat.inverse().isApprox(res));
+}
+
+BOOST_AUTO_TEST_CASE(test_generated_inverse)
+{
+  test_generated_inverse_impl<3>();
+  test_generated_inverse_impl<4>();
+  test_generated_inverse_impl<5>();
+  test_generated_inverse_impl<6>();
+  test_generated_inverse_impl<7>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
