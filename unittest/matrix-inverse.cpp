@@ -20,14 +20,15 @@ template<int size>
 using MatrixTpl = Eigen::Matrix<double, size, size>;
 
 #ifndef NDEBUG
-const int N = int(1e6);
-#else
 const int N = int(1e3);
+#else
+const int N = int(1e6);
 #endif
 
 template<int size>
 void test_generated_inverse_impl()
 {
+  std::cout << "size: " << size << std::endl;
   typedef MatrixTpl<size> Matrix;
   for (int i = 0; i < N; ++i)
   {
