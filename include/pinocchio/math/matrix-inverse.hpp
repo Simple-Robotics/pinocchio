@@ -5,7 +5,7 @@
 #ifndef __pinocchio_math_matrix_inverse_hpp__
 #define __pinocchio_math_matrix_inverse_hpp__
 
-#include "pinocchio/math/fwd.hpp"
+#include "pinocchio/math/matrix.hpp"
 
 namespace pinocchio
 {
@@ -27,6 +27,7 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void
       run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
       {
+        assert(is_symmetric(matrix));
         auto & matrix_inverse_ = matrix_inverse.const_cast_derived();
         matrix_inverse_.setIdentity();
         matrix.llt().solveInPlace(matrix_inverse_);
