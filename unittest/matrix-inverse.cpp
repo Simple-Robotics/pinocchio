@@ -21,7 +21,7 @@ using MatrixTpl = Eigen::Matrix<double, size, size>;
 template<int size>
 void test_generated_inverse_impl()
 {
-  typedef MatrixTpl<4> Matrix;
+  typedef MatrixTpl<size> Matrix;
   Matrix mat = Matrix::Random();
   mat = mat.transpose() * mat;
   make_symmetric(mat);
