@@ -105,6 +105,8 @@ namespace pinocchio
   }
 } // namespace pinocchio
 
+#include "pinocchio/math/details/matrix-inverse-1x1.hpp"
+#include "pinocchio/math/details/matrix-inverse-2x2.hpp"
 #include "pinocchio/math/details/matrix-inverse-3x3.hpp"
 #include "pinocchio/math/details/matrix-inverse-4x4.hpp"
 #include "pinocchio/math/details/matrix-inverse-5x5.hpp"
