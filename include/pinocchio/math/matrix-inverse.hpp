@@ -35,6 +35,17 @@ namespace pinocchio
     };
 
     template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
+    struct MatrixInversionCodeGeneratedImpl
+    {
+      template<typename M1, typename M2>
+      static EIGEN_STRONG_INLINE void run(
+        const Eigen::MatrixBase<M1> & /*matrix*/, const Eigen::MatrixBase<M2> & /*matrix_inverse*/)
+      {
+        static_assert(false, "Not implemented.");
+      }
+    };
+
+    template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
     struct MatrixInversionImpl : MatrixInversionDynamicMatrixImpl
     {
     };
