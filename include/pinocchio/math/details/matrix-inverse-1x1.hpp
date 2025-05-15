@@ -30,7 +30,7 @@ namespace pinocchio
         a0 = input_vec[0];
         a0 = math::sqrt(a0);
         a1 = (Scalar(1) / a0);
-        a1 = (a1 / a0);
+        a1 = math::square(a1);
         output_vec[0] = a1;
       }
     };
