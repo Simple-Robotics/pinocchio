@@ -35,6 +35,8 @@ void test_generated_inverse_impl()
 
 BOOST_AUTO_TEST_CASE(test_generated_inverse)
 {
+  test_generated_inverse_impl<1>();
+  test_generated_inverse_impl<2>();
   test_generated_inverse_impl<3>();
   test_generated_inverse_impl<4>();
   test_generated_inverse_impl<5>();
