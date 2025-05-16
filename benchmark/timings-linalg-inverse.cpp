@@ -23,6 +23,7 @@ DEFINE_MATRIX(4)
 DEFINE_MATRIX(5)
 DEFINE_MATRIX(6)
 DEFINE_MATRIX(7)
+DEFINE_MATRIX(12)
 
 static void CustomArguments(benchmark::internal::Benchmark * b)
 {
@@ -149,7 +150,8 @@ BENCHMARK(scalar_multiplication)->Apply(CustomArguments);
   BENCH_MATRIX_INVERSION(Matrix4, MatrixInverseFunctor)                                            \
   BENCH_MATRIX_INVERSION(Matrix5, MatrixInverseFunctor)                                            \
   BENCH_MATRIX_INVERSION(Matrix6, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix7, MatrixInverseFunctor)
+  BENCH_MATRIX_INVERSION(Matrix7, MatrixInverseFunctor)                                            \
+  BENCH_MATRIX_INVERSION(Matrix12, MatrixInverseFunctor)
 
 BENCH_MATRIX_INVERSION_ALL(MatrixInverseEigen)
 BENCH_MATRIX_INVERSION_ALL(MatrixInversePartialPivLU)
