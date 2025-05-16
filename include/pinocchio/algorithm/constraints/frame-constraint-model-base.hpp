@@ -909,13 +909,18 @@ namespace pinocchio
       const auto & A2 =
         std::is_same<ReferenceFrameTag<rf>, WorldFrameTag>::value ? cdata.A2_world : cdata.A2_local;
 
-      constraint_motion.const_cast_derived().setZero();
-      if (joint1_id > 0)
-        constraint_motion.const_cast_derived().noalias() +=
+      if (joint1_id > 0 && joint2_id > 0)
+        constraint_motion.const_cast_derived().noalias() =
+          A1 * joint_accelerations[this->joint1_id].toVector()
+          + A2 * joint_accelerations[this->joint2_id].toVector();
+      else if (joint1_id > 0)
+        constraint_motion.const_cast_derived().noalias() =
           A1 * joint_accelerations[this->joint1_id].toVector();
-      if (joint2_id > 0)
-        constraint_motion.const_cast_derived().noalias() +=
+      else if (joint2_id > 0)
+        constraint_motion.const_cast_derived().noalias() =
           A2 * joint_accelerations[this->joint2_id].toVector();
+      else
+        constraint_motion.const_cast_derived().setZero();
     }
 
     static int size()
