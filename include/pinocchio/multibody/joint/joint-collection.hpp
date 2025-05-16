@@ -1,5 +1,6 @@
 //
-// Copyright (c) 2018-2019 CNRS INRIA
+// Copyright (c) 2018 CNRS
+// Copyright (c) 2018-2025 INRIA
 //
 
 #ifndef __pinocchio_multibody_joint_collection_hpp__
