@@ -28,27 +28,22 @@ namespace pinocchio
 
         Scalar a0, a1, a2, a3;
         a0 = input_vec[0];
-        a1 = input_vec[2];
-        a2 = input_vec[3];
-        a2 = math::sqrt(a2);
-        a1 = (a1 / a2);
-        a3 = math::square(a1);
+        a1 = input_vec[3];
+        a2 = input_vec[2];
+        a2 = (a2 / a1);
+        a3 = math::square(a2);
+        a3 = (a1 * a3);
         a0 = (a0 - a3);
-        a0 = math::sqrt(a0);
-        a3 = (Scalar(1) / a0);
-        a3 = (a3 / a0);
+        a3 = (1. / a0);
         output_vec[0] = a3;
-        a3 = (a1 / a2);
-        a3 = (a3 / a0);
-        a3 = (a3 / a0);
-        a0 = (-a3);
-        output_vec[1] = a0;
-        output_vec[2] = a0;
-        a0 = (Scalar(1) / a2);
-        a1 = (a1 * a3);
-        a0 = (a0 + a1);
-        a0 = (a0 / a2);
-        output_vec[3] = a0;
+        a0 = (a2 * a3);
+        a3 = (-a0);
+        output_vec[1] = a3;
+        output_vec[2] = a3;
+        a1 = (1. / a1);
+        a2 = (a2 * a0);
+        a1 = (a1 + a2);
+        output_vec[3] = a1;
       }
     };
   } // namespace internal

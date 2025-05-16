@@ -26,12 +26,10 @@ namespace pinocchio
         auto & matrix_inverse = matrix_inverse_.const_cast_derived();
         auto output_vec = matrix_inverse.reshaped();
 
-        Scalar a0, a1;
+        Scalar a0;
         a0 = input_vec[0];
-        a0 = math::sqrt(a0);
-        a1 = (Scalar(1) / a0);
-        a1 = math::square(a1);
-        output_vec[0] = a1;
+        a0 = (1. / a0);
+        output_vec[0] = a0;
       }
     };
   } // namespace internal
