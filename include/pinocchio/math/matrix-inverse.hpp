@@ -92,6 +92,10 @@ namespace pinocchio
     SET_MATRIX_INVERSION_FOR(5, MatrixInversionCodeGeneratedImpl<5>)
     SET_MATRIX_INVERSION_FOR(6, MatrixInversionCodeGeneratedImpl<6>)
     SET_MATRIX_INVERSION_FOR(7, MatrixInversionCodeGeneratedImpl<7>)
+    SET_MATRIX_INVERSION_FOR(8, MatrixInversionCodeGeneratedImpl<8>)
+    SET_MATRIX_INVERSION_FOR(9, MatrixInversionCodeGeneratedImpl<9>)
+    SET_MATRIX_INVERSION_FOR(10, MatrixInversionCodeGeneratedImpl<10>)
+    SET_MATRIX_INVERSION_FOR(11, MatrixInversionCodeGeneratedImpl<11>)
     SET_MATRIX_INVERSION_FOR(12, MatrixInversionCodeGeneratedImpl<12>)
 
     template<
