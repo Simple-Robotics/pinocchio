@@ -59,6 +59,10 @@ BOOST_AUTO_TEST_CASE(test_generated_inverse)
   test_generated_inverse_impl<5>();
   test_generated_inverse_impl<6>();
   test_generated_inverse_impl<7>();
+  test_generated_inverse_impl<8>();
+  test_generated_inverse_impl<9>();
+  test_generated_inverse_impl<10>();
+  test_generated_inverse_impl<11>();
   test_generated_inverse_impl<12>();
 }
 
