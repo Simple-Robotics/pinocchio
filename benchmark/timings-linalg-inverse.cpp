@@ -107,6 +107,40 @@ void scalar_inversion(benchmark::State & st)
   }
 }
 
+template<typename Scalar>
+PINOCCHIO_DONT_INLINE void scalar_sqrt_op(const Scalar & input_scalar, Scalar & output)
+{
+  output = math::sqrt(input_scalar);
+}
+
+void scalar_sqrt(benchmark::State & st)
+{
+  const double input_scalar = Matrix1::Random().coeff(0, 0);
+  double res_scalar = 0.;
+  for (auto _ : st)
+  {
+    scalar_sqrt_op(input_scalar, res_scalar);
+    benchmark::DoNotOptimize(res_scalar);
+  }
+}
+
+template<typename Scalar>
+PINOCCHIO_DONT_INLINE void scalar_multiplication_op(const Scalar & input_scalar, Scalar & output)
+{
+  output = input_scalar * input_scalar;
+}
+
+void scalar_multiplication(benchmark::State & st)
+{
+  const double input_scalar = Matrix1::Random().coeff(0, 0);
+  double res_scalar = 0.;
+  for (auto _ : st)
+  {
+    scalar_multiplication_op(input_scalar, res_scalar);
+    benchmark::DoNotOptimize(res_scalar);
+  }
+}
+
 #define BENCH_MATRIX_INVERSION(Type, MatrixInverseFunctor)                                         \
   BENCHMARK(matrix_inversion_call<Type, Type, MatrixInverseFunctor>)->Apply(CustomArguments);      \
   //BENCHMARK(matrix_inversion_call<Row##Type,Type,MatrixInverseEigen>)->Apply(CustomArguments); \
@@ -114,6 +148,8 @@ void scalar_inversion(benchmark::State & st)
 //BENCHMARK(matrix_inversion_call<Row##Type,Row##Type,MatrixInverseEigen>)->Apply(CustomArguments);
 
 BENCHMARK(scalar_inversion)->Apply(CustomArguments);
+BENCHMARK(scalar_sqrt)->Apply(CustomArguments);
+BENCHMARK(scalar_multiplication)->Apply(CustomArguments);
 
 #define BENCH_MATRIX_INVERSION_ALL(MatrixInverseFunctor)                                           \
   BENCH_MATRIX_INVERSION(Matrix1, MatrixInverseFunctor)                                            \
