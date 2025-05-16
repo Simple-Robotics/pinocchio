@@ -12,26 +12,17 @@ using namespace pinocchio;
 template<int Size, int Options = 0>
 using Matrix = Eigen::Matrix<double, Size, Size, Options>;
 
-using Matrix1 = Matrix<1>;
-using RowMatrix1 = Matrix<1, Eigen::RowMajor>;
+#define DEFINE_MATRIX(size)                                                                        \
+  using Matrix##size = Matrix<size>;                                                               \
+  using RowMatrix##size = Matrix<size, Eigen::RowMajor>;
 
-using Matrix2 = Matrix<2>;
-using RowMatrix2 = Matrix<2, Eigen::RowMajor>;
-
-using Matrix3 = Matrix<3>;
-using RowMatrix3 = Matrix<3, Eigen::RowMajor>;
-
-using Matrix4 = Matrix<4>;
-using RowMatrix4 = Matrix<4, Eigen::RowMajor>;
-
-using Matrix5 = Matrix<5>;
-using RowMatrix5 = Matrix<5, Eigen::RowMajor>;
-
-using Matrix6 = Matrix<6>;
-using RowMatrix6 = Matrix<6, Eigen::RowMajor>;
-
-using Matrix7 = Matrix<7>;
-using RowMatrix7 = Matrix<7, Eigen::RowMajor>;
+DEFINE_MATRIX(1)
+DEFINE_MATRIX(2)
+DEFINE_MATRIX(3)
+DEFINE_MATRIX(4)
+DEFINE_MATRIX(5)
+DEFINE_MATRIX(6)
+DEFINE_MATRIX(7)
 
 static void CustomArguments(benchmark::internal::Benchmark * b)
 {
