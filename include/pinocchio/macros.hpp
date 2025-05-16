@@ -32,6 +32,10 @@
   #define PINOCCHIO_WITH_CXX11_SUPPORT
 #endif
 
+#if defined(__APPLE__) && defined(__aarch64__)
+  #define PINOCCHIO_MAC_ARM64
+#endif
+
 #define PINOCCHIO_STRING_LITERAL(string) #string
 #define PINOCCHIO_NOEXCEPT noexcept
 
