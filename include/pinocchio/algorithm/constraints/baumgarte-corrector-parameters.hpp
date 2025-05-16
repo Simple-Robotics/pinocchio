@@ -39,7 +39,7 @@ namespace pinocchio
     }
 
     /// \brief Constructor from Kp and Kd.
-    BaumgarteCorrectorParametersTpl(Scalar Kp, Scalar Kd)
+    BaumgarteCorrectorParametersTpl(const Scalar Kp, const Scalar Kd)
     : Kp(Kp)
     , Kd(Kd)
     {
@@ -69,8 +69,8 @@ namespace pinocchio
     {
       typedef typename CastType<NewScalar, BaumgarteCorrectorParametersTpl>::type ReturnType;
       ReturnType res;
-      res.Kp = (NewScalar)Kp;
-      res.Kd = (NewScalar)Kd;
+      res.Kp = NewScalar(Kp);
+      res.Kd = NewScalar(Kd);
       return res;
     }
 
