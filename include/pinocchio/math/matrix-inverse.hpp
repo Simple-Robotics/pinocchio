@@ -30,7 +30,7 @@ namespace pinocchio
         assert(is_symmetric(matrix));
         auto & matrix_inverse_ = matrix_inverse.const_cast_derived();
         matrix_inverse_.setIdentity();
-        matrix.llt().solveInPlace(matrix_inverse_);
+        matrix.ldlt().solveInPlace(matrix_inverse_);
       }
     };
 
