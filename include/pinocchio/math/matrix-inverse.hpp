@@ -98,6 +98,8 @@ namespace pinocchio
     SET_MATRIX_INVERSION_FOR(11, MatrixInversionCodeGeneratedImpl<11>)
     SET_MATRIX_INVERSION_FOR(12, MatrixInversionCodeGeneratedImpl<12>)
 
+#undef SET_MATRIX_INVERSION_FOR
+
     template<
       typename InputMatrix,
       bool is_floating_point = pinocchio::is_floating_point<typename InputMatrix::Scalar>::value>
