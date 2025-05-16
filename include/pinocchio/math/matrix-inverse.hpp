@@ -41,7 +41,8 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void run(
         const Eigen::MatrixBase<M1> & /*matrix*/, const Eigen::MatrixBase<M2> & /*matrix_inverse*/)
       {
-        static_assert(false, "Not implemented.");
+        // static_assert(false, "Not implemented.");
+        assert(false && "Not implemented.");
       }
     };
 
