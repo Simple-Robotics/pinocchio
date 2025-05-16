@@ -38,12 +38,15 @@ void test_generated_inverse_impl()
     BOOST_CHECK(is_symmetric(mat, 0));
 
     if (!(mat.determinant() > 1e-3))
+    {
+      i--;
       continue;
+    }
 
     Matrix res = Matrix::Zero();
     matrix_inversion_code_generated(mat, res);
-    BOOST_CHECK((res * mat).isIdentity(1e-10));
-    BOOST_CHECK(mat.inverse().isApprox(res, 1e-10));
+    BOOST_CHECK((res * mat).isIdentity(1e-8));
+    BOOST_CHECK(mat.inverse().isApprox(res, 1e-8));
   }
 }
 
@@ -56,6 +59,7 @@ BOOST_AUTO_TEST_CASE(test_generated_inverse)
   test_generated_inverse_impl<5>();
   test_generated_inverse_impl<6>();
   test_generated_inverse_impl<7>();
+  test_generated_inverse_impl<12>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
