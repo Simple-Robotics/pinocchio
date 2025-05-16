@@ -50,6 +50,28 @@ struct MatrixInversePartialPivLU
   }
 };
 
+struct MatrixInverseLLT
+{
+  template<typename M1, typename M2>
+  PINOCCHIO_DONT_INLINE static void
+  run(const Eigen::MatrixBase<M1> & mat, const Eigen::MatrixBase<M2> & mat_inv)
+  {
+    mat_inv.const_cast_derived().setIdentity();
+    mat.llt().solveInPlace(mat_inv.const_cast_derived());
+  }
+};
+
+struct MatrixInverseLDLT
+{
+  template<typename M1, typename M2>
+  PINOCCHIO_DONT_INLINE static void
+  run(const Eigen::MatrixBase<M1> & mat, const Eigen::MatrixBase<M2> & mat_inv)
+  {
+    mat_inv.const_cast_derived().setIdentity();
+    mat.ldlt().solveInPlace(mat_inv.const_cast_derived());
+  }
+};
+
 struct MatrixInversePinocchio
 {
   template<typename M1, typename M2>
@@ -155,6 +177,8 @@ BENCHMARK(scalar_multiplication)->Apply(CustomArguments);
 
 BENCH_MATRIX_INVERSION_ALL(MatrixInverseEigen)
 BENCH_MATRIX_INVERSION_ALL(MatrixInversePartialPivLU)
+BENCH_MATRIX_INVERSION_ALL(MatrixInverseLLT)
+BENCH_MATRIX_INVERSION_ALL(MatrixInverseLDLT)
 BENCH_MATRIX_INVERSION_ALL(MatrixInversePinocchio)
 BENCH_MATRIX_INVERSION_ALL(MatrixInverseCodeGenerated)
 
