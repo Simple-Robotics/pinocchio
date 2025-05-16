@@ -192,6 +192,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-5x5.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-6x6.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-7x7.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-12x12.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/eigen-helpers.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/eigenvalues.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/fwd.hpp
