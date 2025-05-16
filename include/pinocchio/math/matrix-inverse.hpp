@@ -11,7 +11,7 @@ namespace pinocchio
 {
   namespace internal
   {
-    struct MatrixInversionDefaultImpl
+    struct MatrixInversionEigenDefaultImpl
     {
       template<typename M1, typename M2>
       static EIGEN_STRONG_INLINE void
@@ -56,19 +56,19 @@ namespace pinocchio
     };
 
     template<>
-    struct MatrixInversionImpl<1> : MatrixInversionDefaultImpl
+    struct MatrixInversionImpl<1> : MatrixInversionEigenDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<2> : MatrixInversionDefaultImpl
+    struct MatrixInversionImpl<2> : MatrixInversionEigenDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<3> : MatrixInversionDefaultImpl
+    struct MatrixInversionImpl<3> : MatrixInversionEigenDefaultImpl
     {
     };
     template<>
-    struct MatrixInversionImpl<4> : MatrixInversionDefaultImpl
+    struct MatrixInversionImpl<4> : MatrixInversionEigenDefaultImpl
     {
     };
 
