@@ -60,6 +60,10 @@ namespace pinocchio
 #include "pinocchio/math/details/matrix-inverse-5x5.hpp"
 #include "pinocchio/math/details/matrix-inverse-6x6.hpp"
 #include "pinocchio/math/details/matrix-inverse-7x7.hpp"
+#include "pinocchio/math/details/matrix-inverse-8x8.hpp"
+#include "pinocchio/math/details/matrix-inverse-9x9.hpp"
+#include "pinocchio/math/details/matrix-inverse-10x10.hpp"
+#include "pinocchio/math/details/matrix-inverse-11x11.hpp"
 #include "pinocchio/math/details/matrix-inverse-12x12.hpp"
 
 namespace pinocchio
