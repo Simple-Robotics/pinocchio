@@ -50,27 +50,45 @@ namespace pinocchio
       }
     };
 
+  } // namespace internal
+} // namespace pinocchio
+
+#include "pinocchio/math/details/matrix-inverse-1x1.hpp"
+#include "pinocchio/math/details/matrix-inverse-2x2.hpp"
+#include "pinocchio/math/details/matrix-inverse-3x3.hpp"
+#include "pinocchio/math/details/matrix-inverse-4x4.hpp"
+#include "pinocchio/math/details/matrix-inverse-5x5.hpp"
+#include "pinocchio/math/details/matrix-inverse-6x6.hpp"
+#include "pinocchio/math/details/matrix-inverse-7x7.hpp"
+#include "pinocchio/math/details/matrix-inverse-12x12.hpp"
+
+namespace pinocchio
+{
+  namespace internal
+  {
+
     template<int RowsAtCompileTime, int ColsAtCompileTime = RowsAtCompileTime>
     struct MatrixInversionImpl : MatrixInversionDynamicMatrixImpl
     {
     };
 
-    template<>
-    struct MatrixInversionImpl<1> : MatrixInversionEigenDefaultImpl
-    {
-    };
-    template<>
-    struct MatrixInversionImpl<2> : MatrixInversionEigenDefaultImpl
-    {
-    };
-    template<>
-    struct MatrixInversionImpl<3> : MatrixInversionEigenDefaultImpl
-    {
-    };
-    template<>
-    struct MatrixInversionImpl<4> : MatrixInversionEigenDefaultImpl
-    {
-    };
+#define SET_MATRIX_INVERSION_FOR(size, Impl)                                                       \
+  template<>                                                                                       \
+  struct MatrixInversionImpl<size> : Impl                                                          \
+  {                                                                                                \
+  };
+
+    // For size lower than 4, we can use the spezialized inverse of Eigen
+    SET_MATRIX_INVERSION_FOR(1, MatrixInversionEigenDefaultImpl)
+    SET_MATRIX_INVERSION_FOR(2, MatrixInversionEigenDefaultImpl)
+    SET_MATRIX_INVERSION_FOR(3, MatrixInversionEigenDefaultImpl)
+    SET_MATRIX_INVERSION_FOR(4, MatrixInversionEigenDefaultImpl)
+
+    // For size in [5,12], we can use code generated impl
+    SET_MATRIX_INVERSION_FOR(5, MatrixInversionCodeGeneratedImpl<5>)
+    SET_MATRIX_INVERSION_FOR(6, MatrixInversionCodeGeneratedImpl<6>)
+    SET_MATRIX_INVERSION_FOR(7, MatrixInversionCodeGeneratedImpl<7>)
+    SET_MATRIX_INVERSION_FOR(12, MatrixInversionCodeGeneratedImpl<12>)
 
     template<
       typename InputMatrix,
@@ -109,14 +127,5 @@ namespace pinocchio
     Runner::run(matrix, matrix_inverse.const_cast_derived());
   }
 } // namespace pinocchio
-
-#include "pinocchio/math/details/matrix-inverse-1x1.hpp"
-#include "pinocchio/math/details/matrix-inverse-2x2.hpp"
-#include "pinocchio/math/details/matrix-inverse-3x3.hpp"
-#include "pinocchio/math/details/matrix-inverse-4x4.hpp"
-#include "pinocchio/math/details/matrix-inverse-5x5.hpp"
-#include "pinocchio/math/details/matrix-inverse-6x6.hpp"
-#include "pinocchio/math/details/matrix-inverse-7x7.hpp"
-#include "pinocchio/math/details/matrix-inverse-12x12.hpp"
 
 #endif // ifndef __pinocchio_math_matrix_inverse_hpp__
