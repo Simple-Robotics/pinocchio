@@ -362,6 +362,7 @@ namespace pinocchio
     }
 
     GeometryObject(const GeometryObject & other)
+    : Base(other)
     {
       *this = other;
     }
