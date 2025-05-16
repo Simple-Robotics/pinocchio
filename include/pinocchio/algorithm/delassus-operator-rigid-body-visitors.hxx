@@ -299,6 +299,7 @@ namespace pinocchio
       const Data & data,
       CustomData & custom_data)
     {
+      typedef typename Model::Scalar Scalar;
       typedef typename Data::Force Force;
       typedef typename Data::Motion Motion;
       typedef typename Motion::Vector6 Vector6;
@@ -319,11 +320,16 @@ namespace pinocchio
       // Compare to ABA, the sign of ofi is reversed
       jmodel.jointVelocitySelector(custom_data.u).noalias() += Jcols.transpose() * ofi.toVector();
 
-      const auto res = (jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u))
-                         .eval(); // Abuse of notation to reuse existing unused data variable
-
       if (joint_neighbours.size())
       {
+        using VectorNV = typename std::remove_reference<typename JointData::TangentVector_t>::type;
+        typedef Eigen::Map<VectorNV> MapVectorNV;
+        MapVectorNV res = MapVectorNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, jmodel.nv(), 1));
+        res.noalias() =
+          (jdata.Dinv()
+           * jmodel.jointVelocitySelector(
+             custom_data.u)); // Abuse of notation to reuse existing unused data variable
+
         const Vector6 a_tmp = Jcols * res;
 
         for (JointIndex vertex_j : neighbours[i])
