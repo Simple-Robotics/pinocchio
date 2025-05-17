@@ -69,6 +69,8 @@ function(ADD_PINOCCHIO_BENCHMARK name)
   add_dependencies(${PROJECT_NAME}-benchmarks ${bench_name})
 endfunction()
 
+add_pinocchio_benchmark(spatial-operations)
+
 # timings
 #
 add_pinocchio_benchmark(timings PARSERS)
