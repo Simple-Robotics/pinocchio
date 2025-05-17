@@ -217,13 +217,12 @@ void matrix_times_vector_static_dispatch(benchmark::State & st)
 
     switch (size)
     {
-      CASE_OP_DYN(1)
-      // CASE_OP_DYN(2)
-      // CASE_OP(3)
-      // CASE_OP_DYN(4)
-      // CASE_OP(5)
-      CASE_OP_DYN(5)
-      CASE_OP_DYN(6)
+      CASE_OP(1)
+      CASE_OP(2)
+      CASE_OP(3)
+      CASE_OP(4)
+      CASE_OP(5)
+      CASE_OP(6)
     default:
       break;
     }
