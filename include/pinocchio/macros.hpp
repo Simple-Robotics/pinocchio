@@ -90,6 +90,12 @@ namespace pinocchio
   #define PINOCCHIO_ONLY_USED_FOR_DEBUG(var) PINOCCHIO_UNUSED_VARIABLE(var)
 #endif
 
+#ifdef PINOCCHIO_WITH_CXX17_SUPPORT
+  #define PINOCCHIO_MAYBE_UNUSED [[maybe_unused]]
+#else
+  #define PINOCCHIO_MAYBE_UNUSED
+#endif
+
 /// Ensure that a matrix (or vector) is of correct size (compile-time and run-time assertion)
 #define PINOCCHIO_ASSERT_MATRIX_SPECIFIC_SIZE(type, M, nrows, ncols)                               \
   EIGEN_STATIC_ASSERT(                                                                             \
