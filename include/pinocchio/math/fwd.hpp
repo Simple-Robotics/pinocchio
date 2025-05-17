@@ -99,7 +99,7 @@ namespace pinocchio
   template<typename T>
   inline EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR T dummy_precision()
   {
-    ::Eigen::NumTraits<T>::dummy_precision();
+    return ::Eigen::NumTraits<T>::dummy_precision();
   }
 
 } // namespace pinocchio
