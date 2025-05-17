@@ -19,23 +19,8 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void
       run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
       {
-        matrix_inverse.const_cast_derived().noalias() = matrix.inverse();
-      }
-
-      template<typename M1, typename M2>
-      static EIGEN_STRONG_INLINE void
-      run(const Eigen::PlainObjectBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
-      {
-        enum
-        {
-          Options = M1::Options
-        };
-        typedef typename M1::Scalar Scalar;
-
-        typedef Eigen::Matrix<Scalar, Size, Size, Options> M1Static;
-        typedef const Eigen::Map<const M1Static> MapM1Static;
         matrix_inverse.const_cast_derived().noalias() =
-          MapM1Static(matrix.data(), Size, Size).inverse();
+          matrix.template block<Size, Size>(0, 0).inverse();
       }
     };
 
