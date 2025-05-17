@@ -185,9 +185,9 @@ void scalar_multiplication(benchmark::State & st)
 
 #define BENCH_MATRIX_INVERSION(Call, Type, MatrixInverseFunctor, Arg)                              \
   BENCHMARK(Call<Type, Type, MatrixInverseFunctor>)->Apply(Arg);                                   \
-  //BENCHMARK(Call<Row##Type,Type,MatrixInverseEigen>); \
-//BENCHMARK(Call<Type,Row##Type,MatrixInverseEigen>); \
-//BENCHMARK(Call<Row##Type,Row##Type,MatrixInverseEigen>);
+  //BENCHMARK(Call<Row##Type,Type,MatrixInverseEigen>)->Apply(Arg); \
+  //BENCHMARK(Call<Type,Row##Type,MatrixInverseEigen>->Apply(Arg)); \
+  //BENCHMARK(Call<Row##Type,Row##Type,MatrixInverseEigen>)->Apply(Arg);
 
 #define BENCH_STATIC_MATRIX_INVERSION(Type, MatrixInverseFunctor)                                  \
   BENCH_MATRIX_INVERSION(                                                                          \
