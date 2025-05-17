@@ -205,6 +205,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/matrix.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/matrix-block.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/matrix-inverse.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/math/matrix-inverse-code-generated.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/multiprecision.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/multiprecision-mpfr.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/quaternion.hpp
