@@ -58,15 +58,30 @@ namespace pinocchio
         PINOCCHIO_MAYBE_UNUSED typedef typename M1::RealScalar RealScalar;
         assert(is_symmetric(matrix, math::sqrt(dummy_precision<RealScalar>())));
 
-#define IF_SAME_SIZE_DO(size)                                                                      \
-  (matrix.rows() == size)                                                                          \
-    MatrixInversionImpl<size>::run(matrix.derived(), matrix_inverse.const_cast_derived());
+#define CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(size)                                            \
+case size:                                                                                         \
+  MatrixInversionImpl<size>::run(matrix.derived(), matrix_inverse.const_cast_derived());           \
+  break;
 
-        if IF_SAME_SIZE_DO (1)
-          else if IF_SAME_SIZE_DO (2) else if IF_SAME_SIZE_DO (3) else if IF_SAME_SIZE_DO (4) else if IF_SAME_SIZE_DO (5) else if IF_SAME_SIZE_DO (6) else if IF_SAME_SIZE_DO (7) else if IF_SAME_SIZE_DO (8) else if IF_SAME_SIZE_DO (9) else if IF_SAME_SIZE_DO (10) else if IF_SAME_SIZE_DO (
-            11) else if IF_SAME_SIZE_DO (12) else generic(matrix.derived(), matrix_inverse.const_cast_derived());
+        switch (matrix.rows())
+        {
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(1)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(2)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(3)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(4)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(5)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(6)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(7)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(8)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(9)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(10)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(11)
+          CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(12)
+        default:
+          generic(matrix.derived(), matrix_inverse.const_cast_derived());
+        }
 
-#undef IF_SAME_SIZE_DO
+#undef CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE
       }
 
       template<typename M1, typename M2>
