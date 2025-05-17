@@ -79,6 +79,7 @@ case size:                                                                      
           CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE(12)
         default:
           generic(matrix.derived(), matrix_inverse.const_cast_derived());
+          break;
         }
 
 #undef CASE_RUN_SPECIFIC_MATRIX_INVERSE_FOR_SIZE
