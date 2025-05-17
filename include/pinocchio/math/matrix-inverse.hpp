@@ -60,10 +60,10 @@ namespace pinocchio
   };
 
     // For size lower than 4, we can use the spezialized inverse of Eigen
-    SET_MATRIX_INVERSION_FOR(1, MatrixInversionEigenDefaultImpl)
-    SET_MATRIX_INVERSION_FOR(2, MatrixInversionEigenDefaultImpl)
-    SET_MATRIX_INVERSION_FOR(3, MatrixInversionEigenDefaultImpl)
-    SET_MATRIX_INVERSION_FOR(4, MatrixInversionEigenDefaultImpl)
+    SET_MATRIX_INVERSION_FOR(1, MatrixInversionEigenDefaultImpl<1>)
+    SET_MATRIX_INVERSION_FOR(2, MatrixInversionEigenDefaultImpl<2>)
+    SET_MATRIX_INVERSION_FOR(3, MatrixInversionEigenDefaultImpl<3>)
+    SET_MATRIX_INVERSION_FOR(4, MatrixInversionEigenDefaultImpl<4>)
 
     // For size in [5,12], we can use code generated impl
     SET_MATRIX_INVERSION_FOR(5, MatrixInversionCodeGeneratedImpl<5>)
