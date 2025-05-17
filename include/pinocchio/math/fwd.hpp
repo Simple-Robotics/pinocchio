@@ -95,6 +95,7 @@ namespace pinocchio
     }
   } // namespace math
 
+  /// \brief Shortcut for calling ::Eigen::NumTraits<T>::dummy_precision()
   template<typename T>
   inline EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR T dummy_precision()
   {
