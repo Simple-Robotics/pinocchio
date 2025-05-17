@@ -425,7 +425,7 @@ namespace pinocchio
     const typename Matrix::Scalar & prec =
       Eigen::NumTraits<typename Matrix::Scalar>::dummy_precision())
   {
-    if (mat.rows() != mat.cols())
+    if (!is_square(mat))
       return false;
 
     return mat.reshaped().isApprox(mat.transpose().reshaped(), prec);
