@@ -27,8 +27,11 @@ namespace pinocchio
       static EIGEN_STRONG_INLINE void
       run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse)
       {
-        assert(is_symmetric(matrix));
+        typedef typename M1::RealScalar RealScalar;
+        assert(is_symmetric(matrix, math::sqrt(dummy_precision<RealScalar>())));
+
         auto & matrix_inverse_ = matrix_inverse.const_cast_derived();
+
         matrix_inverse_.setIdentity();
 #ifdef PINOCCHIO_MAC_ARM64
         matrix.ldlt().solveInPlace(matrix_inverse_);
