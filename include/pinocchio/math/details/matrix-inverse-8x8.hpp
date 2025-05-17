@@ -15,7 +15,7 @@ namespace pinocchio
     struct MatrixInversionCodeGeneratedImpl<8>
     {
       template<typename M1, typename M2>
-      static EIGEN_STRONG_INLINE void
+      static void
       run(const Eigen::MatrixBase<M1> & matrix, const Eigen::MatrixBase<M2> & matrix_inverse_)
       {
         typedef typename M1::Scalar Scalar;
