@@ -182,6 +182,76 @@ void force_no_init(benchmark::State & st)
   }
 }
 
+void matrix_times_vector6(benchmark::State & st)
+{
+  Inertia::Matrix6 mat6 = Inertia::Matrix6::Random();
+  Motion::Vector6 vec6 = Motion::Vector6::Random();
+  Force res = Force::Zero();
+  for (auto _ : st)
+  {
+    res.toVector().noalias() += mat6 * vec6;
+    benchmark::DoNotOptimize(res);
+  }
+}
+
+void matrix_times_vector_static_dispatch(benchmark::State & st)
+{
+  typedef Eigen::Matrix<double, 6, 6> Matrix6;
+  typedef Eigen::Matrix<double, 6, 1> Vector6;
+
+  Matrix6 mat = Matrix6::Random();
+  Vector6 vec = Vector6::Random();
+  Force res = Force::Zero();
+  for (auto _ : st)
+  {
+    auto size = st.range(0);
+#define CASE_OP(n)                                                                                 \
+  case n:                                                                                          \
+    res.toVector().noalias() += mat.leftCols<n>() * vec.head<n>();                                 \
+    break;
+
+#define CASE_OP_DYN(n)                                                                             \
+  case n:                                                                                          \
+    res.toVector().noalias() += mat.leftCols(size) * vec.head(size);                               \
+    break;
+
+    switch (size)
+    {
+      CASE_OP_DYN(1)
+      // CASE_OP_DYN(2)
+      // CASE_OP(3)
+      // CASE_OP_DYN(4)
+      // CASE_OP(5)
+      CASE_OP_DYN(5)
+      CASE_OP_DYN(6)
+    default:
+      break;
+    }
+
+#undef CASE_OP
+    benchmark::DoNotOptimize(size);
+    benchmark::DoNotOptimize(res);
+  }
+}
+
+void matrix_times_vector_dynamic_dispatch(benchmark::State & st)
+{
+  typedef Eigen::Matrix<double, 6, 6> Matrix6;
+  typedef Eigen::Matrix<double, 6, 1> Vector6;
+
+  Matrix6 mat = Matrix6::Random();
+  Vector6 vec = Vector6::Random();
+  Force res = Force::Zero();
+  for (auto _ : st)
+  {
+    auto size = st.range(0);
+
+    res.toVector().noalias() += mat.leftCols(size) * vec.head(size);
+    benchmark::DoNotOptimize(size);
+    benchmark::DoNotOptimize(res);
+  }
+}
+
 // Matrix operations
 BENCHMARK(matrix_matrix_add<2>)->Apply(CustomArguments);
 BENCHMARK(matrix_matrix_add<3>)->Apply(CustomArguments);
@@ -217,4 +287,22 @@ BENCHMARK(force_no_init)->Apply(CustomArguments);
 BENCHMARK(force_init_from_zero)->Apply(CustomArguments);
 BENCHMARK(force_set_zero)->Apply(CustomArguments);
 
+// Others
+BENCHMARK(matrix_times_vector6)->Apply(CustomArguments);
+BENCHMARK(matrix_times_vector_static_dispatch)
+  ->Apply(CustomArguments)
+  ->Arg(1)
+  ->Arg(2)
+  ->Arg(3)
+  ->Arg(4)
+  ->Arg(5)
+  ->Arg(6);
+BENCHMARK(matrix_times_vector_dynamic_dispatch)
+  ->Apply(CustomArguments)
+  ->Arg(1)
+  ->Arg(2)
+  ->Arg(3)
+  ->Arg(4)
+  ->Arg(5)
+  ->Arg(6);
 BENCHMARK_MAIN();
