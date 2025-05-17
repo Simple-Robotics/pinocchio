@@ -403,6 +403,17 @@ namespace pinocchio
   }
 
   ///
+  /// \brief Helper to check whether the input matrix is square.
+  ///
+  /// \param[in] mat Input matrix to check whether it is square.
+  ///
+  template<typename Matrix>
+  EIGEN_STRONG_INLINE bool is_square(const Eigen::MatrixBase<Matrix> & mat)
+  {
+    return mat.rows() == mat.cols();
+  }
+
+  ///
   /// \brief Helper to check whether the input matrix is symmetric.
   ///
   /// \param[in] mat Input matrix to check symmetry.
