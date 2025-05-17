@@ -20,7 +20,7 @@ namespace pinocchio
       {
         typedef typename M1::Scalar Scalar;
 
-        assert(is_symmetric(matrix));
+        assert(is_symmetric(matrix, math::sqrt(dummy_precision<Scalar>())));
 
         const auto & input_vec = matrix.reshaped();
         auto & matrix_inverse = matrix_inverse_.const_cast_derived();
