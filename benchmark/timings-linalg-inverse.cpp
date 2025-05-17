@@ -11,6 +11,7 @@ using namespace pinocchio;
 
 template<int Size, int Options = 0>
 using Matrix = Eigen::Matrix<double, Size, Size, Options>;
+using DynamicMatrix = Matrix<Eigen::Dynamic>;
 
 #define DEFINE_MATRIX(size)                                                                        \
   using Matrix##size = Matrix<size>;                                                               \
@@ -29,7 +30,7 @@ DEFINE_MATRIX(10)
 DEFINE_MATRIX(11)
 DEFINE_MATRIX(12)
 
-static void CustomArguments(benchmark::internal::Benchmark * b)
+static void CustomArgumentsStaticMatrix(benchmark::internal::Benchmark * b)
 {
   b->MinWarmUpTime(3.);
 }
@@ -97,13 +98,36 @@ struct MatrixInverseCodeGenerated
 };
 
 template<typename InputMatrix, typename OutputMatrix, class MatrixInverseFunctor>
-static void matrix_inversion_call(benchmark::State & st)
+static void static_matrix_inversion_call(benchmark::State & st)
 {
   const InputMatrix input_matrix = InputMatrix::Identity();
   OutputMatrix res = OutputMatrix::Zero(input_matrix.rows(), input_matrix.cols());
   for (auto _ : st)
   {
     MatrixInverseFunctor::run(input_matrix, res);
+    benchmark::DoNotOptimize(res);
+  }
+}
+
+static void CustomArgumentsDynamicMatrix(benchmark::internal::Benchmark * b)
+{
+  b->MinWarmUpTime(3.);
+  for (int size = 1; size <= 12; ++size)
+    b->Arg(size);
+
+  b->Arg(20)->Arg(50)->Arg(100);
+}
+
+template<typename InputMatrix, typename OutputMatrix, class MatrixInverseFunctor>
+static void dynamic_matrix_inversion_call(benchmark::State & st)
+{
+  const auto size = st.range(0);
+  const InputMatrix input_matrix = InputMatrix::Identity(size, size);
+  OutputMatrix res = OutputMatrix::Zero(input_matrix.rows(), input_matrix.cols());
+  for (auto _ : st)
+  {
+    MatrixInverseFunctor::run(input_matrix, res);
+    // pinocchio::internal::MatrixInversionDynamicMatrixImpl::run(input_matrix, res);
     benchmark::DoNotOptimize(res);
   }
 }
@@ -159,35 +183,47 @@ void scalar_multiplication(benchmark::State & st)
   }
 }
 
-#define BENCH_MATRIX_INVERSION(Type, MatrixInverseFunctor)                                         \
-  BENCHMARK(matrix_inversion_call<Type, Type, MatrixInverseFunctor>)->Apply(CustomArguments);      \
-  //BENCHMARK(matrix_inversion_call<Row##Type,Type,MatrixInverseEigen>)->Apply(CustomArguments); \
-//BENCHMARK(matrix_inversion_call<Type,Row##Type,MatrixInverseEigen>)->Apply(CustomArguments); \
-//BENCHMARK(matrix_inversion_call<Row##Type,Row##Type,MatrixInverseEigen>)->Apply(CustomArguments);
+#define BENCH_MATRIX_INVERSION(Call, Type, MatrixInverseFunctor, Arg)                              \
+  BENCHMARK(Call<Type, Type, MatrixInverseFunctor>)->Apply(Arg);                                   \
+  //BENCHMARK(Call<Row##Type,Type,MatrixInverseEigen>); \
+//BENCHMARK(Call<Type,Row##Type,MatrixInverseEigen>); \
+//BENCHMARK(Call<Row##Type,Row##Type,MatrixInverseEigen>);
 
-BENCHMARK(scalar_inversion)->Apply(CustomArguments);
-BENCHMARK(scalar_sqrt)->Apply(CustomArguments);
-BENCHMARK(scalar_multiplication)->Apply(CustomArguments);
+#define BENCH_STATIC_MATRIX_INVERSION(Type, MatrixInverseFunctor)                                  \
+  BENCH_MATRIX_INVERSION(                                                                          \
+    static_matrix_inversion_call, Type, MatrixInverseFunctor, CustomArgumentsStaticMatrix)
 
-#define BENCH_MATRIX_INVERSION_ALL(MatrixInverseFunctor)                                           \
-  BENCH_MATRIX_INVERSION(Matrix1, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix2, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix3, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix4, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix5, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix6, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix7, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix8, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix9, MatrixInverseFunctor)                                            \
-  BENCH_MATRIX_INVERSION(Matrix10, MatrixInverseFunctor)                                           \
-  BENCH_MATRIX_INVERSION(Matrix11, MatrixInverseFunctor)                                           \
-  BENCH_MATRIX_INVERSION(Matrix12, MatrixInverseFunctor)
+#define BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInverseFunctor)                                    \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix1, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix2, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix3, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix4, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix5, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix6, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix7, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix8, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix9, MatrixInverseFunctor)                                     \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix10, MatrixInverseFunctor)                                    \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix11, MatrixInverseFunctor)                                    \
+  BENCH_STATIC_MATRIX_INVERSION(Matrix12, MatrixInverseFunctor)
 
-BENCH_MATRIX_INVERSION_ALL(MatrixInverseEigen)
-BENCH_MATRIX_INVERSION_ALL(MatrixInversePartialPivLU)
-BENCH_MATRIX_INVERSION_ALL(MatrixInverseLLT)
-BENCH_MATRIX_INVERSION_ALL(MatrixInverseLDLT)
-BENCH_MATRIX_INVERSION_ALL(MatrixInverseCodeGenerated)
-BENCH_MATRIX_INVERSION_ALL(MatrixInversePinocchio)
+#define BENCH_DYNAMIC_MATRIX_INVERSION_ALL(MatrixInverseFunctor)                                   \
+  BENCH_MATRIX_INVERSION(                                                                          \
+    dynamic_matrix_inversion_call, DynamicMatrix, MatrixInverseFunctor,                            \
+    CustomArgumentsDynamicMatrix)
+
+BENCHMARK(scalar_inversion)->Apply(CustomArgumentsStaticMatrix);
+BENCHMARK(scalar_sqrt)->Apply(CustomArgumentsStaticMatrix);
+BENCHMARK(scalar_multiplication)->Apply(CustomArgumentsStaticMatrix);
+
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInverseEigen)
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInversePartialPivLU)
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInverseLLT)
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInverseLDLT)
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInverseCodeGenerated)
+BENCH_STATIC_MATRIX_INVERSION_ALL(MatrixInversePinocchio)
+
+BENCH_DYNAMIC_MATRIX_INVERSION_ALL(MatrixInverseEigen)
+BENCH_DYNAMIC_MATRIX_INVERSION_ALL(MatrixInversePinocchio)
 
 BENCHMARK_MAIN();
