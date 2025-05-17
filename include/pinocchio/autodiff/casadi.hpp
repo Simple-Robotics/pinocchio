@@ -116,27 +116,27 @@ namespace Eigen
       MulCost = 2
     };
 
-    static ::casadi::Matrix<Scalar> epsilon()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline ::casadi::Matrix<Scalar> epsilon()
     {
       return ::casadi::Matrix<Scalar>(std::numeric_limits<double>::epsilon());
     }
 
-    static ::casadi::Matrix<Scalar> dummy_precision()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline ::casadi::Matrix<Scalar> dummy_precision()
     {
       return ::casadi::Matrix<Scalar>(NumTraits<double>::dummy_precision());
     }
 
-    static ::casadi::Matrix<Scalar> highest()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline ::casadi::Matrix<Scalar> highest()
     {
       return ::casadi::Matrix<Scalar>(std::numeric_limits<double>::max());
     }
 
-    static ::casadi::Matrix<Scalar> lowest()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline ::casadi::Matrix<Scalar> lowest()
     {
       return ::casadi::Matrix<Scalar>(std::numeric_limits<double>::min());
     }
 
-    static int digits10()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits10()
     {
       return std::numeric_limits<double>::digits10;
     }

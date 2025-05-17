@@ -108,32 +108,32 @@ namespace Eigen
 
     // machine epsilon with type of real part of x
     // (use assumption that Base is not complex)
-    static CppAD::AD<Base> epsilon(void)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline CppAD::AD<Base> epsilon(void)
     {
       return CppAD::numeric_limits<CppAD::AD<Base>>::epsilon();
     }
 
     // relaxed version of machine epsilon for comparison of different
     // operations that should result in the same value
-    static CppAD::AD<Base> dummy_precision(void)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline CppAD::AD<Base> dummy_precision(void)
     {
       return 100. * CppAD::numeric_limits<CppAD::AD<Base>>::epsilon();
     }
 
     // minimum normalized positive value
-    static CppAD::AD<Base> lowest(void)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline CppAD::AD<Base> lowest(void)
     {
       return CppAD::numeric_limits<CppAD::AD<Base>>::min();
     }
 
     // maximum finite value
-    static CppAD::AD<Base> highest(void)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline CppAD::AD<Base> highest(void)
     {
       return CppAD::numeric_limits<CppAD::AD<Base>>::max();
     }
 
     // number of decimal digits that can be represented without change.
-    static int digits10(void)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits10(void)
     {
       return CppAD::numeric_limits<CppAD::AD<Base>>::digits10;
     }

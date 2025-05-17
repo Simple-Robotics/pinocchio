@@ -85,32 +85,32 @@ namespace Eigen
                    : true,
       RequireInitialization = 1
     };
-    static Real epsilon()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline Real epsilon()
     {
       return std::numeric_limits<Real>::epsilon();
     }
-    static Real dummy_precision()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline Real dummy_precision()
     {
       return 1000 * epsilon();
     }
-    static Real highest()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline Real highest()
     {
       return (std::numeric_limits<Real>::max)();
     }
-    static Real lowest()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline Real lowest()
     {
       return (std::numeric_limits<Real>::min)();
     }
-    static int digits10_imp(const std::true_type &)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits10_imp(const std::true_type &)
     {
       return std::numeric_limits<Real>::digits10;
     }
     template<bool B>
-    static int digits10_imp(const boost::mpl::bool_<B> &)
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits10_imp(const boost::mpl::bool_<B> &)
     {
       return static_cast<int>(Real::default_precision());
     }
-    static int digits10()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits10()
     {
       return digits10_imp(
         boost::mpl::bool_<
@@ -119,13 +119,13 @@ namespace Eigen
             : false>());
     }
 
-    constexpr static inline int digits()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline inline int digits()
     {
       return internal::default_digits_impl<self_type>::run();
     }
 
   #if EIGEN_VERSION_AT_LEAST(3, 4, 90)
-    constexpr static inline int max_digits10()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline inline int max_digits10()
     {
       return internal::default_max_digits10_impl<Real>::run();
     }
