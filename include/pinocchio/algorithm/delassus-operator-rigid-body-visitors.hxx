@@ -325,10 +325,7 @@ namespace pinocchio
         using VectorNV = typename std::remove_reference<typename JointData::TangentVector_t>::type;
         typedef Eigen::Map<VectorNV> MapVectorNV;
         MapVectorNV res = MapVectorNV(PINOCCHIO_EIGEN_MAP_ALLOCA(Scalar, jmodel.nv(), 1));
-        res.noalias() =
-          (jdata.Dinv()
-           * jmodel.jointVelocitySelector(
-             custom_data.u)); // Abuse of notation to reuse existing unused data variable
+        res.noalias() = (jdata.Dinv() * jmodel.jointVelocitySelector(custom_data.u));
 
         const Vector6 a_tmp = Jcols * res;
 
