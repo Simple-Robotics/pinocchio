@@ -30,6 +30,14 @@ BOOST_AUTO_TEST_CASE(test_get_ref)
     const std::shared_ptr<double> v_const_ptr = std::make_shared<double>(v);
     BOOST_CHECK(v_const_ptr.get() != &get_ref(v_ref));
     BOOST_CHECK(v_const_ptr.get() == &get_ref(v_const_ptr));
+
+    std::unique_ptr<double> v_uptr = std::make_unique<double>(v);
+    BOOST_CHECK(v_uptr.get() != &get_ref(v_ref));
+    BOOST_CHECK(v_uptr.get() == &get_ref(v_uptr));
+
+    const std::unique_ptr<double> v_const_uptr = std::make_unique<double>(v);
+    BOOST_CHECK(v_const_uptr.get() != &get_ref(v_ref));
+    BOOST_CHECK(v_const_uptr.get() == &get_ref(v_const_uptr));
   }
 
   {
@@ -46,6 +54,15 @@ BOOST_AUTO_TEST_CASE(test_get_ref)
     const std::shared_ptr<const double> const_v_const_ptr = std::make_shared<const double>(const_v);
     BOOST_CHECK(const_v_const_ptr.get() != &get_ref(const_v_ref));
     BOOST_CHECK(const_v_const_ptr.get() == &get_ref(const_v_const_ptr));
+
+    std::unique_ptr<const double> const_v_uptr = std::make_unique<const double>(const_v);
+    BOOST_CHECK(const_v_uptr.get() != &get_ref(const_v_ref));
+    BOOST_CHECK(const_v_uptr.get() == &get_ref(const_v_uptr));
+
+    const std::unique_ptr<const double> const_v_const_uptr =
+      std::make_unique<const double>(const_v);
+    BOOST_CHECK(const_v_const_uptr.get() != &get_ref(const_v_ref));
+    BOOST_CHECK(const_v_const_uptr.get() == &get_ref(const_v_const_uptr));
   }
 }
 
