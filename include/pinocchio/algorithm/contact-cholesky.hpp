@@ -158,7 +158,7 @@ namespace pinocchio
       class ConstraintAllocator>
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
-      const std::vector<ConstraintModel, ConstraintAllocator> & contact_models)
+      const std::vector<ConstraintModel, ConstraintAllocator> & constraint_models)
     : D(D_storage.map())
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
@@ -169,8 +169,9 @@ namespace pinocchio
       typedef std::reference_wrapper<const ConstraintModel> WrappedType;
       typedef std::vector<WrappedType> WrappedTypeVector;
 
-      WrappedTypeVector wrapped_contact_models(contact_models.cbegin(), contact_models.cend());
-      resize(model, wrapped_contact_models);
+      WrappedTypeVector wrapped_constraint_models(
+        constraint_models.cbegin(), constraint_models.cend());
+      resize(model, wrapped_constraint_models);
     }
 
     ///
@@ -185,10 +186,11 @@ namespace pinocchio
       int O1,
       template<typename, int> class JointCollectionTpl,
       template<typename T> class Holder,
-      class Allocator>
+      class ConstraintAllocator>
     ContactCholeskyDecompositionTpl(
       const ModelTpl<S1, O1, JointCollectionTpl> & model,
-      const std::vector<Holder<const RigidConstraintModelTpl<S1, O1>>, Allocator> & contact_models)
+      const std::vector<Holder<const ConstraintModel>, ConstraintAllocator> &
+        wrapped_constraint_models)
     : D(D_storage.map())
     , Dinv(Dinv_storage.map())
     , U(U_storage.map())
@@ -196,7 +198,7 @@ namespace pinocchio
     , compliance(compliance_storage.map())
     , damping(damping_storage.map())
     {
-      resize(model, contact_models);
+      resize(model, wrapped_constraint_models);
     }
 
     ///
