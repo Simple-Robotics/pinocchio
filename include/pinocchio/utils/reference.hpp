@@ -123,6 +123,38 @@ namespace pinocchio
     };
 
     template<typename T>
+    struct remove_ref<std::unique_ptr<T>>
+    {
+      typedef typename remove_ref<T>::type type;
+
+      static T & get_ref(const std::unique_ptr<T> & ptr)
+      {
+        return *ptr;
+      }
+    };
+
+    template<typename T>
+    struct remove_ref<const std::unique_ptr<T>> : remove_ref<std::unique_ptr<T>>
+    {
+    };
+
+    template<typename T>
+    struct remove_ref<std::unique_ptr<const T>>
+    {
+      typedef typename remove_ref<const T>::type type;
+
+      static const T & get_ref(const std::unique_ptr<const T> & ptr)
+      {
+        return *ptr;
+      }
+    };
+
+    template<typename T>
+    struct remove_ref<const std::unique_ptr<const T>> : remove_ref<std::unique_ptr<const T>>
+    {
+    };
+
+    template<typename T>
     typename remove_ref<T>::type & get_ref(T & v)
     {
       return remove_ref<T>::get_ref(v);
