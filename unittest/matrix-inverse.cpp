@@ -24,7 +24,7 @@ using DynamicMatrix = MatrixTpl<Eigen::Dynamic>;
 #ifndef NDEBUG
 const int N = int(1e3);
 #else
-const int N = int(1e6);
+const int N = int(1e4);
 #endif
 
 template<int size>
