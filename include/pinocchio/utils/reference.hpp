@@ -102,18 +102,12 @@ namespace pinocchio
     };
 
     template<typename T>
-    struct remove_ref<const std::shared_ptr<T>>
+    struct remove_ref<const std::shared_ptr<T>> : remove_ref<std::shared_ptr<T>>
     {
-      typedef typename remove_ref<T>::type type;
-
-      static T & get_ref(const std::shared_ptr<T> & ptr)
-      {
-        return *ptr;
-      }
     };
 
     template<typename T>
-    struct remove_ref<const std::shared_ptr<const T>>
+    struct remove_ref<std::shared_ptr<const T>>
     {
       typedef typename remove_ref<const T>::type type;
 
@@ -121,6 +115,11 @@ namespace pinocchio
       {
         return *ptr;
       }
+    };
+
+    template<typename T>
+    struct remove_ref<const std::shared_ptr<const T>> : remove_ref<std::shared_ptr<const T>>
+    {
     };
 
     template<typename T>
