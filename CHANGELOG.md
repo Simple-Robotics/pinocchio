@@ -15,6 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added joint method `lieGroup` that returns the Lie group instance associated to a joint. This allows performing some operations (e.g. `integrate`...) individually.
 - Added model method `lieGroup` that returns the Lie group instance associated to the model. It is a Cartesian product of multiple Lie groups. It allows combination of the model Lie group with other Lie groups.
 
+## [3.7.0] - 2025-05-21
+
+### Changed
+- Change the default branch to `devel` ([#2666](https://github.com/stack-of-tasks/pinocchio/pull/2666))
+- Implement `captureImage` for Panda3D visualizer for video recording ([#2668](https://github.com/stack-of-tasks/pinocchio/pull/2668))
+- Drop Ubuntu 20.04 support ([#2680](https://github.com/stack-of-tasks/pinocchio/pull/2680))
+
 ## [3.6.0] - 2025-04-28
 
 ### Fixed
@@ -1158,7 +1165,8 @@ The model can either be parsed from a URDF format or be created by appendending 
         • Fixed (concatenation of two consecutive bodies)
 
 
-[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/stack-of-tasks/pinocchio/compare/v3.7.0...HEAD
+[3.7.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.5.0...v3.6.0
 [3.5.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/stack-of-tasks/pinocchio/compare/v3.3.1...v3.4.0
