@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added joint methods `jointQrows`, `jointQcols` (resp. `jointQVblock`) that make selections of size `NQ` (resp. `NQ x NV`).
 - Added joint method `lieGroup` that returns the Lie group instance associated to a joint. This allows performing some operations (e.g. `integrate`...) individually.
 - Added model method `lieGroup` that returns the Lie group instance associated to the model. It is a Cartesian product of multiple Lie groups. It allows combination of the model Lie group with other Lie groups.
+- Add Python example showcasing the candlewick visualizer
+
+### Changed
+
+- bindings/python : Add missing arg names in `visualizer-visitor.hpp`
 
 ## [3.7.0] - 2025-05-21
 
