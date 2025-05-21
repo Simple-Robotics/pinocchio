@@ -1,9 +1,8 @@
+import importlib.util
 import unittest
 from pathlib import Path
 
 import pinocchio as pin
-
-import importlib.util
 
 mujoco_spec = importlib.util.find_spec("mujoco")
 mujoco_found = mujoco_spec is not None
