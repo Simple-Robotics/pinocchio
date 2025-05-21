@@ -381,6 +381,10 @@ namespace pinocchio
       calc_first_order(*this, data, q.derived(), v.derived());
     }
 
+    // Declaration of overload : must be define after Lie group and joint visitors
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<JointModelTpl>::type lieGroup_impl() const;
+
     template<typename VectorLike, typename Matrix6Like>
     void calc_aba(
       JointDataDerived & data,

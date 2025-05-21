@@ -141,6 +141,23 @@ namespace pinocchio
     template<typename ConstraintModelVisitorDerived, typename ReturnType = void>
     struct ConstraintUnaryVisitorBase
     {
+      template<
+        typename Scalar,
+        int Options,
+        template<typename, int> class ConstraintCollectionTpl,
+        typename ArgsTmp>
+      static ReturnType run(
+        ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+        ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata,
+        ArgsTmp args)
+      {
+        typedef ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintModel;
+        typedef ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> ConstraintData;
+
+        ModelAndDataVisitor<ConstraintModel, ConstraintData, ArgsTmp> visitor(cdata, args);
+
+        return boost::apply_visitor(visitor, cmodel);
+      }
 
       template<
         typename Scalar,
@@ -350,6 +367,22 @@ namespace pinocchio
         }
 
         template<typename ConstraintModelDerived>
+        ReturnType operator()(ConstraintModelBase<ConstraintModelDerived> & cmodel) const
+        {
+          typedef typename ConstraintModelBase<ConstraintModelDerived>::ConstraintData
+            ConstraintDataDerived;
+          using ConstraintDataGet = typename std::conditional<
+            std::is_const<ConstraintData>::value, const ConstraintDataDerived,
+            ConstraintDataDerived>::type;
+
+          return bf::invoke(
+            &ConstraintModelVisitorDerived::template algo<ConstraintModelDerived>,
+            bf::append(
+              boost::ref(cmodel.derived()), boost::ref(boost::get<ConstraintDataGet>(cdata)),
+              args));
+        }
+
+        template<typename ConstraintModelDerived>
         ReturnType operator()(const ConstraintModelBase<ConstraintModelDerived> & cmodel) const
         {
           typedef typename ConstraintModelBase<ConstraintModelDerived>::ConstraintData
@@ -420,6 +453,44 @@ namespace pinocchio
       ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata)
     {
       typedef ConstraintModelCalcVisitor<Scalar, Options, JointCollectionTpl> Algo;
+      Algo::run(cmodel, cdata, typename Algo::ArgsType(model, data));
+    }
+
+    /**
+     * @brief      ConstraintModelResizeVisitor fusion visitor
+     */
+    template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+    struct ConstraintModelResizeVisitor
+    : visitors::ConstraintUnaryVisitorBase<
+        ConstraintModelResizeVisitor<Scalar, Options, JointCollectionTpl>>
+    {
+      typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+      typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
+      typedef boost::fusion::vector<const Model &, const Data &> ArgsType;
+
+      template<typename ConstraintModel>
+      static void algo(
+        pinocchio::ConstraintModelBase<ConstraintModel> & cmodel,
+        typename ConstraintModel::ConstraintData & cdata,
+        const Model & model,
+        const Data & data)
+      {
+        cmodel.resize(model, data, cdata.derived());
+      }
+    };
+
+    template<
+      typename Scalar,
+      int Options,
+      template<typename S, int O> class JointCollectionTpl,
+      template<typename S, int O> class ConstraintCollectionTpl>
+    void resize(
+      ConstraintModelTpl<Scalar, Options, ConstraintCollectionTpl> & cmodel,
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintDataTpl<Scalar, Options, ConstraintCollectionTpl> & cdata)
+    {
+      typedef ConstraintModelResizeVisitor<Scalar, Options, JointCollectionTpl> Algo;
       Algo::run(cmodel, cdata, typename Algo::ArgsType(model, data));
     }
 

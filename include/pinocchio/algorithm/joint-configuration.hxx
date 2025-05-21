@@ -7,6 +7,7 @@
 
 #include "pinocchio/multibody/visitor.hpp"
 #include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
+#include "pinocchio/multibody/liegroup/liegroup-joint.hpp"
 
 /* --- Details -------------------------------------------------------------------- */
 namespace pinocchio
@@ -237,6 +238,143 @@ namespace pinocchio
       Algo;
     typename Algo::ArgsType args(
       q.derived(), v.derived(), PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixType, J), arg, op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void tangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+    const AssignmentOperatorType op)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TM.rows(), model.nq, "The output argument is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      TM.cols(), model.nv, "The output argument is not of the right size");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
+    typename Algo::ArgsType args(
+      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename TangentMapMatrixType>
+  void compactTangentMap(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<TangentMapMatrixType> & TMc)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    // Assume TMc.rows() == SUM_(j in joint_selection) j.nq() --> assert at the end
+    // Assume TMc.cols() >= max_nv --> assert in the Visitor
+
+    typedef CompactSetTangentMapStep<LieGroup_t, ConfigVectorType, TangentMapMatrixType> Algo;
+
+    int idx = 0;
+    typename Algo::ArgsType args(
+      q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TMc), idx);
+    for (size_t i = 0; i < joint_selection.size(); ++i)
+    {
+      Algo::run(model.joints[joint_selection[i]], args);
+    }
+    assert(idx == TMc.rows());
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void tangentMapProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType op)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.rows(), model.nv, "The input matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_out.rows(), model.nq, "The output matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.cols(), mat_out.cols(), "The input/output matrix sized do not match");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapProductStep<LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType> Algo;
+    typename Algo::ArgsType args(
+      q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl,
+    typename ConfigVectorType,
+    typename MatrixInType,
+    typename MatrixOutType>
+  void tangentMapTransposeProduct(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const Eigen::MatrixBase<ConfigVectorType> & q,
+    const Eigen::MatrixBase<MatrixInType> & mat_in,
+    const Eigen::MatrixBase<MatrixOutType> & mat_out,
+    const AssignmentOperatorType op)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      q.size(), model.nq, "The configuration vector is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.rows(), model.nq, "The input matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_out.rows(), model.nv, "The output matrix is not of the right size");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(
+      mat_in.cols(), mat_out.cols(), "The input/output matrix sized do not match");
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef typename Model::JointIndex JointIndex;
+
+    typedef TangentMapTransposeProductStep<
+      LieGroup_t, ConfigVectorType, MatrixInType, MatrixOutType>
+      Algo;
+    typename Algo::ArgsType args(
+      q.derived(), mat_in.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out), op);
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
     {
       Algo::run(model.joints[i], args);
@@ -525,6 +663,46 @@ namespace pinocchio
     }
   }
 
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl>
+  void lieGroup(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    typename LieGroup_t::template operationProduct<Scalar, Options>::type & lgo)
+  {
+
+    typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
+    typedef LieGroupInstanceStep<LieGroup_t, Scalar, Options> Algo;
+    typedef typename Model::JointIndex JointIndex;
+
+    typename Algo::ArgsType args(lgo);
+    for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+    {
+      Algo::run(model.joints[i], args);
+    }
+  }
+
+  template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
+  void indexvInfo(
+    const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+    const std::vector<typename ModelTpl<Scalar, Options, JointCollectionTpl>::JointIndex> &
+      joint_selection,
+    std::vector<int> & nvs,
+    std::vector<int> & idx_vs)
+  {
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(nvs.size(), 0, "The nvs vector must be empty");
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(idx_vs.size(), 0, "The idx_vs vector must empty");
+
+    typename IndexvInfoStep::ArgsType args(nvs, idx_vs);
+
+    for (size_t i = 0; i < joint_selection.size(); ++i)
+    {
+      IndexvInfoStep::run(model.joints[joint_selection[i]], args);
+    }
+  }
+
   // ----------------- API that allocates memory ---------------------------- //
 
   template<
@@ -659,6 +837,20 @@ namespace pinocchio
     ReturnType q(model.nq);
     neutral<LieGroup_t, Scalar, Options, JointCollectionTpl, ReturnType>(model, q);
     return q;
+  }
+
+  template<
+    typename LieGroup_t,
+    typename Scalar,
+    int Options,
+    template<typename, int> class JointCollectionTpl>
+  typename LieGroup_t::template operationProduct<Scalar, Options>::type
+  lieGroup(const ModelTpl<Scalar, Options, JointCollectionTpl> & model)
+  {
+    typedef typename LieGroup_t::template operationProduct<Scalar, Options>::type LGO;
+    LGO lgo;
+    lieGroup<LieGroup_t, Scalar, Options, JointCollectionTpl>(model, lgo);
+    return lgo;
   }
 
 } // namespace pinocchio

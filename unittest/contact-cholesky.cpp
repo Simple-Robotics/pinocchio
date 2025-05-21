@@ -1755,8 +1755,8 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_dynamic_size)
     {
       joint_indices.push_back((Model::JointIndex)i);
     }
-    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     model.positionLimitMargin.setZero();
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     constraint_models.push_back(joint_limit_constraint_model);
     // No activable joint limits
     BOOST_CHECK(constraint_models[0].size() == 0);
@@ -1824,8 +1824,8 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_dynamic_size)
     {
       joint_indices.push_back((Model::JointIndex)i);
     }
-    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     model.positionLimitMargin.setZero();
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     constraint_models.push_back(joint_limit_constraint_model);
     // Activable joint limits (only the rotation part of the freeflyer is not activable)
     BOOST_CHECK(constraint_models[0].size() == 2 * (model.nv - 3));
@@ -1890,8 +1890,8 @@ BOOST_AUTO_TEST_CASE(contact_cholesky_dynamic_size)
     {
       joint_indices.push_back((Model::JointIndex)i);
     }
-    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     model.positionLimitMargin.setZero();
+    JointLimitConstraintModel joint_limit_constraint_model(model, joint_indices);
     constraint_models.push_back(joint_limit_constraint_model);
     // Activable joint limits (only the rotation part of the freeflyer is not activable)
     BOOST_CHECK(constraint_models[0].size() == 2 * (model.nv - 3));

@@ -189,6 +189,57 @@ namespace pinocchio
       }
     }
 
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op) const
+    {
+      switch (op)
+      {
+      case SETTO:
+        TM12(TM).setZero();
+        TM21(TM).setZero();
+        // fallthrough
+      case ADDTO:
+      case RMTO:
+        lg1.tangentMap(Q1(q), TM11(TM), op);
+        lg2.tangentMap(Q2(q), TM22(TM), op);
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      lg1.tangentMapProduct(
+        Q1(q), Min.template topRows<LieGroup1::NV>(), Mout.template topRows<LieGroup1::NQ>(), op);
+      lg2.tangentMapProduct(
+        Q2(q), Min.template bottomRows<LieGroup2::NV>(), Mout.template bottomRows<LieGroup2::NQ>(),
+        op);
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapTransposeProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+    {
+      lg1.tangentMapTransposeProduct(
+        Q1(q), Min.template topRows<LieGroup1::NQ>(), Mout.template topRows<LieGroup1::NV>(), op);
+      lg2.tangentMapTransposeProduct(
+        Q2(q), Min.template bottomRows<LieGroup2::NQ>(), Mout.template bottomRows<LieGroup2::NV>(),
+        op);
+    }
+
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & q,
@@ -387,6 +438,32 @@ namespace pinocchio
       return PINOCCHIO_EIGEN_CONST_CAST(Jac, J)
         .template bottomRightCorner<LieGroup2::NV, LieGroup2::NV>(lg2.nv(), lg2.nv());
     }
+
+    template<typename TM_t>
+    Eigen::Block<TM_t, LieGroup1::NQ, LieGroup1::NV> TM11(const Eigen::MatrixBase<TM_t> & TM) const
+    {
+      return PINOCCHIO_EIGEN_CONST_CAST(TM_t, TM)
+        .template topLeftCorner<LieGroup1::NQ, LieGroup1::NV>(lg1.nq(), lg1.nv());
+    }
+    template<typename TM_t>
+    Eigen::Block<TM_t, LieGroup1::NQ, LieGroup2::NV> TM12(const Eigen::MatrixBase<TM_t> & TM) const
+    {
+      return PINOCCHIO_EIGEN_CONST_CAST(TM_t, TM)
+        .template topRightCorner<LieGroup1::NQ, LieGroup2::NV>(lg1.nq(), lg2.nv());
+    }
+    template<typename TM_t>
+    Eigen::Block<TM_t, LieGroup2::NQ, LieGroup1::NV> TM21(const Eigen::MatrixBase<TM_t> & TM) const
+    {
+      return PINOCCHIO_EIGEN_CONST_CAST(TM_t, TM)
+        .template bottomLeftCorner<LieGroup2::NQ, LieGroup1::NV>(lg2.nq(), lg1.nv());
+    }
+    template<typename TM_t>
+    Eigen::Block<TM_t, LieGroup2::NQ, LieGroup2::NV> TM22(const Eigen::MatrixBase<TM_t> & TM) const
+    {
+      return PINOCCHIO_EIGEN_CONST_CAST(TM_t, TM)
+        .template bottomRightCorner<LieGroup2::NQ, LieGroup2::NV>(lg2.nq(), lg2.nv());
+    }
+
 #undef REMOVE_IF_EIGEN_TOO_LOW
 
   }; // struct CartesianProductOperation

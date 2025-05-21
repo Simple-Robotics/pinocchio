@@ -258,6 +258,26 @@ namespace pinocchio
       const Eigen::MatrixBase<Tangent_t> & v,
       const Eigen::MatrixBase<JacobianOut_t> & J) const;
 
+    template<class Config_t, class TangentMap_t>
+    void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapTransposeProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const;
+
     template<class ConfigL_t, class ConfigR_t>
     Scalar squaredDistance_impl(
       const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1) const;

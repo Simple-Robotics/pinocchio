@@ -85,6 +85,9 @@ namespace pinocchio
             bp::args("self", "model", "data", "constraint_data"),
             "Compute the constraint jacobian.")
           .def(
+            "resize", &resize, bp::args("self", "model", "data", "constraint_data"),
+            "Resize the constraint before evaluation.")
+          .def(
             "jacobianMatrixProduct", &jacobianMatrixProduct,
             bp::args("self", "model", "data", "constraint_data", "matrix"),
             "Forward chain rule: return product between the jacobian and a matrix.")
@@ -172,6 +175,12 @@ namespace pinocchio
               bp::return_internal_reference<>()),
             "Baumgarte parameters associated with the constraint.");
         }
+      }
+
+      static void
+      resize(Self & self, const Model & model, const Data & data, ConstraintData & constraint_data)
+      {
+        self.resize(model, data, constraint_data);
       }
 
       static void calc(

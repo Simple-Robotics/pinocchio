@@ -873,6 +873,59 @@ namespace pinocchio
         Mat.derived(), Base::i_v, Base::i_v, m_nvExtended, m_nvExtended);
     }
 
+    /* Acces to dedicated Q releated rows or columns.*/
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::ConstType
+    jointQCols_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), Base::i_q, m_nqExtended);
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::Type
+    jointQCols_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), Base::i_q, m_nqExtended);
+    }
+
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
+    jointQRows_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), Base::i_q, m_nqExtended);
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::Type
+    jointQRows_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), Base::i_q, m_nqExtended);
+    }
+
+    /// \brief Returns a block of dimension m_nqExtendedxm_nvExtended located at position
+    /// idx_q_a,idx_v_a in the matrix Mat
+    // Const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
+    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(
+        Mat.derived(), idx_q_a, idx_v_a, m_nqExtended, m_nvExtended);
+    }
+
+    // Non-const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
+    jointQVBlock_impl(Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(
+        Mat.derived(), idx_q_a, idx_v_a, m_nqExtended, m_nvExtended);
+    }
+
     void disp(std::ostream & os) const
     {
       Base::disp(os);

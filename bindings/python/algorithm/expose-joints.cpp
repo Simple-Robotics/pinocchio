@@ -10,6 +10,9 @@ namespace pinocchio
   namespace python
   {
 
+    typedef typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
+      LgType;
+
     static context::VectorXs
     normalize_proxy(const context::Model & model, const context::VectorXs & config)
     {
@@ -84,6 +87,77 @@ namespace pinocchio
       dDifference(model, q1, q2, J, arg);
 
       return J;
+    }
+
+    context::MatrixXs tangentMap_proxy(const context::Model & model, const context::VectorXs & q)
+    {
+      context::MatrixXs TM(context::MatrixXs::Zero(model.nq, model.nv));
+
+      tangentMap(model, q, TM, SETTO);
+
+      return TM;
+    }
+
+    context::MatrixXs
+    compactTangentMap_proxy(const context::Model & model, const context::VectorXs & q)
+    {
+      context::MatrixXs TMc(context::MatrixXs::Zero(model.nq, MAX_JOINT_NV));
+      typedef typename context::Model::JointIndex JointIndex;
+      std::vector<JointIndex> joint_selection;
+      for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+      {
+        joint_selection.push_back(i);
+      }
+
+      compactTangentMap(model, joint_selection, q, TMc);
+
+      return TMc;
+    }
+
+    context::MatrixXs tangentMapProduct_proxy(
+      const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
+    {
+      context::MatrixXs mat_out(context::MatrixXs::Zero(model.nq, mat_in.cols()));
+
+      tangentMapProduct(model, q, mat_in, mat_out, SETTO);
+
+      return mat_out;
+    }
+
+    context::MatrixXs tangentMapTransposeProduct_proxy(
+      const context::Model & model, const context::VectorXs & q, const context::MatrixXs & mat_in)
+    {
+      context::MatrixXs mat_out(context::MatrixXs::Zero(model.nv, mat_in.cols()));
+
+      tangentMapTransposeProduct(model, q, mat_in, mat_out, SETTO);
+
+      return mat_out;
+    }
+
+    LgType lieGroup_proxy(const context::Model & model)
+    {
+      LgType res;
+
+      lieGroup(model, res);
+
+      return res;
+    }
+
+    bp::tuple indexvInfo_proxy(const context::Model & model)
+    {
+      std::vector<int> nvs;
+      std::vector<int> idx_vs;
+
+      typedef typename context::Model::JointIndex JointIndex;
+      std::vector<JointIndex> joint_selection;
+      for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+      {
+        joint_selection.push_back(i);
+      }
+
+      indexvInfo(model, joint_selection, nvs, idx_vs);
+
+      return bp::make_tuple(nvs, idx_vs);
     }
 
     void exposeJointsAlgo()
@@ -204,6 +278,40 @@ namespace pinocchio
         "pinocchio.ArgumentPosition.ARG1, depending on the desired Jacobian value.\n");
 
       bp::def(
+        "tangentMap", &tangentMap_proxy, bp::args("model", "q"),
+        "Computes the tangent map in configuration q that map of a small variation express in the "
+        "Lie algebra as a small variation in the parametric space.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n");
+
+      bp::def(
+        "compactTangentMap", &compactTangentMap_proxy, bp::args("model", "q"),
+        "Computes the tangent map in configuration q that map of a small variation express in the "
+        "Lie algebra as a small variation in the parametric space. Store the result in a compact "
+        "manner that can be exploited using indexvInfo.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n");
+
+      bp::def(
+        "tangentMapProduct", &tangentMapProduct_proxy, bp::args("model", "q", "mat_in"),
+        "Apply the tangent map to a matrix mat_in.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n"
+        "\tmat_in: a matrix (size model.nq, ncols)");
+
+      bp::def(
+        "tangentMapTransposeProduct", &tangentMapTransposeProduct_proxy,
+        bp::args("model", "q", "mat_in"),
+        "Apply the tangent map to a matrix mat_in.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n"
+        "\tq: the joint configuration vector (size model.nq)\n"
+        "\tmat_in: a matrix (size model.nv, ncols)");
+
+      bp::def(
         "randomConfiguration", &randomConfiguration_proxy, bp::arg("model"),
         "Generate a random configuration in the bounds given by the lower and upper limits "
         "contained in model.\n\n"
@@ -235,6 +343,20 @@ namespace pinocchio
         "Parameters:\n"
         "\tmodel: model of the kinematic tree\n"
         "\tq: a joint configuration vector to normalize (size model.nq)\n");
+
+      bp::def(
+        "lieGroup", lieGroup_proxy, bp::args("model"),
+        "Returns the Lie group associated to the model. It is the cartesian product of the lie "
+        "groups of all its joints.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n");
+
+      bp::def(
+        "indexvInfo", indexvInfo_proxy, bp::args("model"),
+        "Returns two vectors of size model.nq that gives for each q_i, the associated idx_v and nv "
+        "of the joint for which q_i is a configuration component.\n\n"
+        "Parameters:\n"
+        "\tmodel: model of the kinematic tree\n");
 
 #ifndef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
 

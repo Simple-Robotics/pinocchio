@@ -189,6 +189,28 @@ namespace pinocchio
         lg.dIntegrateTransport(q, v, J, Jout, arg);
         return Jout;
       }
+      static JacobianMatrix_t tangentMap(const LieGroupType & lg, const ConfigVector_t & q)
+      {
+        JacobianMatrix_t TM(lg.nq(), lg.nv());
+        lg.tangentMap(q, TM, SETTO);
+        return TM;
+      }
+
+      static JacobianMatrix_t tangentMapProduct(
+        const LieGroupType & lg, const ConfigVector_t & q, const JacobianMatrix_t & Min)
+      {
+        JacobianMatrix_t Mout(lg.nq(), Min.cols());
+        lg.tangentMapProduct(q, Min, Mout, SETTO);
+        return Mout;
+      }
+
+      static JacobianMatrix_t tangentMapTransposeProduct(
+        const LieGroupType & lg, const ConfigVector_t & q, const JacobianMatrix_t & Min)
+      {
+        JacobianMatrix_t Mout(lg.nv(), Min.cols());
+        lg.tangentMapTransposeProduct(q, Min, Mout, SETTO);
+        return Mout;
+      }
     };
 
     template<class LieGroupType>
@@ -217,6 +239,9 @@ namespace pinocchio
           .def("dDifference", LieGroupWrapper::dDifference1)
           .def("dDifference", LieGroupWrapper::dDifference2)
           .def("dDifference", LieGroupWrapper::dDifference3)
+          .def("tangentMap", LieGroupWrapper::tangentMap)
+          .def("tangentMapProduct", LieGroupWrapper::tangentMapProduct)
+          .def("tangentMapTransposeProduct", LieGroupWrapper::tangentMapTransposeProduct)
 
           .def("interpolate", LieGroupWrapper::interpolate)
 

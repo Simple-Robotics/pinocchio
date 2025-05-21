@@ -234,6 +234,78 @@ namespace pinocchio
       return mat.block(row_id, col_id, row_size_block, col_size_block);
     }
   };
+
+  template<int NQ, int NV>
+  struct DoubleSizeDepType
+  {
+    template<class Mat>
+    struct BlockReturn
+    {
+      typedef Eigen::Block<Mat, NQ, NV> Type;
+      typedef const Eigen::Block<const Mat, NQ, NV> ConstType;
+    };
+
+    template<typename D>
+    static typename BlockReturn<D>::ConstType block(
+      const Eigen::MatrixBase<D> & mat,
+      typename Eigen::DenseBase<D>::Index row_id,
+      typename Eigen::DenseBase<D>::Index col_id,
+      typename Eigen::DenseBase<D>::Index row_size_block = NQ,
+      typename Eigen::DenseBase<D>::Index col_size_block = NV)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(row_size_block);
+      PINOCCHIO_UNUSED_VARIABLE(col_size_block);
+      return mat.template block<NQ, NV>(row_id, col_id);
+    }
+
+    template<typename D>
+    static typename BlockReturn<D>::Type block(
+      Eigen::MatrixBase<D> & mat,
+      typename Eigen::DenseBase<D>::Index row_id,
+      typename Eigen::DenseBase<D>::Index col_id,
+      typename Eigen::DenseBase<D>::Index row_size_block = NQ,
+      typename Eigen::DenseBase<D>::Index col_size_block = NV)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(row_size_block);
+      PINOCCHIO_UNUSED_VARIABLE(col_size_block);
+      return mat.template block<NQ, NV>(row_id, col_id);
+    }
+  };
+
+  template<>
+  struct DoubleSizeDepType<Eigen::Dynamic, Eigen::Dynamic>
+  {
+    template<class Mat>
+    struct BlockReturn
+    {
+      typedef Eigen::Block<Mat> Type;
+      typedef const Eigen::Block<const Mat> ConstType;
+    };
+
+    template<typename D>
+    static typename BlockReturn<D>::ConstType block(
+      const Eigen::MatrixBase<D> & mat,
+      typename Eigen::DenseBase<D>::Index row_id,
+      typename Eigen::DenseBase<D>::Index col_id,
+      typename Eigen::DenseBase<D>::Index row_size_block,
+      typename Eigen::DenseBase<D>::Index col_size_block)
+    {
+      return mat.block(row_id, col_id, row_size_block, col_size_block);
+    }
+
+    template<typename D>
+    static typename BlockReturn<D>::Type block(
+      Eigen::MatrixBase<D> & mat,
+      typename Eigen::DenseBase<D>::Index row_id,
+      typename Eigen::DenseBase<D>::Index col_id,
+      typename Eigen::DenseBase<D>::Index row_size_block,
+      typename Eigen::DenseBase<D>::Index col_size_block)
+    {
+      return mat.block(row_id, col_id, row_size_block, col_size_block);
+    }
+  };
+  // Could be specialized for only one of the two dynamics, but this usecase does not exist yet
+
 } // namespace pinocchio
 
 #endif // ifndef __pinocchio_math_matrix_block_hpp__

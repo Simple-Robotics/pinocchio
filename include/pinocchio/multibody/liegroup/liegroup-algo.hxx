@@ -7,13 +7,14 @@
 
 #include "pinocchio/multibody/visitor.hpp"
 #include "pinocchio/multibody/joint/joint-composite.hpp"
+#include "pinocchio/multibody/joint/joint-mimic.hpp"
 
 namespace pinocchio
 {
 
   namespace details
   {
-    template<typename Algo>
+    template<typename Visitor>
     struct Dispatch
     {
       template<
@@ -25,7 +26,7 @@ namespace pinocchio
       run(const JointModelCompositeTpl<Scalar, Options, JointCollectionTpl> & jmodel, ArgsType args)
       {
         for (size_t i = 0; i < jmodel.joints.size(); ++i)
-          Algo::run(jmodel.joints[i], args);
+          Visitor::run(jmodel.joints[i], args);
       }
     };
 
@@ -42,58 +43,158 @@ namespace pinocchio
   PINOCCHIO_DETAILS_WRITE_ARGS_4(JM), typename boost::fusion::result_of::at_c<ArgsType, 4>::type a4
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelCompositeTpl<JointCollection>))       \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0));                \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelCompositeTpl<JointCollection>))       \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1));            \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelCompositeTpl<JointCollection>))       \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2));        \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelCompositeTpl<JointCollection>))       \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(jmodel.derived(), ArgsType(a0, a1, a2, a3));    \
     }                                                                                              \
   }
 
 #define PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(Algo)                                         \
-  template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelCompositeTpl<JointCollection>>                                    \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelCompositeTpl<_Scalar, _Options, JointCollection>>                 \
   {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelCompositeTpl<JointCollection>))       \
+    typedef JointModelCompositeTpl<_Scalar, _Options, JointCollection> JointModelComposite;        \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelComposite))                           \
     {                                                                                              \
       ::pinocchio::details::Dispatch<Visitor>::run(                                                \
         jmodel.derived(), ArgsType(a0, a1, a2, a3, a4));                                           \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimic))                               \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_2(JointModelMimic))                               \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_3(JointModelMimic))                               \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_4(JointModelMimic))                               \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
+    }                                                                                              \
+  }
+
+#define PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(Algo)                                               \
+  template<                                                                                        \
+    typename Visitor, typename _Scalar, int _Options,                                              \
+    template<typename, int> class JointCollection>                                                 \
+  struct Algo<Visitor, JointModelMimicTpl<_Scalar, _Options, JointCollection>>                     \
+  {                                                                                                \
+    typedef typename Visitor::ArgsType ArgsType;                                                   \
+    typedef JointModelMimicTpl<_Scalar, _Options, JointCollection> JointModelMimic;                \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_5(JointModelMimic))                               \
+    {                                                                                              \
+      PINOCCHIO_UNUSED_VARIABLE(jmodel);                                                           \
+      PINOCCHIO_UNUSED_VARIABLE(a0);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a1);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a2);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a3);                                                               \
+      PINOCCHIO_UNUSED_VARIABLE(a4);                                                               \
     }                                                                                              \
   }
 
@@ -203,6 +304,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(IntegrateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(IntegrateStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateStepAlgo;
@@ -249,6 +351,176 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(dIntegrateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(dIntegrateStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapStepAlgo;
+
+  template<typename LieGroup_t, typename ConfigVectorIn, typename TangentMapMatrixType>
+  struct TangentMapStep
+  : public fusion::JointUnaryVisitorBase<
+      TangentMapStep<LieGroup_t, ConfigVectorIn, TangentMapMatrixType>>
+  {
+    typedef boost::fusion::
+      vector<const ConfigVectorIn &, TangentMapMatrixType &, const AssignmentOperatorType &>
+        ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_3(TangentMapStepAlgo, TangentMapStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapStepAlgo
+  {
+    template<typename ConfigVectorIn, typename TangentMapMatrixType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<TangentMapMatrixType> & TM,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMap(
+        jmodel.jointConfigSelector(q.derived()),
+        jmodel.jointQVBlock(
+          PINOCCHIO_EIGEN_CONST_CAST(TangentMapMatrixType, TM), jmodel.idx_q(), jmodel.idx_v()),
+        op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(TangentMapStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(TangentMapStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct CompactSetTangentMapStepAlgo;
+
+  template<typename LieGroup_t, typename ConfigVectorIn, typename CompactSetTangentMapMatrixType>
+  struct CompactSetTangentMapStep
+  : public fusion::JointUnaryVisitorBase<
+      CompactSetTangentMapStep<LieGroup_t, ConfigVectorIn, CompactSetTangentMapMatrixType>>
+  {
+    typedef boost::fusion::vector<const ConfigVectorIn &, CompactSetTangentMapMatrixType &, int &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_3(CompactSetTangentMapStepAlgo, CompactSetTangentMapStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct CompactSetTangentMapStepAlgo
+  {
+    template<typename ConfigVectorIn, typename CompactSetTangentMapMatrixType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<CompactSetTangentMapMatrixType> & TMc,
+      int & idx)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+      assert(jmodel.nv() <= TMc.cols());
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMap(
+        jmodel.jointConfigSelector(q.derived()),
+        jmodel.jointQVBlock(
+          PINOCCHIO_EIGEN_CONST_CAST(CompactSetTangentMapMatrixType, TMc), idx, 0),
+        SETTO);
+      idx += jmodel.nq();
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(CompactSetTangentMapStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(CompactSetTangentMapStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapProductStepAlgo;
+
+  template<
+    typename LieGroup_t,
+    typename ConfigVectorIn,
+    typename MatrixInType,
+    typename MatrixOutType>
+  struct TangentMapProductStep
+  : public fusion::JointUnaryVisitorBase<
+      TangentMapProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
+  {
+    typedef boost::fusion::vector<
+      const ConfigVectorIn &,
+      const MatrixInType &,
+      MatrixOutType &,
+      const AssignmentOperatorType &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(TangentMapProductStepAlgo, TangentMapProductStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapProductStepAlgo
+  {
+    template<typename ConfigVectorIn, typename MatrixInType, typename MatrixOutType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<MatrixInType> & mat_in,
+      const Eigen::MatrixBase<MatrixOutType> & mat_out,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMapProduct(
+        jmodel.jointConfigSelector(q.derived()), jmodel.jointRows(mat_in.derived()),
+        jmodel.jointQRows(PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out)), op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(TangentMapProductStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(TangentMapProductStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapTransposeProductStepAlgo;
+
+  template<
+    typename LieGroup_t,
+    typename ConfigVectorIn,
+    typename MatrixInType,
+    typename MatrixOutType>
+  struct TangentMapTransposeProductStep
+  : public fusion::JointUnaryVisitorBase<
+      TangentMapTransposeProductStep<LieGroup_t, ConfigVectorIn, MatrixInType, MatrixOutType>>
+  {
+    typedef boost::fusion::vector<
+      const ConfigVectorIn &,
+      const MatrixInType &,
+      MatrixOutType &,
+      const AssignmentOperatorType &>
+      ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_4(
+      TangentMapTransposeProductStepAlgo, TangentMapTransposeProductStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct TangentMapTransposeProductStepAlgo
+  {
+    template<typename ConfigVectorIn, typename MatrixInType, typename MatrixOutType>
+    static void run(
+      const JointModelBase<JointModel> & jmodel,
+      const Eigen::MatrixBase<ConfigVectorIn> & q,
+      const Eigen::MatrixBase<MatrixInType> & mat_in,
+      const Eigen::MatrixBase<MatrixOutType> & mat_out,
+      const AssignmentOperatorType & op)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+
+      typename LieGroupMap::template operation<JointModel>::type lgo;
+      lgo.tangentMapTransposeProduct(
+        jmodel.jointConfigSelector(q.derived()), jmodel.jointQRows(mat_in.derived()),
+        jmodel.jointRows(PINOCCHIO_EIGEN_CONST_CAST(MatrixOutType, mat_out)), op);
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(TangentMapTransposeProductStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(TangentMapTransposeProductStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateTransportStepAlgo;
@@ -305,6 +577,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_5(dIntegrateTransportStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_5(dIntegrateTransportStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dIntegrateTransportInPlaceStepAlgo;
@@ -353,6 +626,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(dIntegrateTransportInPlaceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(dIntegrateTransportInPlaceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct dDifferenceStepAlgo;
@@ -397,6 +671,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(dDifferenceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(dDifferenceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct InterpolateStepAlgo;
@@ -443,6 +718,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(InterpolateStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(InterpolateStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct DifferenceStepAlgo;
@@ -483,6 +759,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(DifferenceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(DifferenceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct SquaredDistanceStepAlgo;
@@ -526,6 +803,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(SquaredDistanceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(SquaredDistanceStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct SquaredDistanceSumStepAlgo;
@@ -559,6 +837,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(SquaredDistanceSumStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(SquaredDistanceSumStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct RandomConfigurationStepAlgo;
@@ -600,6 +879,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(RandomConfigurationStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(RandomConfigurationStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct NormalizeStepAlgo;
@@ -628,6 +908,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(NormalizeStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(NormalizeStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IsNormalizedStepAlgo;
@@ -659,6 +940,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_3(IsNormalizedStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_3(IsNormalizedStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IsSameConfigurationStepAlgo;
@@ -695,6 +977,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_4(IsSameConfigurationStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_4(IsSameConfigurationStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct NeutralStepAlgo;
@@ -725,6 +1008,7 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(NeutralStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(NeutralStepAlgo);
 
   template<typename Visitor, typename JointModel>
   struct IntegrateCoeffWiseJacobianStepAlgo;
@@ -762,6 +1046,67 @@ namespace pinocchio
   };
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(IntegrateCoeffWiseJacobianStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(IntegrateCoeffWiseJacobianStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct LieGroupInstanceStepAlgo;
+
+  template<typename LieGroup_t, typename Scalar, int Options>
+  struct LieGroupInstanceStep
+  : public fusion::JointUnaryVisitorBase<LieGroupInstanceStep<LieGroup_t, Scalar, Options>>
+  {
+    typedef typename LieGroup_t::template operationProduct<Scalar, Options>::type LgType;
+
+    typedef boost::fusion::vector<LgType &> ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_1(LieGroupInstanceStepAlgo, LieGroupInstanceStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct LieGroupInstanceStepAlgo
+  {
+    typedef typename Visitor::LgType LgType;
+
+    static void run(const JointModelBase<JointModel> & jmodel, LgType & res_lgo)
+    {
+      typedef typename Visitor::LieGroupMap LieGroupMap;
+      res_lgo *= jmodel.template lieGroup<LieGroupMap>();
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(LieGroupInstanceStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_1(LieGroupInstanceStepAlgo);
+
+  template<typename Visitor, typename JointModel>
+  struct IndexvInfoStepAlgo;
+
+  struct IndexvInfoStep : public fusion::JointUnaryVisitorBase<IndexvInfoStep>
+  {
+    typedef boost::blank LieGroup_t;
+    typedef boost::fusion::vector<std::vector<int> &, std::vector<int> &> ArgsType;
+
+    PINOCCHIO_DETAILS_VISITOR_METHOD_ALGO_2(IndexvInfoStepAlgo, IndexvInfoStep)
+  };
+
+  template<typename Visitor, typename JointModel>
+  struct IndexvInfoStepAlgo
+  {
+    static void run(
+      const JointModelBase<JointModel> & jmodel, std::vector<int> & nvs, std::vector<int> & idx_vs)
+    {
+      int idx_v = jmodel.idx_v();
+      int nv = jmodel.nv();
+
+      for (size_t i = 0; i < static_cast<size_t>(jmodel.nq()); ++i)
+      {
+        nvs.push_back(nv);
+        idx_vs.push_back(idx_v);
+      }
+    }
+  };
+
+  PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_2(IndexvInfoStepAlgo);
+  PINOCCHIO_DETAILS_CANCEL_JOINT_MIMIC_2(IndexvInfoStepAlgo);
 
 } // namespace pinocchio
 

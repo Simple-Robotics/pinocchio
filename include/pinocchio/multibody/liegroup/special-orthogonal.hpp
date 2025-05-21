@@ -243,6 +243,34 @@ namespace pinocchio
       }
     }
 
+    template<class Config_t, class TangentMap_t>
+    static void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op)
+    {
+      switch (op)
+      {
+      case SETTO:
+        TM(0, 0) = -q[1];
+        TM(1, 0) = q[0];
+        break;
+      case ADDTO:
+        TM(0, 0) -= q[1];
+        TM(1, 0) += q[0];
+        break;
+      case RMTO:
+        TM(0, 0) += q[1];
+        TM(1, 0) -= q[0];
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+    // We use default tangentMapProduct_impl and tangentMapTransposeProduct_impl
+    // because TM is a dense matrix for SO(2)
+
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
@@ -566,6 +594,34 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       }
     }
 
+    template<class Config_t, class TangentMap_t>
+    static void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op)
+    {
+      ConstQuaternionMap_t quat(q.derived().data());
+      TangentMapMatrix_t _TM;
+      quaternion::tangentMap(quat, _TM);
+      switch (op)
+      {
+      case SETTO:
+        TM = _TM;
+        break;
+      case ADDTO:
+        TM += _TM;
+        break;
+      case RMTO:
+        TM -= _TM;
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+    // We use default tangentMapProduct_impl and tangentMapTransposeProduct_impl
+    // because TM is a dense matrix for SO(3)
+
     template<class Config_t, class Tangent_t, class JacobianIn_t, class JacobianOut_t>
     static void dIntegrateTransport_dq_impl(
       const Eigen::MatrixBase<Config_t> & /*q*/,
@@ -642,18 +698,6 @@ PINOCCHIO_COMPILER_DIAGNOSTIC_POP
       difference_impl(q0, q1, w);
       integrate_impl(q0, u * w, qout);
       assert(quaternion::isNormalized(quat_res));
-    }
-
-    template<class ConfigL_t, class ConfigR_t>
-    static Scalar squaredDistance_impl(
-      const Eigen::MatrixBase<ConfigL_t> & q0, const Eigen::MatrixBase<ConfigR_t> & q1)
-    {
-      PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-      PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
-      TangentVector_t t;
-      difference_impl(q0, q1, t);
-      PINOCCHIO_COMPILER_DIAGNOSTIC_POP
-      return t.squaredNorm();
     }
 
     template<class Config_t>

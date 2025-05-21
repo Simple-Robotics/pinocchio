@@ -76,6 +76,17 @@ namespace pinocchio
       other.name = name;
     }
 
+    /// \brief Resize the constraint if needed at the current state given by data and store the
+    /// results in cdata.
+    template<template<typename, int> class JointCollectionTpl>
+    void resize(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata)
+    {
+      derived().resize_impl(model, data, cdata);
+    }
+
     /// \brief Evaluate the constraint values at the current state given by data and store the
     /// results in cdata.
     template<int Options, template<typename, int> class JointCollectionTpl>
@@ -372,6 +383,18 @@ namespace pinocchio
     BaumgarteCorrectorParameters & baumgarte_corrector_parameters()
     {
       return derived().baumgarte_corrector_parameters_impl();
+    }
+
+    /// \brief Default implementation: do nothing
+    template<template<typename, int> class JointCollectionTpl>
+    void resize_impl(
+      const ModelTpl<Scalar, Options, JointCollectionTpl> & model,
+      const DataTpl<Scalar, Options, JointCollectionTpl> & data,
+      ConstraintData & cdata)
+    {
+      PINOCCHIO_UNUSED_VARIABLE(model);
+      PINOCCHIO_UNUSED_VARIABLE(data);
+      PINOCCHIO_UNUSED_VARIABLE(cdata);
     }
 
     ConstraintModelBase & base()

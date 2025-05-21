@@ -23,6 +23,7 @@ namespace pinocchio
     m_nv += lg_nv;
 
     if (liegroups.size() > 1)
+      // Was not empty before the append
       m_name += " x ";
     m_name += ::pinocchio::name(lg);
 
@@ -226,6 +227,69 @@ namespace pinocchio
           liegroups[k], q.segment(id_q, nq), v.segment(id_v, nv), Jin.middleCols(id_v, nv), SELF,
           Jout.middleCols(id_v, nv), arg, op);
 
+      id_q += nq;
+      id_v += nv;
+    }
+  }
+
+  template<typename _Scalar, int _Options, template<typename, int> class LieGroupCollectionTpl>
+  template<class Config_t, class TangentMap_t>
+  void
+  CartesianProductOperationVariantTpl<_Scalar, _Options, LieGroupCollectionTpl>::tangentMap_impl(
+    const Eigen::MatrixBase<Config_t> & q,
+    Eigen::MatrixBase<TangentMap_t> & TM,
+    const AssignmentOperatorType op) const
+  {
+    if (op == SETTO)
+      TM.setZero();
+    Index id_q = 0, id_v = 0;
+    for (size_t k = 0; k < liegroups.size(); ++k)
+    {
+      const Index & nq = lg_nqs[k];
+      const Index & nv = lg_nvs[k];
+      ::pinocchio::tangentMap(liegroups[k], q.segment(id_q, nq), TM.block(id_q, id_v, nq, nv), op);
+      id_q += nq;
+      id_v += nv;
+    }
+  }
+
+  template<typename _Scalar, int _Options, template<typename, int> class LieGroupCollectionTpl>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void CartesianProductOperationVariantTpl<_Scalar, _Options, LieGroupCollectionTpl>::
+    tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+  {
+    Index id_q = 0, id_v = 0;
+    for (size_t k = 0; k < liegroups.size(); ++k)
+    {
+      const Index & nq = lg_nqs[k];
+      const Index & nv = lg_nvs[k];
+      ::pinocchio::tangentMapProduct(
+        liegroups[k], q.segment(id_q, nq), Min.middleRows(id_v, nv), Mout.middleRows(id_q, nq), op);
+      id_q += nq;
+      id_v += nv;
+    }
+  }
+
+  template<typename _Scalar, int _Options, template<typename, int> class LieGroupCollectionTpl>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void CartesianProductOperationVariantTpl<_Scalar, _Options, LieGroupCollectionTpl>::
+    tangentMapTransposeProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const
+  {
+    Index id_q = 0, id_v = 0;
+    for (size_t k = 0; k < liegroups.size(); ++k)
+    {
+      const Index & nq = lg_nqs[k];
+      const Index & nv = lg_nvs[k];
+      ::pinocchio::tangentMapTransposeProduct(
+        liegroups[k], q.segment(id_q, nq), Min.middleRows(id_q, nq), Mout.middleRows(id_v, nv), op);
       id_q += nq;
       id_v += nv;
     }
@@ -483,7 +547,8 @@ namespace pinocchio
 
     if (other.liegroups.size() > 0)
     {
-      if (liegroups.size())
+      if (liegroups.size() > other.liegroups.size())
+        // Was not empty before concat
         m_name += " x ";
       m_name += other.m_name;
     }

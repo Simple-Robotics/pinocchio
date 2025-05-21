@@ -109,9 +109,9 @@ namespace pinocchio
     {
     }
 
-    /// \brief Copy constructor
+    /// \brief Copy constructor (only consider the active part of storage)
     EigenStorageTpl(const EigenStorageTpl & other)
-    : m_storage(other.m_storage)
+    : m_storage(other.m_storage.head(other.m_map.size()))
     , m_map(m_storage.data(), other.m_map.rows(), other.m_map.cols())
     {
     }
@@ -121,7 +121,7 @@ namespace pinocchio
 
     EigenStorageTpl & operator=(const EigenStorageTpl & other)
     {
-      m_storage = other.m_storage;
+      m_storage = other.m_storage.head(other.m_map.size());
       new (&m_map) MapType(m_storage.data(), other.m_map.rows(), other.m_map.cols());
 
       return *this;
@@ -132,8 +132,7 @@ namespace pinocchio
     typename CastType<NewScalar, EigenStorageTpl>::type cast() const
     {
       typedef typename CastType<NewScalar, EigenStorageTpl>::type ReturnType;
-      ReturnType res;
-      res.resize(rows(), cols());
+      ReturnType res = ReturnType(rows(), cols());
       res.m_storage.head(size()) = m_storage.head(size()).template cast<NewScalar>();
       return res;
     }
@@ -155,6 +154,29 @@ namespace pinocchio
       if (new_size > capacity())
         m_storage.resize(2 * new_size); // Double the size of the storage
       new (&m_map) MapType(m_storage.data(), new_size);
+    }
+
+    /// \brief Reserve some place if the capacity is not enough.
+    ///
+    /// \remarks This is not data conservative
+    void reserve(const Index rows, const Index cols)
+    {
+      const Index new_size = rows * cols;
+      if (new_size > capacity())
+      {
+        m_storage.resize(new_size);
+        new (&m_map) MapType(m_storage.data(), m_map.rows(), m_map.cols());
+      }
+    }
+
+    void reserve(const Index new_size)
+    {
+      EIGEN_STATIC_ASSERT_VECTOR_ONLY(MatrixLike)
+      if (new_size > capacity())
+      {
+        m_storage.resize(new_size);
+        new (&m_map) MapType(m_storage.data(), m_map.size());
+      }
     }
 
     /// \brief Conservative resize of the current capacity of the internal storage. The data are
@@ -249,7 +271,8 @@ namespace pinocchio
     template<typename OtherMatrixLike>
     bool operator==(const EigenStorageTpl<OtherMatrixLike> & other) const
     {
-      return m_storage == other.m_storage && rows() == other.rows() && cols() == other.cols();
+      return rows() == other.rows() && cols() == other.cols()
+             && m_storage.head(size()) == other.m_storage.head(size());
     }
 
   protected:

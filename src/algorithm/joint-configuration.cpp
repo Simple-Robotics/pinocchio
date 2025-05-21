@@ -187,6 +187,83 @@ namespace pinocchio
     const ArgumentPosition,
     const AssignmentOperatorType);
 
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMap<
+    LieGroupMap,
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMap<
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMapProduct<
+    LieGroupMap,
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMapProduct<
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMapTransposeProduct<
+    LieGroupMap,
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void tangentMapTransposeProduct<
+    context::Scalar,
+    context::Options,
+    JointCollectionDefaultTpl,
+    context::VectorXs,
+    context::MatrixXs,
+    context::MatrixXs>(
+    const context::Model &,
+    const Eigen::MatrixBase<context::VectorXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const Eigen::MatrixBase<context::MatrixXs> &,
+    const AssignmentOperatorType);
+
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void dIntegrateTransport<
     LieGroupMap,
     context::Scalar,
@@ -311,6 +388,16 @@ namespace pinocchio
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI void
   normalize<context::Scalar, context::Options, JointCollectionDefaultTpl, context::VectorXs>(
     const context::Model &, const Eigen::MatrixBase<context::VectorXs> &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI void
+  lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(
+    const context::Model &,
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type &);
 
 #ifndef PINOCCHIO_SKIP_CASADI_UNSUPPORTED
 
@@ -493,4 +580,13 @@ namespace pinocchio
 
   template PINOCCHIO_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI context::VectorXs
   neutral<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
+    lieGroup<LieGroupMap, context::Scalar, context::Options, JointCollectionDefaultTpl>(
+      const context::Model &);
+
+  template PINOCCHIO_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    typename LieGroupMap::template operationProduct<context::Scalar, context::Options>::type
+    lieGroup<context::Scalar, context::Options, JointCollectionDefaultTpl>(const context::Model &);
 } // namespace pinocchio

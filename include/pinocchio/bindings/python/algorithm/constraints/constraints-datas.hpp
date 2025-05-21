@@ -59,9 +59,13 @@ namespace pinocchio
     bp::class_<context::JointLimitConstraintData> &
     expose_constraint_data(bp::class_<context::JointLimitConstraintData> & cl)
     {
+      typedef context::JointLimitConstraintData Self;
       return cl
-        .def(bp::init<const typename context::JointLimitConstraintData::ConstraintModel &>(
+        .def(bp::init<const typename Self::ConstraintModel &>(
           bp::args("self", "constraint_model"), "From model constructor."))
+        .PINOCCHIO_ADD_PROPERTY(Self, compact_tangent_map, "Compact tangent map.")
+        .PINOCCHIO_ADD_PROPERTY(
+          Self, activable_constraint_residual, "Activable constraint residual.")
         .add_property(
           "constraint_residual",
           bp::make_function(

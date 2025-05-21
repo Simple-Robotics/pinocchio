@@ -282,6 +282,50 @@ namespace pinocchio
       q.derived(), v.derived(), PINOCCHIO_EIGEN_CONST_CAST(Jacobian_t, J));
   }
 
+  template<class Derived>
+  template<class Config_t, class TangentMap_t>
+  void LieGroupBase<Derived>::tangentMap(
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<TangentMap_t> & TM,
+    const AssignmentOperatorType op) const
+  {
+    EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
+    EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(TangentMap_t, TangentMapMatrix_t);
+    derived().tangentMap_impl(q.derived(), PINOCCHIO_EIGEN_CONST_CAST(TangentMap_t, TM), op);
+  }
+
+  template<class Derived>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void LieGroupBase<Derived>::tangentMapProduct(
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    const Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op) const
+  {
+    EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.rows(), nv());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Mout.rows(), nq());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.cols(), Mout.cols());
+    derived().tangentMapProduct_impl(
+      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout), op);
+  }
+
+  template<class Derived>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void LieGroupBase<Derived>::tangentMapTransposeProduct(
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    const Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op) const
+  {
+    EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(Config_t, ConfigVector_t);
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.rows(), nq());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Mout.rows(), nv());
+    PINOCCHIO_CHECK_ARGUMENT_SIZE(Min.cols(), Mout.cols());
+    derived().tangentMapTransposeProduct_impl(
+      q.derived(), Min.derived(), PINOCCHIO_EIGEN_CONST_CAST(MatrixOut_t, Mout), op);
+  }
+
   /**
    * @brief      Interpolation between two joint's configurations
    *
@@ -620,6 +664,64 @@ namespace pinocchio
         Jout -= J * Jin;
       else
         Jout -= Jin * J;
+      return;
+    }
+  }
+
+  template<class Derived>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void LieGroupBase<Derived>::tangentMapProduct_impl(
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op) const
+  {
+    Index nv_(nv()), nq_(nq());
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
+    // When tangent map map is sparse, this must be overwritten
+    TangentMapMatrix_t TM(nq_, nv_);
+    tangentMap(q, TM);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
+    switch (op)
+    {
+    case SETTO:
+      Mout = TM * Min;
+      return;
+    case ADDTO:
+      Mout += TM * Min;
+      return;
+    case RMTO:
+      Mout -= TM * Min;
+      return;
+    }
+  }
+
+  template<class Derived>
+  template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void LieGroupBase<Derived>::tangentMapTransposeProduct_impl(
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op) const
+  {
+    Index nv_(nv()), nq_(nq());
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
+    // When tangent map map is sparse, this must be overwritten
+    TangentMapMatrix_t TM(nq_, nv_);
+    tangentMap(q, TM);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
+    switch (op)
+    {
+    case SETTO:
+      Mout = TM.transpose() * Min;
+      return;
+    case ADDTO:
+      Mout += TM.transpose() * Min;
+      return;
+    case RMTO:
+      Mout -= TM.transpose() * Min;
       return;
     }
   }

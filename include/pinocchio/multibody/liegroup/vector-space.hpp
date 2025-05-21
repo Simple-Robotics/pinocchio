@@ -271,6 +271,77 @@ namespace pinocchio
     // static context::Scalar squaredDistance_impl(const Eigen::MatrixBase<ConfigL_t> & q0,
     // const Eigen::MatrixBase<ConfigR_t> & q1)
 
+    template<class Config_t, class TangentMap_t>
+    static void tangentMap_impl(
+      const Eigen::MatrixBase<Config_t> & /*q*/,
+      Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op)
+    {
+      switch (op)
+      {
+      case SETTO:
+        TM.setIdentity();
+        break;
+      case ADDTO:
+        TM.diagonal().array() += Scalar(1);
+        break;
+      case RMTO:
+        TM.diagonal().array() -= Scalar(1);
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    static void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & /*q*/,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op)
+    {
+      switch (op)
+      {
+      case SETTO:
+        Mout = Min;
+        break;
+      case ADDTO:
+        Mout += Min;
+        break;
+      case RMTO:
+        Mout -= Min;
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    static void tangentMapTransposeProduct_impl(
+      const Eigen::MatrixBase<Config_t> & /*q*/,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op)
+    {
+      switch (op)
+      {
+      case SETTO:
+        Mout = Min;
+        break;
+      case ADDTO:
+        Mout += Min;
+        break;
+      case RMTO:
+        Mout -= Min;
+        break;
+      default:
+        assert(false && "Wrong Op requesed value");
+        break;
+      }
+    }
+
     template<class Config_t>
     static void normalize_impl(const Eigen::MatrixBase<Config_t> & /*qout*/)
     {

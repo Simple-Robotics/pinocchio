@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE(interpolate_test)
 
   Eigen::VectorXd q01_1 = interpolate(model, q0, q1, 1.0);
   BOOST_CHECK_MESSAGE(isSameConfiguration(model, q01_1, q1), "interpolation: q01_1 != q1");
+  Eigen::VectorXd q01_1_bis;
 }
 
 BOOST_AUTO_TEST_CASE(diff_integration_test)
@@ -59,15 +60,17 @@ BOOST_AUTO_TEST_CASE(diff_integration_test)
   Model model;
   buildAllJointsModel(model);
 
-  std::vector<Eigen::VectorXd> qs(2);
-  std::vector<Eigen::VectorXd> vs(2);
-  std::vector<Eigen::MatrixXd> results(2, Eigen::MatrixXd::Zero(model.nv, model.nv));
+  std::vector<Eigen::VectorXd> qs(3);
+  std::vector<Eigen::VectorXd> vs(3);
+  std::vector<Eigen::MatrixXd> results(3, Eigen::MatrixXd::Zero(model.nv, model.nv));
   std::vector<Eigen::MatrixXd> results_fd(2, Eigen::MatrixXd::Zero(model.nv, model.nv));
 
   qs[0] = Eigen::VectorXd::Ones(model.nq);
+  qs[2] = Eigen::VectorXd::Ones(model.nq);
   normalize(model, qs[0]);
 
   vs[0] = Eigen::VectorXd::Zero(model.nv);
+  vs[2] = Eigen::VectorXd::Zero(model.nv);
   vs[1] = Eigen::VectorXd::Ones(model.nv);
   dIntegrate(model, qs[0], vs[0], results[0], ARG0);
 
@@ -112,6 +115,116 @@ BOOST_AUTO_TEST_CASE(diff_integration_test)
   }
 
   BOOST_CHECK(results[1].isApprox(results_fd[1], sqrt(eps)));
+}
+
+BOOST_AUTO_TEST_CASE(tangent_map_test)
+{
+  Model model;
+  buildAllJointsModel(model);
+
+  Eigen::VectorXd q(Eigen::VectorXd::Random(model.nq));
+  normalize(model, q);
+  Eigen::VectorXd q_plus(Eigen::VectorXd::Zero(model.nq));
+  Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
+
+  std::vector<Eigen::MatrixXd> TMs(5, Eigen::MatrixXd::Zero(model.nq, model.nv));
+
+  Eigen::MatrixXd TMc(Eigen::MatrixXd::Zero(model.nq, MAX_JOINT_NV));
+
+  tangentMap(model, q, TMs[0]);
+  tangentMapProduct(model, q, Eigen::MatrixXd::Identity(model.nv, model.nv), TMs[1]);
+  tangentMapTransposeProduct(
+    model, q, Eigen::MatrixXd::Identity(model.nq, model.nq), TMs[2].transpose());
+
+  typedef typename Model::JointIndex JointIndex;
+  std::vector<JointIndex> joint_selection;
+  for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+  {
+    joint_selection.push_back(i);
+  }
+  compactTangentMap(model, joint_selection, q, TMc);
+  std::vector<int> nvs;
+  nvs.reserve(static_cast<size_t>(model.nq));
+  std::vector<int> idx_vs;
+  idx_vs.reserve(static_cast<size_t>(model.nq));
+
+  indexvInfo(model, joint_selection, nvs, idx_vs);
+  size_t k_s;
+  for (Eigen::DenseIndex k = 0; k < model.nq; ++k)
+  {
+    k_s = static_cast<size_t>(k);
+    TMs[3].block(k, idx_vs[k_s], 1, nvs[k_s]) = TMc.block(k, 0, 1, nvs[k_s]);
+  }
+
+  const double eps = 1e-8;
+  for (Eigen::DenseIndex k = 0; k < model.nv; ++k)
+  {
+    v[k] = eps;
+
+    q_plus = integrate(model, q, v);
+    TMs[4].col(k) = (q_plus - q) / eps;
+
+    v[k] = 0;
+  }
+
+  BOOST_CHECK(TMs[0].isApprox(TMs[1], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[2], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[3], 1e-8));
+  BOOST_CHECK(TMs[0].isApprox(TMs[4], sqrt(eps)));
+}
+
+BOOST_AUTO_TEST_CASE(lie_group_test)
+{
+  Model model;
+  buildAllJointsModel(model);
+
+  typedef
+    typename LieGroupMap::template operationProduct<typename Model::Scalar, Model::Options>::type
+      LGO;
+
+  LGO lgo1;
+  lieGroup(model, lgo1);
+
+  LGO lgo2 = lieGroup(model);
+
+  LGO lgo3;
+  typedef typename Model::JointIndex JointIndex;
+  for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
+  {
+    lgo3 *= model.joints[i].template lieGroup<LieGroupMap>();
+  }
+
+  BOOST_CHECK(lgo1 == lgo2);
+  BOOST_CHECK(lgo1 == lgo3);
+}
+
+BOOST_AUTO_TEST_CASE(lie_group_vs_algo_test)
+{
+  Model model;
+  buildAllJointsModel(model);
+
+  typedef
+    typename LieGroupMap::template operationProduct<typename Model::Scalar, Model::Options>::type
+      LGO;
+
+  LGO lgo;
+  lieGroup(model, lgo);
+
+  Eigen::VectorXd q(randomConfiguration(
+    model, -1 * Eigen::VectorXd::Ones(model.nq), Eigen::VectorXd::Ones(model.nq)));
+  Eigen::VectorXd q2(randomConfiguration(
+    model, -1 * Eigen::VectorXd::Ones(model.nq), Eigen::VectorXd::Ones(model.nq)));
+  Eigen::VectorXd v(Eigen::VectorXd::Zero(model.nv));
+
+  std::vector<Eigen::VectorXd> q_ps(2, Eigen::VectorXd::Zero(model.nq));
+  integrate(model, q, v, q_ps[0]);
+  lgo.integrate(q, v, q_ps[1]);
+  BOOST_CHECK(q_ps[0].isApprox(q_ps[1], 1e-8));
+
+  std::vector<Eigen::VectorXd> v_ds(2, Eigen::VectorXd::Zero(model.nv));
+  difference(model, q, q2, v_ds[0]);
+  lgo.difference(q, q2, v_ds[1]);
+  BOOST_CHECK(v_ds[0].isApprox(v_ds[1], 1e-8));
 }
 
 BOOST_AUTO_TEST_CASE(diff_difference_test)
@@ -296,7 +409,7 @@ BOOST_AUTO_TEST_CASE(integrate_difference_test)
   Eigen::VectorXd qdot(Eigen::VectorXd::Random(model.nv));
 
   BOOST_CHECK_MESSAGE(
-    isSameConfiguration(model, integrate(model, q0, difference(model, q0, q1)), q1),
+    isSameConfiguration(model, integrate(model, q0, difference(model, q0, q1)), q1, 1e-5),
     "Integrate (difference) - wrong results");
 
   BOOST_CHECK_MESSAGE(

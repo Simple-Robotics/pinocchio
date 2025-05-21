@@ -207,6 +207,29 @@ namespace pinocchio
     const Eigen::MatrixBase<JacobianOut_t> & Jout,
     const ArgumentPosition arg);
 
+  template<typename LieGroupCollection, class Config_t, class TangentMap_t>
+  void tangentMap(
+    const LieGroupGenericTpl<LieGroupCollection> & lg,
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<TangentMap_t> & TM,
+    const AssignmentOperatorType op);
+
+  template<typename LieGroupCollection, class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void tangentMapProduct(
+    const LieGroupGenericTpl<LieGroupCollection> & lg,
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    const Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op);
+
+  template<typename LieGroupCollection, class Config_t, class MatrixIn_t, class MatrixOut_t>
+  void tangentMapTransposeProduct(
+    const LieGroupGenericTpl<LieGroupCollection> & lg,
+    const Eigen::MatrixBase<Config_t> & q,
+    const Eigen::MatrixBase<MatrixIn_t> & Min,
+    const Eigen::MatrixBase<MatrixOut_t> & Mout,
+    const AssignmentOperatorType op);
+
   template<
     typename LieGroupCollection,
     class Config_t,

@@ -25,7 +25,8 @@ namespace pinocchio
   };                                                                                               \
   typedef TYPENAME Base::ConfigVector_t ConfigVector_t;                                            \
   typedef TYPENAME Base::TangentVector_t TangentVector_t;                                          \
-  typedef TYPENAME Base::JacobianMatrix_t JacobianMatrix_t
+  typedef TYPENAME Base::JacobianMatrix_t JacobianMatrix_t;                                        \
+  typedef TYPENAME Base::TangentMapMatrix_t TangentMapMatrix_t
 
 #define PINOCCHIO_LIE_GROUP_PUBLIC_INTERFACE(Derived)                                              \
   PINOCCHIO_LIE_GROUP_PUBLIC_INTERFACE_GENERIC(Derived, PINOCCHIO_MACRO_EMPTY_ARG)
@@ -49,6 +50,7 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, NQ, 1, Options> ConfigVector_t;
     typedef Eigen::Matrix<Scalar, NV, 1, Options> TangentVector_t;
     typedef Eigen::Matrix<Scalar, NV, NV, Options> JacobianMatrix_t;
+    typedef Eigen::Matrix<Scalar, NQ, NV, Options> TangentMapMatrix_t;
 
     /// \name API with return value as argument
     /// \{
@@ -547,6 +549,41 @@ namespace pinocchio
       const AssignmentOperatorType op = SETTO) const;
 
     /**
+     * @brief      Computes the left Tangent Mapping from the Lie algebra of the group to the
+     * parametric space tangent space TqQ.
+     *
+     * @details    The tangent mapping corresponds to the eucliean Jacobian of \f$ (\mathbf{q}
+     * \oplus \mathbf{v}\f$ with respect to \f$ \mathbf{q}\f$ in \f$ 0\f$. In other words for any
+     * vector $v$ in the Lie algebra we have \f$ TM(\mathbf{q}) v = lim_{\delta t \rightarrow 0}
+     * \frac{\mathbf{q} \oplus (v\delta t) - \mathbf{q}}{\delta t}\f$
+     *
+     * @param[in]  q    configuration vector.
+     * @param[in]  op   assignment operator (SETTO, ADDTO or RMTO).
+     * @param[out] TM the tangentmapping matrix
+     */
+    template<class Config_t, class TangentMap_t>
+    void tangentMap(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<TangentMap_t> & TM,
+      const AssignmentOperatorType op = SETTO) const;
+
+    // Mout op TM * Min, it is the jacobian vector product
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      const Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op = SETTO) const;
+
+    // Mout op TM^T * Min, it is the jacobian transpose vector product
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapTransposeProduct(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      const Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op = SETTO) const;
+
+    /**
      * @brief      Squared distance between two joint configurations.
      *
      * @param[in]  q0    the initial configuration vector.
@@ -646,6 +683,20 @@ namespace pinocchio
       const JacobianIn_t & Jin,
       JacobianOut_t & Jout,
       bool dDifferenceOnTheLeft,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
+      const AssignmentOperatorType op) const;
+
+    template<class Config_t, class MatrixIn_t, class MatrixOut_t>
+    void tangentMapTransposeProduct_impl(
+      const Eigen::MatrixBase<Config_t> & q,
+      const Eigen::MatrixBase<MatrixIn_t> & Min,
+      Eigen::MatrixBase<MatrixOut_t> & Mout,
       const AssignmentOperatorType op) const;
 
     template<class ConfigL_t, class ConfigR_t, class ConfigOut_t>

@@ -12,6 +12,7 @@
 #include "pinocchio/algorithm/constraints/point-bilateral-constraint.hpp"
 #include "pinocchio/algorithm/constraints/weld-constraint.hpp"
 #include "pinocchio/multibody/liegroup/liegroup.hpp"
+#include "pinocchio/multibody/liegroup/liegroup-joint.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -64,20 +65,16 @@ namespace pinocchio
 
           if (root_joint.has_value())
           {
+            Eigen::VectorXd qroot(root_joint->template lieGroup<LieGroupMap>().neutral());
+
             // update the reference_config with the size of the root joint
-            Eigen::VectorXd qroot(root_joint->nq());
-
-            typedef Eigen::VectorXd ReturnType;
-            typename NeutralStep<LieGroupMap, ReturnType>::ArgsType args(qroot.derived());
-            JointModel root_joint_copy = root_joint.get();
-            root_joint_copy.setIndexes(0, 0, 0);
-            NeutralStep<LieGroupMap, ReturnType>::run(root_joint_copy, args);
-
-            reference_config.conservativeResize(qroot.size() + reference_config.size());
+            reference_config.conservativeResize(reference_config.size() + qroot.size());
             reference_config.tail(qroot.size()) = qroot;
 
-            // convert qroot to mujoco's convention
-            qpos0.conservativeResize(qroot.size() + qpos0.size());
+            // convert qroot to mujoco's convention for quaternions
+            int qpos0_size = static_cast<int>(qpos0.size());
+            qpos0.conservativeResize(qpos0_size + qroot.size());
+            qpos0.tail(qroot.size()) = qroot;
             if (root_joint->shortname() == "JointModelFreeFlyer")
             {
               qpos0.tail(4) << qroot(6), qroot(3), qroot(4), qroot(5);
@@ -88,22 +85,18 @@ namespace pinocchio
             }
             else if (root_joint->shortname() == "JointModelComposite")
             {
+              JointModel root_joint_copy = root_joint.get();
+              root_joint_copy.setIndexes(0, 0, 0);
               for (const auto & joint_ :
                    boost::get<JointModelComposite>(root_joint_copy.toVariant()).joints)
               {
-                int idx_q_ = joint_.idx_q();
-                int nq_ = joint_.nq();
                 if (joint_.shortname() == "JointModelSpherical")
                 {
-                  Eigen::Vector4d new_quat(
-                    qroot(idx_q_ + 3), qroot(idx_q_ + 0), qroot(idx_q_ + 1), qroot(idx_q_ + 2));
-                  qpos0.segment(idx_q_, nq_) = new_quat;
+                  int idx_q_ = joint_.idx_q();
+                  qpos0.segment(qpos0_size + idx_q_, 4) << qroot(idx_q_ + 3), qroot(idx_q_ + 0),
+                    qroot(idx_q_ + 1), qroot(idx_q_ + 2);
                 }
               }
-            }
-            else
-            {
-              qpos0.tail(qroot.size()) = qroot;
             }
           }
         }

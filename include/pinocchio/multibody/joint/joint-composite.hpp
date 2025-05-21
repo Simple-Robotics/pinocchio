@@ -368,6 +368,10 @@ namespace pinocchio
         I.const_cast_derived().noalias() -= data.UDinv * data.U.transpose();
     }
 
+    // Declaration of overload : must be define after Lie group and joint visitors
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<JointModelCompositeTpl>::type lieGroup_impl() const;
+
     int nv_impl() const
     {
       return m_nv;

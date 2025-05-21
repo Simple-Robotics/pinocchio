@@ -140,6 +140,20 @@ namespace pinocchio
       derived().calc_aba(data, armature.derived(), I.const_cast_derived(), update_I);
     }
 
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<Derived>::type lieGroup() const
+    {
+      return derived().template lieGroup_impl<LieGroupMap>();
+    }
+
+    // Default implementation, default construction of the type mapped by the LieGroupMap
+    template<typename LieGroupMap>
+    typename LieGroupMap::template operation<Derived>::type lieGroup_impl() const
+    {
+      typedef typename LieGroupMap::template operation<Derived>::type lgo;
+      return lgo();
+    }
+
     int nv() const
     {
       return derived().nv_impl();
@@ -583,6 +597,99 @@ namespace pinocchio
     {
       return SizeDepType<NVExtended>::block(
         Mat.derived(), idx_vExtended(), idx_vExtended(), nvExtended(), nvExtended());
+    }
+
+    /* Acces to dedicated Q releated rows or columns.*/
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::ConstType
+    jointQCols(const Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQCols_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::ConstType
+    jointQCols_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), idx_q(), nq());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::Type
+    jointQCols(Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQCols_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template ColsReturn<D>::Type
+    jointQCols_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleCols(A.derived(), idx_q(), nq());
+    }
+
+    // Const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
+    jointQRows(const Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQRows_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::ConstType
+    jointQRows_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), idx_q(), nq());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::Type
+    jointQRows(Eigen::MatrixBase<D> & A) const
+    {
+      return derived().jointQRows_impl(A.derived());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template RowsReturn<D>::Type
+    jointQRows_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return SizeDepType<NQ>::middleRows(A.derived(), idx_q(), nq());
+    }
+
+    /// \brief Returns a block of dimension nq()xnv() located at position idx_q_a,idx_v_a in the
+    /// matrix Mat
+    // Const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
+    jointQVBlock(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return derived().jointQVBlock_impl(Mat.derived(), idx_q_a, idx_v_a);
+    }
+
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::ConstType
+    jointQVBlock_impl(const Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q_a, idx_v_a, nq(), nv());
+    }
+
+    // Non-const access
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
+    jointQVBlock(Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return derived().jointQVBlock_impl(Mat.derived(), idx_q_a, idx_v_a);
+    }
+
+    template<typename D>
+    typename DoubleSizeDepType<NQ, NV>::template BlockReturn<D>::Type
+    jointQVBlock_impl(Eigen::MatrixBase<D> & Mat, int idx_q_a, int idx_v_a) const
+    {
+      return DoubleSizeDepType<NQ, NV>::block(Mat.derived(), idx_q_a, idx_v_a, nq(), nv());
     }
 
   protected:

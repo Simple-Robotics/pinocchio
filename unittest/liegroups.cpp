@@ -567,6 +567,100 @@ struct LieGroup_JintegrateCoeffWise
   }
 };
 
+template<bool around_identity>
+struct LieGroup_TangentMap
+{
+  template<typename T>
+  void operator()(const T) const
+  {
+    typedef typename T::ConfigVector_t ConfigVector_t;
+    typedef typename T::TangentVector_t TangentVector_t;
+    typedef typename T::JacobianMatrix_t JacobianMatrix_t;
+    typedef typename T::TangentMapMatrix_t TangentMapMatrix_t;
+    typedef typename T::Scalar Scalar;
+
+    T lg;
+    ConfigVector_t q = lg.random();
+    TangentVector_t v, dq, dv;
+    ConfigVector_t dI_eucl, dq_ps;
+
+    if (around_identity)
+      v.setZero();
+    else
+      v.setRandom();
+
+    dv.setZero();
+    dq.setZero();
+    dv.setZero();
+    dq_ps.setZero();
+
+    ConfigVector_t q_p_v = lg.integrate(q, v);
+
+    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_MAYBE_UNINITIALIZED
+    JacobianMatrix_t Jq, Jv;
+    lg.dIntegrate_dq(q, v, Jq);
+    lg.dIntegrate_dv(q, v, Jv);
+
+    TangentMapMatrix_t TM_q_p_v, Jq_eucl, Jv_eucl, Jq_eucl_p, Jv_eucl_p;
+    lg.tangentMap(q_p_v, TM_q_p_v);
+    Jq_eucl = TM_q_p_v * Jq;
+    Jv_eucl = TM_q_p_v * Jv;
+    lg.tangentMapProduct(q_p_v, Jq, Jq_eucl_p);
+    lg.tangentMapProduct(q_p_v, Jv, Jv_eucl_p);
+    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
+
+    EIGEN_VECTOR_IS_APPROX(Jq_eucl_p, Jq_eucl, 1e-6);
+    EIGEN_VECTOR_IS_APPROX(Jv_eucl_p, Jv_eucl, 1e-6);
+
+    const Scalar eps = 1e-6;
+    for (int i = 0; i < v.size(); ++i)
+    {
+      dq[i] = dv[i] = eps;
+
+      // wrt q
+      ConfigVector_t q_dq = lg.integrate(q, dq);
+      ConfigVector_t q_dq_p_v = lg.integrate(q_dq, v);
+
+      ConfigVector_t Jq_eucl_col = Jq_eucl.col(i);
+      ConfigVector_t Jq_eucl_fd = (q_dq_p_v - q_p_v) / eps;
+      EIGEN_VECTOR_IS_APPROX(Jq_eucl_col, Jq_eucl_fd, 1e-2);
+
+      // wrt v
+      ConfigVector_t q_p_v_dv = lg.integrate(q, (v + dv).eval());
+
+      ConfigVector_t Jv_eucl_col = Jv_eucl.col(i);
+      ConfigVector_t Jv_eucl_fd = (q_p_v_dv - q_p_v) / eps;
+      EIGEN_VECTOR_IS_APPROX(Jv_eucl_col, Jv_eucl_fd, 1e-2);
+
+      dq[i] = dv[i] = 0;
+    }
+    for (int i = 0; i < v.size(); ++i)
+    {
+      dv[i] = Scalar(1.);
+
+      // wrt q
+      ConfigVector_t manual_prod = TM_q_p_v * dv;
+      ConfigVector_t prod;
+      lg.tangentMapProduct(q_p_v, dv, prod);
+      EIGEN_VECTOR_IS_APPROX(prod, manual_prod, 1e-6);
+
+      dv[i] = Scalar(0.);
+    }
+    for (int i = 0; i < q.size(); ++i)
+    {
+      dq_ps[i] = Scalar(1.);
+
+      TangentVector_t manual_co_prod = TM_q_p_v.transpose() * dq_ps;
+      TangentVector_t co_prod;
+      lg.tangentMapTransposeProduct(q_p_v, dq_ps, co_prod);
+      EIGEN_VECTOR_IS_APPROX(co_prod, manual_co_prod, 1e-6);
+
+      dq_ps[i] = Scalar(0.);
+    }
+  }
+};
+
 BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(test_all)
@@ -722,6 +816,34 @@ BOOST_AUTO_TEST_CASE(JintegrateCoeffWise)
     typedef Eigen::Matrix<Scalar, LieGroup::NQ, LieGroup::NV> JacobianCoeffs;
     JacobianCoeffs Jintegrate(JacobianCoeffs::Zero(lg.nq(), lg.nv()));
     lg.integrateCoeffWiseJacobian(q, Jintegrate);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(tangentMap)
+{
+  typedef double Scalar;
+  enum
+  {
+    Options = 0
+  };
+
+  typedef boost::mpl::vector<
+    VectorSpaceOperationTpl<1, Scalar, Options>, VectorSpaceOperationTpl<2, Scalar, Options>,
+    SpecialOrthogonalOperationTpl<2, Scalar, Options>,
+    SpecialOrthogonalOperationTpl<3, Scalar, Options>,
+    SpecialEuclideanOperationTpl<2, Scalar, Options>,
+    SpecialEuclideanOperationTpl<3, Scalar, Options>,
+    CartesianProductOperation<
+      VectorSpaceOperationTpl<2, Scalar, Options>,
+      SpecialOrthogonalOperationTpl<2, Scalar, Options>>,
+    CartesianProductOperation<
+      VectorSpaceOperationTpl<3, Scalar, Options>,
+      SpecialOrthogonalOperationTpl<3, Scalar, Options>>>
+    Types;
+  for (int i = 0; i < 20; ++i)
+  {
+    boost::mpl::for_each<Types>(LieGroup_TangentMap<false>());
+    boost::mpl::for_each<Types>(LieGroup_TangentMap<true>());
   }
 }
 
