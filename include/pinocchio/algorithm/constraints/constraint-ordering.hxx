@@ -36,15 +36,6 @@ namespace pinocchio
 
     template<typename ConstraintModel>
     static void algo_step(
-      const RigidConstraintModelTpl<ConstraintModel> & cmodel, const Model & model, Data & data)
-    {
-      PINOCCHIO_UNUSED_VARIABLE(cmodel);
-      PINOCCHIO_UNUSED_VARIABLE(model);
-      PINOCCHIO_UNUSED_VARIABLE(data);
-    }
-
-    template<typename ConstraintModel>
-    static void algo_step(
       const KinematicsConstraintModelBase<ConstraintModel> & cmodel,
       const Model & model,
       Data & data)
