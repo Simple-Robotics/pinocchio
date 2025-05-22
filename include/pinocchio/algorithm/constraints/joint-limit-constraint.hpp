@@ -341,7 +341,7 @@ namespace pinocchio
       const ConstraintData & cdata,
       const Eigen::MatrixBase<VectorNLike> & diagonal_constraint_inertia,
       const ReferenceFrameTag<rf> reference_frame) const;
-      
+
     /// \brief Returns the vector of the active indexes associated with a given row
     /// This vector is computed when calling the calc method.
     const VectorOfSize & getActiveSetIndexes() const

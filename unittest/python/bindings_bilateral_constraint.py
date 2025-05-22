@@ -1,4 +1,5 @@
 import unittest
+
 import pinocchio as pin
 from test_case import PinocchioTestCase as TestCase
 

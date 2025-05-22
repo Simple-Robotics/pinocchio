@@ -1,11 +1,10 @@
+import importlib.util
 import unittest
 from pathlib import Path
 
 import numpy as np
 import pinocchio as pin
 from test_case import ContactSolverTestCase as TestCase
-
-import importlib.util
 
 coal_spec = importlib.util.find_spec("coal")
 coal_found = coal_spec is not None

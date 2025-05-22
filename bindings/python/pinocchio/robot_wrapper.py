@@ -69,7 +69,7 @@ class RobotWrapper:
             model=model,
             collision_model=collision_model,
             visual_model=visual_model,
-            constraint_models=constraint_models
+            constraint_models=constraint_models,
         )
 
     def __init__(

@@ -529,15 +529,15 @@ namespace pinocchio
 
             urdfVisitor << "joint REVOLUTE with axis" << axis.transpose() << '\n';
             urdfVisitor.addJointAndBody(
-              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
-              childName, max_effort, max_velocity, min_config, max_config, friction, damping);
+              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(), childName,
+              max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else if (jointElement->template Get<std::string>("type") == "gearbox")
           {
             urdfVisitor << "joint GEARBOX with axis" << '\n';
             urdfVisitor.addJointAndBody(
-              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(),
-              childName, max_effort, max_velocity, min_config, max_config, friction, damping);
+              JointType::REVOLUTE, axis, parentFrameId, pMj, jointName, Y, cMj.inverse(), childName,
+              max_effort, max_velocity, min_config, max_config, friction, damping);
           }
           else if (jointElement->template Get<std::string>("type") == "prismatic")
           {

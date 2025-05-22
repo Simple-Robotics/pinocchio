@@ -44,7 +44,8 @@ namespace pinocchio
       os << shortname() << endl;
     }
 
-    friend std::ostream & operator<<(std::ostream & os, const ConstraintDataBase<Derived> & constraint)
+    friend std::ostream &
+    operator<<(std::ostream & os, const ConstraintDataBase<Derived> & constraint)
     {
       constraint.disp(os);
       return os;
