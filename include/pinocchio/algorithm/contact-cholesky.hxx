@@ -327,7 +327,7 @@ namespace pinocchio
       DUt_partial.noalias() =
         U.row(j).segment(j + 1, slice_dim).transpose().cwiseProduct(D.segment(j + 1, slice_dim));
 
-      D[j] = -vec[j] - compliance[j] - U.row(j).segment(j + 1, slice_dim).dot(DUt_partial);
+      D[j] = -damping[j] - compliance[j] - U.row(j).segment(j + 1, slice_dim).dot(DUt_partial);
       assert(
         check_expression_if_real<Scalar>(D[j] != Scalar(0))
         && "The diagonal element is equal to zero.");
