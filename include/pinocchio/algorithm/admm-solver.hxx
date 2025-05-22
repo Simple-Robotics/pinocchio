@@ -192,7 +192,6 @@ namespace pinocchio
     // Unused for now
     PINOCCHIO_UNUSED_VARIABLE(dual_guess);
 
-    using namespace internal;
     typedef ADMMSpectralUpdateRuleTpl<Scalar> ADMMSpectralUpdateRule;
     typedef ADMMLinearUpdateRuleTpl<Scalar> ADMMLinearUpdateRule;
 
@@ -236,9 +235,9 @@ namespace pinocchio
     // -> time_scaling_constraints_to_pos similarly allows to go from the units of the constraints
     // to positions in m. Warning: this constraints time-scaling has (a priori) nothing to do with
     // the pre-conditioner.
-    getTimeScalingFromAccelerationToConstraints(
+    internal::getTimeScalingFromAccelerationToConstraints(
       constraint_models, dt, time_scaling_acc_to_constraints);
-    getTimeScalingFromConstraintsToPosition(
+    internal::getTimeScalingFromConstraintsToPosition(
       time_scaling_acc_to_constraints, dt, time_scaling_constraints_to_pos);
     gs = g.array() / time_scaling_acc_to_constraints.array();
     const Scalar g_pos_norm_inf =
@@ -276,7 +275,7 @@ namespace pinocchio
     }
 
     // Init y
-    computeConeProjection(constraint_models, x_, y_);
+    internal::computeConeProjection(constraint_models, x_, y_);
 
     // Init z -> z_ = (G + R) * y_ + g
     delassus.applyOnTheRight(y_, z_);
@@ -284,7 +283,7 @@ namespace pinocchio
     z_ -= y_.cwiseProduct(delassus.getDamping());
     if (solve_ncp)
     {
-      computeDeSaxeCorrection(constraint_models, z_, s_);
+      internal::computeDeSaxeCorrection(constraint_models, z_, s_);
       z_ += s_; // Add De Saxé shift
     }
 
@@ -296,11 +295,11 @@ namespace pinocchio
     // constraint formulation level.
     rhs =
       z_.array() * time_scaling_acc_to_constraints.array(); // back to constraint formulation level
-    complementarity = computeConicComplementarity(constraint_models, rhs, y_);
+    complementarity = internal::computeConicComplementarity(constraint_models, rhs, y_);
 
     // dual feasibility is computed in "position" on the z_ variable (and not on z_bar_).
     dual_feasibility_vector = rhs;
-    computeDualConeProjection(constraint_models, rhs, rhs);
+    internal::computeDualConeProjection(constraint_models, rhs, rhs);
     dual_feasibility_vector -= rhs;
     dual_feasibility = dual_feasibility_vector.template lpNorm<Eigen::Infinity>();
     const Scalar absolute_residual_warm_start = math::max(complementarity, dual_feasibility);
@@ -329,13 +328,13 @@ namespace pinocchio
         {
           PINOCCHIO_TRACY_ZONE_SCOPED_N(
             "ADMMContactSolverTpl::solve - second computeDeSaxeCorrection");
-          computeDeSaxeCorrection(constraint_models, z_, s_);
+          internal::computeDeSaxeCorrection(constraint_models, z_, s_);
         }
         z_ += s_; // Add De Saxé shift
       }
       rhs = z_.array() * time_scaling_acc_to_constraints.array();
       dual_feasibility_vector = rhs;
-      computeDualConeProjection(constraint_models, rhs, rhs);
+      internal::computeDualConeProjection(constraint_models, rhs, rhs);
       dual_feasibility_vector -= rhs; // Dual feasibility vector for the new null guess
       dual_feasibility_vector.array() *= time_scaling_constraints_to_pos.array();
       // We set the new convergence criterion
@@ -449,7 +448,7 @@ namespace pinocchio
         if (solve_ncp)
         {
           // s-update
-          computeDeSaxeCorrection(constraint_models, z_bar_, s_bar_);
+          internal::computeDeSaxeCorrection(constraint_models, z_bar_, s_bar_);
         }
 
         // x-update
@@ -459,7 +458,8 @@ namespace pinocchio
 
         // y-update
         rhs -= z_bar_ / (tau * rho);
-        computeScaledConeProjection(constraint_models, rhs, preconditioner_.getDiagonal(), y_bar_);
+        internal::computeScaledConeProjection(
+          constraint_models, rhs, preconditioner_.getDiagonal(), y_bar_);
 
         // z-update
         z_bar_ -= (tau * rho) * (x_bar_ - y_bar_);
@@ -505,7 +505,7 @@ namespace pinocchio
         unscalePrimalSolution(y_bar_, y_);
         unscaleDualSolution(z_bar_, z_);
         rhs = z_.array() * time_scaling_acc_to_constraints.array();
-        complementarity = computeConicComplementarity(constraint_models, rhs, y_);
+        complementarity = internal::computeConicComplementarity(constraint_models, rhs, y_);
 
         if (stat_record)
         {
@@ -515,7 +515,7 @@ namespace pinocchio
           unscaleDualSolution(rhs, tmp);
           if (solve_ncp)
           {
-            computeDeSaxeCorrection(constraint_models, tmp, rhs);
+            internal::computeDeSaxeCorrection(constraint_models, tmp, rhs);
             tmp += rhs;
           }
 
