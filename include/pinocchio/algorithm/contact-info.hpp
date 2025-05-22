@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2024 INRIA CNRS
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_algorithm_contact_info_hpp__
@@ -11,7 +11,7 @@
 #include "pinocchio/spatial/skew.hpp"
 #include "pinocchio/algorithm/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
-#include "pinocchio/algorithm/constraints/constraint-model-base.hpp"
+#include "pinocchio/algorithm/constraints/kinematics-constraint-base.hpp"
 #include "pinocchio/algorithm/constraints/constraint-data-base.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
@@ -131,7 +131,8 @@ namespace pinocchio
   ///
   template<typename _Scalar, int _Options>
   struct PINOCCHIO_UNSUPPORTED_MESSAGE("The API will change towards more flexibility")
-    RigidConstraintModelTpl : ConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>>
+    RigidConstraintModelTpl
+  : KinematicsConstraintModelBase<RigidConstraintModelTpl<_Scalar, _Options>>
   {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -142,7 +143,7 @@ namespace pinocchio
     };
 
     typedef RigidConstraintModelTpl Self;
-    typedef ConstraintModelBase<Self> Base;
+    typedef KinematicsConstraintModelBase<Self> Base;
 
     template<typename NewScalar, int NewOptions>
     friend struct RigidConstraintModelTpl;
@@ -178,14 +179,9 @@ namespace pinocchio
     typedef Eigen::Matrix<Scalar, 6, 1, Options> Vector6;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Options> VectorXs;
 
+    using Base::joint1_id, Base::joint2_id;
     ///  \brief Type of the contact.
     ContactType type;
-
-    /// \brief Index of the first joint in the model tree
-    JointIndex joint1_id;
-
-    /// \brief Index of the second joint in the model tree
-    JointIndex joint2_id;
 
     /// \brief Relative placement with respect to the frame of joint1.
     SE3 joint1_placement;
@@ -275,10 +271,8 @@ namespace pinocchio
       const JointIndex joint2_id,
       const SE3 & joint2_placement,
       const ReferenceFrame & reference_frame = LOCAL)
-    : Base(model)
+    : Base(model, joint1_id, joint2_id)
     , type(type)
-    , joint1_id(joint1_id)
-    , joint2_id(joint2_id)
     , joint1_placement(joint1_placement)
     , joint2_placement(joint2_placement)
     , reference_frame(reference_frame)
@@ -312,10 +306,8 @@ namespace pinocchio
       const JointIndex joint1_id,
       const SE3 & joint1_placement,
       const ReferenceFrame & reference_frame = LOCAL)
-    : Base(model)
+    : Base(model, joint1_id, 0)
     , type(type)
-    , joint1_id(joint1_id)
-    , joint2_id(0)
     , joint1_placement(joint1_placement)
     , joint2_placement(SE3::Identity())
     , reference_frame(reference_frame)
@@ -347,10 +339,8 @@ namespace pinocchio
       const JointIndex joint1_id,
       const JointIndex joint2_id,
       const ReferenceFrame & reference_frame = LOCAL)
-    : Base(model)
+    : Base(model, joint1_id, joint2_id)
     , type(type)
-    , joint1_id(joint1_id)
-    , joint2_id(joint2_id)
     , joint1_placement(SE3::Identity())
     , joint2_placement(SE3::Identity())
     , reference_frame(reference_frame)
@@ -383,10 +373,8 @@ namespace pinocchio
       const ModelTpl<Scalar, OtherOptions, JointCollectionTpl> & model,
       const JointIndex joint1_id,
       const ReferenceFrame & reference_frame = LOCAL)
-    : Base(model)
+    : Base(model, joint1_id, 0)
     , type(type)
-    , joint1_id(joint1_id)
-    , joint2_id(0) // set to be the Universe
     , joint1_placement(SE3::Identity())
     , joint2_placement(SE3::Identity())
     , reference_frame(reference_frame)
@@ -503,8 +491,8 @@ namespace pinocchio
     template<int OtherOptions>
     bool operator==(const RigidConstraintModelTpl<Scalar, OtherOptions> & other) const
     {
-      return base() == other.base() && type == other.type && joint1_id == other.joint1_id
-             && joint2_id == other.joint2_id && joint1_placement == other.joint1_placement
+      return base() == other.base() && type == other.type
+             && joint1_placement == other.joint1_placement
              && joint2_placement == other.joint2_placement
              && reference_frame == other.reference_frame && corrector == other.corrector
              && colwise_joint1_sparsity == other.colwise_joint1_sparsity
