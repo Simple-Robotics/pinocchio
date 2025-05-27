@@ -8,6 +8,7 @@
 #include "pinocchio/math/fwd.hpp"
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/set-base.hpp"
+#include "pinocchio/math/matrix.hpp"
 
 namespace pinocchio
 {
@@ -60,7 +61,8 @@ namespace pinocchio
     , m_ub(ub)
     {
       PINOCCHIO_CHECK_INPUT_ARGUMENT(
-        (m_lb.array() <= m_ub.array()).all(), "Some components of lb are greater than ub");
+        arrayCompareAll(m_lb, m_ub, internal::ComparisonOperators::LE),
+        "Some components of lb are greater than ub");
     }
 
     /// \brief Copy constructor.
@@ -127,7 +129,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
-      res_.const_cast_derived() = x.array().max(m_lb.array()).min(m_ub.array());
+      pinocchio::arrayBound(x, m_lb, m_ub, res_);
     }
 
     /// \brief Project a vector x such that scale * res is in the box.

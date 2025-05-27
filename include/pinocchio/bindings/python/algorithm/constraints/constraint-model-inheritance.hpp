@@ -45,28 +45,34 @@ namespace pinocchio
       typedef typename T::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
+      typedef context::SE3 SE3;
 
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
-                 (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
-                  bp::arg("joint1_placement"), bp::arg("joint2_id"), bp::arg("joint2_placement")),
-                 "Contructor from given joint index and placement for the two joints "
-                 "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, const SE3 &>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
-            "Contructor from given joint index and placement of the first joint "
-            "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, JointIndex>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
-            "Contructor from given joint index for the two joints "
-            "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
-            "Contructor from given joint index of the first joint "
-            "implied in the constraint."))
+        cl.def(
+            bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement"),
+               bp::arg("joint2_id"), bp::arg("joint2_placement")),
+              "Contructor from given joint index and placement for the two joints "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex, const SE3 &>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
+               bp::arg("joint1_placement")),
+              "Contructor from given joint index and placement of the first joint "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex, JointIndex>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
+              "Contructor from given joint index for the two joints "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
+              "Contructor from given joint index of the first joint "
+              "implied in the constraint."))
           .PINOCCHIO_ADD_PROPERTY(T, joint1_id, "Index of the first joint in the model tree.")
           .PINOCCHIO_ADD_PROPERTY(T, joint2_id, "Index of the second joint in the model tree.")
           .PINOCCHIO_ADD_PROPERTY(
@@ -148,28 +154,34 @@ namespace pinocchio
       typedef typename T::ConstraintData ConstraintData;
       typedef context::Model Model;
       typedef context::Data Data;
+      typedef context::SE3 SE3;
 
     public:
       template<class PyClass>
       void visit(PyClass & cl) const
       {
-        cl.def(bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
-                 (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
-                  bp::arg("joint1_placement"), bp::arg("joint2_id"), bp::arg("joint2_placement")),
-                 "Contructor from given joint index and placement for the two joints "
-                 "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, const SE3 &>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement")),
-            "Contructor from the given joint index and the placement wrt the first joint "
-            "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex, JointIndex>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
-            "Contructor from given joint indexes for the two joints "
-            "implied in the constraint."))
-          .def(bp::init<const Model &, JointIndex>(
-            (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
-            "Contructor from given joint index of the first joint "
-            "implied in the constraint."))
+        cl.def(
+            bp::init<const Model &, JointIndex, const SE3 &, JointIndex, const SE3 &>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint1_placement"),
+               bp::arg("joint2_id"), bp::arg("joint2_placement")),
+              "Contructor from given joint index and placement for the two joints "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex, const SE3 &>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"),
+               bp::arg("joint1_placement")),
+              "Contructor from the given joint index and the placement wrt the first joint "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex, JointIndex>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id"), bp::arg("joint2_id")),
+              "Contructor from given joint indexes for the two joints "
+              "implied in the constraint."))
+          .def(
+            bp::init<const Model &, JointIndex>(
+              (bp::arg("self"), bp::arg("model"), bp::arg("joint1_id")),
+              "Contructor from given joint index of the first joint "
+              "implied in the constraint."))
           .PINOCCHIO_ADD_PROPERTY(T, joint1_id, "Index of the first joint in the model tree.")
           .PINOCCHIO_ADD_PROPERTY(T, joint2_id, "Index of the second joint in the model tree.")
           .PINOCCHIO_ADD_PROPERTY(

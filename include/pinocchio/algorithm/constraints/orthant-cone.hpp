@@ -6,6 +6,7 @@
 #define __pinocchio_algorithm_constraints_orthant_cone_hpp__
 
 #include "pinocchio/math/fwd.hpp"
+#include "pinocchio/math/matrix.hpp"
 #include "pinocchio/algorithm/constraints/cone-base.hpp"
 
 namespace pinocchio
@@ -227,7 +228,7 @@ namespace pinocchio
       const Eigen::MatrixBase<VectorLikeIn> & x,
       const Eigen::MatrixBase<VectorLikeOut> & res_) const
     {
-      res_.const_cast_derived() = x.array().min(Scalar(0)).matrix();
+      pinocchio::arrayMin(x, Scalar(0), res_);
     }
 
     /// \brief Project the value given as input for the given row index.
