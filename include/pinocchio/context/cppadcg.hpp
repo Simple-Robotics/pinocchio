@@ -47,9 +47,10 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#include "pinocchio/codegen/cppadcg.hpp"
+#include <cppad/cg/support/cppadcg_eigen.hpp>
 #define PINOCCHIO_SCALAR_TYPE ::CppAD::AD<CppAD::cg::CG<double>>
 #include "pinocchio/context/generic.hpp"
+#include "pinocchio/codegen/cppadcg.hpp"
 
 #undef PINOCCHIO_SCALAR_TYPE
 #endif // #ifndef __pinocchio_context_cppadcg_hpp__

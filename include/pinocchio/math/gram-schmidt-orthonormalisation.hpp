@@ -21,7 +21,7 @@ namespace pinocchio
   void orthogonalization(
     const Eigen::MatrixBase<MatrixType> & basis,
     const Eigen::MatrixBase<VectorType> & vec_,
-    const typename MatrixType::Scalar & threshold = 0)
+    const typename MatrixType::Scalar & threshold = typename MatrixType::Scalar(0))
   {
     typedef typename VectorType::Scalar Scalar;
     VectorType & vec = vec_.const_cast_derived();

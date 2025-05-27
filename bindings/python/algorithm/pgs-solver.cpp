@@ -57,6 +57,7 @@ namespace pinocchio
       void run(ConstraintModelBase<ConstraintModel> * ptr = 0)
       {
         PINOCCHIO_UNUSED_VARIABLE(ptr);
+#ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
         class_
           .def(
             "solve", solve_wrapper<context::MatrixXs, ConstraintModel>,
@@ -72,6 +73,7 @@ namespace pinocchio
              bp::arg("solve_ncp") = true, bp::arg("stat_record") = false),
             "Solve the constrained conic problem composed of problem data (G,g,cones) and starting "
             "from the initial guess.");
+#endif // ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
       }
 
       //      template<typename S, int O>
