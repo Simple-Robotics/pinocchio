@@ -119,7 +119,7 @@ namespace Eigen
             : false>());
     }
 
-    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline inline int digits()
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR static inline int digits()
     {
       return internal::default_digits_impl<self_type>::run();
     }

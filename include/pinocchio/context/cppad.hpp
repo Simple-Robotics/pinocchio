@@ -46,9 +46,10 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#include "pinocchio/autodiff/cppad.hpp"
+#include <cppad/cppad.hpp>
 #define PINOCCHIO_SCALAR_TYPE ::CppAD::AD<double>
 #include "pinocchio/context/generic.hpp"
+#include "pinocchio/autodiff/cppad.hpp"
 
 #undef PINOCCHIO_SCALAR_TYPE
 #endif // #ifndef __pinocchio_context_cppad_hpp__

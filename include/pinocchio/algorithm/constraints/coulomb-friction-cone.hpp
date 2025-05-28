@@ -9,6 +9,7 @@
 #include "pinocchio/algorithm/constraints/cone-base.hpp"
 #include "pinocchio/math/fwd.hpp"
 #include "pinocchio/math/comparison-operators.hpp"
+#include "pinocchio/utils/check.hpp"
 
 namespace pinocchio
 {
@@ -135,12 +136,12 @@ namespace pinocchio
       const Vector2Plain t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
-      if (mu * t_norm <= -z)
+      if (check_expression_if_real<Scalar>(mu * t_norm <= -z))
       {
         res.setZero();
         return;
       }
-      else if (t_norm <= mu_z)
+      else if (check_expression_if_real<Scalar>(t_norm <= mu_z))
       {
         res = x;
         return;
@@ -149,7 +150,7 @@ namespace pinocchio
       {
         res.template head<2>() = (mu / t_norm) * t;
         res[2] = 1;
-        res.normalize();
+        pinocchio::normalize(res);
         const Scalar scale = x.dot(res);
         res *= scale;
         return;
@@ -220,7 +221,7 @@ namespace pinocchio
 
       res[2] = math::max(Scalar(0), f[2]);
       const Scalar mu_fz = mu * res[2];
-      if (ft_norm > mu_fz)
+      if (check_expression_if_real<Scalar>(ft_norm > mu_fz))
       {
         res.template head<2>() = Scalar(mu_fz / ft_norm) * ft;
       }
@@ -352,12 +353,12 @@ namespace pinocchio
       const Eigen::Matrix<Scalar, 2, 1> t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
-      if (t_norm <= -mu * z)
+      if (check_expression_if_real<Scalar>(t_norm <= -mu * z))
       {
         res.setZero();
         return;
       }
-      else if (mu * t_norm <= z)
+      else if (check_expression_if_real<Scalar>(mu * t_norm <= z))
       {
         res = x;
         return;
@@ -366,7 +367,7 @@ namespace pinocchio
       {
         res.template head<2>() = t;
         res[2] = mu * t_norm;
-        res.normalize();
+        pinocchio::normalize(res);
         const Scalar scale = x.dot(res);
         res *= scale;
         return;

@@ -109,8 +109,8 @@ if(CMAKE_VERSION VERSION_GREATER "3.12")
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-# Force C++ standard to be C++11 at least
-check_minimal_cxx_standard(11 ENFORCE)
+# Force C++ standard to be C++17 at least
+check_minimal_cxx_standard(17 ENFORCE)
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_BENCHMARK "Build the benchmarks" OFF)
