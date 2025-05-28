@@ -11,11 +11,10 @@
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-parameters.hpp"
 #include "pinocchio/algorithm/constraints/baumgarte-corrector-vector-parameters.hpp"
 
-template<typename Scalar>
-struct BaumgarteCorrectorParametersTpl;
-
 namespace pinocchio
 {
+  template<typename Scalar>
+  struct BaumgarteCorrectorParametersTpl;
 
   enum struct ConstraintFormulationLevel
   {
