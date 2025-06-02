@@ -3,7 +3,7 @@
 //
 
 #include "pinocchio/bindings/python/fwd.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
+
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
 
 #include <eigenpy/eigenpy.hpp>

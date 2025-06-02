@@ -27,6 +27,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove header `pinocchio/deprecation.hpp`, directly use generated `pinocchio/deprecated.hpp`
 - macros.hpp : remove macros already provided by jrl-cmakemodules
 
+### Removed
+
+- bindings/python : removed header `utils/registration.hpp`, delegate to `<eigenpy/registration.hpp>` instead
+
 ## [3.7.0] - 2025-05-21
 
 ### Changed

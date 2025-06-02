@@ -12,7 +12,6 @@
 #include "pinocchio/bindings/python/utils/cast.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 
 namespace pinocchio
 {

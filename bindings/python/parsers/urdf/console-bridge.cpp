@@ -4,7 +4,6 @@
 
 #include <boost/python.hpp>
 #include "pinocchio/bindings/python/parsers/urdf.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 
 #ifdef PINOCCHIO_WITH_URDFDOM
   #include <console_bridge/console.h>

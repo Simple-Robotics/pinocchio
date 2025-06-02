@@ -7,7 +7,6 @@
 #include "pinocchio/utils/version.hpp"
 #include "pinocchio/bindings/python/utils/version.hpp"
 #include "pinocchio/bindings/python/utils/dependencies.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
 #include "pinocchio/spatial/cartesian-axis.hpp"

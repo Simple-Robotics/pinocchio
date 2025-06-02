@@ -16,6 +16,8 @@ namespace pinocchio
 {
   namespace python
   {
+    using eigenpy::register_symbolic_link_to_registered_type;
+
     // Expose spatial classes
     void exposeSE3();
     void exposeForce();
