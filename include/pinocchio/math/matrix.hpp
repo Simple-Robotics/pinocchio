@@ -542,6 +542,63 @@ namespace pinocchio
     internal::arrayMinAlgo<M, Res>::run(x, min, res);
   }
 
+  namespace internal
+  {
+    template<
+      typename MatrixLike1,
+      typename MatrixLike2,
+      bool value = is_floating_point<typename MatrixLike1::Scalar>::value
+                   && is_floating_point<typename MatrixLike2::Scalar>::value>
+    struct isApproxAlgo
+    {
+      typedef typename MatrixLike1::RealScalar RealScalar;
+
+      static bool run(
+        const Eigen::MatrixBase<MatrixLike1> & m1,
+        const Eigen::MatrixBase<MatrixLike2> & m2,
+        const RealScalar & prec = Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        return m1.isApprox(m2, prec);
+      }
+    };
+
+    template<typename MatrixLike1, typename MatrixLike2>
+    struct isApproxAlgo<MatrixLike1, MatrixLike2, false>
+    {
+      typedef typename MatrixLike1::RealScalar RealScalar;
+
+      static bool run(
+        const Eigen::MatrixBase<MatrixLike1> & m1,
+        const Eigen::MatrixBase<MatrixLike2> & m2,
+        const RealScalar & prec = Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        PINOCCHIO_UNUSED_VARIABLE(m1);
+        PINOCCHIO_UNUSED_VARIABLE(m2);
+        PINOCCHIO_UNUSED_VARIABLE(prec);
+        return true;
+      }
+    };
+  } // namespace internal
+
+  ///
+  /// \brief Check whether two matrix are approximately the same
+  ///
+  /// \param[in] m1 Input matrix
+  /// \param[in] m2 Input matrix
+  /// \param[in] prec Required precision
+  ///
+  /// \returns true if m1 and m2 are approximately the same given precision prec.
+  ///
+  template<typename MatrixLike1, typename MatrixLike2>
+  inline bool isApprox(
+    const Eigen::MatrixBase<MatrixLike1> & m1,
+    const Eigen::MatrixBase<MatrixLike2> & m2,
+    const typename MatrixLike1::RealScalar & prec =
+      Eigen::NumTraits<typename MatrixLike1::Scalar>::dummy_precision())
+  {
+    return internal::isApproxAlgo<MatrixLike1, MatrixLike2>::run(m1, m2, prec);
+  }
+
   template<typename XprType, typename DestType>
   inline void evalTo(const XprType & xpr, DestType & dest)
   {
