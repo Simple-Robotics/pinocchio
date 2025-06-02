@@ -8,6 +8,7 @@
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/cone-base.hpp"
 #include "pinocchio/math/fwd.hpp"
+#include "pinocchio/math/matrix.hpp"
 #include "pinocchio/math/comparison-operators.hpp"
 #include "pinocchio/utils/check.hpp"
 
