@@ -678,7 +678,7 @@ namespace pinocchio
     tmp = 0.5 * (mat + mat.transpose());
     mat = tmp;
 
-    assert(mat == mat.transpose());
+    assert(isSymmetric(mat));
   }
 
   template<typename Matrix>

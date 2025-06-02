@@ -163,7 +163,7 @@ namespace pinocchio
     {
       const auto activable_idx_q = activable_idx_qs[i];
       bound_position_limit[bound_row_id] = lb[activable_idx_q];
-      assert(marg[activable_idx_q] >= 0);
+      assert(check_expression_if_real<Scalar>(marg[activable_idx_q] >= 0));
       bound_position_margin[bound_row_id] = marg[activable_idx_q];
       bound_row_id++;
     }
@@ -172,7 +172,7 @@ namespace pinocchio
     {
       const auto activable_idx_q = activable_idx_qs[i];
       bound_position_limit[bound_row_id] = ub[activable_idx_q];
-      assert(marg[activable_idx_q] >= 0);
+      assert(check_expression_if_real<Scalar>(marg[activable_idx_q] >= 0));
       bound_position_margin[bound_row_id] = marg[activable_idx_q];
       bound_row_id++;
     }

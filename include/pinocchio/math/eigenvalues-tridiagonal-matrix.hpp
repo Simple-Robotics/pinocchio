@@ -53,7 +53,7 @@ namespace pinocchio
     const Eigen::DenseIndex dm = m2 - m1 + 1;
     const Scalar relfeh = 2 * Eigen::NumTraits<Scalar>::epsilon();
 
-    assert((Scalar(1) + relfeh) > Scalar(1));
+    assert(check_expression_if_real<Scalar>((Scalar(1) + relfeh) > Scalar(1)));
 
     const auto & alphas = tridiagonal_mat.diagonal();
     const auto & betas_ = tridiagonal_mat.subDiagonal();
