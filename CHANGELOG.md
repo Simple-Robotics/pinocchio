@@ -26,9 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove unused headers `deprecated-macros.hpp` and `deprecated-namespaces.hpp`
 - Remove header `pinocchio/deprecation.hpp`, directly use generated `pinocchio/deprecated.hpp`
 - macros.hpp : remove macros already provided by jrl-cmakemodules
-
-### Removed
-
+- bindings/python : deprecate and remove contents of `utils/copyable.hpp` and `utils/deprecation.hpp`, include corresponding eigenpy headers instead
 - bindings/python : removed header `utils/registration.hpp`, delegate to `<eigenpy/registration.hpp>` instead
 
 ## [3.7.0] - 2025-05-21
