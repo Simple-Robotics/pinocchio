@@ -574,6 +574,7 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/conversions.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/address.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/copyable.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/registration.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/pickle.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/pickle-map.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/utils/list.hpp
