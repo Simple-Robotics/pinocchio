@@ -1,9 +1,8 @@
 //
-// Copyright (c) 2020-2021 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #include "pinocchio/bindings/python/fwd.hpp"
-
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
 
 #include <eigenpy/eigenpy.hpp>

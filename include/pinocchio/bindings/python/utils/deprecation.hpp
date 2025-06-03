@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #ifndef __pinocchio_python_utils_deprecation_hpp__
@@ -9,7 +9,7 @@
 #include <eigenpy/deprecation-policy.hpp>
 #include "pinocchio/deprecated.hpp"
 
-PINOCCHIO_DEPRECATED_HEADER("Include <eigenpy/deprecation-policy.hpp> instead.")
+PINOCCHIO_DEPRECATED_HEADER("Directly include <eigenpy/deprecation-policy.hpp> instead.")
 
 namespace pinocchio
 {

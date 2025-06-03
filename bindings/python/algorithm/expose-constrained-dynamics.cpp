@@ -8,7 +8,6 @@
 #include "pinocchio/bindings/python/algorithm/contact-cholesky.hpp"
 
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
-
 #include "pinocchio/bindings/python/utils/model-checker.hpp"
 
 #include "pinocchio/algorithm/constrained-dynamics.hpp"

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2022 CNRS INRIA
+// Copyright (c) 2015-2022 CNRS INRIA, 2025 INRIA
 //
 
 #include "pinocchio/bindings/python/fwd.hpp"

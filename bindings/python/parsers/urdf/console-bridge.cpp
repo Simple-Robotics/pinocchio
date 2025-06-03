@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #include <boost/python.hpp>

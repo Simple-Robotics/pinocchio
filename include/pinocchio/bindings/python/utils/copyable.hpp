@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2023 CNRS INRIA
+// Copyright (c) 2016-2023 CNRS INRIA, 2025 INRIA
 //
 
 #ifndef __pinocchio_python_utils_copyable_hpp__
@@ -9,7 +9,7 @@
 
 #include "pinocchio/deprecated.hpp"
 
-PINOCCHIO_DEPRECATED_HEADER("Directly include <eigenpy/copyable.hpp>")
+PINOCCHIO_DEPRECATED_HEADER("Directly include <eigenpy/copyable.hpp> instead.")
 
 namespace pinocchio
 {
