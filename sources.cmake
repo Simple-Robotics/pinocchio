@@ -173,9 +173,6 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/context.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/core/binary-op.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/core/unary-op.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/deprecated-macros.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/deprecated-namespaces.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/deprecation.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/eigen-macros.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/fwd.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/macros.hpp

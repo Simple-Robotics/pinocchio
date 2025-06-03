@@ -8,7 +8,7 @@
 #include "pinocchio/macros.hpp"
 
 // clang-format off
-PINOCCHIO_PRAGMA_DEPRECATED_HEADER(pinocchio/math/casadi.hpp, pinocchio/autodiff/casadi.hpp)
+PINOCCHIO_DEPRECATED_HEADER(pinocchio/math/casadi.hpp, pinocchio/autodiff/casadi.hpp)
 // clang-format on
 
 #include "pinocchio/autodiff/casadi.hpp"

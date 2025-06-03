@@ -8,7 +8,7 @@
 #include "pinocchio/macros.hpp"
 
 // clang-format off
-PINOCCHIO_PRAGMA_DEPRECATED_HEADER(pinocchio/bindings/python/parsers/python.hpp, pinocchio/parsers/python.hpp)
+PINOCCHIO_DEPRECATED_HEADER(pinocchio/bindings/python/parsers/python.hpp, pinocchio/parsers/python.hpp)
 // clang-format on
 
 #include "pinocchio/parsers/python.hpp"
