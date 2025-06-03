@@ -26,7 +26,7 @@ namespace pinocchio
 #endif
 
 #include "pinocchio/macros.hpp"
-#include "pinocchio/deprecation.hpp"
+#include "pinocchio/deprecated.hpp"
 #include "pinocchio/warning.hpp"
 #include "pinocchio/config.hpp"
 #include "pinocchio/unsupported.hpp"
