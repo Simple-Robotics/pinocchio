@@ -8,7 +8,7 @@
 #include "pinocchio/macros.hpp"
 
 // clang-format off
-PINOCCHIO_PRAGMA_DEPRECATED_HEADER(pinocchio/algorithm/parallel/geometry.hpp, pinocchio/collision/parallel/geometry.hpp)
+PINOCCHIO_DEPRECATED_HEADER(pinocchio/algorithm/parallel/geometry.hpp, pinocchio/collision/parallel/geometry.hpp)
 // clang-format on
 
 #include "pinocchio/collision/parallel/geometry.hpp"
