@@ -13,8 +13,13 @@ namespace pinocchio
 {
 
   ///
-  /// @copydoc changeReferenceFrame(const SE3Tpl<Scalar,Options> &,const MotionDense<MotionIn>
+  /// \copybrief changeReferenceFrame(const SE3Tpl<Scalar,Options> &,const MotionDense<MotionIn>
   /// &,const ReferenceFrame,const ReferenceFrame)
+  ///
+  /// \param[in] placement Placement of the frame having velocity m_in
+  /// \param[in] m_in Input motion quantity.
+  /// \param[in] rf_in Reference frame in which m_in is expressed
+  /// \param[in] rf_out Reference frame in which the result m_out is expressed
   /// \param[out] m_out Resulting motion quantity.
   ///
   template<typename Scalar, int Options, typename MotionIn, typename MotionOut>
@@ -86,7 +91,7 @@ namespace pinocchio
   /// \param[in] m_in Input motion quantity.
   /// \param[in] rf_in Reference frame in which m_in is expressed
   /// \param[in] rf_out Reference frame in which the result m_out is expressed
-  /// \param[out] m_out Resulting motion quantity.
+  /// \return Resulting motion quantity.
   ///
   template<typename Scalar, int Options, typename MotionIn>
   typename MotionIn::MotionPlain changeReferenceFrame(

@@ -12,8 +12,14 @@
 namespace pinocchio
 {
   ///
-  /// @copydoc changeReferenceFrame(const SE3Tpl<Scalar,Options> &,const ForceDense<MotionIn>
-  /// &,const ReferenceFrame,const ReferenceFrame) \param[out] f_out Resulting force quantity.
+  /// \copybrief changeReferenceFrame(const SE3Tpl<Scalar,Options> &,const ForceDense<ForceIn>
+  /// &,const ReferenceFrame,const ReferenceFrame)
+  ///
+  /// \param[in] placement Placement of the frame having force f_in
+  /// \param[in] f_in Input force quantity.
+  /// \param[in] rf_in Reference frame in which m_in is expressed
+  /// \param[in] rf_out Reference frame in which the result m_out is expressed
+  /// \param[out] f_out Resulting force quantity.
   ///
   template<typename Scalar, int Options, typename ForceIn, typename ForceOut>
   void changeReferenceFrame(
@@ -84,7 +90,7 @@ namespace pinocchio
   /// \param[in] f_in Input force quantity.
   /// \param[in] rf_in Reference frame in which m_in is expressed
   /// \param[in] rf_out Reference frame in which the result m_out is expressed
-  /// \param[out] f_out Resulting force quantity.
+  /// \return Resulting force quantity.
   ///
   template<typename Scalar, int Options, typename ForceIn>
   typename ForceIn::ForcePlain changeReferenceFrame(
