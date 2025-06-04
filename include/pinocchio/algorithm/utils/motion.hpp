@@ -75,10 +75,10 @@ namespace pinocchio
   }
 
   ///
-  ///  \brief Change the expression of a given Motion vector from one reference frame to another
+  /// \brief Change the expression of a given Motion vector from one reference frame to another
   /// reference frame.
   ///
-  ///  \example If ones has an initial m_in Motion expressed locally (rf_in=LOCAL) in a Frame
+  /// \details If ones has an initial m_in Motion expressed locally (rf_in=LOCAL) in a Frame
   /// localized at a given placement value,           ones may want to retrieve its value inside
   /// another reference frame e.g. the world (rf_out=WORLD).
   ///
