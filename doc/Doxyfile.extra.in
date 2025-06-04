@@ -608,7 +608,8 @@ PREDEFINED             += EIGEN_MAKE_ALIGNED_OPERATOR_NEW \
                           PINOCCHIO_WITH_URDFDOM \
                           PINOCCHIO_WITH_CPPAD_SUPPORT \
                           PINOCCHIO_WITH_CPPADCG_SUPPORT \
-                          PINOCCHIO_WITH_LUA5
+                          PINOCCHIO_DONT_INLINE \
+                          PINOCCHIO_NOEXCEPT=noexcept
 
 # The following macros would be better treated with EXPAND_AS_DEFINED.
 # However, it was not working properly
