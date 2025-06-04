@@ -356,7 +356,12 @@ EXCLUDE_PATTERNS      += CMake* \
 # AClass::ANamespace, ANamespace::*Test
 
 EXCLUDE_SYMBOLS        = internal::* \
-                         *Visitor
+                         detail*::* \
+                         *Visitor \
+                         boost::* \
+                         Eigen::* \
+                         eigenpy::* \
+                         std::*
 
 # The IMAGE_PATH tag can be used to specify one or more files or
 # directories that contain image that are included in the documentation (see
