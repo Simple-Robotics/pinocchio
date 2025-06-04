@@ -44,9 +44,10 @@ namespace pinocchio
 
 } // namespace pinocchio
 
-#include "pinocchio/autodiff/casadi.hpp"
+#include <casadi/casadi.hpp>
 #define PINOCCHIO_SCALAR_TYPE ::casadi::SX
 #include "pinocchio/context/generic.hpp"
+#include "pinocchio/autodiff/casadi.hpp"
 
 #undef PINOCCHIO_SCALAR_TYPE
 #endif // #ifndef __pinocchio_context_casadi_hpp__

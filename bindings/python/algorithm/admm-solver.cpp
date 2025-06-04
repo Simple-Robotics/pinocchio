@@ -168,6 +168,7 @@ namespace pinocchio
             ;
         }
 
+#ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
         class_
           .def(
             "solve",
@@ -200,7 +201,7 @@ namespace pinocchio
              bp::arg("admm_update_rule") = ADMMUpdateRule::SPECTRAL,
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
-#ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
+  #ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
         {
           typedef Eigen::AccelerateLLT<context::SparseMatrix> AccelerateLLT;
           typedef DelassusOperatorSparseTpl<context::Scalar, context::Options, AccelerateLLT>
@@ -216,8 +217,10 @@ namespace pinocchio
              bp::arg("stat_record") = false),
             "Solve the constrained conic problem, starting from the optional initial guess.");
         }
-#endif
+  #endif // ifdef PINOCCHIO_WITH_ACCELERATE_SUPPORT
+#endif   // ifdef PINOCCHIO_PYTHON_PLAIN_SCALAR_TYPE
 
+#ifndef PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
         bp::def(
           "computeConeProjection",
           computeConeProjection_wrapper<ConstraintModel, ConstraintModelAllocator>,
@@ -247,6 +250,7 @@ namespace pinocchio
           computeDeSaxeCorrection_wrapper<ConstraintModel, ConstraintModelAllocator>,
           bp::args("constraint_models", "velocities"),
           "Compute the complementarity shift associated to the De Saxé function.");
+#endif // ifndef PINOCCHIO_PYTHON_SKIP_CASADI_UNSUPPORTED
       }
       //
       //      template<typename S, int O>

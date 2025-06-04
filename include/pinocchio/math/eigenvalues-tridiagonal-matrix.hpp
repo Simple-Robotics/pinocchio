@@ -46,13 +46,14 @@ namespace pinocchio
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
       m2 <= tridiagonal_mat.rows() - 1,
       "m2 should be lower than the size of the tridiagonal matrix.");
-    PINOCCHIO_CHECK_INPUT_ARGUMENT(eps >= Scalar(0), "eps should be greater than 0.")
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+      check_expression_if_real<Scalar>(eps >= Scalar(0)), "eps should be greater than 0.")
 
     const Eigen::DenseIndex n = tridiagonal_mat.rows();
     const Eigen::DenseIndex dm = m2 - m1 + 1;
     const Scalar relfeh = 2 * Eigen::NumTraits<Scalar>::epsilon();
 
-    assert((Scalar(1) + relfeh) > Scalar(1));
+    assert(check_expression_if_real<Scalar>((Scalar(1) + relfeh) > Scalar(1)));
 
     const auto & alphas = tridiagonal_mat.diagonal();
     const auto & betas_ = tridiagonal_mat.subDiagonal();
@@ -69,7 +70,7 @@ namespace pinocchio
       xmin = math::min(alphas[i] - h, xmin);
     }
 
-    Scalar eps2 = relfeh * ((xmin + xmax > 0) ? xmax : xmin);
+    Scalar eps2 = check_expression_if_real<Scalar>(relfeh * ((xmin + xmax > 0))) ? xmax : xmin;
     eps2 = 0.5 * eps + 7 * eps2;
 
     // Inner block
@@ -88,21 +89,24 @@ namespace pinocchio
       Scalar xu = xmin;
       for (Eigen::DenseIndex i = k; i >= m1; --i)
       {
-        if (xu <= wu[i])
+        if (check_expression_if_real<Scalar>(xu <= wu[i]))
         {
           xu = wu[i];
           x0 = math::min(x0, x[k]);
-          while ((x0 - xu) > (2 * relfeh * (math::fabs(xu) + math::fabs(x0)) + eps))
+          while (check_expression_if_real<Scalar>(
+            (x0 - xu) > (2 * relfeh * (math::fabs(xu) + math::fabs(x0)) + eps)))
           {
             //            z++;
-            Scalar x1 = 0.5 * (xu + x0);
+            Scalar x1 = Scalar(0.5) * (xu + x0);
             Eigen::DenseIndex a = -1;
-            Scalar q = 1.;
+            Scalar q(1.);
             for (Eigen::DenseIndex j = 0; j < n; ++j)
             {
-              const Scalar dq = q != Scalar(0) ? betas_square[j] / q : betas_abs[j] / relfeh;
+              const Scalar dq = check_expression_if_real<Scalar>(q != Scalar(0))
+                                  ? betas_square[j] / q
+                                  : betas_abs[j] / relfeh;
               q = alphas[j] - x1 - dq;
-              if (q < Scalar(0))
+              if (check_expression_if_real<Scalar>(q < Scalar(0)))
                 a++;
             } // end for j
             if (a < k)

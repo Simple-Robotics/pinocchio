@@ -368,6 +368,237 @@ namespace pinocchio
 
   } // namespace internal
 
+  namespace internal
+  {
+    template<
+      typename M1,
+      typename M2,
+      bool value = is_floating_point<typename M1::Scalar>::value
+                   && is_floating_point<typename M2::Scalar>::value>
+    struct arrayCompareAllAlgo
+    {
+      static bool run(
+        const Eigen::MatrixBase<M1> & m1,
+        const Eigen::MatrixBase<M2> & m2,
+        internal::ComparisonOperators op)
+      {
+        switch (op)
+        {
+        case LT:
+          return (m1.array() < m2.array()).all();
+        case LE:
+          return (m1.array() <= m2.array()).all();
+        case EQ:
+          return (m1.array() == m2.array()).all();
+        case GE:
+          return (m1.array() >= m2.array()).all();
+        case GT:
+          return (m1.array() > m2.array()).all();
+        default:
+          return false;
+        }
+      }
+    };
+
+    template<typename M1, typename M2>
+    struct arrayCompareAllAlgo<M1, M2, false>
+    {
+
+      static bool run(
+        const Eigen::MatrixBase<M1> & m1,
+        const Eigen::MatrixBase<M2> & m2,
+        internal::ComparisonOperators op)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(m1);
+        PINOCCHIO_UNUSED_VARIABLE(m2);
+        PINOCCHIO_UNUSED_VARIABLE(op);
+        return true;
+      }
+    };
+  } // namespace internal
+
+  ///
+  /// \brief Compare all the elements of two matrices
+  ///
+  /// \param[in] m1 Input matrix
+  /// \param[in] m2 Input matrix
+  /// \param[in] op Comparison operation
+  ///
+  /// \returns true if op is true on all m1 and m2 elements
+  ///
+  template<typename M1, typename M2>
+  inline bool arrayCompareAll(
+    const Eigen::MatrixBase<M1> & m1,
+    const Eigen::MatrixBase<M2> & m2,
+    internal::ComparisonOperators op)
+  {
+    return internal::arrayCompareAllAlgo<M1, M2>::run(m1, m2, op);
+  }
+
+  namespace internal
+  {
+    template<
+      typename M,
+      typename Lower,
+      typename Upper,
+      typename Res,
+      bool value = is_floating_point<typename M::Scalar>::value
+                   && is_floating_point<typename Lower::Scalar>::value
+                   && is_floating_point<typename Upper::Scalar>::value
+                   && is_floating_point<typename Res::Scalar>::value>
+    struct arrayBoundAlgo
+    {
+      static void run(
+        const Eigen::MatrixBase<M> & x,
+        const Eigen::MatrixBase<Lower> & lower,
+        const Eigen::MatrixBase<Upper> & upper,
+        const Eigen::MatrixBase<Res> & res)
+      {
+        res.const_cast_derived() = x.array().max(lower.array()).min(upper.array());
+      }
+    };
+
+    template<typename M, typename Lower, typename Upper, typename Res>
+    struct arrayBoundAlgo<M, Lower, Upper, Res, false>
+    {
+
+      static void run(
+        const Eigen::MatrixBase<M> & x,
+        const Eigen::MatrixBase<Lower> & lower,
+        const Eigen::MatrixBase<Upper> & upper,
+        const Eigen::MatrixBase<Res> & res)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(lower);
+        PINOCCHIO_UNUSED_VARIABLE(upper);
+        res.const_cast_derived() = x;
+      }
+    };
+  } // namespace internal
+
+  ///
+  /// \brief Bound a matrix between upper and lower bound
+  ///
+  /// \param[in] x Input matrix
+  /// \param[in] lower lower bound matrix
+  /// \param[in] upper upper bound matrix
+  /// \param[out] res result
+  ///
+  template<typename M, typename Lower, typename Upper, typename Res>
+  inline void arrayBound(
+    const Eigen::MatrixBase<M> & x,
+    const Eigen::MatrixBase<Lower> & lower,
+    const Eigen::MatrixBase<Upper> & upper,
+    const Eigen::MatrixBase<Res> & res)
+  {
+    internal::arrayBoundAlgo<M, Lower, Upper, Res>::run(x, lower, upper, res);
+  }
+
+  namespace internal
+  {
+    template<
+      typename M,
+      typename Res,
+      bool value = is_floating_point<typename M::Scalar>::value
+                   && is_floating_point<typename Res::Scalar>::value>
+    struct arrayMinAlgo
+    {
+      static void run(
+        const Eigen::MatrixBase<M> & x,
+        typename Eigen::MatrixBase<M>::Scalar min,
+        const Eigen::MatrixBase<Res> & res)
+      {
+        res.const_cast_derived() = x.array().min(min);
+      }
+    };
+
+    template<typename M, typename Res>
+    struct arrayMinAlgo<M, Res, false>
+    {
+
+      static void run(
+        const Eigen::MatrixBase<M> & x,
+        typename Eigen::MatrixBase<M>::Scalar min,
+        const Eigen::MatrixBase<Res> & res)
+      {
+        PINOCCHIO_UNUSED_VARIABLE(min);
+        res.const_cast_derived() = x;
+      }
+    };
+  } // namespace internal
+
+  ///
+  /// \brief Apply an upper bound to a matrix
+  ///
+  /// \param[in] x Input matrix
+  /// \param[in] min Matrix upper bound
+  /// \param[out] res result
+  ///
+  template<typename M, typename Res>
+  inline void arrayMin(
+    const Eigen::MatrixBase<M> & x,
+    typename Eigen::MatrixBase<M>::Scalar min,
+    const Eigen::MatrixBase<Res> & res)
+  {
+    internal::arrayMinAlgo<M, Res>::run(x, min, res);
+  }
+
+  namespace internal
+  {
+    template<
+      typename MatrixLike1,
+      typename MatrixLike2,
+      bool value = is_floating_point<typename MatrixLike1::Scalar>::value
+                   && is_floating_point<typename MatrixLike2::Scalar>::value>
+    struct isApproxAlgo
+    {
+      typedef typename MatrixLike1::RealScalar RealScalar;
+
+      static bool run(
+        const Eigen::MatrixBase<MatrixLike1> & m1,
+        const Eigen::MatrixBase<MatrixLike2> & m2,
+        const RealScalar & prec = Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        return m1.isApprox(m2, prec);
+      }
+    };
+
+    template<typename MatrixLike1, typename MatrixLike2>
+    struct isApproxAlgo<MatrixLike1, MatrixLike2, false>
+    {
+      typedef typename MatrixLike1::RealScalar RealScalar;
+
+      static bool run(
+        const Eigen::MatrixBase<MatrixLike1> & m1,
+        const Eigen::MatrixBase<MatrixLike2> & m2,
+        const RealScalar & prec = Eigen::NumTraits<RealScalar>::dummy_precision())
+      {
+        PINOCCHIO_UNUSED_VARIABLE(m1);
+        PINOCCHIO_UNUSED_VARIABLE(m2);
+        PINOCCHIO_UNUSED_VARIABLE(prec);
+        return true;
+      }
+    };
+  } // namespace internal
+
+  ///
+  /// \brief Check whether two matrix are approximately the same
+  ///
+  /// \param[in] m1 Input matrix
+  /// \param[in] m2 Input matrix
+  /// \param[in] prec Required precision
+  ///
+  /// \returns true if m1 and m2 are approximately the same given precision prec.
+  ///
+  template<typename MatrixLike1, typename MatrixLike2>
+  inline bool isApprox(
+    const Eigen::MatrixBase<MatrixLike1> & m1,
+    const Eigen::MatrixBase<MatrixLike2> & m2,
+    const typename MatrixLike1::RealScalar & prec =
+      Eigen::NumTraits<typename MatrixLike1::Scalar>::dummy_precision())
+  {
+    return internal::isApproxAlgo<MatrixLike1, MatrixLike2>::run(m1, m2, prec);
+  }
+
   template<typename XprType, typename DestType>
   inline void evalTo(const XprType & xpr, DestType & dest)
   {
@@ -447,7 +678,7 @@ namespace pinocchio
     tmp = 0.5 * (mat + mat.transpose());
     mat = tmp;
 
-    assert(mat == mat.transpose());
+    assert(isSymmetric(mat));
   }
 
   template<typename Matrix>

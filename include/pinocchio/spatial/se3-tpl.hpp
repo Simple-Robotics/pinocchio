@@ -10,6 +10,7 @@
 #include "pinocchio/spatial/se3-base.hpp"
 
 #include "pinocchio/math/quaternion.hpp"
+#include "pinocchio/math/matrix.hpp"
 #include "pinocchio/math/rotation.hpp"
 #include "pinocchio/spatial/cartesian-axis.hpp"
 
@@ -332,8 +333,8 @@ namespace pinocchio
       const SE3Tpl<Scalar, O2> & m2,
       const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const
     {
-      return rotation().isApprox(m2.rotation(), prec)
-             && translation().isApprox(m2.translation(), prec);
+      return pinocchio::isApprox(rotation(), m2.rotation(), prec)
+             && pinocchio::isApprox(translation(), m2.translation(), prec);
     }
 
     bool isIdentity(const Scalar & prec = Eigen::NumTraits<Scalar>::dummy_precision()) const

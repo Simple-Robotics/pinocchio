@@ -126,7 +126,7 @@ namespace pinocchio
             bool found_new_base_vector = false;
             PINOCCHIO_ONLY_USED_FOR_DEBUG(found_new_base_vector);
 
-            Scalar q_next_norm = -1; //= q_next.norm();
+            Scalar q_next_norm(-1); //= q_next.norm();
 
             for (Eigen::DenseIndex j = 0; j < num_cols; ++j)
             {

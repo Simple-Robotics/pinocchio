@@ -13,6 +13,29 @@
 // #include "pinocchio/bindings/python/serialization/serialization.hpp"
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
+#ifdef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
+namespace eigenpy
+{
+  // has_operator_equal return true for CoulombFrictionCone and DualCoulombFrictionCone with casadi
+  // but it should not.
+  // We provide specialization to enforce good result.
+  template<>
+  struct has_operator_equal<
+    pinocchio::python::context::CoulombFrictionCone,
+    pinocchio::python::context::CoulombFrictionCone>
+  {
+    typedef std::false_type type;
+  };
+  template<>
+  struct has_operator_equal<
+    pinocchio::python::context::DualCoulombFrictionCone,
+    pinocchio::python::context::DualCoulombFrictionCone>
+  {
+    typedef std::false_type type;
+  };
+} // namespace eigenpy
+#endif // ifdef PINOCCHIO_PYTHON_SKIP_COMPARISON_OPERATIONS
+
 namespace pinocchio
 {
   namespace python
