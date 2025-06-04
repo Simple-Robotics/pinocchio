@@ -10,7 +10,7 @@
 #include "pinocchio/bindings/python/utils/address.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
 #include "pinocchio/bindings/python/utils/copyable.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
+
 #include "pinocchio/bindings/python/utils/pickle.hpp"
 #include "pinocchio/bindings/python/serialization/serializable.hpp"
 

@@ -77,6 +77,9 @@ namespace pinocchio
   #define PINOCCHIO_MAYBE_UNUSED
 #endif
 
+#define PINOCCHIO_DEPRECATED_MOVED_HEADER(old_header, new_header)                                  \
+  PINOCCHIO_DEPRECATED_HEADER("#old_header has been replaced by #new_header.")
+
 /// Ensure that a matrix (or vector) is of correct size (compile-time and run-time assertion)
 #define PINOCCHIO_ASSERT_MATRIX_SPECIFIC_SIZE(type, M, nrows, ncols)                               \
   EIGEN_STATIC_ASSERT(                                                                             \

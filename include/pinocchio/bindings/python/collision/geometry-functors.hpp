@@ -5,8 +5,6 @@
 #ifndef __pinocchio_python_collision_geometry_functors_hpp__
 #define __pinocchio_python_collision_geometry_functors_hpp__
 
-#include "pinocchio/bindings/python/utils/registration.hpp"
-
 #include "pinocchio/multibody/geometry.hpp"
 
 namespace pinocchio

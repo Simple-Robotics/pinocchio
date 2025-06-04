@@ -8,7 +8,7 @@
 #include "pinocchio/macros.hpp"
 
 // clang-format off
-PINOCCHIO_DEPRECATED_HEADER(
+PINOCCHIO_DEPRECATED_MOVED_HEADER(
   pinocchio/spatial/fcl-pinocchio-conversions.hpp,
   pinocchio/collision/fcl-pinocchio-conversions.hpp)
 // clang-format on

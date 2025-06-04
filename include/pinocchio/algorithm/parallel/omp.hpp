@@ -6,7 +6,7 @@
 #define __pinocchio_algorithm_parallel_omp_hpp__
 
 #include "pinocchio/macros.hpp"
-PINOCCHIO_DEPRECATED_HEADER(
+PINOCCHIO_DEPRECATED_MOVED_HEADER(
   pinocchio / algorithm / parallel / omp.hpp, pinocchio / utils / openmp.hpp)
 #include "pinocchio/utils/openmp.hpp"
 

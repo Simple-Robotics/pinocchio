@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2023 CNRS INRIA
+// Copyright (c) 2017-2023 CNRS INRIA, 2025 INRIA
 //
 
 #ifndef __pinocchio_python_geometry_object_hpp__
@@ -9,11 +9,10 @@
 #include <eigenpy/eigen-from-python.hpp>
 #include <eigenpy/eigen-to-python.hpp>
 #include <eigenpy/variant.hpp>
+#include <eigenpy/copyable.hpp>
+#include <eigenpy/deprecation-policy.hpp>
 
 #include "pinocchio/bindings/python/utils/address.hpp"
-#include "pinocchio/bindings/python/utils/copyable.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
-#include "pinocchio/bindings/python/utils/deprecation.hpp"
 #include "pinocchio/bindings/python/utils/pickle.hpp"
 #include "pinocchio/bindings/python/serialization/serializable.hpp"
 
@@ -28,6 +27,8 @@ namespace pinocchio
   namespace python
   {
     namespace bp = boost::python;
+    using eigenpy::CopyableVisitor;
+    using eigenpy::deprecated_function;
 
     struct GeometryObjectPythonVisitor
     : public boost::python::def_visitor<GeometryObjectPythonVisitor>

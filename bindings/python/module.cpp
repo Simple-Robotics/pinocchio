@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2015-2022 CNRS INRIA
+// Copyright (c) 2015-2022 CNRS INRIA, 2025 INRIA
 //
 
 #include "pinocchio/bindings/python/fwd.hpp"
@@ -7,7 +7,6 @@
 #include "pinocchio/utils/version.hpp"
 #include "pinocchio/bindings/python/utils/version.hpp"
 #include "pinocchio/bindings/python/utils/dependencies.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
 #include "pinocchio/spatial/cartesian-axis.hpp"

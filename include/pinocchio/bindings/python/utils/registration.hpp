@@ -1,33 +1,20 @@
 //
-// Copyright (c) 2019-2020 INRIA
+// Copyright (c) 2019-2025 INRIA
 //
 
 #ifndef __pinocchio_python_utils_registration_hpp__
 #define __pinocchio_python_utils_registration_hpp__
 
+#include "pinocchio/deprecated.hpp"
 #include <eigenpy/registration.hpp>
+
+PINOCCHIO_DEPRECATED_HEADER("Directly include <eigenpy/registration.hpp> instead.")
 
 namespace pinocchio
 {
   namespace python
   {
-
-    template<typename T>
-    inline bool register_symbolic_link_to_registered_type()
-    {
-      namespace bp = boost::python;
-      if (eigenpy::check_registration<T>())
-      {
-        const bp::type_info info = bp::type_id<T>();
-        const bp::converter::registration * reg = bp::converter::registry::query(info);
-        bp::handle<> class_obj(bp::borrowed(reg->get_class_object()));
-        bp::scope().attr(reg->get_class_object()->tp_name) = bp::object(class_obj);
-        return true;
-      }
-
-      return false;
-    }
-
+    using eigenpy::register_symbolic_link_to_registered_type;
   } // namespace python
 } // namespace pinocchio
 

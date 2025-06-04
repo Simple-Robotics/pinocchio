@@ -1,10 +1,10 @@
 //
-// Copyright (c) 2020 INRIA
+// Copyright (c) 2020-2025 INRIA
 //
 
 #include <boost/python.hpp>
+#include <eigenpy/registration.hpp>
 #include "pinocchio/bindings/python/parsers/urdf.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 
 #ifdef PINOCCHIO_WITH_URDFDOM
   #include <console_bridge/console.h>
@@ -24,7 +24,7 @@ namespace pinocchio
       ::console_bridge::setLogLevel(::console_bridge::CONSOLE_BRIDGE_LOG_ERROR);
 
       typedef ::console_bridge::LogLevel LogLevel;
-      if (!register_symbolic_link_to_registered_type<LogLevel>())
+      if (!eigenpy::register_symbolic_link_to_registered_type<LogLevel>())
       {
         bp::enum_<LogLevel>("LogLevel")
           .value("CONSOLE_BRIDGE_LOG_DEBUG", ::console_bridge::CONSOLE_BRIDGE_LOG_DEBUG)

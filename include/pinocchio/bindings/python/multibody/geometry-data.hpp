@@ -1,19 +1,18 @@
 //
-// Copyright (c) 2015-2022 CNRS INRIA
+// Copyright (c) 2015-2022 CNRS INRIA, 2025 INRIA
 //
 
 #ifndef __pinocchio_python_geometry_data_hpp__
 #define __pinocchio_python_geometry_data_hpp__
 
 #include <eigenpy/memory.hpp>
+#include <eigenpy/copyable.hpp>
 
 #include "pinocchio/serialization/geometry.hpp"
 
 #include "pinocchio/bindings/python/utils/address.hpp"
 #include "pinocchio/bindings/python/utils/printable.hpp"
-#include "pinocchio/bindings/python/utils/copyable.hpp"
 #include "pinocchio/bindings/python/utils/std-vector.hpp"
-#include "pinocchio/bindings/python/utils/registration.hpp"
 #include "pinocchio/bindings/python/serialization/serializable.hpp"
 
 #if EIGENPY_VERSION_AT_MOST(2, 8, 1)
@@ -25,6 +24,7 @@ namespace pinocchio
   namespace python
   {
     namespace bp = boost::python;
+    using eigenpy::CopyableVisitor;
 
     /* --- COLLISION PAIR --------------------------------------------------- */
     /* --- COLLISION PAIR --------------------------------------------------- */
