@@ -105,7 +105,4 @@ namespace pinocchio {
 
   /// \namespace pinocchio::srdf
   /// \brief SRDF parsing
-
-  /// \namespace pinocchio::lua
-  /// \brief Lua parsing
 }

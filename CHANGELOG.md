@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - bindings/python : Add missing arg names in `visualizer-visitor.hpp`
 - use deprecation, warning macros already provided by jrl-cmakemodules
 - renamed `PINOCCHIO_PRAGMA_DEPRECATED_HEADER` to `PINOCCHIO_DEPRECATED_MOVED_HEADER`
+- docs : update documentation stylesheet, fix some Doxygen config options
 
 ### Removed
 
