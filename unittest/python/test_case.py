@@ -1,11 +1,10 @@
+# ruff: noqa: E501
+import importlib.util
 import unittest
 
-from pinocchio.utils import isapprox
-
-import pinocchio as pin
 import numpy as np
-
-import importlib.util
+import pinocchio as pin
+from pinocchio.utils import isapprox
 
 coal_spec = importlib.util.find_spec("coal")
 coal_found = coal_spec is not None
