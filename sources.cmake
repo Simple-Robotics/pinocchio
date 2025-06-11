@@ -182,6 +182,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/comparison-operators.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/cppadcg.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/cppad.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-tpl.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-1x1.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-2x2.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/math/details/matrix-inverse-3x3.hpp
@@ -290,6 +291,7 @@ set(${PROJECT_NAME}_CORE_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/multibody/sample-models.hxx
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/aligned-vector.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/archive.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/boost-blank.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/constraints-data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/constraints-model.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/serialization/constraints-set.hpp
@@ -605,14 +607,15 @@ set(${PROJECT_NAME}_BINDINGS_PYTHON_PUBLIC_HEADERS
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/frame.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/geometry-model.hpp
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/model.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joint.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joint-model.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joint-derived.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joints-models.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joints-variant.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joints-datas.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joint-data.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/joint/joints-liegroup.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/liegroups.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/geometry-data.hpp
     ${PROJECT_SOURCE_DIR}/include/pinocchio/bindings/python/multibody/geometry-object.hpp
