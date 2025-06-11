@@ -109,8 +109,8 @@ if(CMAKE_VERSION VERSION_GREATER "3.12")
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-# Force C++ standard to be C++11 at least
-check_minimal_cxx_standard(11 ENFORCE)
+# Force C++ standard to be C++17 at least
+check_minimal_cxx_standard(17 ENFORCE)
 
 # --- OPTIONS ----------------------------------------
 option(BUILD_BENCHMARK "Build the benchmarks" OFF)
@@ -212,7 +212,7 @@ set(PINOCCHIO_MODEL_DIR "${PROJECT_SOURCE_DIR}/models")
 # --- DEPENDENCIES -----------------------------------
 # ----------------------------------------------------
 set(CMAKE_MODULE_PATH "${JRL_CMAKE_MODULES}/find-external/CppAD/" ${CMAKE_MODULE_PATH})
-add_project_dependency(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.0.5")
+add_project_dependency(Eigen3 REQUIRED PKG_CONFIG_REQUIRES "eigen3 >= 3.4.0")
 
 if(BUILD_WITH_URDF_SUPPORT)
   add_project_dependency(urdfdom_headers REQUIRED)

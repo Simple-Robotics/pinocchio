@@ -58,6 +58,7 @@ configure = { cmd = [
   "-DBUILD_WITH_SDF_SUPPORT=$PINOCCHIO_SDF_SUPPORT",
   "-DBUILD_PYTHON_BINDINGS_WITH_BOOST_MPFR_SUPPORT=$PINOCCHIO_MPFR_SUPPORT",
   "-DBUILD_BENCHMARK=$PINOCCHIO_BUILD_BENCHMARK",
+  "-DPINOCCHIO_BUILD_WITH_TRACY=$PINOCCHIO_BUILD_WITH_TRACY",
 ] }
 build = { cmd = "cmake --build build --target all", depends-on = ["configure"] }
 clean = { cmd = "rm -rf build" }
@@ -103,6 +104,10 @@ tasks = { lint = { cmd = "pre-commit run --all" } }
 [feature.benchmark]
 dependencies = { benchmark = ">=1.9.1", bokeh = ">=3.7.0" }
 activation = { env = { PINOCCHIO_BUILD_BENCHMARK = "ON" } }
+
+[feature.tracy]
+dependencies = { tracy-profiler = ">=0.11.1" }
+activation = { env = { PINOCCHIO_BUILD_WITH_TRACY = "ON" } }
 
 [feature.collision]
 dependencies = { hpp-fcl = ">=2.4" }
@@ -177,6 +182,7 @@ default = { features = ["py312"], solve-group = "py312" }
 clang = { features = ["clang", "py312"] }
 lint = { features = ["lint"], solve-group = "py312" }
 benchmark = { features = ["benchmark", "py312"] }
+tracy = { features = ["tracy", "py312"] }
 collision = { features = ["collision", "py312"], solve-group = "py312" }
 accelerate = { features = ["accelerate", "py312"], solve-group = "py312" }
 casadi = { features = ["casadi", "py312"], solve-group = "py312" }

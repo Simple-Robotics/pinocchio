@@ -106,7 +106,7 @@ namespace pinocchio
         const Scalar contact_complementarity = cone.computeConicComplementarity(
           Vector3(sigma_segment + desaxce_correction), lambda_segment);
         const Scalar dual_feasibility =
-          std::abs(math::min(0., sigma_segment(2))); // proxy of dual feasibility
+          math::fabs(math::min(Scalar(0.), sigma_segment(2))); // proxy of dual feasibility
         settings.absolute_residual = math::max(
           settings.absolute_residual, math::max(contact_complementarity, dual_feasibility));
 

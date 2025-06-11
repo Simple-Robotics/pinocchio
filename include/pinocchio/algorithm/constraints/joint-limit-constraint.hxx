@@ -85,16 +85,18 @@ namespace pinocchio
         const int q_index = idx_q + j_qi;
         const int q_reduce_index = nq_reduce + j_qi;
 
-        if (!(lb[q_index] == -std::numeric_limits<Scalar>::max()
-              || lb[q_index] == -std::numeric_limits<Scalar>::infinity()))
+        if (!(check_expression_if_real<Scalar>(lb[q_index] == -std::numeric_limits<Scalar>::max())
+              || check_expression_if_real<Scalar>(
+                lb[q_index] == -std::numeric_limits<Scalar>::infinity())))
         {
           activable_idx_rows_lower.push_back(idx_row);
           activable_idx_qs_lower.push_back(q_index);
           activable_idx_qs_reduce_lower.push_back(q_reduce_index);
           is_joint_really_active = true;
         }
-        if (!(ub[q_index] == +std::numeric_limits<Scalar>::max()
-              || ub[q_index] == +std::numeric_limits<Scalar>::infinity()))
+        if (!(check_expression_if_real<Scalar>(ub[q_index] == +std::numeric_limits<Scalar>::max())
+              || check_expression_if_real<Scalar>(
+                ub[q_index] == +std::numeric_limits<Scalar>::infinity())))
         {
           activable_idx_rows_upper.push_back(idx_row);
           activable_idx_qs_upper.push_back(q_index);
@@ -161,7 +163,7 @@ namespace pinocchio
     {
       const auto activable_idx_q = activable_idx_qs[i];
       bound_position_limit[bound_row_id] = lb[activable_idx_q];
-      assert(marg[activable_idx_q] >= 0);
+      assert(check_expression_if_real<Scalar>(marg[activable_idx_q] >= 0));
       bound_position_margin[bound_row_id] = marg[activable_idx_q];
       bound_row_id++;
     }
@@ -170,7 +172,7 @@ namespace pinocchio
     {
       const auto activable_idx_q = activable_idx_qs[i];
       bound_position_limit[bound_row_id] = ub[activable_idx_q];
-      assert(marg[activable_idx_q] >= 0);
+      assert(check_expression_if_real<Scalar>(marg[activable_idx_q] >= 0));
       bound_position_margin[bound_row_id] = marg[activable_idx_q];
       bound_row_id++;
     }
@@ -264,7 +266,8 @@ namespace pinocchio
       const Eigen::DenseIndex ie = static_cast<Eigen::DenseIndex>(i);
       const Eigen::DenseIndex idx_q = activable_idx_qs[i];
       activable_constraint_residual[ie] = bound_position_limit[ie] - data.q_in[idx_q];
-      if (activable_constraint_residual[ie] >= -bound_position_margin[ie])
+      if (check_expression_if_real<Scalar>(
+            activable_constraint_residual[ie] >= -bound_position_margin[ie]))
       {
         active_set_indexes.push_back(i);
         active_idx_rows.push_back(activable_idx_rows[i]);
@@ -281,7 +284,8 @@ namespace pinocchio
       const Eigen::DenseIndex ie = static_cast<Eigen::DenseIndex>(i);
       const Eigen::DenseIndex idx_q = activable_idx_qs[i];
       activable_constraint_residual[ie] = bound_position_limit[ie] - data.q_in[idx_q];
-      if (activable_constraint_residual[ie] <= bound_position_margin[ie])
+      if (check_expression_if_real<Scalar>(
+            activable_constraint_residual[ie] <= bound_position_margin[ie]))
       {
         active_set_indexes.push_back(i);
         active_idx_rows.push_back(activable_idx_rows[i]);

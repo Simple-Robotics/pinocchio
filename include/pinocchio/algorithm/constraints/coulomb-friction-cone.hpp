@@ -8,7 +8,9 @@
 #include "pinocchio/algorithm/constraints/fwd.hpp"
 #include "pinocchio/algorithm/constraints/cone-base.hpp"
 #include "pinocchio/math/fwd.hpp"
+#include "pinocchio/math/matrix.hpp"
 #include "pinocchio/math/comparison-operators.hpp"
+#include "pinocchio/utils/check.hpp"
 
 namespace pinocchio
 {
@@ -67,7 +69,7 @@ namespace pinocchio
     explicit CoulombFrictionConeTpl(const Scalar mu)
     : mu(mu)
     {
-      assert(mu >= 0 && "mu must be positive");
+      assert(check_expression_if_real<Scalar>(mu >= 0) && "mu must be positive");
     }
 
     /// \brief Copy constructor.
@@ -122,7 +124,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Vector3LikeIn> & x,
       const Eigen::MatrixBase<Vector3LikeOut> & res_) const
     {
-      assert(mu >= 0 && "mu must be positive");
+      assert(check_expression_if_real<Scalar>(mu >= 0) && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
       typedef Eigen::Matrix<Scalar, 2, 1> Vector2Plain;
@@ -135,12 +137,12 @@ namespace pinocchio
       const Vector2Plain t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
-      if (mu * t_norm <= -z)
+      if (check_expression_if_real<Scalar>(mu * t_norm <= -z))
       {
         res.setZero();
         return;
       }
-      else if (t_norm <= mu_z)
+      else if (check_expression_if_real<Scalar>(t_norm <= mu_z))
       {
         res = x;
         return;
@@ -149,7 +151,7 @@ namespace pinocchio
       {
         res.template head<2>() = (mu / t_norm) * t;
         res[2] = 1;
-        res.normalize();
+        pinocchio::normalize(res);
         const Scalar scale = x.dot(res);
         res *= scale;
         return;
@@ -166,11 +168,11 @@ namespace pinocchio
     typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) weightedProject(
       const Eigen::MatrixBase<Vector3Like1> & x, const Eigen::MatrixBase<Vector3Like2> & R) const
     {
-      assert(mu >= 0 && "mu must be positive");
+      assert(check_expression_if_real<Scalar>(mu >= 0) && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
-      assert(R(2) > 0 && "R(2) must be strictly positive");
-      assert(R(0) == R(1) && "R(0) must be equal to R(1)");
+      assert(check_expression_if_real<Scalar>(R(2) > 0) && "R(2) must be strictly positive");
+      assert(check_expression_if_real<Scalar>(R(0) == R(1)) && "R(0) must be equal to R(1)");
 
       typedef typename PINOCCHIO_EIGEN_PLAIN_TYPE(Vector3Like1) Vector3Plain;
 
@@ -220,7 +222,7 @@ namespace pinocchio
 
       res[2] = math::max(Scalar(0), f[2]);
       const Scalar mu_fz = mu * res[2];
-      if (ft_norm > mu_fz)
+      if (check_expression_if_real<Scalar>(ft_norm > mu_fz))
       {
         res.template head<2>() = Scalar(mu_fz / ft_norm) * ft;
       }
@@ -300,7 +302,7 @@ namespace pinocchio
     explicit DualCoulombFrictionConeTpl(const Scalar mu)
     : mu(mu)
     {
-      assert(mu >= 0 && "mu must be positive");
+      assert(check_expression_if_real<Scalar>(mu >= 0) && "mu must be positive");
     }
 
     /// \brief Copy constructor.
@@ -342,7 +344,7 @@ namespace pinocchio
       const Eigen::MatrixBase<Vector3LikeIn> & x,
       const Eigen::MatrixBase<Vector3LikeOut> & res_) const
     {
-      assert(mu >= 0 && "mu must be positive");
+      assert(check_expression_if_real<Scalar>(mu >= 0) && "mu must be positive");
       //      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Vector3Like, 3);
       assert(x.size() == 3 && "The input vector is of wrong size.");
       const Scalar & z = x[2];
@@ -352,12 +354,12 @@ namespace pinocchio
       const Eigen::Matrix<Scalar, 2, 1> t = x.template head<2>();
       const Scalar t_norm = t.norm();
 
-      if (t_norm <= -mu * z)
+      if (check_expression_if_real<Scalar>(t_norm <= -mu * z))
       {
         res.setZero();
         return;
       }
-      else if (mu * t_norm <= z)
+      else if (check_expression_if_real<Scalar>(mu * t_norm <= z))
       {
         res = x;
         return;
@@ -366,7 +368,7 @@ namespace pinocchio
       {
         res.template head<2>() = t;
         res[2] = mu * t_norm;
-        res.normalize();
+        pinocchio::normalize(res);
         const Scalar scale = x.dot(res);
         res *= scale;
         return;
