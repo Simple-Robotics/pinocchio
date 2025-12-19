@@ -39,6 +39,7 @@ namespace pinocchio
     assert(model.check(MimicChecker()) && "Function does not support mimic joints");
 
     nv = model.nv;
+    num_contacts = (Eigen::DenseIndex)contact_models.size();
 
     Eigen::DenseIndex num_total_constraints = 0;
     for (std::size_t i = 0; i < contact_models.size(); i++)
@@ -189,9 +190,17 @@ namespace pinocchio
     assert(model.check(data) && "data is not consistent with model.");
     assert(model.check(MimicChecker()) && "Function does not support mimic joints");
 
+    // PINOCCHIO_CHECK_INPUT_ARGUMENT(
+    //   contact_models.size() == contact_datas.size(),
+    //   "The number of constraints between contact_models and contact_datas vectors is different.");
     PINOCCHIO_CHECK_INPUT_ARGUMENT(
-      contact_models.size() == contact_datas.size(),
-      "The number of constraints between contact_models and contact_datas vectors is different.");
+      (Eigen::DenseIndex)contact_models.size() == num_contacts,
+      "The number of contacts inside contact_models and the one during allocation do not match.\n"
+      "Please call first ContactCholeskyDecompositionTpl::allocate method.");
+    PINOCCHIO_CHECK_INPUT_ARGUMENT(
+      (Eigen::DenseIndex)contact_datas.size() == num_contacts,
+      "The number of contacts inside contact_datas and the one during allocation do not match.\n"
+      "Please call first ContactCholeskyDecompositionTpl::allocate method.");
     PINOCCHIO_ONLY_USED_FOR_DEBUG(model);
 
     const Eigen::DenseIndex total_dim = size();
@@ -654,7 +663,7 @@ namespace pinocchio
   {
     bool is_same = true;
 
-    if (nv != other.nv)
+    if (nv != other.nv || num_contacts != other.num_contacts)
       return false;
 
     if (

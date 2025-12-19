@@ -648,6 +648,12 @@ namespace pinocchio
       return size() - nv;
     }
 
+    /// \brief Returns the number of contacts associated to this decomposition.
+    Eigen::DenseIndex numContacts() const
+    {
+      return num_contacts;
+    }
+
     ///
     ///  \brief Computes the solution of \f$ A x = b \f$ where *this is the Cholesky decomposition
     /// of A.         "in-place" version of ContactCholeskyDecompositionTpl::solve(b) where the
@@ -760,6 +766,9 @@ namespace pinocchio
 
     /// \brief Dimension of the tangent of the configuration space of the model
     Eigen::DenseIndex nv;
+
+    ///  \brief Number of contacts.
+    Eigen::DenseIndex num_contacts;
 
     VectorOfSliceVector rowise_sparsity_pattern;
 
