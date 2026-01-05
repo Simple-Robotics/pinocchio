@@ -331,6 +331,30 @@ namespace pinocchio
       return m_set;
     }
 
+    /// \brief Returns the lower joint friction limit
+    const VectorXs & getFrictionLowerLimit() const
+    {
+      return m_set.lb();
+    }
+
+    /// \brief Returns the upper joint friction limit
+    const VectorXs & getFrictionUpperLimit() const
+    {
+      return m_set.ub();
+    }
+
+    /// \brief Sets the lower joint friction limit
+    void setFrictionLowerLimit(const VectorXs & limit)
+    {
+      m_set.lb() = limit;
+    }
+
+    /// \brief Sets the upper joint friction limit
+    void setFrictionUpperLimit(const VectorXs & limit)
+    {
+      m_set.ub() = limit;
+    }
+
     template<
       template<typename, int> class JointCollectionTpl,
       typename VectorNLike,
