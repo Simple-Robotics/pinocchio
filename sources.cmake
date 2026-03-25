@@ -626,7 +626,7 @@ set(${PROJECT_NAME}_COLLISION_PRIVATE_HEADERS
 )
 
 set(${PROJECT_NAME}_COLLISION_DEPRECATED_HEADERS
-    ${PROJECT_SOURCE_DIR}/include/pinocchio/deprecated/pinocchio/collision/fcl-pinocchio-conversions.hpp
+    ${PROJECT_SOURCE_DIR}/include/pinocchio/deprecated/pinocchio/spatial/fcl-pinocchio-conversions.hpp
 )
 
 # Collision + OpenMP
