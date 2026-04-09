@@ -29,7 +29,7 @@ Eigen 3.4 is the minimal Eigen supported version:
   - Remove PINOCCHIO_WITH_EIGEN_TENSOR_MODULE define
 
 HPP-FCL has been replaced by coal:
-- Deprecate `pinocchio/multibody/fcl.hpp` moved at `pinocchio/multibody/coal.hpp`
+- Deprecate `pinocchio/multibody/fcl.hpp` moved to `pinocchio/multibody/coal.hpp`
 - Deprecate `pinocchio/serialization/fcl.hpp` moved at `pinocchio/serialization/coal.hpp`
 - Deprecate `pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `pinocchio/collision/coal-pinocchio-conversions.hpp`
 - Deprecate `pinocchio/bindings/python/collision/fcl/transform.hpp` moved at `pinocchio/bindings/python/collision/coal/transform.hpp`
