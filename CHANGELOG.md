@@ -10,16 +10,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Highlights
+
+- `lcaba` algorithm:
+  - Compute forward dynamics for constrained system with closed kinematics loops
+  - [Python example here](./examples/simulation-lcaba.py)
+- `ADMMConstraintSolverTpl` and `PGSConstraintSolverTpl` algorithms:
+  - Solve constrained dynamics expressed with the new constraint API
+  - [Python example here](./examples/admm-constraint-solver.py)
+- New [header convention](./development/convention.md)
+  - Introduce omnibus headers:
+    - `pinocchio/math.hpp`
+    - `pinocchio/spatial.hpp`
+    - `pinocchio/mutlibody.hpp`
+    - ...
+
 ### Added
-- Added Python bindings for loop-constrained-aba.
-- Added Lie group method `tangentMap` which gives, in the form of a `nq x nv` matrix, the linear mapping that transforms a configuration variation expressed in the Lie algebra (size `nv`) into a small variation expressed in the parametric space (size `nq`). Composed with Jacobian of other methods of Pinocchio that use the Lie group structure, it allows obtaining standard Jacobians in order to, for example, insert Pinocchio derivatives into standard Euclidean differentiation pipelines.
-- Added Lie group methods `tangentMapProduct` and `tangentMapTransport` that apply `tangentMap` while exploiting sparsity.
-- Added model methods `tangentMap`, `tangentMapProduct` and `tangentMapTransport` that perform tangent map for the whole configuration space of the model.
-- Now all Lie group related algorithms (e.g. `dIntegrate`...) work seamlessly for models having some mimic joints.
-- Added joint methods `jointQrows`, `jointQcols` (resp. `jointQVMap`) that make selections of size `NQ` (resp. `NQ x NV`).
-- Added joint method `lieGroup` that returns the Lie group instance associated to a joint. This allows performing some operations (e.g. `integrate`...) individually.
-- Added model method `lieGroup` that returns the Lie group instance associated to the model. It is a Cartesian product of multiple Lie groups. It allows combination of the model Lie group with other Lie groups.
-- Add Python example showcasing the candlewick visualizer
+- Add `lcaba` algorithm in `pinocchio/algorithm/loop-constrained-aba.hpp`
+  - Compute forward dynamics for constrained system with closed kinematics loops
+- Add `computeJointMinimalOrdering` in `pinocchio/constraints.hpp`
+  - Compute joint processing order for `lcaba`
+- Add new constraint API in `pinocchio/constraints.hpp`
+- Add new Delassus API in `pinocchio/algorithm/delassus.hpp`
+- Add `ADMMConstraintSolverTpl` in `pinocchio/algorithm/solvers/admm-solver.hpp`
+  - Solve constrained dynamics using an ADMM algorithm
+- Add `PGSConstraintSolverTpl` in `pinocchio/algorithm/solvers/pgs-solver.hpp`
+  - Solve constrained dynamics using a projected Gauss Siedel algorithm
+- Add new functions in `pinocchio/multibody/liegroup.hpp`
+  - `tangentMap`: transforms a configuration variation into a small variation expressed in the parametric space
+  - `tangentMapProduct` and `tangentMapTransport`: apply `tangentMap` while exploiting sparsity
+- Add mimic joint support for all Lie group related algorithms
+- Add new methods to `JointModelBase`:
+  - `jointQrows` and `jointQcols` that make selections of size `NQ`
+  - `jointQVMap` that make selections of size `NQ x NV`
+  - `lieGroup` that returns the Lie group instance associated to a joint
+- Add `lieGroup` function that returns the Lie group instance associated to a model
+- Add new `mjcf::buildModel` overload to load new constraint API from MJCF
+- Add new `sdf::buildModel` overload to load new constraint API from SDF
+- Add new Python functions to load MJCF model:
+  - Add `pinocchio.buildModelFromMJCFAndRootJoint` load model with a custom root joint
+  - Add `pinocchio.buildModelAndConstraintFromMJCF` load model and constraints (new API)
+  - Add `pinocchio.buildModelAndLegacyConstraintFromMJCF` load model and constraints (old API)
+- Add Python example showcasing the [candlewick visualizer](./examples/candlewick-viewer-solo.py)
 - Add `PINOCCHIO_DISABLE_UNSUPPORTED_WARNINGS` C++ definition to disable unsupported algorithm warnings
 - Add `PINOCCHIO_BUILD_MPFR_TESTING` CMake option to build MPFR tests
 - Add `pinocchio/utils/alloca.hpp`: Helpers for mapping stack allocation for Eigen::Map
@@ -31,25 +63,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add `internal::matrix_product` in `math.hpp`
 - Add `internal::matrix_inversion` in `math.hpp`
 - Add `internal::matrix_inversion_code_generated` in `math.hpp`
-- Add `examples/admm-constraint-solver.py`: how to use the constraints API to model a stack of cubes, how to use the Delassus operator, how to use the ADMM solver to solve the constraint problem.
 
 ### Changed
-- Clean delassus API: DelassusOperatorBase define the main delassus API and each method calls `derived().[name-of-method]Impl`
-- Fix potential bug in joint limit due to uninitialized field
-- Add missing constructor for joint friction
-- Solvers can be safely copied (result and workspace copy constructor/operator are now safely handled)
-- Bindings/python : Add missing arg names in `visualizer-visitor.hpp`
-- Use deprecation, warning macros already provided by jrl-cmakemodules
+- C++17 is minimal supported version
+- Introduce new header convention [described here](./development/convention.md)
+  - Omnibus header as default pinocchio include
+  - Replace headers guards by `#pragma once`
+- Bindings/python: Add missing arg names in `visualizer-visitor.hpp`
 - Renamed `PINOCCHIO_PRAGMA_DEPRECATED_HEADER` to `PINOCCHIO_MOVED_HEADER`
-- Docs : update documentation stylesheet, fix some Doxygen config options
-- Change multiple compile-time definitions from anonymous enum values to `constexpr` variables
-  - Change instances of `Options`, `Flags`, joint space dimensions `NV`, Lie group `NQ` and `NV`
-- Bindings/python : employ using-declarations (`using context::Options`) in the binding code for the `Options` constant
+- Docs: update documentation stylesheet, fix some Doxygen config options
 - Replace `hpp-fcl` by `coal` (see `doc/_porting.md`):
   - C++:
-    - Deprecate `include/pinocchio/multibody/fcl.hpp` moved at `include/pinocchio/multibody/coal.hpp`
-    - Deprecate `include/pinocchio/serialization/fcl.hpp` moved at `include/pinocchio/serialization/fcl.hpp`
-    - Deprecate `include/pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `include/pinocchio/collision/coal-pinocchio-conversions.hpp`
+    - Deprecate `pinocchio/multibody/fcl.hpp` moved at `pinocchio/multibody/coal.hpp`
+    - Deprecate `pinocchio/serialization/fcl.hpp` moved at `pinocchio/serialization/coal.hpp`
+    - Deprecate `pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `pinocchio/collision/coal-pinocchio-conversions.hpp`
     - Deprecate `pinocchio/bindings/python/collision/fcl/transform.hpp` moved at `pinocchio/bindings/python/collision/coal/transform.hpp`
     - Deprecate `pinocchio::toFclTransform3f` replaced by `pinocchio::toCoalTransform3s`
     - Deprecate `PINOCCHIO_WITH_HPP_FCL` replaced by `PINOCCHIO_WITH_COLLISION`
@@ -58,45 +85,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - Deprecate `pinocchio.hppfcl` replaced by `pinocchio.coal`
     - Deprecate `buildModelFromMJCF(filename, root_joint, root_joint_name)` replaced by `buildModelFromMJCFAndRootJoint` and `buildModelAndLegacyConstraintsFromMJCF`
     - Deprecate `buildModelFromSdf` replaced by `buildModelAndLegacyConstraintsFromSdf`
-  - Don't use Eigen::aligned_allocator:
-    - Deprecate `PINOCCHIO_ALIGNED_STD_VECTOR` replaced by `std::vector`
-    - Deprecate `PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR` replaced by `std::vector`
-    - Deprecate `pinocchio::container::aligned_vector` replaced by `std::allocator`
-    - Deprecate `pinocchio/container/aligned-vector.hpp`
-    - Deprecate `pinocchio::python::StdAlignedVectorPythonVisitor`
+- Don't use `Eigen::aligned_allocator`:
+  - Deprecate `PINOCCHIO_ALIGNED_STD_VECTOR` replaced by `std::vector`
+  - Deprecate `PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR` replaced by `std::vector`
+  - Deprecate `pinocchio::container::aligned_vector` replaced by `std::allocator`
+  - Deprecate `pinocchio/container/aligned-vector.hpp`
+  - Deprecate `pinocchio::python::StdAlignedVectorPythonVisitor`
 - Deprecate `pinocchio/bindings/python/multibody/joint/joint.hpp` replaced by `pinocchio/bindings/python/multibody/joint/joint-model.hpp`
+- Deprecate Python bindings headers already implemented in eigenpy:
+  - `pinocchio/bindings/python/utils/registration.hpp` replaced by `eigenpy/registration.hpp`
+  - `pinocchio/bindings/python/utils/copyable.hpp` replaced by `eigenpy/copyable.hpp`
+  - `pinocchio/bindings/python/utils/deprecation.hpp` replaced by `eigenpy/deprecation-policy.hpp`
 - Following algorithms are now unsupported algorithms (no more deprecated):
   - `forwardDynamics`
   - `impulseDynamics`
   - `getKKTContactDynamicMatrixInverse`
-- Replace headers guards by `#pragma once`
 - Change arguments in `initConstraintDynamics`
-- Change arguments in `BaumgarteCorrectorParametersTpl` constructor : scalar are used instead of vectors
-- Major refactorization of ContactCholeskyDecompositionTpl to ease online resizing
-- Deprecate `ContactCholeskyDecompositionTpl::allocate` replaced by `ContactCholeskyDecompositionTpl::rebuild`
-- Change arguments in `ContactCholeskyDecompositionTpl` constructor
+- Change arguments in `BaumgarteCorrectorParametersTpl` constructor: scalar are used instead of vectors
 - Deprecate `ContactCholeskyDecompositionTpl`, replaced by  `ConstraintCholeskyDecompositionTpl`
 - Deprecate `DelassusCholeskyExpressionTpl`, replaced by  `DelassusOperatorCholeskyExpressionTpl`
+- Major refactorization of `ConstraintCholeskyDecompositionTpl` to ease online resizing
+- Deprecate `ConstraintCholeskyDecompositionTpl::allocate` replaced by `ConstraintCholeskyDecompositionTpl::rebuild`
+- Change arguments in `ConstraintCholeskyDecompositionTpl` constructor
 
 ### Removed
 - Remove unused headers `deprecated-macros.hpp` and `deprecated-namespaces.hpp`
 - Remove header `pinocchio/deprecation.hpp`, directly use generated `pinocchio/deprecated.hpp`
-- macros.hpp : remove macros already provided by jrl-cmakemodules
-- bindings/python : removed header `utils/registration.hpp`, delegate to `<eigenpy/registration.hpp>` instead
-- bindings/python : deprecate and remove contents of `utils/copyable.hpp`, `utils/registration.hpp` and `utils/deprecation.hpp`, include corresponding eigenpy headers instead
-- Remove pinocchio 3 deprecated files and functions (see `doc/_porting.md`)
-- Remove PINOCCHIO_WITH_CXX{11,14,17}_SUPPORT define
-- Remove support to Eigen < 3.4
+- macros.hpp: remove macros already provided by jrl-cmakemodules
+- Remove pinocchio 3 deprecated files and functions (see `doc/_porting/porting-3-to-4.md`)
+- Remove `PINOCCHIO_WITH_CXX{11,14,17}_SUPPORT` define
 - Remove support to coal < 3
 - Remove support to eigenpy < 3
 - Eigen 3.4 is the minimal Eigen supported version:
   - Remove Eigen < 3.4 workaround
-  - Remove PINOCCHIO_WITH_EIGEN_TENSOR_MODULE define
+  - Remove `PINOCCHIO_WITH_EIGEN_TENSOR_MODULE` define
 - Boost 1.74 is the minimal Boost supported version:
   - Remove Boost < 1.74 workaround
 - pkg-config file are no more generate
 - PyPy interpreter is no more supported
-- Favorize `RTSan` over `EIGEN_RUNTIME_NO_MALLOC`:
+- Use `RTSan` instead of `EIGEN_RUNTIME_NO_MALLOC`:
   - Remove `CHECK_RUNTIME_MALLOC` CMake option
   - Remove `PINOCCHIO_EIGEN_CHECK_MALLOC` C++ definition
   - Deprecate `PINOCCHIO_EIGEN_MALLOC*` macros

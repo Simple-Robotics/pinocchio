@@ -18,7 +18,7 @@ All Pinocchio 3 deprecated functions had been removed:
 - Replace `FrameTpl::previousFrame` by `FrameTpl::parentFrame`
 - Replace `GeometryObject` constructor argument order has changed
 
-Remove use of Eigen::aligned_allocator:
+Remove use of `Eigen::aligned_allocator`:
   - Deprecate `PINOCCHIO_ALIGNED_STD_VECTOR` replaced by `std::vector`
   - Deprecate `PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR` replaced by `std::vector`
   - Deprecate `pinocchio::container::aligned_vector` replaced by `std::allocator`
@@ -29,9 +29,9 @@ Eigen 3.4 is the minimal Eigen supported version:
   - Remove PINOCCHIO_WITH_EIGEN_TENSOR_MODULE define
 
 HPP-FCL has been replaced by coal:
-- Deprecate `include/pinocchio/multibody/fcl.hpp` moved at `include/pinocchio/multibody/coal.hpp`
-- Deprecate `include/pinocchio/serialization/fcl.hpp` moved at `include/pinocchio/serialization/coal.hpp`
-- Deprecate `include/pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `include/pinocchio/collision/coal-pinocchio-conversions.hpp`
+- Deprecate `pinocchio/multibody/fcl.hpp` moved at `pinocchio/multibody/coal.hpp`
+- Deprecate `pinocchio/serialization/fcl.hpp` moved at `pinocchio/serialization/coal.hpp`
+- Deprecate `pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `pinocchio/collision/coal-pinocchio-conversions.hpp`
 - Deprecate `pinocchio/bindings/python/collision/fcl/transform.hpp` moved at `pinocchio/bindings/python/collision/coal/transform.hpp`
 - Deprecate `pinocchio::toFclTransform3f` replaced by `pinocchio::toCoalTransform3s`
 - Deprecate `PINOCCHIO_WITH_HPP_FCL` replaced by `PINOCCHIO_WITH_COLLISION`
@@ -46,20 +46,29 @@ Constraints API changes:
   - Remove `joint1_span_indexes`
   - Remove `joint2_span_indexes`
 
-ContactCholeskyDecompositionTpl changes :
-- Deprecate `ContactCholeskyDecompositionTpl::allocate` replaced by `ContactCholeskyDecompositionTpl::rebuild`
-  - Add `std::vector<ConstraintModel, ConstraintModelAllocator>`
-  - Add `std::vector<ConstraintData, ConstraintDataAllocator>`
-- ContactCholeskyDecompositionTpl constructor :
-  - Add `DataTpl<S1, O1, JointCollectionTpl>`
-  - Add `std::vector<ConstraintData, ConstraintDataAllocator>`
 - Deprecate `ContactCholeskyDecompositionTpl`, replaced by  `ConstraintCholeskyDecompositionTpl`
 - Deprecate `DelassusCholeskyExpressionTpl`, replaced by  `DelassusOperatorCholeskyExpressionTpl`
 
+ConstraintCholeskyDecompositionTpl changes :
+- Deprecate `ConstraintCholeskyDecompositionTpl::allocate` replaced by `ConstraintCholeskyDecompositionTpl::rebuild`
+  - Add `std::vector<ConstraintModel, ConstraintModelAllocator>`
+  - Add `std::vector<ConstraintData, ConstraintDataAllocator>`
+- ConstraintCholeskyDecompositionTpl constructor :
+  - Add `DataTpl<S1, O1, JointCollectionTpl>`
+  - Add `std::vector<ConstraintData, ConstraintDataAllocator>`
 
 Utility API changes:
 - Remove `gettimeofday` definition on Windows
 - Remove `operator-(timeval, timeval)` definition
+- Remove `deprecated-macros.hpp` and `deprecated-namespaces.hpp`
+- Remove `pinocchio/deprecation.hpp` replaced by `pinocchio/deprecated.hpp`
+
+Python bindings API changes:
+- Deprecate `pinocchio/bindings/python/multibody/joint/joint.hpp` replaced by `pinocchio/bindings/python/multibody/joint/joint-model.hpp`
+- Deprecate Python bindings headers already implemented in eigenpy:
+  - `pinocchio/bindings/python/utils/registration.hpp` replaced by `eigenpy/registration.hpp`
+  - `pinocchio/bindings/python/utils/copyable.hpp` replaced by `eigenpy/copyable.hpp`
+  - `pinocchio/bindings/python/utils/deprecation.hpp` replaced by `eigenpy/deprecation-policy.hpp`
 
 ## Python changes
 
