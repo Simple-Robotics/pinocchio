@@ -65,7 +65,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add `internal::matrix_inversion_code_generated` in `math.hpp`
 
 ### Changed
-- C++17 is minimal supported version
+- C++17 is now the minimal supported version of the C++ standard. Check [cppreference](https://en.cppreference.com/w/cpp/compiler_support/17) to see if your compiler supports it.
 - Introduce new header convention [described here](./development/convention.md)
   - Omnibus header as default pinocchio include
   - Replace headers guards by `#pragma once`
@@ -113,10 +113,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove header `pinocchio/deprecation.hpp`, directly use generated `pinocchio/deprecated.hpp`
 - macros.hpp: remove macros already provided by jrl-cmakemodules
 - Remove pinocchio 3 deprecated files and functions (see `doc/_porting/porting-3-to-4.md`)
-- Remove `PINOCCHIO_WITH_CXX{11,14,17}_SUPPORT` define
+- Remove `PINOCCHIO_WITH_CXX{11,14,17}_SUPPORT` defines
 - Remove support to coal < 3
 - Remove support to eigenpy < 3
-- Eigen 3.4 is the minimal Eigen supported version:
+- Eigen 3.4 is now the minimal required version of Eigen:
   - Remove Eigen < 3.4 workaround
   - Remove `PINOCCHIO_WITH_EIGEN_TENSOR_MODULE` define
 - Boost 1.74 is the minimal Boost supported version:

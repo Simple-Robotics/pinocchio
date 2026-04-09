@@ -21,24 +21,24 @@ All Pinocchio 3 deprecated functions had been removed:
 Remove use of `Eigen::aligned_allocator`:
   - Deprecate `PINOCCHIO_ALIGNED_STD_VECTOR` replaced by `std::vector`
   - Deprecate `PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR` replaced by `std::vector`
-  - Deprecate `pinocchio::container::aligned_vector` replaced by `std::allocator`
+  - Deprecate `pinocchio::container::aligned_vector<T>` replaced by `std::vector<T, std::allocator<T>>`
   - Deprecate `pinocchio/container/aligned-vector.hpp`
   - Deprecate `pinocchio::python::StdAlignedVectorPythonVisitor`
 
-Eigen 3.4 is the minimal Eigen supported version:
+Eigen 3.4 is now the required minimum version of Eigen:
   - Remove PINOCCHIO_WITH_EIGEN_TENSOR_MODULE define
 
 HPP-FCL has been replaced by coal:
 - Deprecate `pinocchio/multibody/fcl.hpp` moved to `pinocchio/multibody/coal.hpp`
-- Deprecate `pinocchio/serialization/fcl.hpp` moved at `pinocchio/serialization/coal.hpp`
-- Deprecate `pinocchio/collision/fcl-pinocchio-conversions.hpp` moved at `pinocchio/collision/coal-pinocchio-conversions.hpp`
+- Deprecate `pinocchio/serialization/fcl.hpp` moved to `pinocchio/serialization/coal.hpp`
+- Deprecate `pinocchio/collision/fcl-pinocchio-conversions.hpp` moved to `pinocchio/collision/coal-pinocchio-conversions.hpp`
 - Deprecate `pinocchio/bindings/python/collision/fcl/transform.hpp` moved at `pinocchio/bindings/python/collision/coal/transform.hpp`
 - Deprecate `pinocchio::toFclTransform3f` replaced by `pinocchio::toCoalTransform3s`
 - Deprecate `PINOCCHIO_WITH_HPP_FCL` replaced by `PINOCCHIO_WITH_COLLISION`
 
 Constraints API changes:
   - Add `std::vector<ConstraintData, ConstraintDataAllocator> contact_datas` in `initConstraintDynamics` method
-  - Change `BaumgarteCorrectorParametersTpl` constructor scalar are used instead of vectors
+  - Change `BaumgarteCorrectorParametersTpl` constructor: scalars are used for the gains instead of vectors
 
 `RigidConstraintModel` internal API has changed:
   - Remove `colwise_joint1_sparsity`
