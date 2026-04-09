@@ -109,6 +109,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Change arguments in `ConstraintCholeskyDecompositionTpl` constructor
 
 ### Removed
+- Remove all warnings with G++ and Clang
 - Remove unused headers `deprecated-macros.hpp` and `deprecated-namespaces.hpp`
 - Remove header `pinocchio/deprecation.hpp`, directly use generated `pinocchio/deprecated.hpp`
 - macros.hpp: remove macros already provided by jrl-cmakemodules
