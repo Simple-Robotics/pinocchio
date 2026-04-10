@@ -31,6 +31,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add `computeJointMinimalOrdering` in `pinocchio/constraints.hpp`
   - Compute joint processing order for `lcaba`
 - Add new constraint API in `pinocchio/constraints.hpp`
+  - `PointContactConstraintModel`: models a unilateral contact constraint with coulomb friction cone. Constraint forces will be applied to prevent interpenetration and to model friction forces.
+  - `PointAnchorConstraintModel`: models a point-wise equality constraint (bilateral constraint). Constraint forces will be applied to maintain the point placement of the constraint.
+  - `FrameAnchorConstraintModel`: models a frame-wise equality constraint (bilateral constraint). Constraint forces will be applied to maintain the frame placement of the constraint.
+  - `JointLimitConstraintModel`: models a component-wise joint limit lower/upper bound constraint. Constraint forces will be applied to prevent joints from violating their limits.
+  - `JointFrictionConstraintModel`: models a component-wise joint friction lower/upper bound constraint. Friction force will be applied until it maximizes the bound of the constraint.
 - Add new Delassus API in `pinocchio/algorithm/delassus.hpp`
 - Add `ADMMConstraintSolverTpl` in `pinocchio/algorithm/solvers/admm-solver.hpp`
   - Solve constrained dynamics using an ADMM algorithm
