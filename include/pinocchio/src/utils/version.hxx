@@ -41,7 +41,8 @@ namespace pinocchio
   inline bool checkVersionAtLeast(
     unsigned int major_version, unsigned int minor_version, unsigned int patch_version)
   {
-    return PINOCCHIO_MAJOR_VERSION > major_version
-           || (PINOCCHIO_MAJOR_VERSION >= major_version && (PINOCCHIO_MINOR_VERSION > minor_version || (PINOCCHIO_MINOR_VERSION >= minor_version && PINOCCHIO_PATCH_VERSION >= patch_version)));
+    return std::make_tuple(
+             PINOCCHIO_MAJOR_VERSION, PINOCCHIO_MINOR_VERSION, PINOCCHIO_PATCH_VERSION)
+           >= std::make_tuple(major_version, minor_version, patch_version);
   }
 } // namespace pinocchio

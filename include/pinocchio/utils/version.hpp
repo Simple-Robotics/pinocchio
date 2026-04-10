@@ -6,6 +6,7 @@
 // IWYU pragma: begin_keep
 #include <string>
 #include <sstream>
+#include <tuple>
 
 #include "pinocchio/config.hpp"
 // IWYU pragma: end_keep
