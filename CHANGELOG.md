@@ -19,15 +19,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `PointContactConstraintModelTpl`, `PointAnchorConstraintModelTpl`, `FrameAnchorConstraintModelTpl`, `JointLimitConstraintModelTpl` and `JointFrictionConstraintModelTpl` constraint models
   - Each constraint model is associated to its own constraint data
   - Variants `ConstraintModelTpl`/`ConstraintDataTpl` encapsulate all constraints models and data
-  - Delassus operator API: `DelassusOperatorDenseTpl`, `DelassusOperatorSparseTpl`, `DelassusOperatorCholeskyExpressionTpl`, `DelassusOperatorRigidBodyTpl`.
-    These operators are tighly linked to the new constraints API.
-    All these operators compute the same mathematical operator JMinvJ^T (J is the constraints jacobian, Minv is the inverse of the mass matrix),
-    but with different algorithms and internal optimizations.
-  - [Python example here](./examples/admm-constraint-solver.py) and [here](./examples/g1-constraint-simulation.py).
-    These examples show how to use each constraint model, how to build a constraint problem, how to compute the associated Delassus operator and how to solve it.
+  - Delassus operator API: `DelassusOperatorDenseTpl`, `DelassusOperatorSparseTpl`, `DelassusOperatorCholeskyExpressionTpl`, `DelassusOperatorRigidBodyTpl`
+  - These operators are tightly linked to the new constraints API
+    All these operators compute the same mathematical operator $J M^{-1} J^T$ ($J$ is the constraints jacobian, $M^{-1}$ is the inverse of the mass matrix),
+    but with different algorithms and internal optimizations
 - `ADMMConstraintSolverTpl` and `PGSConstraintSolverTpl` algorithms:
   - Solve constrained dynamics expressed with the new constraint API
-  - [Python example here](./examples/admm-constraint-solver.py)
+  - Python examples [here](./examples/admm-constraint-solver.py) and [here](./examples/g1-constraint-simulation.py).
+    These examples show how to use each constraint model, how to build a constraint problem, how to compute the associated Delassus operator and how to solve it
 - New [header convention](./development/convention.md)
   - Introduce omnibus headers:
     - `pinocchio/math.hpp`
@@ -41,11 +40,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add `computeJointMinimalOrdering` in `pinocchio/constraints.hpp`
   - Compute joint processing order for `lcaba`
 - Add new constraint API in `pinocchio/constraints.hpp`
-  - `PointContactConstraintModel`: models a unilateral contact constraint with coulomb friction cone. Constraint forces will be applied to prevent interpenetration and to model friction forces.
-  - `PointAnchorConstraintModel`: models a point-wise equality constraint (bilateral constraint). Constraint forces will be applied to maintain the point placement of the constraint.
-  - `FrameAnchorConstraintModel`: models a frame-wise equality constraint (bilateral constraint). Constraint forces will be applied to maintain the frame placement of the constraint.
-  - `JointLimitConstraintModel`: models a component-wise joint limit lower/upper bound constraint. Constraint forces will be applied to prevent joints from violating their limits.
-  - `JointFrictionConstraintModel`: models a component-wise joint friction lower/upper bound constraint. Friction force will be applied until it maximizes the bound of the constraint.
+  - `PointContactConstraintModel`: models a unilateral contact constraint with coulomb friction cone
+  - `PointAnchorConstraintModel`: models a point-wise equality constraint (bilateral constraint)
+  - `FrameAnchorConstraintModel`: models a frame-wise equality constraint (bilateral constraint)
+  - `JointLimitConstraintModel`: models a component-wise joint limit lower/upper bound constraint
+  - `JointFrictionConstraintModel`: models a component-wise joint friction lower/upper bound constraint
 - Add new Delassus API in `pinocchio/algorithm/delassus.hpp`
 - Add `ADMMConstraintSolverTpl` in `pinocchio/algorithm/solvers/admm-solver.hpp`
   - Solve constrained dynamics using an ADMM algorithm
