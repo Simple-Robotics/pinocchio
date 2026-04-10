@@ -134,8 +134,7 @@ jobs:
           pixi run -e ${{ matrix.environment }} configure \
             -DBUILD_ADVANCED_TESTING=${{ env.BUILD_ADVANCED_TESTING }} \
             ${{ steps.get_labels.outputs.cmakeFlags }}
-          # pixi run -e ${{ matrix.environment }} cmake --build build --target all
-          pixi run -e ${{ matrix.environment }} ninja -j${CMAKE_BUILD_PARALLEL_LEVEL} -C build -k0
+          pixi run -e ${{ matrix.environment }} cmake --build build --target all
           pixi run -e ${{ matrix.environment }} ctest --test-dir build --output-on-failure
           pixi run -e ${{ matrix.environment }} cmake --install build
 
