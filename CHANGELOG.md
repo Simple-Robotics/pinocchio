@@ -15,6 +15,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `lcaba` algorithm:
   - Compute forward dynamics for constrained system with closed kinematics loops
   - [Python example here](./examples/simulation-lcaba.py)
+- New constraint API:
+  - `PointContactConstraintModelTpl`, `PointAnchorConstraintModelTpl`, `FrameAnchorConstraintModelTpl`, `JointLimitConstraintModelTpl` and `JointFrictionConstraintModelTpl` constraint models
+  - Each constraint model is associated to its own constraint data
+  - Variants `ConstraintModelTpl`/`ConstraintDataTpl` encapsulate all constraints models and data
+  - Delassus operator API: `DelassusOperatorDenseTpl`, `DelassusOperatorSparseTpl`, `DelassusOperatorCholeskyExpressionTpl`, `DelassusOperatorRigidBodyTpl`.
+    These operators are tighly linked to the new constraints API.
+    All these operators compute the same mathematical operator JMinvJ^T (J is the constraints jacobian, Minv is the inverse of the mass matrix),
+    but with different algorithms and internal optimizations.
+  - [Python example here](./examples/admm-constraint-solver.py) and [here](./examples/g1-constraint-simulation.py).
+    These examples show how to use each constraint model, how to build a constraint problem, how to compute the associated Delassus operator and how to solve it.
 - `ADMMConstraintSolverTpl` and `PGSConstraintSolverTpl` algorithms:
   - Solve constrained dynamics expressed with the new constraint API
   - [Python example here](./examples/admm-constraint-solver.py)
